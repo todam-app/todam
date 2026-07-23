@@ -1,0 +1,46 @@
+name: Problème de données culturelles
+description: Corriger une œuvre, un spectacle, un lieu, un artiste ou une source.
+title: "[Données] "
+labels:
+  - data
+body:
+  - type: dropdown
+    id: entity
+    attributes:
+      label: Type de donnée
+      options:
+        - Œuvre
+        - Spectacle
+        - Représentation
+        - Lieu
+        - Artiste ou crédit
+        - Genre ou discipline
+        - Autre
+    validations:
+      required: true
+  - type: textarea
+    id: current
+    attributes:
+      label: Donnée actuelle
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Correction proposée
+    validations:
+      required: true
+  - type: input
+    id: source
+    attributes:
+      label: Source vérifiable
+      description: URL officielle ou autre source dont les droits permettent l'usage.
+    validations:
+      required: true
+  - type: checkboxes
+    id: rights
+    attributes:
+      label: Droits et vie privée
+      options:
+        - label: Je n'inclus aucune donnée personnelle non publique ni contenu sans droits.
+          required: true

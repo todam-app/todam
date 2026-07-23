@@ -1,0 +1,26 @@
+{
+  "name": "todam",
+  "version": "0.0.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "description": "Le journal open source du spectacle vivant.",
+  "packageManager": "pnpm@11.9.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "lint": "node scripts/check-repository.mjs && markdownlint-cli2 \"**/*.md\" \"#node_modules\"",
+    "typecheck": "node scripts/check-placeholder.mjs typecheck",
+    "test": "node --test",
+    "validate:openapi": "node scripts/check-openapi.mjs",
+    "check:licenses": "node scripts/check-licenses.mjs",
+    "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm validate:openapi && pnpm check:licenses"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "devDependencies": {
+    "markdownlint-cli2": "0.18.1"
+  }
+}

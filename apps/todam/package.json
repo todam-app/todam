@@ -1,0 +1,7 @@
+{
+  "name": "@todam/todam",
+  "version": "0.0.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "description": "Future application Expo Web, iOS et Android de Todam."
+}

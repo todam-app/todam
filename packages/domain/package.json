@@ -1,0 +1,7 @@
+{
+  "name": "@todam/domain",
+  "version": "0.0.0",
+  "private": true,
+  "license": "AGPL-3.0-only",
+  "description": "Futures règles métier serveur de Todam."
+}

@@ -1,0 +1,7 @@
+{
+  "name": "@todam/contracts",
+  "version": "0.0.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "description": "Futurs contrats Zod et OpenAPI partagés de Todam."
+}

@@ -1,0 +1,29 @@
+name: Proposition fonctionnelle
+description: Proposer une amélioration du produit Todam.
+title: "[Produit] "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problème utilisateur
+      description: Quel besoin concret cette proposition résout-elle ?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposition
+      description: Décrivez l'expérience souhaitée, sans imposer une solution technique.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives envisagées
+  - type: textarea
+    id: success
+    attributes:
+      label: Critère de réussite
+      description: Comment saurons-nous que la proposition répond au besoin ?

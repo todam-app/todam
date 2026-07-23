@@ -1,0 +1,36 @@
+name: Bug
+description: Signaler un comportement incorrect et reproductible.
+title: "[Bug] "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: Merci de vérifier qu'une Issue équivalente n'existe pas déjà.
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Que s'est-il passé et qu'attendiez-vous ?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Étapes de reproduction
+      placeholder: |
+        1. Ouvrir…
+        2. Cliquer…
+        3. Observer…
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environnement
+      description: Web/iOS/Android, navigateur, appareil et version.
+  - type: textarea
+    id: context
+    attributes:
+      label: Contexte supplémentaire
+      description: N'ajoutez aucun secret ni donnée personnelle réelle.

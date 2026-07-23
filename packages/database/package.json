@@ -1,0 +1,7 @@
+{
+  "name": "@todam/database",
+  "version": "0.0.0",
+  "private": true,
+  "license": "AGPL-3.0-only",
+  "description": "Futurs schéma Drizzle et migrations de Todam."
+}
