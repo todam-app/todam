@@ -21,6 +21,14 @@ const unsigned = [];
 
 for (const record of records) {
   const [sha, authorName, authorEmail, body = ""] = record.split("\x00");
+  const isGitHubBot =
+    authorName.endsWith("[bot]") &&
+    authorEmail.endsWith("@users.noreply.github.com");
+
+  if (isGitHubBot) {
+    continue;
+  }
+
   const escapedName = authorName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   const escapedEmail = authorEmail.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   const signoff = new RegExp(
