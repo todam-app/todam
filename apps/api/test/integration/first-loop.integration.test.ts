@@ -82,14 +82,17 @@ async function seedCatalog() {
   performanceId = performance!.id;
 }
 
-async function signUp(email = "spectatrice@example.test"): Promise<string> {
-  const pseudonym = email.split("@")[0]!;
+async function signUp(
+  email = "spectatrice@example.test",
+  username = email.split("@")[0]!,
+): Promise<string> {
   const response = await app.inject({
     method: "POST",
     url: "/v1/auth/sign-up/email",
     payload: {
-      name: pseudonym,
-      pseudonym,
+      name: username,
+      username,
+      displayUsername: username,
       email,
       password: "Todam-test-2026",
       ageConfirmedAt: new Date().toISOString(),
@@ -137,6 +140,34 @@ describe("première boucle API sur PostgreSQL/PostGIS", () => {
     expect(privateDiaryRemoval.statusCode).toBe(401);
     expect(searchResponse.statusCode).toBe(200);
     expect(searchResponse.json().items[0].title).toBe("Le Rêve d'Élodie");
+  });
+
+  it("connecte avec l'email ou le nom d'utilisateur", async () => {
+    const email = "connexion@example.test";
+    const username = "Spectatrice-Connexion";
+    await signUp(email, username);
+
+    const emailResponse = await app.inject({
+      method: "POST",
+      url: "/v1/auth/sign-in/email",
+      payload: {
+        email,
+        password: "Todam-test-2026",
+      },
+    });
+    const usernameResponse = await app.inject({
+      method: "POST",
+      url: "/v1/auth/sign-in/username",
+      payload: {
+        username: username.toLowerCase(),
+        password: "Todam-test-2026",
+      },
+    });
+
+    expect(emailResponse.statusCode).toBe(200);
+    expect(emailResponse.headers["set-cookie"]).toBeTruthy();
+    expect(usernameResponse.statusCode).toBe(200);
+    expect(usernameResponse.headers["set-cookie"]).toBeTruthy();
   });
 
   it("enchaîne À voir, note, journal et histogramme", async () => {

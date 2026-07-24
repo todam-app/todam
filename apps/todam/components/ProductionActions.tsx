@@ -23,9 +23,7 @@ interface ActionButtonProps {
   loading?: boolean;
   onPress: () => void;
   selected?: boolean;
-  subtitle?: string;
   tone: ActionTone;
-  trailingIcon?: IconName;
 }
 
 function ActionButton({
@@ -36,9 +34,7 @@ function ActionButton({
   loading = false,
   onPress,
   selected = false,
-  subtitle,
   tone,
-  trailingIcon,
 }: ActionButtonProps) {
   const foreground =
     tone === "primary"
@@ -76,29 +72,7 @@ function ActionButton({
           />
           <View style={styles.copy}>
             <Text style={[styles.label, { color: foreground }]}>{label}</Text>
-            {subtitle ? (
-              <Text
-                style={[
-                  styles.subtitle,
-                  {
-                    color:
-                      tone === "success" ? tokens.color.success : tokens.color.muted,
-                  },
-                ]}
-              >
-                {subtitle}
-              </Text>
-            ) : null}
           </View>
-          {trailingIcon ? (
-            <Ionicons
-              accessibilityElementsHidden
-              color={foreground}
-              importantForAccessibility="no"
-              name={trailingIcon}
-              size={20}
-            />
-          ) : null}
         </>
       )}
     </Pressable>
@@ -143,18 +117,13 @@ export function ProductionActions({
       />
       <ActionButton
         accessibilityLabel={presentation.seen.accessibilityLabel}
+        disabled={seen}
         icon={presentation.seen.icon}
         label={presentation.seen.label}
         loading={presentation.seen.loading}
         onPress={onSeenPress}
         selected={presentation.seen.selected}
         tone={presentation.seen.tone}
-        {...(presentation.seen.subtitle
-          ? { subtitle: presentation.seen.subtitle }
-          : {})}
-        {...(presentation.seen.trailingIcon
-          ? { trailingIcon: presentation.seen.trailingIcon }
-          : {})}
       />
     </View>
   );
@@ -206,9 +175,5 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     fontWeight: "700",
-  },
-  subtitle: {
-    fontSize: 13,
-    fontWeight: "600",
   },
 });

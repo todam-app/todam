@@ -41,13 +41,12 @@ describe("actions personnelles d’une production", () => {
       selected: true,
     });
     expect(actions.seen).toMatchObject({
-      accessibilityLabel: "Déjà vu, gérer mes séances",
+      accessibilityLabel: "Déjà vu",
       icon: "checkmark-circle-outline",
+      label: "Déjà vu",
       loading: true,
       selected: true,
-      subtitle: "Gérer mes séances",
       tone: "success",
-      trailingIcon: "chevron-forward",
     });
   });
 });

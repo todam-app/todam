@@ -16,7 +16,7 @@ export default function SignInScreen() {
     returnTo?: string;
   }>();
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
@@ -24,10 +24,19 @@ export default function SignInScreen() {
   async function submit() {
     setPending(true);
     setError(null);
-    const result = await authClient.signIn.email({ email, password });
+    const normalizedIdentifier = identifier.trim();
+    const result = normalizedIdentifier.includes("@")
+      ? await authClient.signIn.email({
+          email: normalizedIdentifier,
+          password,
+        })
+      : await authClient.signIn.username({
+          username: normalizedIdentifier,
+          password,
+        });
     setPending(false);
     if (result.error) {
-      setError("Email ou mot de passe incorrect.");
+      setError("Email, nom d'utilisateur ou mot de passe incorrect.");
       return;
     }
     const returnTo = parameter(params.returnTo) ?? "/profile";
@@ -56,11 +65,10 @@ export default function SignInScreen() {
       </View>
       <TextField
         autoCapitalize="none"
-        autoComplete="email"
-        keyboardType="email-address"
-        label="Email"
-        onChangeText={setEmail}
-        value={email}
+        autoComplete="username"
+        label="Email ou nom d'utilisateur"
+        onChangeText={setIdentifier}
+        value={identifier}
       />
       <TextField
         autoComplete="current-password"
@@ -75,7 +83,7 @@ export default function SignInScreen() {
         </Text>
       ) : null}
       <Button
-        disabled={!email || password.length < 8}
+        disabled={!identifier.trim() || password.length < 8}
         label="Se connecter"
         loading={pending}
         onPress={() => void submit()}

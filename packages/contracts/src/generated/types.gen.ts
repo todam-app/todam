@@ -4,6 +4,42 @@ export type ClientOptions = {
   baseUrl: "http://localhost:3000" | (string & {});
 };
 
+export type PostV1AuthSignInEmailData = {
+  body: {
+    email: string;
+    password: string;
+    rememberMe?: boolean;
+  };
+  path?: never;
+  query?: never;
+  url: "/v1/auth/sign-in/email";
+};
+
+export type PostV1AuthSignInEmailResponses = {
+  /**
+   * Default Response
+   */
+  200: unknown;
+};
+
+export type PostV1AuthSignInUsernameData = {
+  body: {
+    username: string;
+    password: string;
+    rememberMe?: boolean;
+  };
+  path?: never;
+  query?: never;
+  url: "/v1/auth/sign-in/username";
+};
+
+export type PostV1AuthSignInUsernameResponses = {
+  /**
+   * Default Response
+   */
+  200: unknown;
+};
+
 export type GetHealthLiveData = {
   body?: never;
   path?: never;

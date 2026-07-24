@@ -38,6 +38,10 @@ import type {
   GetV1SearchData,
   GetV1SearchErrors,
   GetV1SearchResponses,
+  PostV1AuthSignInEmailData,
+  PostV1AuthSignInEmailResponses,
+  PostV1AuthSignInUsernameData,
+  PostV1AuthSignInUsernameResponses,
   PostV1MeDiaryData,
   PostV1MeDiaryErrors,
   PostV1MeDiaryResponses,
@@ -66,6 +70,44 @@ export type Options<
    */
   meta?: keyof ClientMeta extends never ? Record<string, unknown> : ClientMeta;
 };
+
+/**
+ * Connecte un compte avec son email
+ */
+export const postV1AuthSignInEmail = <ThrowOnError extends boolean = false>(
+  options: Options<PostV1AuthSignInEmailData, ThrowOnError>,
+): RequestResult<PostV1AuthSignInEmailResponses, unknown, ThrowOnError> =>
+  (options.client ?? client).post<
+    PostV1AuthSignInEmailResponses,
+    unknown,
+    ThrowOnError
+  >({
+    url: "/v1/auth/sign-in/email",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * Connecte un compte avec son nom d'utilisateur
+ */
+export const postV1AuthSignInUsername = <ThrowOnError extends boolean = false>(
+  options: Options<PostV1AuthSignInUsernameData, ThrowOnError>,
+): RequestResult<PostV1AuthSignInUsernameResponses, unknown, ThrowOnError> =>
+  (options.client ?? client).post<
+    PostV1AuthSignInUsernameResponses,
+    unknown,
+    ThrowOnError
+  >({
+    url: "/v1/auth/sign-in/username",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
 
 /**
  * Vérifie que le processus API répond

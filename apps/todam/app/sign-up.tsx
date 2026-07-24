@@ -16,7 +16,7 @@ export default function SignUpScreen() {
     returnTo?: string;
   }>();
   const router = useRouter();
-  const [pseudonym, setPseudonym] = useState("");
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [ageConfirmed, setAgeConfirmed] = useState(false);
@@ -27,8 +27,9 @@ export default function SignUpScreen() {
     setPending(true);
     setError(null);
     const input = {
-      name: pseudonym.trim(),
-      pseudonym: pseudonym.trim(),
+      name: username.trim(),
+      username: username.trim(),
+      displayUsername: username.trim(),
       email: email.trim(),
       password,
       ageConfirmedAt: new Date(),
@@ -40,7 +41,7 @@ export default function SignUpScreen() {
     if (result.error) {
       setError(
         result.error.status === 422
-          ? "Ce pseudonyme ou cet email est déjà utilisé."
+          ? "Ce nom d'utilisateur ou cet email est déjà utilisé."
           : "Le compte n’a pas pu être créé. Vérifie les informations.",
       );
       return;
@@ -57,7 +58,7 @@ export default function SignUpScreen() {
   }
 
   const canSubmit =
-    pseudonym.trim().length >= 3 &&
+    username.trim().length >= 3 &&
     email.includes("@") &&
     password.length >= 8 &&
     ageConfirmed;
@@ -74,17 +75,14 @@ export default function SignUpScreen() {
         >
           Créer ton journal
         </Text>
-        <Text className="text-muted">
-          Un pseudonyme suffit pour commencer. Il sera unique sur Todam.
-        </Text>
       </View>
       <TextField
         autoCapitalize="none"
         autoComplete="username-new"
-        label="Pseudonyme"
+        label="Nom d'utilisateur"
         maxLength={30}
-        onChangeText={setPseudonym}
-        value={pseudonym}
+        onChangeText={setUsername}
+        value={username}
       />
       <TextField
         autoCapitalize="none"

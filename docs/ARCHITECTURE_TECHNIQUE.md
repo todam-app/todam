@@ -19,7 +19,7 @@ flowchart LR
 - **Backend** : Node.js TypeScript + Fastify.
 - **Contrats** : Zod + OpenAPI, avec client TypeScript généré pour Expo.
 - **Base** : PostgreSQL sur Render, pilotée par Drizzle et des migrations versionnées.
-- **Authentification** : Better Auth, compatible Expo Web/natif, avec Apple, Google et email/mot de passe.
+- **Authentification** : Better Auth, compatible Expo Web/natif, avec Apple, Google et connexion par email ou nom d'utilisateur avec mot de passe.
 - **Infrastructure** : Render pour le Web, l’API et PostgreSQL ; Cloudflare R2 pour les images.
 - **Pas de Strapi ni Supabase** : aucun rôle, token ou réglage métier ne dépendra d’une console propriétaire.
 
@@ -63,10 +63,10 @@ Le Web utilisera le rendu statique stable d’Expo. Les pages dynamiques connues
 
 API REST versionnée sous `/v1`, documentée sous `/openapi.json` :
 
-- `/auth/*` : Better Auth, Apple, Google, email, vérification et réinitialisation.
+- `/auth/*` : Better Auth, Apple, Google, connexion par email ou nom d'utilisateur, vérification et réinitialisation.
 - `/catalog/*` : œuvres, spectacles, représentations, lieux, artistes et genres.
 - `/search` et `/discover` : recherche, carte, programmation et tendances.
-- `/me/*` : séances, notes, critiques, À voir, listes, historique et export.
+- `/me/*` : statut Vu, notes, critiques, À voir, listes, historique et export.
 - `/profiles/*` : profil public, abonnements et activité visible.
 - `/suggestions/*` : création et suivi des fiches provisoires.
 - `/admin/*` : validation, fusion, modération, imports et audit.
@@ -84,11 +84,11 @@ Conventions :
 - `Role = member | trusted_contributor | admin`.
 - `Discipline = theatre | opera | ballet`.
 - Une note est un entier de 1 à 10, unique par membre et spectacle.
-- Une note crée une séance si nécessaire et retire le spectacle de « À voir » dans la même transaction.
-- Plusieurs séances peuvent viser le même spectacle sans augmenter le compteur de spectacles uniques vus.
+- Une note crée le statut Vu si nécessaire et retire le spectacle de « À voir » dans la même transaction.
+- Le frontend MVP expose un seul statut Vu par spectacle ; le détail des séances reste une capacité backend non exposée.
 - Les rôles et permissions sont déclarés dans le code et couverts par une matrice de tests.
 - Aucun secret permanent n’est embarqué dans Expo : session HTTP sécurisée sur le Web et stockage sécurisé Expo sur mobile.
-- Apple et Google SSO sont proposés avec email/mot de passe en alternative.
+- Apple et Google SSO sont proposés avec une connexion par email ou nom d'utilisateur avec mot de passe en alternative.
 - L’adresse email doit être vérifiée pour qu’une note influence une moyenne ; les emails SSO vérifiés sont acceptés.
 - L’âge est traité par une déclaration « J’ai 15 ans ou plus », sans conserver inutilement une date de naissance.
 
@@ -100,7 +100,7 @@ Extensions prévues :
 - `unaccent` et `pg_trgm` pour fautes et accents ;
 - recherche plein texte configurée en français.
 
-Entités principales : utilisateurs/profils, œuvres, spectacles, représentations, lieux, artistes, crédits, disciplines, genres, séances personnelles, notes, critiques, À voir, listes ordonnées, abonnements, blocages, suggestions, sources, imports, signalements et actions de modération.
+Entités principales : utilisateurs/profils, œuvres, spectacles, représentations, lieux, artistes, crédits, disciplines, genres, traces personnelles du statut Vu, notes, critiques, À voir, listes ordonnées, abonnements, blocages, suggestions, sources, imports, signalements et actions de modération.
 
 La recherche reste dans PostgreSQL jusqu’à ce que les mesures démontrent un besoin réel d’un moteur séparé.
 
@@ -153,7 +153,7 @@ Les frais des stores, du domaine et les dépassements email ne sont pas inclus.
 - Maestro pour iOS/Android lorsque la phase mobile commence.
 - Tests automatiques de confidentialité pour chaque rôle et chaque visibilité.
 - Tests WCAG avec axe, clavier et résumés accessibles des graphiques.
-- Validation des scénarios de la fiche produit : note en moins de dix secondes, séances multiples, retrait de « À voir », seuil des moyennes, suggestion fusionnée sans perte de note et export complet.
+- Validation des scénarios de la fiche produit : note en moins de dix secondes, statut Vu simple, retrait de « À voir », seuil des moyennes, suggestion fusionnée sans perte de note et export complet.
 - Logs JSON Pino, Sentry frontend/backend, endpoints `/health/live` et `/health/ready`.
 - Sauvegardes Render et exercice documenté de restauration avant ouverture publique.
 - `AGENTS.md` précisera l’architecture, les commandes, les règles de sécurité et la définition de « terminé » afin que Codex puisse construire, tester et diagnostiquer le projet de façon reproductible.

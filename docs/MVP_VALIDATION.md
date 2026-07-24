@@ -6,7 +6,7 @@ Le Sprint 0 doit vérifier que Todam peut :
 
 1. constituer un catalogue fiable de spectacles et de représentations ;
 2. permettre à une personne de retrouver la production exacte qu'elle a vue ;
-3. enregistrer une séance, une note ou un ajout « À voir » sans friction ;
+3. enregistrer un statut « Vu », une note ou un ajout « À voir » sans friction ;
 4. préserver la distinction entre œuvre, spectacle et représentation ;
 5. mesurer l'effort nécessaire pour étendre ensuite le catalogue à la France.
 
@@ -173,10 +173,11 @@ Une occurrence programmée du spectacle :
 Une série annoncée sous la forme « du 12 au 15 juillet » doit être transformée en
 séances individuelles seulement si les dates et horaires sont vérifiables.
 
-### Séance personnelle
+### Statut personnel « Vu »
 
-Le souvenir créé par un membre. Il peut être rattaché à une représentation précise ou
-seulement au spectacle lorsque la date est inconnue.
+La première version enregistre seulement qu’un membre a vu un spectacle. Elle ne lui
+demande ni date, ni lieu, ni représentation précise. Le backend conserve une trace
+interne compatible avec une gestion détaillée ultérieure.
 
 ## 6. Données minimales à collecter
 
@@ -251,10 +252,8 @@ Le prototype Sprint 0 couvre uniquement :
 2. résultats distinguant œuvre et spectacle ;
 3. fiche Spectacle avec ses représentations ;
 4. actions « Vu », « Noter » et « À voir » ;
-5. choix facultatif d'une représentation précise ;
-6. création d'un souvenir sans date ;
-7. fiche provisoire privée lorsque le spectacle manque ;
-8. profil avec journal récent et répartition des notes.
+5. fiche provisoire privée lorsque le spectacle manque ;
+6. profil avec journal récent et répartition des notes.
 
 Le premier corpus privé validé contient 51 productions, 182 représentations horodatées
 et 7 exclusions ou mises en attente documentées pour le Théâtre des Muses. Il n'est pas
@@ -269,7 +268,8 @@ Ne font pas partie du prototype :
 - notifications ;
 - applications natives ;
 - recommandations ;
-- statistiques avancées.
+- statistiques avancées ;
+- gestion de plusieurs séances personnelles ou rattachement à une représentation.
 
 ## 9. Tests utilisateurs
 
@@ -289,13 +289,10 @@ Chaque participant doit :
 1. retrouver cinq spectacles réellement vus ;
 2. identifier la bonne production parmi des titres similaires ;
 3. marquer un spectacle vu sans le noter ;
-4. ouvrir « Déjà vu », ajouter une seconde séance et retirer une séance précise ;
-5. vérifier qu’une note bloque uniquement le retrait de la dernière séance ;
-6. noter un autre spectacle ;
-7. sélectionner une représentation lorsqu'il se souvient de la date ;
-8. enregistrer un souvenir ancien sans date ;
-9. signaler un spectacle manquant ;
-10. retrouver ses entrées dans son profil.
+4. vérifier que ce spectacle apparaît une seule fois dans le journal ;
+5. noter un autre spectacle ;
+6. signaler un spectacle manquant ;
+7. retrouver ses entrées dans son profil.
 
 ### Mesures
 

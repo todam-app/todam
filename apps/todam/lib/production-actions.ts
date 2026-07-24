@@ -1,5 +1,5 @@
 export type ProductionActionIcon =
-  "add" | "checkmark" | "checkmark-circle-outline" | "chevron-forward" | "eye-outline";
+  "add" | "checkmark" | "checkmark-circle-outline" | "eye-outline";
 
 export interface ProductionActionPresentation {
   accessibilityLabel: string;
@@ -7,9 +7,7 @@ export interface ProductionActionPresentation {
   label: string;
   loading: boolean;
   selected: boolean;
-  subtitle?: string;
   tone: "primary" | "secondary" | "success";
-  trailingIcon?: ProductionActionIcon;
 }
 
 export function getProductionActionsPresentation(input: {
@@ -33,20 +31,12 @@ export function getProductionActionsPresentation(input: {
       tone: input.watchlisted ? "secondary" : "primary",
     },
     seen: {
-      accessibilityLabel: input.seen
-        ? "Déjà vu, gérer mes séances"
-        : "Marquer comme vu",
+      accessibilityLabel: input.seen ? "Déjà vu" : "Marquer comme vu",
       icon: input.seen ? "checkmark-circle-outline" : "eye-outline",
       label: input.seen ? "Déjà vu" : "Marquer comme vu",
       loading: input.seenLoading,
       selected: input.seen,
       tone: input.seen ? "success" : "secondary",
-      ...(input.seen
-        ? {
-            subtitle: "Gérer mes séances",
-            trailingIcon: "chevron-forward" as const,
-          }
-        : {}),
     },
   };
 }

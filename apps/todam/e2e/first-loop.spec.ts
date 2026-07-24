@@ -41,7 +41,7 @@ test("première boucle Todam au Théâtre des Muses", async ({ page }) => {
   await page.getByRole("link").filter({ hasText: "Muses" }).first().click();
   await page.getByRole("button", { name: "Ajouter à « À voir »" }).click();
 
-  await page.getByLabel("Pseudonyme").fill(`spectateur-${suffix}`);
+  await page.getByLabel("Nom d'utilisateur").fill(`spectateur-${suffix}`);
   await page.getByLabel("Email").fill(`spectateur-${suffix}@example.test`);
   await page.getByLabel("Mot de passe (8 caractères minimum)").fill("Todam-test-2026");
   await page.getByRole("checkbox").click();
@@ -59,32 +59,12 @@ test("première boucle Todam au Théâtre des Muses", async ({ page }) => {
   await expect(
     page.getByRole("button", { name: "Ajouter à « À voir »" }),
   ).toBeVisible();
-  await page.getByRole("button", { name: "Déjà vu, gérer mes séances" }).click();
-  await expect(page.getByRole("heading", { name: "Mes séances" })).toBeVisible();
-  await page.getByRole("button", { name: "Ajouter une séance" }).click();
-  await expect(page.getByText("Séance sans date")).toHaveCount(2);
-
-  await page
-    .getByRole("button", { name: /Retirer la séance/ })
-    .first()
-    .click();
-  await page.getByRole("button", { name: "Retirer", exact: true }).click();
-  await expect(page.getByText("Séance sans date")).toHaveCount(1);
-
-  await page.getByRole("button", { name: /Retirer la séance/ }).click();
-  await expect(page.getByText("Supprimez d’abord votre note")).toBeVisible();
-  await page.getByRole("button", { name: "Revenir à ma note" }).click();
-  await page.getByRole("button", { name: "Supprimer ma note" }).click();
-
-  await page.getByRole("button", { name: "Déjà vu, gérer mes séances" }).click();
-  await page.getByRole("button", { name: /Retirer la séance/ }).click();
-  await page.getByRole("button", { name: "Retirer", exact: true }).click();
-  await expect(page.getByRole("button", { name: "Marquer comme vu" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Déjà vu" })).toBeDisabled();
 
   await page.goto("/");
   await page.getByRole("link", { name: "Profil" }).click();
   await expect(page.getByText("Répartition de mes notes")).toBeVisible();
-  await expect(page.getByLabel("0 notes à 8 sur 10")).toBeVisible();
+  await expect(page.getByLabel("1 notes à 8 sur 10")).toBeVisible();
 
   await page.goto("/");
   await page.getByRole("link", { name: "Profil" }).click();

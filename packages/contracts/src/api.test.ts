@@ -1,13 +1,30 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  EmailSignInBodySchema,
   MarkSeenBodySchema,
   ProductionDiaryResponseSchema,
   RatingBodySchema,
   SearchQuerySchema,
+  UsernameSignInBodySchema,
 } from "./api.js";
 
 describe("contrats API", () => {
+  it("décrit les connexions par email et nom d'utilisateur", () => {
+    expect(
+      EmailSignInBodySchema.parse({
+        email: "spectatrice@example.test",
+        password: "Todam-test-2026",
+      }),
+    ).toMatchObject({ email: "spectatrice@example.test" });
+    expect(
+      UsernameSignInBodySchema.parse({
+        username: "spectatrice",
+        password: "Todam-test-2026",
+      }),
+    ).toMatchObject({ username: "spectatrice" });
+  });
+
   it("normalise la pagination de recherche", () => {
     expect(SearchQuerySchema.parse({ q: "Muses" })).toEqual({
       q: "Muses",

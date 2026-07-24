@@ -60,6 +60,16 @@ export default function ProfileScreen() {
     1,
     ...(dashboard.data?.ratingDistribution.map((item) => item.count) ?? [1]),
   );
+  const recentProductions = dashboard.data
+    ? Array.from(
+        new Map(
+          dashboard.data.recentDiary.map((entry) => [
+            entry.production.id,
+            entry.production,
+          ]),
+        ).values(),
+      )
+    : [];
 
   return (
     <ScrollView
@@ -101,14 +111,14 @@ export default function ProfileScreen() {
 
             <View className="gap-4">
               <SectionTitle>Mon journal récent</SectionTitle>
-              {dashboard.data.recentDiary.length === 0 ? (
+              {recentProductions.length === 0 ? (
                 <Text className="rounded-todam border border-line bg-paper p-5 text-muted">
                   Aucun spectacle vu pour le moment.
                 </Text>
               ) : (
                 <View className="gap-3">
-                  {dashboard.data.recentDiary.map((entry) => (
-                    <ProductionListItem key={entry.id} production={entry.production} />
+                  {recentProductions.map((production) => (
+                    <ProductionListItem key={production.id} production={production} />
                   ))}
                 </View>
               )}

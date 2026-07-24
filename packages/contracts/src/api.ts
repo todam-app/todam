@@ -17,6 +17,18 @@ export const ProblemDetailsSchema = z.object({
 });
 export type ProblemDetails = z.infer<typeof ProblemDetailsSchema>;
 
+export const EmailSignInBodySchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8),
+  rememberMe: z.boolean().optional(),
+});
+
+export const UsernameSignInBodySchema = z.object({
+  username: z.string().trim().min(3).max(30),
+  password: z.string().min(8),
+  rememberMe: z.boolean().optional(),
+});
+
 export const SearchQuerySchema = z.object({
   q: z.string().trim().min(2).max(100),
   cursor: z.string().nullable().optional(),

@@ -1,6 +1,7 @@
 import {
   DashboardSchema,
   DiaryEntryIdParamsSchema,
+  EmailSignInBodySchema,
   HealthResponseSchema,
   MarkSeenBodySchema,
   MutationResponseSchema,
@@ -12,6 +13,7 @@ import {
   RatingBodySchema,
   SearchQuerySchema,
   SearchResponseSchema,
+  UsernameSignInBodySchema,
   ViewerProductionStateSchema,
 } from "@todam/contracts";
 import type { FastifyInstance } from "fastify";
@@ -40,6 +42,30 @@ export async function registerRoutes(
 ) {
   const app = baseApp.withTypeProvider<ZodTypeProvider>();
   const { auth, catalog } = dependencies;
+
+  app.post(
+    "/v1/auth/sign-in/email",
+    {
+      schema: {
+        tags: ["Authentification"],
+        summary: "Connecte un compte avec son email",
+        body: EmailSignInBodySchema,
+      },
+    },
+    (request, reply) => handleAuthRequest(auth, request, reply),
+  );
+
+  app.post(
+    "/v1/auth/sign-in/username",
+    {
+      schema: {
+        tags: ["Authentification"],
+        summary: "Connecte un compte avec son nom d'utilisateur",
+        body: UsernameSignInBodySchema,
+      },
+    },
+    (request, reply) => handleAuthRequest(auth, request, reply),
+  );
 
   app.route({
     method: ["GET", "POST"],

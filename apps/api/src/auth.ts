@@ -10,6 +10,7 @@ import {
 } from "@todam/database";
 import { betterAuth } from "better-auth";
 import type { FastifyReply, FastifyRequest } from "fastify";
+import { username } from "better-auth/plugins";
 
 import { HttpProblem } from "./errors.js";
 
@@ -42,6 +43,7 @@ export function createAuth(database: TodamDatabase) {
       autoSignIn: true,
       minPasswordLength: 8,
     },
+    disabledPaths: ["/is-username-available"],
     trustedOrigins: [
       webAppUrl,
       "todam://",
@@ -51,11 +53,6 @@ export function createAuth(database: TodamDatabase) {
     ],
     user: {
       additionalFields: {
-        pseudonym: {
-          type: "string",
-          required: true,
-          input: true,
-        },
         ageConfirmedAt: {
           type: "date",
           required: true,
@@ -73,13 +70,13 @@ export function createAuth(database: TodamDatabase) {
       user: {
         create: {
           before: async (candidate) => {
-            const pseudonym =
-              typeof candidate.pseudonym === "string" ? candidate.pseudonym.trim() : "";
-            if (pseudonym.length < 3 || pseudonym.length > 30) {
+            const usernameValue =
+              typeof candidate.username === "string" ? candidate.username.trim() : "";
+            if (usernameValue.length < 3 || usernameValue.length > 30) {
               throw new HttpProblem(
                 400,
                 "INVALID_PSEUDONYM",
-                "Le pseudonyme doit contenir entre 3 et 30 caractères.",
+                "Le nom d'utilisateur doit contenir entre 3 et 30 caractères.",
               );
             }
             if (!candidate.ageConfirmedAt) {
@@ -92,8 +89,9 @@ export function createAuth(database: TodamDatabase) {
             return {
               data: {
                 ...candidate,
-                name: pseudonym,
-                pseudonym,
+                name: usernameValue,
+                username: usernameValue,
+                displayUsername: usernameValue,
                 ageConfirmedAt: new Date(),
                 role: "member",
               },
@@ -102,7 +100,24 @@ export function createAuth(database: TodamDatabase) {
         },
       },
     },
-    plugins: [expo()],
+    plugins: [
+      username({
+        minUsernameLength: 3,
+        maxUsernameLength: 30,
+        usernameValidator: () => true,
+        usernameNormalization: (value) => value.trim(),
+        displayUsernameNormalization: (value) => value.trim(),
+        schema: {
+          user: {
+            fields: {
+              username: "pseudonym",
+              displayUsername: "name",
+            },
+          },
+        },
+      }),
+      expo(),
+    ],
   });
 }
 
