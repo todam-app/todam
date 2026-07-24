@@ -1,5 +1,36 @@
 import { expect, test } from "@playwright/test";
 
+test("l’accueil présente Todam simplement et ouvre l’inscription", async ({ page }) => {
+  await page.goto("/");
+
+  await expect(page.getByRole("link", { name: "Todam, accueil" })).toHaveText("Todam");
+  await expect(
+    page.getByRole("heading", {
+      name: "Gardez une trace des spectacles que vous avez vus. Notez-les et partagez votre avis. Trouvez votre prochain spectacle.",
+    }),
+  ).toBeVisible();
+  await expect(page.getByText("Les spectacles restent avec vous.")).toHaveCount(0);
+  await expect(page.getByText("Ce que vous pouvez faire")).toHaveCount(0);
+  await expect(
+    page.getByText("Mon journal de spectacles. Bientôt sur iOS et Android."),
+  ).toBeVisible();
+  await expect(page.getByText("Marquez les spectacles que vous avez vus.")).toHaveCount(
+    0,
+  );
+  await expect(
+    page.getByText(
+      "Donnez une note sur 10. Ajoutez un commentaire si vous le souhaitez.",
+    ),
+  ).toHaveCount(0);
+  await expect(
+    page.getByText("Enregistrez les spectacles que vous voulez voir."),
+  ).toHaveCount(0);
+  await expect(page.getByText("Monaco ouvre le bal")).toHaveCount(0);
+
+  await page.getByRole("button", { name: "Commencer — c’est gratuit" }).press("Enter");
+  await expect(page.getByRole("heading", { name: "Créer ton journal" })).toBeVisible();
+});
+
 test("première boucle Todam au Théâtre des Muses", async ({ page }) => {
   const suffix = Date.now();
   await page.goto("/");

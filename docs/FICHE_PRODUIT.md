@@ -4,7 +4,7 @@
 
 ### Positionnement
 
-Todam est **le journal du spectacle vivant** : une application française permettant de retrouver, consigner, noter et partager les spectacles de théâtre, d’opéra et de ballet.
+Todam est un journal personnel de spectacles : une application française permettant de retrouver, consigner, noter et partager les spectacles de théâtre, d’opéra et de ballet.
 
 La valeur principale est personnelle : conserver la mémoire de ce que l’on a vu et comprendre ses goûts. La découverte locale et les profils suivis enrichissent cette habitude sans transformer Todam en billetterie ou en réseau social généraliste.
 
@@ -273,8 +273,8 @@ Tokens provisoires :
 - Cartes sobres, ombres très légères et hiérarchie obtenue par l’espace et la typographie.
 - Icônes linéaires accompagnées d’un libellé pour les actions importantes.
 - Ton rédactionnel chaleureux, direct et non élitiste.
-- Signature : **Le journal du spectacle vivant**.
-- Sous-promesse de lancement : **Théâtre, opéra et ballet**.
+- Signature : **Mon journal de spectacles**.
+- Périmètre du catalogue au lancement : **Théâtre, opéra et ballet**.
 
 ### Accessibilité
 

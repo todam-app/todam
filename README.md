@@ -1,6 +1,6 @@
 # Todam
 
-> Le journal open source du spectacle vivant — théâtre, opéra et ballet.
+> Mon journal de spectacles.
 
 Todam est un projet français pour découvrir, enregistrer et noter les spectacles vivants
 que l'on a vus ou que l'on souhaite voir. L'objectif est de proposer au théâtre, à

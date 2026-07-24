@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "license": "Apache-2.0",
-  "description": "Le journal open source du spectacle vivant.",
+  "description": "Todam — Mon journal de spectacles open source.",
   "packageManager": "pnpm@11.9.0",
   "workspaces": [
     "apps/*",
