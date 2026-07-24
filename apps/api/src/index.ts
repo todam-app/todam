@@ -1,8 +1,14 @@
-import "dotenv/config";
+import { fileURLToPath } from "node:url";
 
 import { createDatabase } from "@todam/database";
+import { config } from "dotenv";
 
 import { buildServer } from "./server.js";
+
+config({
+  path: fileURLToPath(new URL("../../../.env", import.meta.url)),
+  quiet: true,
+});
 
 const { db, pool } = createDatabase();
 const app = await buildServer({ database: db });

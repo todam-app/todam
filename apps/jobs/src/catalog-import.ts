@@ -1,11 +1,16 @@
-import "dotenv/config";
-
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
 import { CatalogImportSchema } from "@todam/contracts";
+import { config } from "dotenv";
 
 import { applyCatalogFromEnvironment, createDryRunReport } from "./importer.js";
+
+config({
+  path: fileURLToPath(new URL("../../../.env", import.meta.url)),
+  quiet: true,
+});
 
 function readArgument(name: string): string | undefined {
   const index = process.argv.indexOf(name);
