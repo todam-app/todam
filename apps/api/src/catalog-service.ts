@@ -1,5 +1,6 @@
 import type {
   Dashboard,
+  DiarySession,
   ProductionCard,
   ProductionDetail,
   SearchResponse,
@@ -326,6 +327,65 @@ export function createCatalogService(database: TodamDatabase) {
 
     getProductionState,
 
+    async getProductionDiary(
+      userId: string,
+      productionId: string,
+    ): Promise<DiarySession[]> {
+      await assertProduction(productionId);
+      const rows = await database
+        .select({
+          id: diaryEntries.id,
+          attendedOn: diaryEntries.attendedOn,
+          createdAt: diaryEntries.createdAt,
+          performanceId: performances.id,
+          performanceStartsAt: performances.startsAt,
+          performanceStatus: performances.status,
+          venueId: venues.id,
+          venueSlug: venues.slug,
+          venueName: venues.name,
+          venueLocality: venues.locality,
+          venueTimezone: venues.timezone,
+        })
+        .from(diaryEntries)
+        .leftJoin(performances, eq(performances.id, diaryEntries.performanceId))
+        .leftJoin(venues, eq(venues.id, performances.venueId))
+        .where(
+          and(
+            eq(diaryEntries.userId, userId),
+            eq(diaryEntries.productionId, productionId),
+          ),
+        )
+        .orderBy(desc(diaryEntries.createdAt), desc(diaryEntries.id));
+
+      return rows.map((row) => ({
+        id: row.id,
+        attendedOn: row.attendedOn,
+        createdAt: row.createdAt.toISOString(),
+        performance:
+          row.performanceId &&
+          row.performanceStartsAt &&
+          row.performanceStatus &&
+          row.venueId &&
+          row.venueSlug &&
+          row.venueName &&
+          row.venueLocality &&
+          row.venueTimezone
+            ? {
+                id: row.performanceId,
+                startsAt: row.performanceStartsAt.toISOString(),
+                status: row.performanceStatus,
+                venue: {
+                  id: row.venueId,
+                  slug: row.venueSlug,
+                  name: row.venueName,
+                  locality: row.venueLocality,
+                  timezone: row.venueTimezone,
+                },
+              }
+            : null,
+      }));
+    },
+
     async markSeen(userId: string, input: SeenInput): Promise<ViewerProductionState> {
       await assertProduction(input.productionId);
       await database.transaction(async (transaction) => {
@@ -406,6 +466,73 @@ export function createCatalogService(database: TodamDatabase) {
         }
       });
       return getProductionState(userId, input.productionId);
+    },
+
+    async deleteDiaryEntry(
+      userId: string,
+      entryId: string,
+    ): Promise<ViewerProductionState> {
+      let productionId: string | undefined;
+      await database.transaction(async (transaction) => {
+        const targetRows = await transaction
+          .select({ productionId: diaryEntries.productionId })
+          .from(diaryEntries)
+          .where(and(eq(diaryEntries.id, entryId), eq(diaryEntries.userId, userId)))
+          .limit(1);
+        const target = targetRows[0];
+        if (!target) {
+          throw new HttpProblem(
+            404,
+            "DIARY_ENTRY_NOT_FOUND",
+            "Cette séance est introuvable dans votre journal.",
+          );
+        }
+        productionId = target.productionId;
+
+        const ratingRows = await transaction
+          .select({ value: ratings.value })
+          .from(ratings)
+          .where(
+            and(
+              eq(ratings.userId, userId),
+              eq(ratings.productionId, target.productionId),
+            ),
+          )
+          .for("update")
+          .limit(1);
+        const lockedEntries = await transaction
+          .select({ id: diaryEntries.id })
+          .from(diaryEntries)
+          .where(
+            and(
+              eq(diaryEntries.userId, userId),
+              eq(diaryEntries.productionId, target.productionId),
+            ),
+          )
+          .orderBy(asc(diaryEntries.id))
+          .for("update");
+
+        if (!lockedEntries.some((entry) => entry.id === entryId)) {
+          throw new HttpProblem(
+            404,
+            "DIARY_ENTRY_NOT_FOUND",
+            "Cette séance est introuvable dans votre journal.",
+          );
+        }
+        if (lockedEntries.length === 1 && ratingRows[0]) {
+          throw new HttpProblem(
+            409,
+            "RATING_REQUIRES_DIARY_ENTRY",
+            "Supprimez d'abord votre note avant de retirer la dernière séance.",
+          );
+        }
+
+        await transaction
+          .delete(diaryEntries)
+          .where(and(eq(diaryEntries.id, entryId), eq(diaryEntries.userId, userId)));
+      });
+
+      return getProductionState(userId, productionId!);
     },
 
     async setRating(

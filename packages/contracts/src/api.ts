@@ -1,6 +1,11 @@
 import { z } from "zod";
 
-import { ProductionCardSchema, ProductionDetailSchema, UuidSchema } from "./catalog.js";
+import {
+  PerformanceSchema,
+  ProductionCardSchema,
+  ProductionDetailSchema,
+  UuidSchema,
+} from "./catalog.js";
 
 export const ProblemDetailsSchema = z.object({
   type: z.string(),
@@ -32,6 +37,10 @@ export const ProductionIdParamsSchema = z.object({
   id: UuidSchema,
 });
 
+export const DiaryEntryIdParamsSchema = z.object({
+  entryId: UuidSchema,
+});
+
 export const ProductionResponseSchema = ProductionDetailSchema;
 
 export const ViewerProductionStateSchema = z.object({
@@ -50,6 +59,19 @@ export const DiaryEntrySchema = z.object({
   createdAt: z.string().datetime({ offset: true }),
 });
 export type DiaryEntry = z.infer<typeof DiaryEntrySchema>;
+
+export const DiarySessionSchema = z.object({
+  id: UuidSchema,
+  attendedOn: z.string().date().nullable(),
+  createdAt: z.string().datetime({ offset: true }),
+  performance: PerformanceSchema.nullable(),
+});
+export type DiarySession = z.infer<typeof DiarySessionSchema>;
+
+export const ProductionDiaryResponseSchema = z.object({
+  items: z.array(DiarySessionSchema),
+});
+export type ProductionDiaryResponse = z.infer<typeof ProductionDiaryResponseSchema>;
 
 export const MarkSeenBodySchema = z
   .object({

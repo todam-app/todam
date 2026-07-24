@@ -2,10 +2,12 @@ import {
   DashboardSchema,
   MutationResponseSchema,
   ProblemDetailsSchema,
+  ProductionDiaryResponseSchema,
   ProductionResponseSchema,
   SearchResponseSchema,
   ViewerProductionStateSchema,
   type Dashboard,
+  type DiarySession,
   type ProblemDetails,
   type SearchResponse,
   type ViewerProductionState,
@@ -38,7 +40,9 @@ export interface TodamApiClient {
   getProduction(slug: string): Promise<ProductionDetail>;
   getProductionState(productionId: string): Promise<ViewerProductionState>;
   getDashboard(): Promise<Dashboard>;
+  getProductionDiary(productionId: string): Promise<DiarySession[]>;
   markSeen(input: MarkSeenInput): Promise<ViewerProductionState>;
+  deleteDiaryEntry(entryId: string): Promise<ViewerProductionState>;
   setRating(productionId: string, value: number): Promise<ViewerProductionState>;
   deleteRating(productionId: string): Promise<ViewerProductionState>;
   addToWatchlist(productionId: string): Promise<ViewerProductionState>;
@@ -81,6 +85,13 @@ export function createTodamApiClient(options: TodamApiClientOptions): TodamApiCl
         ViewerProductionStateSchema,
       ),
     getDashboard: () => request("/v1/me/dashboard", DashboardSchema),
+    getProductionDiary: async (productionId) => {
+      const response = await request(
+        `/v1/me/productions/${encodeURIComponent(productionId)}/diary`,
+        ProductionDiaryResponseSchema,
+      );
+      return response.items;
+    },
     markSeen: async (input) => {
       const response = await request("/v1/me/diary", MutationResponseSchema, {
         method: "POST",
@@ -90,6 +101,14 @@ export function createTodamApiClient(options: TodamApiClientOptions): TodamApiCl
           attendedOn: input.attendedOn ?? null,
         }),
       });
+      return response.state;
+    },
+    deleteDiaryEntry: async (entryId) => {
+      const response = await request(
+        `/v1/me/diary/${encodeURIComponent(entryId)}`,
+        MutationResponseSchema,
+        { method: "DELETE" },
+      );
       return response.state;
     },
     setRating: async (productionId, value) => {

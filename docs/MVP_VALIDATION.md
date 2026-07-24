@@ -289,11 +289,13 @@ Chaque participant doit :
 1. retrouver cinq spectacles réellement vus ;
 2. identifier la bonne production parmi des titres similaires ;
 3. marquer un spectacle vu sans le noter ;
-4. noter un autre spectacle ;
-5. sélectionner une représentation lorsqu'il se souvient de la date ;
-6. enregistrer un souvenir ancien sans date ;
-7. signaler un spectacle manquant ;
-8. retrouver ses entrées dans son profil.
+4. ouvrir « Déjà vu », ajouter une seconde séance et retirer une séance précise ;
+5. vérifier qu’une note bloque uniquement le retrait de la dernière séance ;
+6. noter un autre spectacle ;
+7. sélectionner une représentation lorsqu'il se souvient de la date ;
+8. enregistrer un souvenir ancien sans date ;
+9. signaler un spectacle manquant ;
+10. retrouver ses entrées dans son profil.
 
 ### Mesures
 

@@ -15,16 +15,13 @@ export default function HomeScreen() {
           accessibilityRole="header"
           className="text-center font-serif text-[34px] font-semibold leading-[40px] text-ink md:text-[36px] md:leading-[44px]"
         >
-          <Text className="font-serif font-bold text-accent">Gardez</Text> une trace des
-          spectacles que vous avez vus.{"\n"}
-          <Text className="font-serif font-bold text-accent">Notez-les</Text> et
-          partagez votre avis.{"\n"}
-          <Text className="font-serif font-bold text-accent">Trouvez</Text> votre
-          prochain spectacle.
+          Gardez une trace des spectacles que vous avez vus.{"\n"}
+          Notez-les et partagez votre avis.{"\n"}
+          Trouvez votre prochain spectacle.
         </Text>
         <View className="w-full max-w-xs">
           <Button
-            label="Commencer — c’est gratuit"
+            label="Commencez — c’est gratuit"
             onPress={() => router.push("/sign-up")}
           />
         </View>

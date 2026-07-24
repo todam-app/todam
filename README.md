@@ -42,6 +42,19 @@ et les contrats publics.
 
 Prérequis : Node 24, pnpm 11 et Docker Desktop.
 
+Sous Windows, la commande suivante vérifie les prérequis, prépare la base et lance
+l'application complète :
+
+```cmd
+start-todam.cmd
+```
+
+Le script crée automatiquement le fichier `.env` lors du premier lancement et utilise le
+corpus privé du Théâtre des Muses lorsqu'il est disponible. Sinon, il importe la fixture
+synthétique du dépôt.
+
+Le démarrage manuel reste possible :
+
 ```bash
 cp .env.example .env
 pnpm install

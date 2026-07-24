@@ -1,5 +1,15 @@
 import { Link, usePathname } from "expo-router";
-import { Platform, Pressable, Text, View } from "react-native";
+import {
+  Image,
+  Platform,
+  Pressable,
+  Text,
+  useWindowDimensions,
+  View,
+} from "react-native";
+
+const horizontalLogo = require("../assets/brand/todam-logo-horizontal.svg");
+const symbolLogo = require("../assets/brand/todam-symbol.svg");
 
 const navigation = [
   { href: "/", label: "Accueil" },
@@ -9,7 +19,10 @@ const navigation = [
 
 export function WebNavigation() {
   const pathname = usePathname();
+  const { width } = useWindowDimensions();
   if (Platform.OS !== "web") return null;
+
+  const compactLogo = width < 640;
 
   return (
     <View className="border-b border-line bg-paper">
@@ -20,7 +33,18 @@ export function WebNavigation() {
             accessibilityRole="link"
             className="min-h-11 justify-center"
           >
-            <Text className="font-serif text-2xl font-black text-ink">Todam</Text>
+            <Image
+              accessibilityIgnoresInvertColors
+              accessible={false}
+              resizeMode="contain"
+              source={compactLogo ? symbolLogo : horizontalLogo}
+              style={
+                compactLogo
+                  ? { height: 44, width: 42 }
+                  : { height: 44, width: 145 }
+              }
+            />
+            <Text className="sr-only">Todam</Text>
           </Pressable>
         </Link>
         <View accessibilityRole="tablist" className="flex-row items-center gap-2">

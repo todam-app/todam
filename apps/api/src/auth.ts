@@ -28,7 +28,6 @@ export function createAuth(database: TodamDatabase) {
       "development-only-secret-change-before-production",
     database: drizzleAdapter(database, {
       provider: "pg",
-      usePlural: true,
       schema: {
         ...schema,
         user,

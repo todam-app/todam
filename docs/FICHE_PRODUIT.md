@@ -133,9 +133,14 @@ Aucune autorisation GPS ou notification n’est demandée au premier lancement.
 ### Vu, note et critique
 
 - **Vu** crée une séance dans le journal. Date, lieu et distribution sont facultatifs.
+- L’état **Déjà vu** ouvre la liste des séances de la production : une personne peut
+  y ajouter un nouveau souvenir ou retirer une séance précise.
 - **Noter** enregistre immédiatement un entier de 1 à 10, marque implicitement la production comme vue et crée une séance sans date si nécessaire.
 - Une personne possède une seule note publique modifiable par production.
 - Plusieurs séances peuvent être enregistrées pour cette production.
+- Une séance intermédiaire peut être retirée malgré une note active. La dernière
+  séance exige de supprimer d’abord la note afin de ne jamais conserver une note
+  sans statut vu.
 - Une production notée ou marquée vue quitte automatiquement À voir, avec une action Annuler. Elle peut ensuite être ajoutée de nouveau pour une revisite.
 - Après la note, Todam propose sans l’imposer : « Ajouter la date » et « Écrire une critique ».
 

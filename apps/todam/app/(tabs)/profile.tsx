@@ -41,7 +41,7 @@ export default function ProfileScreen() {
           Ton journal t’attend
         </Text>
         <Text className="text-center leading-6 text-muted">
-          Crée un compte pour retrouver tes spectacles vus, tes notes et ta liste À
+          Crée un compte pour retrouver tes spectacles vus, tes notes et ta liste à
           voir.
         </Text>
         <View className="w-full max-w-xs gap-2">

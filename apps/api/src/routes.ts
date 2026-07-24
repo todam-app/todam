@@ -1,9 +1,11 @@
 import {
   DashboardSchema,
+  DiaryEntryIdParamsSchema,
   HealthResponseSchema,
   MarkSeenBodySchema,
   MutationResponseSchema,
   ProblemDetailsSchema,
+  ProductionDiaryResponseSchema,
   ProductionIdParamsSchema,
   ProductionParamsSchema,
   ProductionResponseSchema,
@@ -143,6 +145,27 @@ export async function registerRoutes(
   );
 
   app.get(
+    "/v1/me/productions/:id/diary",
+    {
+      schema: {
+        tags: ["Compte"],
+        summary: "Consulte les séances d'une production dans le journal",
+        security: [{ sessionCookie: [] }],
+        params: ProductionIdParamsSchema,
+        response: {
+          200: ProductionDiaryResponseSchema,
+          ...problemResponses,
+        },
+      },
+    },
+    async (request) => {
+      const userId = await getRequiredUserId(auth, request);
+      const items = await catalog.getProductionDiary(userId, request.params.id);
+      return { items };
+    },
+  );
+
+  app.get(
     "/v1/me/dashboard",
     {
       schema: {
@@ -178,6 +201,27 @@ export async function registerRoutes(
     async (request) => {
       const userId = await getRequiredUserId(auth, request);
       const state = await catalog.markSeen(userId, request.body);
+      return { state };
+    },
+  );
+
+  app.delete(
+    "/v1/me/diary/:entryId",
+    {
+      schema: {
+        tags: ["Compte"],
+        summary: "Retire une séance du journal",
+        security: [{ sessionCookie: [] }],
+        params: DiaryEntryIdParamsSchema,
+        response: {
+          200: MutationResponseSchema,
+          ...problemResponses,
+        },
+      },
+    },
+    async (request) => {
+      const userId = await getRequiredUserId(auth, request);
+      const state = await catalog.deleteDiaryEntry(userId, request.params.entryId);
       return { state };
     },
   );

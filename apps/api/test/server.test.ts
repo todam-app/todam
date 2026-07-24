@@ -36,4 +36,30 @@ describe("API Todam", () => {
     expect(response.headers["content-type"]).toContain("application/problem+json");
     await app.close();
   });
+
+  it("autorise les mutations personnelles dans les précontrôles CORS", async () => {
+    const app = await buildServer({
+      database: {} as TodamDatabase,
+      logger: false,
+    });
+
+    for (const method of ["PUT", "DELETE"]) {
+      const response = await app.inject({
+        method: "OPTIONS",
+        url: `/v1/me/watchlist/${randomUUID()}`,
+        headers: {
+          origin: "http://localhost:8081",
+          "access-control-request-method": method,
+        },
+      });
+
+      expect(response.statusCode).toBe(204);
+      expect(response.headers["access-control-allow-origin"]).toBe(
+        "http://localhost:8081",
+      );
+      expect(response.headers["access-control-allow-methods"]).toContain(method);
+    }
+
+    await app.close();
+  });
 });

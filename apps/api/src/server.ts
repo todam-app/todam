@@ -52,6 +52,7 @@ export async function buildServer(options: BuildServerOptions) {
   await app.register(cors, {
     origin: process.env.WEB_APP_URL ?? "http://localhost:8081",
     credentials: true,
+    methods: ["GET", "HEAD", "POST", "PUT", "DELETE"],
   });
   await app.register(swagger, {
     openapi: {

@@ -6,6 +6,8 @@ import { useEffect, useRef, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 
 import { AsyncState } from "../../components/AsyncState";
+import { DiaryManagerModal } from "../../components/DiaryManagerModal";
+import { ProductionActions } from "../../components/ProductionActions";
 import { RatingPicker } from "../../components/RatingPicker";
 import { api } from "../../lib/api";
 import { authClient } from "../../lib/auth-client";
@@ -26,7 +28,12 @@ export default function ProductionScreen() {
   const queryClient = useQueryClient();
   const session = authClient.useSession();
   const [actionError, setActionError] = useState(false);
+  const [diaryVisible, setDiaryVisible] = useState(false);
   const resumed = useRef(false);
+  const scrollViewRef = useRef<ScrollView>(null);
+  const heroOffset = useRef(0);
+  const detailsOffset = useRef(0);
+  const ratingOffset = useRef(0);
 
   const production = useQuery({
     queryKey: ["production", slug],
@@ -132,6 +139,27 @@ export default function ProductionScreen() {
     if (requireAccount("seen")) seenMutation.mutate();
   }
 
+  function handleSeenPress() {
+    if (viewerState.data?.seen && session.data) {
+      setDiaryVisible(true);
+      return;
+    }
+    markSeen();
+  }
+
+  function returnToRating() {
+    setDiaryVisible(false);
+    requestAnimationFrame(() => {
+      scrollViewRef.current?.scrollTo({
+        animated: true,
+        y: Math.max(
+          0,
+          heroOffset.current + detailsOffset.current + ratingOffset.current - 24,
+        ),
+      });
+    });
+  }
+
   useEffect(() => {
     const action = parameter(params.resumeAction);
     if (
@@ -168,6 +196,7 @@ export default function ProductionScreen() {
     <ScrollView
       contentContainerClassName="mx-auto w-full max-w-content gap-8 px-5 py-8 md:px-8 md:py-12"
       contentInsetAdjustmentBehavior="automatic"
+      ref={scrollViewRef}
     >
       <AsyncState
         empty={!production.data}
@@ -178,14 +207,24 @@ export default function ProductionScreen() {
       >
         {production.data ? (
           <>
-            <View className="gap-6 md:flex-row md:items-start">
+            <View
+              className="gap-6 md:flex-row md:items-start"
+              onLayout={(event) => {
+                heroOffset.current = event.nativeEvent.layout.y;
+              }}
+            >
               <View className="w-full max-w-[220px]">
                 <PosterPlaceholder
                   discipline={production.data.discipline}
                   title={production.data.title}
                 />
               </View>
-              <View className="min-w-0 flex-1 gap-4">
+              <View
+                className="min-w-0 flex-1 gap-4"
+                onLayout={(event) => {
+                  detailsOffset.current = event.nativeEvent.layout.y;
+                }}
+              >
                 <Text className="text-xs font-extrabold uppercase tracking-[2px] text-accent">
                   {production.data.discipline} · {production.data.audience}
                 </Text>
@@ -209,39 +248,39 @@ export default function ProductionScreen() {
                 ) : null}
 
                 <View className="gap-3">
-                  <View className="flex-row flex-wrap gap-2">
-                    <Button
-                      disabled={seenMutation.isPending}
-                      label={viewerState.data?.seen ? "Déjà vu" : "Marquer vu"}
-                      onPress={markSeen}
-                      variant={viewerState.data?.seen ? "secondary" : "primary"}
-                    />
-                    <Button
-                      disabled={watchlistMutation.isPending}
-                      label={
-                        viewerState.data?.watchlisted
-                          ? "Retirer de À voir"
-                          : "Ajouter à À voir"
-                      }
-                      onPress={toggleWatchlist}
-                      variant="secondary"
-                    />
-                  </View>
-                  <Text className="font-semibold text-ink">Ma note</Text>
-                  <RatingPicker
-                    disabled={ratingMutation.isPending}
-                    onChange={rate}
-                    value={viewerState.data?.rating ?? null}
+                  <ProductionActions
+                    onSeenPress={handleSeenPress}
+                    onWatchlistPress={toggleWatchlist}
+                    seen={viewerState.data?.seen ?? false}
+                    seenLoading={seenMutation.isPending}
+                    watchlisted={viewerState.data?.watchlisted ?? false}
+                    watchlistLoading={watchlistMutation.isPending}
                   />
-                  {viewerState.data?.rating ? (
-                    <View className="self-start">
-                      <Button
-                        label="Supprimer ma note"
-                        onPress={() => deleteRatingMutation.mutate()}
-                        variant="ghost"
-                      />
-                    </View>
-                  ) : null}
+                  <View
+                    className="gap-3"
+                    nativeID="rating-section"
+                    onLayout={(event) => {
+                      ratingOffset.current = event.nativeEvent.layout.y;
+                    }}
+                  >
+                    <Text accessibilityRole="header" className="font-semibold text-ink">
+                      Ma note
+                    </Text>
+                    <RatingPicker
+                      disabled={ratingMutation.isPending}
+                      onChange={rate}
+                      value={viewerState.data?.rating ?? null}
+                    />
+                    {viewerState.data?.rating ? (
+                      <View className="self-start">
+                        <Button
+                          label="Supprimer ma note"
+                          onPress={() => deleteRatingMutation.mutate()}
+                          variant="ghost"
+                        />
+                      </View>
+                    ) : null}
+                  </View>
                   {!session.data ? (
                     <Text className="text-sm text-muted">
                       Le catalogue est public. Un compte est demandé uniquement pour
@@ -290,6 +329,16 @@ export default function ProductionScreen() {
                 Données vérifiées à partir des sources officielles référencées par
                 Todam.
               </Text>
+            ) : null}
+            {productionId ? (
+              <DiaryManagerModal
+                onClose={() => setDiaryVisible(false)}
+                onReturnToRating={returnToRating}
+                onStateChange={updateState}
+                productionId={productionId}
+                rating={viewerState.data?.rating ?? null}
+                visible={diaryVisible}
+              />
             ) : null}
           </>
         ) : null}

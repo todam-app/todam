@@ -352,6 +352,104 @@ export type GetV1MeProductionsByIdStateResponses = {
 export type GetV1MeProductionsByIdStateResponse =
   GetV1MeProductionsByIdStateResponses[keyof GetV1MeProductionsByIdStateResponses];
 
+export type GetV1MeProductionsByIdDiaryData = {
+  body?: never;
+  path: {
+    id: string;
+  };
+  query?: never;
+  url: "/v1/me/productions/{id}/diary";
+};
+
+export type GetV1MeProductionsByIdDiaryErrors = {
+  /**
+   * Default Response
+   */
+  400: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  401: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  404: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+};
+
+export type GetV1MeProductionsByIdDiaryError =
+  GetV1MeProductionsByIdDiaryErrors[keyof GetV1MeProductionsByIdDiaryErrors];
+
+export type GetV1MeProductionsByIdDiaryResponses = {
+  /**
+   * Default Response
+   */
+  200: {
+    items: Array<{
+      id: string;
+      attendedOn: string | null;
+      createdAt: string;
+      performance: {
+        id: string;
+        startsAt: string;
+        status: "scheduled" | "completed" | "cancelled" | "postponed";
+        venue: {
+          id: string;
+          slug: string;
+          name: string;
+          locality: string;
+          timezone: string;
+        };
+      } | null;
+    }>;
+  };
+};
+
+export type GetV1MeProductionsByIdDiaryResponse =
+  GetV1MeProductionsByIdDiaryResponses[keyof GetV1MeProductionsByIdDiaryResponses];
+
 export type GetV1MeDashboardData = {
   body?: never;
   path?: never;
@@ -559,6 +657,93 @@ export type PostV1MeDiaryResponses = {
 
 export type PostV1MeDiaryResponse =
   PostV1MeDiaryResponses[keyof PostV1MeDiaryResponses];
+
+export type DeleteV1MeDiaryByEntryIdData = {
+  body?: never;
+  path: {
+    entryId: string;
+  };
+  query?: never;
+  url: "/v1/me/diary/{entryId}";
+};
+
+export type DeleteV1MeDiaryByEntryIdErrors = {
+  /**
+   * Default Response
+   */
+  400: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  401: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  404: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+};
+
+export type DeleteV1MeDiaryByEntryIdError =
+  DeleteV1MeDiaryByEntryIdErrors[keyof DeleteV1MeDiaryByEntryIdErrors];
+
+export type DeleteV1MeDiaryByEntryIdResponses = {
+  /**
+   * Default Response
+   */
+  200: {
+    state: {
+      productionId: string;
+      seen: boolean;
+      rating: number | null;
+      watchlisted: boolean;
+    };
+  };
+};
+
+export type DeleteV1MeDiaryByEntryIdResponse =
+  DeleteV1MeDiaryByEntryIdResponses[keyof DeleteV1MeDiaryByEntryIdResponses];
 
 export type DeleteV1MeProductionsByIdRatingData = {
   body?: never;

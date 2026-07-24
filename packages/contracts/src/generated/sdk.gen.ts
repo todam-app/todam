@@ -9,6 +9,9 @@ import type {
   TDataShape,
 } from "./client/index.js";
 import type {
+  DeleteV1MeDiaryByEntryIdData,
+  DeleteV1MeDiaryByEntryIdErrors,
+  DeleteV1MeDiaryByEntryIdResponses,
   DeleteV1MeProductionsByIdRatingData,
   DeleteV1MeProductionsByIdRatingErrors,
   DeleteV1MeProductionsByIdRatingResponses,
@@ -23,6 +26,9 @@ import type {
   GetV1MeDashboardData,
   GetV1MeDashboardErrors,
   GetV1MeDashboardResponses,
+  GetV1MeProductionsByIdDiaryData,
+  GetV1MeProductionsByIdDiaryErrors,
+  GetV1MeProductionsByIdDiaryResponses,
   GetV1MeProductionsByIdStateData,
   GetV1MeProductionsByIdStateErrors,
   GetV1MeProductionsByIdStateResponses,
@@ -137,6 +143,32 @@ export const getV1MeProductionsByIdState = <ThrowOnError extends boolean = false
   });
 
 /**
+ * Consulte les séances d'une production dans le journal
+ */
+export const getV1MeProductionsByIdDiary = <ThrowOnError extends boolean = false>(
+  options: Options<GetV1MeProductionsByIdDiaryData, ThrowOnError>,
+): RequestResult<
+  GetV1MeProductionsByIdDiaryResponses,
+  GetV1MeProductionsByIdDiaryErrors,
+  ThrowOnError
+> =>
+  (options.client ?? client).get<
+    GetV1MeProductionsByIdDiaryResponses,
+    GetV1MeProductionsByIdDiaryErrors,
+    ThrowOnError
+  >({
+    security: [
+      {
+        in: "cookie",
+        name: "better-auth.session_token",
+        type: "apiKey",
+      },
+    ],
+    url: "/v1/me/productions/{id}/diary",
+    ...options,
+  });
+
+/**
  * Consulte le tableau de bord personnel
  */
 export const getV1MeDashboard = <ThrowOnError extends boolean = false>(
@@ -182,6 +214,32 @@ export const postV1MeDiary = <ThrowOnError extends boolean = false>(
       "Content-Type": "application/json",
       ...options.headers,
     },
+  });
+
+/**
+ * Retire une séance du journal
+ */
+export const deleteV1MeDiaryByEntryId = <ThrowOnError extends boolean = false>(
+  options: Options<DeleteV1MeDiaryByEntryIdData, ThrowOnError>,
+): RequestResult<
+  DeleteV1MeDiaryByEntryIdResponses,
+  DeleteV1MeDiaryByEntryIdErrors,
+  ThrowOnError
+> =>
+  (options.client ?? client).delete<
+    DeleteV1MeDiaryByEntryIdResponses,
+    DeleteV1MeDiaryByEntryIdErrors,
+    ThrowOnError
+  >({
+    security: [
+      {
+        in: "cookie",
+        name: "better-auth.session_token",
+        type: "apiKey",
+      },
+    ],
+    url: "/v1/me/diary/{entryId}",
+    ...options,
   });
 
 /**
