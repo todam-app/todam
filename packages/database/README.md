@@ -1,5 +1,10 @@
 # Base de données Todam
 
-Emplacement réservé au futur schéma Drizzle, aux migrations et aux seeds.
+Schéma PostgreSQL/PostGIS, tables Better Auth et migrations Drizzle de Todam.
+
+```bash
+pnpm dev:db
+pnpm db:migrate
+```
 
 Licence : AGPL-3.0-only.

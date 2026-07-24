@@ -1,9 +1,4 @@
-import {
-  existsSync,
-  readFileSync,
-  readdirSync,
-  statSync,
-} from "node:fs";
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { extname, join, relative, sep } from "node:path";
 
 const requiredPaths = [
@@ -19,6 +14,11 @@ const requiredPaths = [
   "AGENTS.md",
   "docs/FICHE_PRODUIT.md",
   "docs/ARCHITECTURE_TECHNIQUE.md",
+  "docs/MVP_VALIDATION.md",
+  "docker-compose.yml",
+  ".env.example",
+  "data/README.md",
+  "data/fixtures/theatre-des-muses.sample.json",
   "apps/todam/package.json",
   "apps/api/package.json",
   "apps/jobs/package.json",
@@ -32,11 +32,7 @@ const errors = requiredPaths
   .filter((path) => !existsSync(path))
   .map((path) => `Chemin requis absent : ${path}`);
 
-const apacheRoots = [
-  "apps/todam",
-  "packages/contracts",
-  "packages/design-system",
-];
+const apacheRoots = ["apps/todam", "packages/contracts", "packages/design-system"];
 const sourceExtensions = new Set([".js", ".jsx", ".mjs", ".ts", ".tsx"]);
 const forbiddenImports = [
   "@todam/api",
@@ -53,15 +49,21 @@ function walk(directory) {
   if (!existsSync(directory)) return [];
 
   return readdirSync(directory).flatMap((entry) => {
+    if (
+      entry === "node_modules" ||
+      entry === ".git" ||
+      entry === "dist" ||
+      entry === ".expo"
+    ) {
+      return [];
+    }
     const path = join(directory, entry);
     return statSync(path).isDirectory() ? walk(path) : [path];
   });
 }
 
 for (const root of apacheRoots) {
-  for (const file of walk(root).filter((path) =>
-    sourceExtensions.has(extname(path)),
-  )) {
+  for (const file of walk(root).filter((path) => sourceExtensions.has(extname(path)))) {
     const source = readFileSync(file, "utf8");
     for (const forbidden of forbiddenImports) {
       if (source.includes(forbidden)) {
@@ -74,12 +76,7 @@ for (const root of apacheRoots) {
   }
 }
 
-for (const markdown of walk(".").filter(
-  (path) =>
-    extname(path) === ".md" &&
-    !path.includes(`${sep}.git${sep}`) &&
-    !path.includes(`${sep}node_modules${sep}`),
-)) {
+for (const markdown of walk(".").filter((path) => extname(path) === ".md")) {
   const content = readFileSync(markdown, "utf8");
   if (!content.startsWith("# ")) {
     errors.push(`${relative(".", markdown)} doit commencer par un titre H1.`);
@@ -94,6 +91,4 @@ if (errors.length > 0) {
   process.exit(1);
 }
 
-console.log(
-  "Dépôt : structure, Markdown UTF-8 et frontière Apache/AGPL cohérents.",
-);
+console.log("Dépôt : structure, Markdown UTF-8 et frontière Apache/AGPL cohérents.");

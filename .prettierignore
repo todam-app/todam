@@ -1,0 +1,22 @@
+.expo
+coverage
+dist
+node_modules
+packages/contracts/src/generated
+pnpm-lock.yaml
+
+# Documents antérieurs au sprint 0, conservés verbatim
+.github/ISSUE_TEMPLATE/cultural-data.yml
+.markdownlint-cli2.jsonc
+AGENTS.md
+CODE_OF_CONDUCT.md
+CONTRIBUTING.md
+docs/ARCHITECTURE_TECHNIQUE.md
+docs/FICHE_PRODUIT.md
+GOVERNANCE.md
+LICENSE.md
+packages/contracts/README.md
+scripts/check-dco.mjs
+scripts/check-licenses.mjs
+SECURITY.md
+TRADEMARKS.md
