@@ -42,13 +42,12 @@ const placeholderValues: Record<string, string> = {
   "{{MEDIATOR_URL}}":
     process.env.EXPO_PUBLIC_MEDIATOR_URL ??
     "[site du médiateur à configurer avant publication]",
-  "{{PRIMARY_HOST_NAME}}":
-    process.env.EXPO_PUBLIC_PRIMARY_HOST_NAME ?? "Render Services, Inc.",
+  "{{PRIMARY_HOST_NAME}}": process.env.EXPO_PUBLIC_PRIMARY_HOST_NAME ?? "OVH SAS",
   "{{PRIMARY_HOST_ADDRESS}}":
     process.env.EXPO_PUBLIC_PRIMARY_HOST_ADDRESS ??
-    "[adresse contractuelle Render à vérifier avant publication]",
+    "2 rue Kellermann, 59100 Roubaix, France",
   "{{PRIMARY_HOST_URL}}":
-    process.env.EXPO_PUBLIC_PRIMARY_HOST_URL ?? "https://render.com",
+    process.env.EXPO_PUBLIC_PRIMARY_HOST_URL ?? "https://www.ovhcloud.com",
   "{{OBJECT_HOST_NAME}}":
     process.env.EXPO_PUBLIC_OBJECT_HOST_NAME ?? "Cloudflare, Inc.",
   "{{OBJECT_HOST_ADDRESS}}":

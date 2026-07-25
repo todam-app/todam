@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Button, SectionTitle, TextField } from "@todam/design-system";
 import { useState } from "react";
-import { ScrollView, Text, View } from "react-native";
+import { Platform, ScrollView, Text, View } from "react-native";
 
 import { AsyncState } from "../../components/AsyncState";
 import { LegalFooter } from "../../components/LegalFooter";
@@ -33,7 +33,9 @@ export default function SearchScreen() {
       contentInsetAdjustmentBehavior="automatic"
       keyboardShouldPersistTaps="handled"
     >
-      <View className="mx-auto w-full max-w-content flex-1 gap-8 px-5 py-8 md:px-8 md:py-12">
+      <View
+        className={`${Platform.OS === "web" ? "todam-page-before-footer " : ""}mx-auto w-full max-w-content flex-1 gap-8 px-5 py-8 md:px-8 md:py-12`}
+      >
         <SectionTitle eyebrow="Catalogue">Rechercher</SectionTitle>
 
         <View className="max-w-2xl gap-3">

@@ -1,4 +1,16 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
+
+async function expectFooterBelowViewport(page: Page) {
+  const footer = page.getByTestId("site-footer");
+  await expect(footer).toHaveCount(1);
+
+  const [footerTop, viewportHeight] = await Promise.all([
+    footer.evaluate((element) => element.getBoundingClientRect().top),
+    page.evaluate(() => window.innerHeight),
+  ]);
+
+  expect(footerTop).toBeGreaterThanOrEqual(viewportHeight - 1);
+}
 
 test("l'accueil présente Todam simplement et ouvre l'inscription", async ({ page }) => {
   await page.goto("/");
@@ -14,6 +26,7 @@ test("l'accueil présente Todam simplement et ouvre l'inscription", async ({ pag
   await expect(
     page.getByText("Mon journal de spectacles. Bientôt sur iOS et Android."),
   ).toBeVisible();
+  await expectFooterBelowViewport(page);
 
   await page.getByRole("button", { name: /Commencez.*gratuit/ }).press("Enter");
   await expect(page.getByRole("heading", { name: "Créer ton journal" })).toBeVisible();
@@ -62,12 +75,11 @@ test("l'inscription présente l'âge et les documents sans checkbox", async ({
     }),
   ).toHaveCount(0);
   await expect(legalPage.getByText(/Date d'effet : 25 juillet 2026/)).toBeVisible();
-  await expect(
-    legalPage.getByText("Votre journal de spectacles, gratuit et sans publicité."),
-  ).toBeVisible();
+  await expect(legalPage.getByText("Votre journal de spectacles.")).toBeVisible();
+  await expectFooterBelowViewport(legalPage);
   await expect(
     legalPage.getByRole("link", {
-      name: "Signalement : signalement@todam.fr",
+      name: "Contact : contact@todam.fr",
     }),
   ).toBeVisible();
   await expect(legalPage.getByText("`signalement@todam.fr`")).toHaveCount(0);
@@ -82,6 +94,21 @@ test("l'inscription présente l'âge et les documents sans checkbox", async ({
   await expect(legalPage).toHaveURL("/");
   await expect(page.getByLabel("Nom d'utilisateur")).toHaveValue("spectatrice-test");
   await expect(page.getByLabel("E-mail")).toHaveValue("spectatrice@example.test");
+});
+
+test("le footer commence sous le premier écran des pages courtes", async ({ page }) => {
+  const pages = [
+    { path: "/search", heading: "Rechercher" },
+    { path: "/profile", heading: "Ton journal t’attend" },
+  ];
+
+  for (const item of pages) {
+    await page.goto(item.path);
+    await expect(
+      page.getByRole("heading", { exact: true, name: item.heading }),
+    ).toBeVisible();
+    await expectFooterBelowViewport(page);
+  }
 });
 
 test("la suppression reste demandable sans l'application", async ({ page }) => {

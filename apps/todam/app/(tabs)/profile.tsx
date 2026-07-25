@@ -67,7 +67,9 @@ export default function ProfileScreen() {
   if (!session.data) {
     return (
       <ScrollView contentContainerClassName="flex-grow">
-        <View className="mx-auto w-full max-w-xl flex-1 items-center justify-center gap-5 px-5 py-12">
+        <View
+          className={`${Platform.OS === "web" ? "todam-page-before-footer " : ""}mx-auto w-full max-w-xl flex-1 items-center justify-center gap-5 px-5 py-12`}
+        >
           <Text
             accessibilityRole="header"
             className="text-center font-serif text-4xl font-black text-ink"
@@ -112,7 +114,9 @@ export default function ProfileScreen() {
       contentContainerClassName="flex-grow"
       contentInsetAdjustmentBehavior="automatic"
     >
-      <View className="mx-auto w-full max-w-content flex-1 gap-10 px-5 py-8 md:px-8 md:py-12">
+      <View
+        className={`${Platform.OS === "web" ? "todam-page-before-footer " : ""}mx-auto w-full max-w-content flex-1 gap-10 px-5 py-8 md:px-8 md:py-12`}
+      >
         <AsyncState
           empty={!dashboard.data}
           emptyMessage="Ton profil est prêt, mais son contenu est encore vide."

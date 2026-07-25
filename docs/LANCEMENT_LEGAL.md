@@ -34,13 +34,22 @@ validés par un avocat.
 - [ ] adhérer à un médiateur de la consommation et renseigner ses coordonnées ;
 - [ ] renseigner l'identité, le SIREN, l'adresse et le téléphone dans les secrets de
       déploiement ;
-- [ ] vérifier les identités et adresses contractuelles exactes de Render et Cloudflare
-      ;
+- [ ] vérifier que le contrat est conclu avec OVH SAS, 2 rue Kellermann, 59100 Roubaix,
+      France, et confirmer l'entité contractuelle Cloudflare ;
 - [ ] signer ou accepter les accords de sous-traitance et garanties de transfert ;
 - [ ] configurer Brevo et tester vérification, réinitialisation, reçu juridique et
       suppression ;
-- [ ] configurer Render en région européenne, les sauvegardes et un exercice de
-      restauration ;
+- [ ] commander un VPS-2 OVHcloud dans un datacenter français, activer la 2FA, les clés
+      SSH et le pare-feu réseau ;
+- [ ] installer Coolify sur le VPS sans y exécuter les builds ; configurer GHCR et les
+      webhooks produits par GitHub Actions ;
+- [ ] créer PostgreSQL avec l'image `postgis/postgis:17-3.5`, sans port public, puis
+      exécuter et vérifier les migrations ;
+- [ ] configurer les sauvegardes PostgreSQL et Coolify vers R2 avec plusieurs jours de
+      rétention, puis réaliser un exercice de restauration ;
+- [ ] configurer le nettoyage Docker, les limites des conteneurs et les alertes à 70 %
+      de CPU, RAM et disque ;
+- [ ] surveiller `/health/live` et `/health/ready` depuis un service extérieur au VPS ;
 - [ ] configurer Sentry en région UE après audit de filtrage des données personnelles ;
 - [ ] créer et vérifier le compte Google Play professionnel de l'entreprise individuelle
       ;
@@ -73,11 +82,17 @@ Les PDF contenant les coordonnées réelles sont ignorés par Git. L'archive pub
 ## Exploitation
 
 - Planifier `pnpm accounts:purge-unverified` au moins une fois par jour.
+- Construire les images de production dans GitHub Actions ; Coolify télécharge les
+  images GHCR déjà construites et ne compile jamais le monorepo sur le VPS.
+- Conserver au moins 15 Go de disque libres et nettoyer les anciennes images Docker.
+- Ne pas exposer PostgreSQL sur Internet ; seuls les ports SSH, HTTP et HTTPS
+  nécessaires sont ouverts par le pare-feu OVHcloud.
 - La limitation locale des tentatives convient à une instance API. Avant de multiplier
   les instances, la remplacer par un compteur partagé.
 - Conserver les journaux techniques au plus 6 mois et filtrer e-mails, jetons, cookies,
   mots de passe et corps de requêtes.
-- Tester trimestriellement l'export, la suppression et une restauration.
+- Tester trimestriellement l'export, la suppression, la restauration PostgreSQL depuis
+  R2 et la restauration de la configuration Coolify.
 - À 1 000 comptes, réévaluer la domiciliation, la RC Pro et la couverture cyber.
 - Préparer la SASU à 7 500 comptes et terminer le transfert avant 10 000 comptes, ou
   plus tôt en cas de monétisation, associé, investisseur ou incident.

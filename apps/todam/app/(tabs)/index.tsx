@@ -12,7 +12,9 @@ export default function HomeScreen() {
       contentContainerClassName="flex-grow"
       contentInsetAdjustmentBehavior="automatic"
     >
-      <View className="mx-auto w-full max-w-content flex-1 items-center justify-center px-5 py-10 md:px-8 md:py-16">
+      <View
+        className={`${Platform.OS === "web" ? "todam-page-before-footer " : ""}mx-auto w-full max-w-content flex-1 items-center justify-center px-5 py-10 md:px-8 md:py-16`}
+      >
         <View className="w-full max-w-5xl min-w-0 items-center gap-6">
           <Text
             accessibilityRole="header"

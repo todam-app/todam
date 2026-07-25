@@ -15,6 +15,7 @@ profil.
 
 - [Fiche produit](docs/FICHE_PRODUIT.md)
 - [Architecture technique](docs/ARCHITECTURE_TECHNIQUE.md)
+- [Déploiement OVHcloud avec Coolify](docs/DEPLOIEMENT_OVH_COOLIFY.md)
 - [Préparation du lancement légal](docs/LANCEMENT_LEGAL.md)
 - [Registre des traitements](docs/REGISTRE_TRAITEMENTS.md)
 - [Préparation Google Play Data Safety](docs/GOOGLE_PLAY_DATA_SAFETY.md)

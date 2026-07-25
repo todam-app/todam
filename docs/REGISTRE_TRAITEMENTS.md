@@ -10,7 +10,7 @@ complété avec l'identité réelle hors Git avant l'ouverture.
   juridiques, canal, horodatages et sessions.
 - Finalité : créer, sécuriser et administrer le compte.
 - Base : exécution du contrat ; intérêt légitime pour la sécurité.
-- Destinataires : Todam, Render, Brevo et Sentry selon configuration.
+- Destinataires : Todam, OVHcloud, Brevo et Sentry selon configuration.
 - Durée : vie du compte ; 7 jours pour un compte jamais vérifié ; sessions selon leur
   expiration ; journaux techniques 6 mois.
 - Mesures : HTTPS, hachage Better Auth, cookies sécurisés, stockage sécurisé Android,
@@ -21,7 +21,7 @@ complété avec l'identité réelle hors Git avant l'ouverture.
 - Données : spectacles vus, représentations, dates, notes et liste « À voir ».
 - Finalité : fournir le journal culturel personnel et son export.
 - Base : exécution du contrat.
-- Destinataires : Todam et Render.
+- Destinataires : Todam et OVHcloud.
 - Durée : vie du compte, puis suppression active sous 30 jours et sauvegardes sous 90
   jours.
 - Mesures : contrôle par identifiant utilisateur et tests d'isolation.
@@ -40,7 +40,7 @@ complété avec l'identité réelle hors Git avant l'ouverture.
 - Données : adresse IP, agent utilisateur, route, date et diagnostic filtré.
 - Finalité : prévenir les abus, diagnostiquer et traiter les incidents.
 - Base : intérêt légitime.
-- Destinataires : Todam, Render et Sentry en région UE.
+- Destinataires : Todam, OVHcloud et Sentry en région UE.
 - Durée : 6 mois maximum, sauf incident documenté.
 
 ## Modération V2

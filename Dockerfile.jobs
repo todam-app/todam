@@ -1,0 +1,24 @@
+# syntax=docker/dockerfile:1.7
+
+FROM node:24-bookworm-slim AS build
+
+WORKDIR /workspace
+RUN corepack enable
+
+COPY . .
+RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store \
+    pnpm install --frozen-lockfile
+RUN pnpm --filter @todam/jobs... build
+RUN pnpm --filter @todam/jobs deploy --prod --legacy /output
+
+FROM node:24-bookworm-slim AS runtime
+
+ENV NODE_ENV=production
+
+WORKDIR /app
+COPY --from=build --chown=node:node /output ./
+
+USER node
+
+# Coolify exécute les commandes planifiées dans ce conteneur déjà démarré.
+CMD ["node", "-e", "setInterval(() => {}, 2147483647)"]

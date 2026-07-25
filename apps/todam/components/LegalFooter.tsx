@@ -32,10 +32,10 @@ function FooterInternalLink({
   );
 }
 
-function FooterEmail({ address, label }: { address: string; label: string }) {
+function FooterEmail({ address }: { address: string }) {
   return (
     <Pressable
-      accessibilityLabel={`${label} : ${address}`}
+      accessibilityLabel={`Contact : ${address}`}
       accessibilityRole="link"
       className="min-h-10 justify-center"
       onPress={() => void Linking.openURL(`mailto:${address}`)}
@@ -49,7 +49,10 @@ export function LegalFooter({ alwaysVisible = false }: { alwaysVisible?: boolean
   if (!alwaysVisible && Platform.OS !== "web") return null;
 
   return (
-    <View className="border-t border-line bg-paper px-5 py-10 md:px-8">
+    <View
+      className="border-t border-line bg-paper px-5 py-10 md:px-8"
+      testID="site-footer"
+    >
       <View className="mx-auto w-full max-w-content gap-10">
         <View className="flex-row flex-wrap justify-between gap-10">
           <View className="min-w-56 max-w-xs gap-3">
@@ -69,7 +72,7 @@ export function LegalFooter({ alwaysVisible = false }: { alwaysVisible?: boolean
               </Pressable>
             </Link>
             <Text className="text-sm leading-6 text-muted">
-              Votre journal de spectacles, gratuit et sans publicité.
+              Votre journal de spectacles.
             </Text>
           </View>
 
@@ -89,9 +92,7 @@ export function LegalFooter({ alwaysVisible = false }: { alwaysVisible?: boolean
 
           <View className="min-w-52 gap-1">
             <Text className="mb-2 font-semibold text-ink">Contact</Text>
-            <FooterEmail address="contact@todam.fr" label="Questions générales" />
-            <FooterEmail address="donnees@todam.fr" label="Données personnelles" />
-            <FooterEmail address="signalement@todam.fr" label="Signalement" />
+            <FooterEmail address="contact@todam.fr" />
           </View>
         </View>
 

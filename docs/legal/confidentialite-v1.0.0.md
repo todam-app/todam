@@ -38,11 +38,11 @@ lecture n'est pas enregistrée comme un consentement RGPD.
 
 ## 4. Destinataires et sous-traitants
 
-L'accès est limité à Todam et aux prestataires nécessaires : Render pour l'API,
-l'application Web, PostgreSQL et les sauvegardes en région européenne ; Cloudflare R2
-pour les objets ; Brevo pour les e-mails transactionnels ; Sentry configuré en région
-européenne avec filtrage des données personnelles ; et Google Play pour la distribution
-Android.
+L'accès est limité à Todam et aux prestataires nécessaires : OVHcloud pour le serveur
+virtuel situé en France qui exécute l'application Web, l'API et PostgreSQL ; Cloudflare
+R2 pour les objets et les sauvegardes logiques externalisées ; Brevo pour les e-mails
+transactionnels ; Sentry configuré en région européenne avec filtrage des données
+personnelles ; et Google Play pour la distribution Android.
 
 Les données ne sont ni vendues, ni utilisées pour de la publicité ciblée. Une liste à
 jour des sous-traitants et de leurs fonctions est tenue par Todam.

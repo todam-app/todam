@@ -1,6 +1,13 @@
 import Head from "expo-router/head";
 import type { ReactNode } from "react";
-import { Linking, ScrollView, Text, View, type ViewProps } from "react-native";
+import {
+  Linking,
+  Platform,
+  ScrollView,
+  Text,
+  View,
+  type ViewProps,
+} from "react-native";
 
 import {
   legalDocumentMarkdown,
@@ -90,7 +97,9 @@ export function LegalDocumentScreen({
         contentContainerClassName="flex-grow"
         contentInsetAdjustmentBehavior="automatic"
       >
-        <View className="mx-auto w-full max-w-3xl gap-5 px-5 py-10 md:px-8 md:py-14">
+        <View
+          className={`${Platform.OS === "web" ? "todam-page-before-footer " : ""}mx-auto w-full max-w-3xl gap-5 px-5 py-10 md:px-8 md:py-14`}
+        >
           <View className="gap-4" {...viewProps}>
             {blocks.map((block, index) => {
               if (block.kind === "title") {
