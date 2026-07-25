@@ -27,11 +27,6 @@ L'application Web, l'API et la base PostgreSQL sont hébergées par {{PRIMARY_HO
 Les objets peuvent être hébergés par {{OBJECT_HOST_NAME}}, {{OBJECT_HOST_ADDRESS}},
 {{OBJECT_HOST_URL}}.
 
-## Médiation de la consommation
-
-Après réclamation écrite préalable auprès de Todam, le consommateur peut saisir
-gratuitement {{MEDIATOR_NAME}}, {{MEDIATOR_ADDRESS}}, {{MEDIATOR_URL}}.
-
 ## Contact
 
 - Questions générales : [contact@todam.fr](mailto:contact@todam.fr)

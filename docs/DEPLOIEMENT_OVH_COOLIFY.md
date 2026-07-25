@@ -59,8 +59,7 @@ Le workflow manuel **Publier les images de production** :
 
 Créer un environnement GitHub `production`. Y ajouter :
 
-- les secrets d'identité `LEGAL_OPERATOR_*`, de médiation `MEDIATOR_*` et
-  `OBJECT_HOST_ADDRESS` ;
+- les secrets d'identité `LEGAL_OPERATOR_*` et `OBJECT_HOST_ADDRESS` ;
 - `BREVO_API_KEY` et `EMAIL_FROM`, requis par le contrôle juridique ;
 - `COOLIFY_TOKEN`, limité au déploiement ;
 - `COOLIFY_WEB_WEBHOOK`, `COOLIFY_API_WEBHOOK` et `COOLIFY_JOBS_WEBHOOK`.

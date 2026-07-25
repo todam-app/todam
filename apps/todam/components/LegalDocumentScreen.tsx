@@ -91,7 +91,7 @@ export function LegalDocumentScreen({
     <>
       <Head>
         <title>{title}</title>
-        <meta content="noindex,nofollow" name="robots" />
+        <meta content="noindex,nofollow,noarchive,nosnippet" name="robots" />
       </Head>
       <ScrollView
         contentContainerClassName="flex-grow"

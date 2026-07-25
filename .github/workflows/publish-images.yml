@@ -114,9 +114,6 @@ jobs:
       LEGAL_APE: ${{ secrets.LEGAL_APE }}
       LEGAL_ADDRESS: ${{ secrets.LEGAL_ADDRESS }}
       LEGAL_PHONE: ${{ secrets.LEGAL_PHONE }}
-      MEDIATOR_NAME: ${{ secrets.MEDIATOR_NAME }}
-      MEDIATOR_ADDRESS: ${{ secrets.MEDIATOR_ADDRESS }}
-      MEDIATOR_URL: ${{ secrets.MEDIATOR_URL }}
       PRIMARY_HOST_NAME: OVH SAS
       PRIMARY_HOST_ADDRESS: 2 rue Kellermann, 59100 Roubaix, France
       PRIMARY_HOST_URL: https://www.ovhcloud.com
@@ -136,9 +133,6 @@ jobs:
       EXPO_PUBLIC_LEGAL_APE: ${{ secrets.LEGAL_APE }}
       EXPO_PUBLIC_LEGAL_ADDRESS: ${{ secrets.LEGAL_ADDRESS }}
       EXPO_PUBLIC_LEGAL_PHONE: ${{ secrets.LEGAL_PHONE }}
-      EXPO_PUBLIC_MEDIATOR_NAME: ${{ secrets.MEDIATOR_NAME }}
-      EXPO_PUBLIC_MEDIATOR_ADDRESS: ${{ secrets.MEDIATOR_ADDRESS }}
-      EXPO_PUBLIC_MEDIATOR_URL: ${{ secrets.MEDIATOR_URL }}
       EXPO_PUBLIC_PRIMARY_HOST_NAME: OVH SAS
       EXPO_PUBLIC_PRIMARY_HOST_ADDRESS: 2 rue Kellermann, 59100 Roubaix, France
       EXPO_PUBLIC_PRIMARY_HOST_URL: https://www.ovhcloud.com
@@ -203,9 +197,6 @@ jobs:
             EXPO_PUBLIC_LEGAL_APE=${{ secrets.LEGAL_APE }}
             EXPO_PUBLIC_LEGAL_ADDRESS=${{ secrets.LEGAL_ADDRESS }}
             EXPO_PUBLIC_LEGAL_PHONE=${{ secrets.LEGAL_PHONE }}
-            EXPO_PUBLIC_MEDIATOR_NAME=${{ secrets.MEDIATOR_NAME }}
-            EXPO_PUBLIC_MEDIATOR_ADDRESS=${{ secrets.MEDIATOR_ADDRESS }}
-            EXPO_PUBLIC_MEDIATOR_URL=${{ secrets.MEDIATOR_URL }}
             EXPO_PUBLIC_PRIMARY_HOST_NAME=OVH SAS
             EXPO_PUBLIC_PRIMARY_HOST_ADDRESS=2 rue Kellermann, 59100 Roubaix, France
             EXPO_PUBLIC_PRIMARY_HOST_URL=https://www.ovhcloud.com

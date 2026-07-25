@@ -15,6 +15,7 @@ const requiredPaths = [
   "docs/FICHE_PRODUIT.md",
   "docs/ARCHITECTURE_TECHNIQUE.md",
   "docs/MVP_VALIDATION.md",
+  "deploy/nginx.conf",
   "docker-compose.yml",
   ".env.example",
   "data/README.md",
@@ -84,6 +85,16 @@ for (const markdown of walk(".").filter((path) => extname(path) === ".md")) {
   if (content.includes("\uFFFD")) {
     errors.push(`${relative(".", markdown)} contient un caractère UTF-8 invalide.`);
   }
+}
+
+const nginxConfig = readFileSync("deploy/nginx.conf", "utf8");
+const legalRobotsHeader =
+  'add_header X-Robots-Tag "noindex, nofollow, noarchive, nosnippet" always;';
+const legalRobotsHeaderCount = nginxConfig.split(legalRobotsHeader).length - 1;
+if (legalRobotsHeaderCount !== 2) {
+  errors.push(
+    "deploy/nginx.conf doit protéger les pages juridiques et leurs PDF avec X-Robots-Tag.",
+  );
 }
 
 if (errors.length > 0) {

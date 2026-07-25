@@ -33,15 +33,6 @@ const placeholderValues: Record<string, string> = {
     process.env.EXPO_PUBLIC_LEGAL_ADDRESS ?? "[adresse à configurer avant publication]",
   "{{LEGAL_PHONE}}":
     process.env.EXPO_PUBLIC_LEGAL_PHONE ?? "[téléphone à configurer avant publication]",
-  "{{MEDIATOR_NAME}}":
-    process.env.EXPO_PUBLIC_MEDIATOR_NAME ??
-    "[médiateur à configurer avant publication]",
-  "{{MEDIATOR_ADDRESS}}":
-    process.env.EXPO_PUBLIC_MEDIATOR_ADDRESS ??
-    "[adresse du médiateur à configurer avant publication]",
-  "{{MEDIATOR_URL}}":
-    process.env.EXPO_PUBLIC_MEDIATOR_URL ??
-    "[site du médiateur à configurer avant publication]",
   "{{PRIMARY_HOST_NAME}}": process.env.EXPO_PUBLIC_PRIMARY_HOST_NAME ?? "OVH SAS",
   "{{PRIMARY_HOST_ADDRESS}}":
     process.env.EXPO_PUBLIC_PRIMARY_HOST_ADDRESS ??

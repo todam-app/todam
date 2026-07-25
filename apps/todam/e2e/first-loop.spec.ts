@@ -83,9 +83,10 @@ test("l'inscription présente l'âge et les documents sans checkbox", async ({
     }),
   ).toBeVisible();
   await expect(legalPage.getByText("`signalement@todam.fr`")).toHaveCount(0);
+  await expect(legalPage.getByText(/médiateur|médiation/i)).toHaveCount(0);
   await expect(legalPage.locator('meta[name="robots"]')).toHaveAttribute(
     "content",
-    "noindex,nofollow",
+    "noindex,nofollow,noarchive,nosnippet",
   );
   await legalPage
     .getByRole("link", { name: "Todam, accueil" })
@@ -155,5 +156,8 @@ test("les pages publiques Web utilisent uniquement l'en-tête Todam", async ({
     await expect(
       page.getByRole("heading", { exact: true, name: item.stackTitle }),
     ).toHaveCount(0);
+    if (item.path === "/mentions-legales") {
+      await expect(page.getByText(/médiateur|médiation/i)).toHaveCount(0);
+    }
   }
 });

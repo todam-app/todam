@@ -21,7 +21,8 @@ validés par un avocat.
 - purge des comptes jamais vérifiés après 7 jours ;
 - limitation des tentatives sensibles par instance API ;
 - pages Web et Android issues des mêmes sources Markdown ;
-- archives PDF générées depuis ces sources et pages `noindex`.
+- archives PDF générées depuis ces sources, pages juridiques `noindex` et en-têtes
+  `X-Robots-Tag` sur les pages et PDF juridiques ;
 
 ## Actions externes bloquant l'ouverture publique
 
@@ -31,7 +32,6 @@ validés par un avocat.
 - [ ] ouvrir le compte ou sous-compte bancaire dédié et le suivi analytique ;
 - [ ] créer `contact@`, `donnees@`, `signalement@` et `securite@todam.fr` avec SPF, DKIM
       et DMARC ;
-- [ ] adhérer à un médiateur de la consommation et renseigner ses coordonnées ;
 - [ ] renseigner l'identité, le SIREN, l'adresse et le téléphone dans les secrets de
       déploiement ;
 - [ ] vérifier que le contrat est conclu avec OVH SAS, 2 rue Kellermann, 59100 Roubaix,
@@ -56,8 +56,6 @@ validés par un avocat.
 - [ ] compléter la fiche Data Safety après audit du binaire Android final ;
 - [ ] fournir `https://todam.fr/suppression-compte` dans Play Console ;
 - [ ] générer les PDF définitifs avec les vraies coordonnées hors Git ;
-- [ ] appliquer `X-Robots-Tag: noindex, nofollow` aux PDF `/legal/*` chez l'hébergeur
-      statique ;
 - [ ] exécuter les contrôles techniques et juridiques de la section suivante.
 
 ## Publication des documents
@@ -107,3 +105,9 @@ Paiement, publicité, nouvelle licence de contenu, nouvelle utilisation des donn
 réduction des droits ou changement important de responsabilité imposent une nouvelle
 version, une information active et une nouvelle preuve d'acceptation. Export et
 suppression restent accessibles en cas de refus.
+
+Avant toute publicité, fonctionnalité payante, commission, billetterie ou autre
+monétisation, réévaluer l'obligation de médiation de la consommation. Si elle devient
+applicable, choisir un médiateur, adhérer à son dispositif, publier ses coordonnées dans
+les CGU et les mentions légales, rétablir les contrôles de publication correspondants et
+demander une nouvelle acceptation des CGU avant l'activation.

@@ -105,12 +105,11 @@ responsabilité ou autre modification contractuelle substantielle. L'activation 
 fonctions sociales décrites à l'article 3 ne nécessite pas de nouvelle acceptation si la
 présente version demeure strictement inchangée.
 
-## 10. Droit applicable, réclamation et médiation
+## 10. Droit applicable et réclamation
 
 Le droit français s'applique, sans priver le consommateur des protections impératives de
 son pays de résidence. Toute réclamation peut être adressée à
 [contact@todam.fr](mailto:contact@todam.fr).
 
-Après une réclamation écrite préalable restée sans solution, le consommateur peut saisir
-gratuitement {{MEDIATOR_NAME}}, {{MEDIATOR_ADDRESS}}, {{MEDIATOR_URL}}. Les juridictions
-compétentes sont celles désignées par les règles impératives applicables.
+Les juridictions compétentes sont celles désignées par les règles impératives
+applicables.
