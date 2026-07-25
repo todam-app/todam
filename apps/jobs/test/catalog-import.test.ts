@@ -19,6 +19,7 @@ describe("catalogue normalisé", () => {
 
     expect(report.counts.productions).toBe(2);
     expect(report.counts.performances).toBe(3);
+    expect(report.counts.media).toBe(1);
     expect(getCatalogHash(catalog)).toHaveLength(64);
   });
 
@@ -30,5 +31,18 @@ describe("catalogue normalisé", () => {
     value.performances[0]!.productionExternalKey = "production.inconnue";
 
     expect(() => CatalogImportSchema.parse(value)).toThrow("Production inconnue");
+  });
+
+  it("refuse de copier une affiche sans droit de stockage", async () => {
+    const raw = await readFile(fixturePath, "utf8");
+    const value = JSON.parse(raw) as {
+      media: { rightsStatus: string; storagePolicy: string }[];
+    };
+    value.media[0]!.rightsStatus = "hotlink_only";
+    value.media[0]!.storagePolicy = "mirror";
+
+    expect(() => CatalogImportSchema.parse(value)).toThrow(
+      "La copie d'une affiche exige",
+    );
   });
 });

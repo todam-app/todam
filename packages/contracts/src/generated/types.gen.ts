@@ -553,6 +553,23 @@ export type GetV1SearchResponses = {
       primaryCredit: string | null;
       venueNames: Array<string>;
       nextPerformance: string | null;
+      poster: {
+        id: string;
+        url: string;
+        kind: "poster" | "key_visual" | "photo" | "logo";
+        alt: string | null;
+        credit: string;
+        copyrightHolder: string | null;
+        license: string | null;
+        rightsStatus:
+          | "permission_granted"
+          | "open_license"
+          | "contractual_display"
+          | "hotlink_only";
+        sourceUrl: string;
+        width: number | null;
+        height: number | null;
+      } | null;
     }>;
     nextCursor: string | null;
   };
@@ -658,6 +675,21 @@ export type GetV1ProductionsBySlugResponses = {
     } | null;
     durationMinutes: number | null;
     language: string | null;
+    officialUrl: string | null;
+    posters: Array<{
+      id: string;
+      url: string;
+      kind: "poster" | "key_visual" | "photo" | "logo";
+      alt: string | null;
+      credit: string;
+      copyrightHolder: string | null;
+      license: string | null;
+      rightsStatus:
+        "permission_granted" | "open_license" | "contractual_display" | "hotlink_only";
+      sourceUrl: string;
+      width: number | null;
+      height: number | null;
+    }>;
     credits: Array<{
       artistId: string;
       artistName: string;
@@ -676,7 +708,9 @@ export type GetV1ProductionsBySlugResponses = {
     performances: Array<{
       id: string;
       startsAt: string;
+      endsAt: string | null;
       status: "scheduled" | "completed" | "cancelled" | "postponed";
+      officialUrl: string | null;
       venue: {
         id: string;
         slug: string;
@@ -881,7 +915,9 @@ export type GetV1MeProductionsByIdDiaryResponses = {
       performance: {
         id: string;
         startsAt: string;
+        endsAt: string | null;
         status: "scheduled" | "completed" | "cancelled" | "postponed";
+        officialUrl: string | null;
         venue: {
           id: string;
           slug: string;
@@ -1002,6 +1038,23 @@ export type GetV1MeDashboardResponses = {
         primaryCredit: string | null;
         venueNames: Array<string>;
         nextPerformance: string | null;
+        poster: {
+          id: string;
+          url: string;
+          kind: "poster" | "key_visual" | "photo" | "logo";
+          alt: string | null;
+          credit: string;
+          copyrightHolder: string | null;
+          license: string | null;
+          rightsStatus:
+            | "permission_granted"
+            | "open_license"
+            | "contractual_display"
+            | "hotlink_only";
+          sourceUrl: string;
+          width: number | null;
+          height: number | null;
+        } | null;
       };
       performanceId: string | null;
       attendedOn: string | null;
@@ -1021,6 +1074,23 @@ export type GetV1MeDashboardResponses = {
       primaryCredit: string | null;
       venueNames: Array<string>;
       nextPerformance: string | null;
+      poster: {
+        id: string;
+        url: string;
+        kind: "poster" | "key_visual" | "photo" | "logo";
+        alt: string | null;
+        credit: string;
+        copyrightHolder: string | null;
+        license: string | null;
+        rightsStatus:
+          | "permission_granted"
+          | "open_license"
+          | "contractual_display"
+          | "hotlink_only";
+        sourceUrl: string;
+        width: number | null;
+        height: number | null;
+      } | null;
     }>;
   };
 };

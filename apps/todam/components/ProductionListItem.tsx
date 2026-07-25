@@ -1,7 +1,8 @@
 import type { ProductionCard } from "@todam/contracts";
-import { PosterPlaceholder } from "@todam/design-system";
 import { Link } from "expo-router";
 import { Pressable, Text, View } from "react-native";
+
+import { ProductionPoster } from "./ProductionPoster";
 
 export function ProductionListItem({ production }: { production: ProductionCard }) {
   return (
@@ -12,9 +13,10 @@ export function ProductionListItem({ production }: { production: ProductionCard 
         accessibilityRole="link"
         className="min-h-28 flex-row gap-4 rounded-todam border border-line bg-paper p-3 active:opacity-70"
       >
-        <PosterPlaceholder
+        <ProductionPoster
           compact
           discipline={production.discipline}
+          poster={production.poster}
           title={production.title}
         />
         <View className="min-w-0 flex-1 justify-center gap-1">

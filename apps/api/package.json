@@ -7,6 +7,7 @@
   "type": "module",
   "scripts": {
     "build": "tsup src/index.ts --format esm --dts --clean",
+    "predev": "pnpm --filter @todam/database db:migrate",
     "dev": "tsx watch src/index.ts",
     "lint": "eslint src test",
     "openapi:check": "tsx src/openapi/check.ts",

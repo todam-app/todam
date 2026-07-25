@@ -28,10 +28,32 @@ export type Audience = z.infer<typeof AudienceSchema>;
 
 export const UuidSchema = z.string().uuid();
 
+export const PosterSchema = z.object({
+  id: UuidSchema,
+  url: z.string().url(),
+  kind: z.enum(["poster", "key_visual", "photo", "logo"]),
+  alt: z.string().nullable(),
+  credit: z.string(),
+  copyrightHolder: z.string().nullable(),
+  license: z.string().nullable(),
+  rightsStatus: z.enum([
+    "permission_granted",
+    "open_license",
+    "contractual_display",
+    "hotlink_only",
+  ]),
+  sourceUrl: z.string().url(),
+  width: z.number().int().positive().nullable(),
+  height: z.number().int().positive().nullable(),
+});
+export type Poster = z.infer<typeof PosterSchema>;
+
 export const PerformanceSchema = z.object({
   id: UuidSchema,
   startsAt: z.string().datetime({ offset: true }),
+  endsAt: z.string().datetime({ offset: true }).nullable().default(null),
   status: PerformanceStatusSchema,
+  officialUrl: z.string().url().nullable().default(null),
   venue: z.object({
     id: UuidSchema,
     slug: z.string(),
@@ -52,6 +74,7 @@ export const ProductionCardSchema = z.object({
   primaryCredit: z.string().nullable(),
   venueNames: z.array(z.string()),
   nextPerformance: z.string().datetime({ offset: true }).nullable(),
+  poster: PosterSchema.nullable().default(null),
 });
 export type ProductionCard = z.infer<typeof ProductionCardSchema>;
 
@@ -70,6 +93,8 @@ export const ProductionDetailSchema = z.object({
     .nullable(),
   durationMinutes: z.number().int().positive().nullable(),
   language: z.string().nullable(),
+  officialUrl: z.string().url().nullable().default(null),
+  posters: z.array(PosterSchema).default([]),
   credits: z.array(
     z.object({
       artistId: UuidSchema,

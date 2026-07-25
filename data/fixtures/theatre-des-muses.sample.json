@@ -1,12 +1,16 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "source": {
     "externalKey": "fixture.theatre-des-muses",
     "name": "Fixture synthétique — Théâtre des Muses",
-    "homepageUrl": "https://example.invalid/todam-fixture"
+    "homepageUrl": "https://example.invalid/todam-fixture",
+    "connectorKind": "file",
+    "metadataLicense": "CC0-1.0",
+    "defaultMediaPolicy": "mirror"
   },
   "coverage": {
-    "territory": "monaco",
+    "countryCodes": ["MC"],
+    "inseeTerritoryCodes": [],
     "label": "Fixture synthétique 2025-2026",
     "startsOn": "2025-09-01",
     "endsOn": "2026-06-30",
@@ -111,6 +115,30 @@
       "venueExternalKey": "venue.theatre-des-muses",
       "startsAt": "2026-01-07T15:00:00+01:00",
       "status": "completed"
+    }
+  ],
+  "media": [
+    {
+      "externalKey": "media.les-lumieres.poster",
+      "sourceDocumentKey": "fixture.document",
+      "productionExternalKey": "production.les-lumieres",
+      "performanceExternalKey": null,
+      "kind": "poster",
+      "url": "https://example.invalid/todam-fixture/les-lumieres.jpg",
+      "alt": "Affiche synthétique du spectacle Les Lumières",
+      "credit": "Illustration synthétique Todam",
+      "copyrightHolder": "Todam",
+      "rightsStatus": "open_license",
+      "license": "CC0-1.0",
+      "termsUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "storagePolicy": "mirror",
+      "width": 1200,
+      "height": 1800,
+      "mimeType": "image/jpeg",
+      "validFrom": null,
+      "validUntil": null,
+      "isPrimary": true,
+      "position": 0
     }
   ],
   "exclusions": [

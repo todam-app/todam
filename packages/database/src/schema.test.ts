@@ -4,6 +4,8 @@ import { describe, expect, it } from "vitest";
 import {
   diaryEntries,
   legalAcceptances,
+  mediaAssets,
+  productionMedia,
   performances,
   productions,
   ratings,
@@ -21,6 +23,8 @@ describe("schéma Todam", () => {
       getTableName(ratings),
       getTableName(watchlistEntries),
       getTableName(legalAcceptances),
+      getTableName(mediaAssets),
+      getTableName(productionMedia),
     ]).toEqual([
       "productions",
       "performances",
@@ -29,6 +33,8 @@ describe("schéma Todam", () => {
       "ratings",
       "watchlist_entries",
       "legal_acceptances",
+      "media_assets",
+      "production_media",
     ]);
   });
 });

@@ -1,12 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { ViewerProductionState } from "@todam/contracts";
-import { Button, PosterPlaceholder, SectionTitle } from "@todam/design-system";
+import { Button, SectionTitle } from "@todam/design-system";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
-import { ScrollView, Text, View } from "react-native";
+import { Linking, ScrollView, Text, View } from "react-native";
 
 import { AsyncState } from "../../components/AsyncState";
 import { ProductionActions } from "../../components/ProductionActions";
+import { ProductionPoster } from "../../components/ProductionPoster";
 import { RatingPicker } from "../../components/RatingPicker";
 import { api } from "../../lib/api";
 import { authClient } from "../../lib/auth-client";
@@ -181,10 +182,30 @@ export default function ProductionScreen() {
           <>
             <View className="gap-6 md:flex-row md:items-start">
               <View className="w-full max-w-[220px]">
-                <PosterPlaceholder
+                <ProductionPoster
                   discipline={production.data.discipline}
+                  poster={production.data.posters[0] ?? null}
                   title={production.data.title}
                 />
+                {production.data.posters[0] ? (
+                  <View className="mt-2 gap-1">
+                    <Text className="text-xs text-muted">
+                      {production.data.posters[0].credit}
+                      {production.data.posters[0].license
+                        ? ` · ${production.data.posters[0].license}`
+                        : ""}
+                    </Text>
+                    <Text
+                      accessibilityRole="link"
+                      className="text-xs font-semibold text-accent"
+                      onPress={() =>
+                        void Linking.openURL(production.data!.posters[0]!.sourceUrl)
+                      }
+                    >
+                      Source de l’affiche
+                    </Text>
+                  </View>
+                ) : null}
               </View>
               <View className="min-w-0 flex-1 gap-4">
                 <Text className="text-xs font-extrabold uppercase tracking-[2px] text-accent">

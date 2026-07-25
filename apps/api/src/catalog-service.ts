@@ -1,6 +1,7 @@
 import type {
   Dashboard,
   DiarySession,
+  Poster,
   ProductionCard,
   ProductionDetail,
   SearchResponse,
@@ -9,6 +10,8 @@ import type {
 import {
   artists,
   diaryEntries,
+  mediaAssets,
+  productionMedia,
   performances,
   productionCredits,
   productionSources,
@@ -25,6 +28,24 @@ import { planRating, planSeen } from "@todam/domain";
 import { and, asc, count, desc, eq, sql } from "drizzle-orm";
 
 import { HttpProblem } from "./errors.js";
+
+type PosterWithStorage = Poster & { storageKey: string | null };
+
+const objectPublicBaseUrl = process.env.TODAM_OBJECT_PUBLIC_BASE_URL?.replace(
+  /\/+$/,
+  "",
+);
+
+function mapPoster(poster: PosterWithStorage): Poster {
+  const { storageKey, ...publicPoster } = poster;
+  return {
+    ...publicPoster,
+    url:
+      storageKey && objectPublicBaseUrl
+        ? `${objectPublicBaseUrl}/${storageKey}`
+        : poster.url,
+  };
+}
 
 function encodeCursor(offset: number): string {
   return Buffer.from(String(offset)).toString("base64url");
@@ -78,6 +99,46 @@ const cardFields = {
       and ${performances.status} = 'scheduled'
       and ${performances.startsAt} >= now()
   )`,
+  poster: sql<PosterWithStorage | null>`(
+    select json_build_object(
+      'id', ${mediaAssets.id},
+      'url', ${mediaAssets.remoteUrl},
+      'kind', ${mediaAssets.kind},
+      'alt', ${mediaAssets.alt},
+      'credit', ${mediaAssets.credit},
+      'copyrightHolder', ${mediaAssets.copyrightHolder},
+      'license', ${mediaAssets.license},
+      'rightsStatus', ${mediaAssets.rightsStatus},
+      'sourceUrl', ${sourceDocuments.url},
+      'width', ${mediaAssets.width},
+      'height', ${mediaAssets.height},
+      'storageKey', ${mediaAssets.storageKey}
+    )
+    from ${productionMedia}
+    join ${mediaAssets} on ${mediaAssets.id} = ${productionMedia.mediaId}
+    join ${sourceDocuments} on ${sourceDocuments.id} = ${mediaAssets.documentId}
+    where ${productionMedia.productionId} = ${productions.id}
+      and ${mediaAssets.isActive} = true
+      and ${mediaAssets.storagePolicy} not in ('metadata_only', 'forbidden')
+      and ${mediaAssets.rightsStatus} in (
+        'permission_granted',
+        'open_license',
+        'contractual_display',
+        'hotlink_only'
+      )
+      and (${mediaAssets.validFrom} is null or ${mediaAssets.validFrom} <= now())
+      and (${mediaAssets.validUntil} is null or ${mediaAssets.validUntil} > now())
+    order by
+      ${productionMedia.isPrimary} desc,
+      case ${mediaAssets.kind}
+        when 'poster' then 0
+        when 'key_visual' then 1
+        else 2
+      end,
+      ${productionMedia.position},
+      ${mediaAssets.id}
+    limit 1
+  )`,
 };
 
 interface CardRow {
@@ -90,6 +151,7 @@ interface CardRow {
   primaryCredit: string | null;
   venueNames: string[];
   nextPerformance: Date | null;
+  poster: PosterWithStorage | null;
 }
 
 function mapCard(row: CardRow): ProductionCard {
@@ -103,6 +165,7 @@ function mapCard(row: CardRow): ProductionCard {
     primaryCredit: row.primaryCredit,
     venueNames: row.venueNames,
     nextPerformance: row.nextPerformance?.toISOString() ?? null,
+    poster: row.poster ? mapPoster(row.poster) : null,
   };
 }
 
@@ -187,24 +250,27 @@ export function createCatalogService(database: TodamDatabase) {
         .from(productions)
         .leftJoin(works, eq(works.id, productions.workId))
         .where(
-          sql<boolean>`
-          unaccent(${productions.title}) ilike unaccent(${pattern})
-          or unaccent(coalesce(${works.title}, '')) ilike unaccent(${pattern})
-          or exists (
-            select 1
-            from ${productionCredits}
-            join ${artists} on ${artists.id} = ${productionCredits.artistId}
-            where ${productionCredits.productionId} = ${productions.id}
-              and unaccent(${artists.name}) ilike unaccent(${pattern})
-          )
-          or exists (
-            select 1
-            from ${performances}
-            join ${venues} on ${venues.id} = ${performances.venueId}
-            where ${performances.productionId} = ${productions.id}
-              and unaccent(${venues.name}) ilike unaccent(${pattern})
-          )
-        `,
+          and(
+            eq(productions.isActive, true),
+            sql<boolean>`
+              unaccent(${productions.title}) ilike unaccent(${pattern})
+              or unaccent(coalesce(${works.title}, '')) ilike unaccent(${pattern})
+              or exists (
+                select 1
+                from ${productionCredits}
+                join ${artists} on ${artists.id} = ${productionCredits.artistId}
+                where ${productionCredits.productionId} = ${productions.id}
+                  and unaccent(${artists.name}) ilike unaccent(${pattern})
+              )
+              or exists (
+                select 1
+                from ${performances}
+                join ${venues} on ${venues.id} = ${performances.venueId}
+                where ${performances.productionId} = ${productions.id}
+                  and unaccent(${venues.name}) ilike unaccent(${pattern})
+              )
+            `,
+          ),
         )
         .orderBy(
           sql`
@@ -237,6 +303,7 @@ export function createCatalogService(database: TodamDatabase) {
           audience: productions.audience,
           durationMinutes: productions.durationMinutes,
           language: productions.language,
+          officialUrl: productions.officialUrl,
           workId: works.id,
           workSlug: works.slug,
           workTitle: works.title,
@@ -254,7 +321,7 @@ export function createCatalogService(database: TodamDatabase) {
         );
       }
 
-      const [creditRows, performanceRows, sourceRows] = await Promise.all([
+      const [creditRows, performanceRows, sourceRows, posterRows] = await Promise.all([
         database
           .select({
             artistId: artists.id,
@@ -271,7 +338,9 @@ export function createCatalogService(database: TodamDatabase) {
           .select({
             id: performances.id,
             startsAt: performances.startsAt,
+            endsAt: performances.endsAt,
             status: performances.status,
+            officialUrl: performances.officialUrl,
             venueId: venues.id,
             venueSlug: venues.slug,
             venueName: venues.name,
@@ -290,6 +359,49 @@ export function createCatalogService(database: TodamDatabase) {
             eq(sourceDocuments.id, productionSources.documentId),
           )
           .where(eq(productionSources.entityId, base.id)),
+        database
+          .select({
+            id: mediaAssets.id,
+            url: mediaAssets.remoteUrl,
+            kind: mediaAssets.kind,
+            alt: mediaAssets.alt,
+            credit: mediaAssets.credit,
+            copyrightHolder: mediaAssets.copyrightHolder,
+            license: mediaAssets.license,
+            rightsStatus: mediaAssets.rightsStatus,
+            sourceUrl: sourceDocuments.url,
+            width: mediaAssets.width,
+            height: mediaAssets.height,
+            storageKey: mediaAssets.storageKey,
+          })
+          .from(productionMedia)
+          .innerJoin(mediaAssets, eq(mediaAssets.id, productionMedia.mediaId))
+          .innerJoin(sourceDocuments, eq(sourceDocuments.id, mediaAssets.documentId))
+          .where(
+            and(
+              eq(productionMedia.productionId, base.id),
+              eq(mediaAssets.isActive, true),
+              sql<boolean>`${mediaAssets.storagePolicy} not in ('metadata_only', 'forbidden')`,
+              sql<boolean>`${mediaAssets.rightsStatus} in (
+                'permission_granted',
+                'open_license',
+                'contractual_display',
+                'hotlink_only'
+              )`,
+              sql<boolean>`(${mediaAssets.validFrom} is null or ${mediaAssets.validFrom} <= now())`,
+              sql<boolean>`(${mediaAssets.validUntil} is null or ${mediaAssets.validUntil} > now())`,
+            ),
+          )
+          .orderBy(
+            desc(productionMedia.isPrimary),
+            sql`case ${mediaAssets.kind}
+              when 'poster' then 0
+              when 'key_visual' then 1
+              else 2
+            end`,
+            asc(productionMedia.position),
+            asc(mediaAssets.id),
+          ),
       ]);
 
       return {
@@ -300,6 +412,8 @@ export function createCatalogService(database: TodamDatabase) {
         audience: base.audience,
         durationMinutes: base.durationMinutes,
         language: base.language,
+        officialUrl: base.officialUrl,
+        posters: posterRows.map((poster) => mapPoster(poster as PosterWithStorage)),
         work:
           base.workId && base.workSlug && base.workTitle
             ? {
@@ -312,7 +426,9 @@ export function createCatalogService(database: TodamDatabase) {
         performances: performanceRows.map((performance) => ({
           id: performance.id,
           startsAt: performance.startsAt.toISOString(),
+          endsAt: performance.endsAt?.toISOString() ?? null,
           status: performance.status,
+          officialUrl: performance.officialUrl,
           venue: {
             id: performance.venueId,
             slug: performance.venueSlug,
@@ -339,7 +455,9 @@ export function createCatalogService(database: TodamDatabase) {
           createdAt: diaryEntries.createdAt,
           performanceId: performances.id,
           performanceStartsAt: performances.startsAt,
+          performanceEndsAt: performances.endsAt,
           performanceStatus: performances.status,
+          performanceOfficialUrl: performances.officialUrl,
           venueId: venues.id,
           venueSlug: venues.slug,
           venueName: venues.name,
@@ -373,7 +491,9 @@ export function createCatalogService(database: TodamDatabase) {
             ? {
                 id: row.performanceId,
                 startsAt: row.performanceStartsAt.toISOString(),
+                endsAt: row.performanceEndsAt?.toISOString() ?? null,
                 status: row.performanceStatus,
+                officialUrl: row.performanceOfficialUrl,
                 venue: {
                   id: row.venueId,
                   slug: row.venueSlug,

@@ -2,8 +2,13 @@ import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
 import { CatalogImportSchema, type CatalogImport } from "@todam/contracts";
-import { catalogSources, createDatabase, productions } from "@todam/database";
-import { count } from "drizzle-orm";
+import {
+  catalogSources,
+  createDatabase,
+  mediaAssets,
+  productions,
+} from "@todam/database";
+import { count, eq } from "drizzle-orm";
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
 
 import { applyCatalog } from "../../src/importer.js";
@@ -41,10 +46,10 @@ describe("import PostgreSQL réel", () => {
     const second = await applyCatalog(db, catalog);
     const productionRows = await db.select({ total: count() }).from(productions);
 
-    expect(first.inserted).toBe(10);
+    expect(first.inserted).toBe(11);
     expect(second.inserted).toBe(0);
     expect(second.updated).toBe(0);
-    expect(second.unchanged).toBe(10);
+    expect(second.unchanged).toBe(11);
     expect(Number(productionRows[0]?.total)).toBe(2);
     expect(second.counts.exclusions).toBe(1);
   });
@@ -58,5 +63,42 @@ describe("import PostgreSQL réel", () => {
     );
     const sourceRows = await db.select({ total: count() }).from(catalogSources);
     expect(Number(sourceRows[0]?.total)).toBe(0);
+  });
+
+  it("désactive l'affiche retirée d'une production observée", async () => {
+    const catalog = await loadFixture();
+    await applyCatalog(db, catalog);
+    const withoutPoster = structuredClone(catalog);
+    withoutPoster.media = [];
+
+    const report = await applyCatalog(db, withoutPoster);
+    const rows = await db.select({ isActive: mediaAssets.isActive }).from(mediaAssets);
+
+    expect(report.deactivated).toBe(1);
+    expect(rows).toEqual([{ isActive: false }]);
+  });
+
+  it("retire une production signalée supprimée par sa source", async () => {
+    const catalog = await loadFixture();
+    catalog.performances[0]!.status = "scheduled";
+    await applyCatalog(db, catalog);
+
+    const withdrawal = structuredClone(catalog);
+    withdrawal.works = [];
+    withdrawal.venues = [];
+    withdrawal.artists = [];
+    withdrawal.productions = [];
+    withdrawal.performances = [];
+    withdrawal.media = [];
+    withdrawal.withdrawnProductionExternalKeys = ["production.les-lumieres"];
+    const report = await applyCatalog(db, withdrawal);
+
+    const productionRows = await db
+      .select({ isActive: productions.isActive })
+      .from(productions)
+      .where(eq(productions.slug, "les-lumieres-jeanne-exemple-2025"));
+
+    expect(productionRows).toEqual([{ isActive: false }]);
+    expect(report.deactivated).toBeGreaterThanOrEqual(2);
   });
 });

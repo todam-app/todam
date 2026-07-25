@@ -22,6 +22,13 @@
       "when": 1784997000000,
       "tag": "0002_legal_acceptance_trigger",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1785078000000,
+      "tag": "0003_national_catalog_media",
+      "breakpoints": true
     }
   ]
 }

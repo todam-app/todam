@@ -7,9 +7,12 @@ import {
   catalogSources,
   createDatabase,
   importBatches,
+  mediaAssets,
   performanceSources,
+  performanceMedia,
   performances,
   productionCredits,
+  productionMedia,
   productionSources,
   productions,
   sourceDocuments,
@@ -19,7 +22,7 @@ import {
   works,
   type TodamDatabase,
 } from "@todam/database";
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray, notInArray, sql } from "drizzle-orm";
 
 type ReportCounts = ImportReport["counts"];
 
@@ -31,6 +34,8 @@ function getCounts(catalog: CatalogImport): ReportCounts {
     artists: catalog.artists.length,
     productions: catalog.productions.length,
     performances: catalog.performances.length,
+    media: catalog.media.length,
+    withdrawnProductions: catalog.withdrawnProductionExternalKeys.length,
     exclusions: catalog.exclusions.length,
   };
 }
@@ -51,6 +56,8 @@ export function createDryRunReport(
     inserted: 0,
     updated: 0,
     unchanged: 0,
+    deactivated: 0,
+    quarantined: 0,
   };
 }
 
@@ -59,6 +66,14 @@ function valuesEqual(left: unknown, right: unknown): boolean {
     return left.getTime() === right.getTime();
   }
   if (Array.isArray(left) || Array.isArray(right)) {
+    return JSON.stringify(left) === JSON.stringify(right);
+  }
+  if (
+    left !== null &&
+    right !== null &&
+    typeof left === "object" &&
+    typeof right === "object"
+  ) {
     return JSON.stringify(left) === JSON.stringify(right);
   }
   return left === right;
@@ -92,6 +107,9 @@ export async function applyCatalog(
       externalKey: catalog.source.externalKey,
       name: catalog.source.name,
       homepageUrl: catalog.source.homepageUrl,
+      connectorKind: catalog.source.connectorKind,
+      metadataLicense: catalog.source.metadataLicense,
+      defaultMediaPolicy: catalog.source.defaultMediaPolicy,
     };
     let sourceId: string;
     const existingSource = existingSources[0];
@@ -179,7 +197,17 @@ export async function applyCatalog(
       const currentRows = await transaction
         .select()
         .from(works)
-        .where(eq(works.slug, item.slug))
+        .where(
+          sql<boolean>`exists (
+          select 1
+          from ${workSources}
+          join ${sourceDocuments}
+            on ${sourceDocuments.id} = ${workSources.documentId}
+          where ${workSources.entityId} = ${works.id}
+            and ${sourceDocuments.sourceId} = ${sourceId}
+            and ${workSources.externalKey} = ${item.externalKey}
+        )`,
+        )
         .limit(1);
       const next = {
         title: item.title,
@@ -224,7 +252,17 @@ export async function applyCatalog(
       const currentRows = await transaction
         .select()
         .from(venues)
-        .where(eq(venues.slug, item.slug))
+        .where(
+          sql<boolean>`exists (
+          select 1
+          from ${venueSources}
+          join ${sourceDocuments}
+            on ${sourceDocuments.id} = ${venueSources.documentId}
+          where ${venueSources.entityId} = ${venues.id}
+            and ${sourceDocuments.sourceId} = ${sourceId}
+            and ${venueSources.externalKey} = ${item.externalKey}
+        )`,
+        )
         .limit(1);
       const next = {
         name: item.name,
@@ -277,7 +315,17 @@ export async function applyCatalog(
       const currentRows = await transaction
         .select()
         .from(artists)
-        .where(eq(artists.slug, item.slug))
+        .where(
+          sql<boolean>`exists (
+          select 1
+          from ${artistSources}
+          join ${sourceDocuments}
+            on ${sourceDocuments.id} = ${artistSources.documentId}
+          where ${artistSources.entityId} = ${artists.id}
+            and ${sourceDocuments.sourceId} = ${sourceId}
+            and ${artistSources.externalKey} = ${item.externalKey}
+        )`,
+        )
         .limit(1);
       const next = { name: item.name };
       const current = currentRows[0];
@@ -319,7 +367,17 @@ export async function applyCatalog(
       const currentRows = await transaction
         .select()
         .from(productions)
-        .where(eq(productions.slug, item.slug))
+        .where(
+          sql<boolean>`exists (
+          select 1
+          from ${productionSources}
+          join ${sourceDocuments}
+            on ${sourceDocuments.id} = ${productionSources.documentId}
+          where ${productionSources.entityId} = ${productions.id}
+            and ${sourceDocuments.sourceId} = ${sourceId}
+            and ${productionSources.externalKey} = ${item.externalKey}
+        )`,
+        )
         .limit(1);
       const workId =
         item.workExternalKey === null
@@ -332,6 +390,8 @@ export async function applyCatalog(
         audience: item.audience,
         durationMinutes: item.durationMinutes,
         language: item.language,
+        officialUrl: item.officialUrl,
+        isActive: true,
       };
       const current = currentRows[0];
       let id: string;
@@ -390,6 +450,7 @@ export async function applyCatalog(
       }
     }
 
+    const performanceIds = new Map<string, string>();
     for (const item of catalog.performances) {
       const productionId = productionIds.get(item.productionExternalKey);
       const venueId = venueIds.get(item.venueExternalKey);
@@ -401,14 +462,25 @@ export async function applyCatalog(
         .select()
         .from(performances)
         .where(
-          and(
-            eq(performances.productionId, productionId),
-            eq(performances.venueId, venueId),
-            eq(performances.startsAt, startsAt),
-          ),
+          sql<boolean>`exists (
+          select 1
+          from ${performanceSources}
+          join ${sourceDocuments}
+            on ${sourceDocuments.id} = ${performanceSources.documentId}
+          where ${performanceSources.entityId} = ${performances.id}
+            and ${sourceDocuments.sourceId} = ${sourceId}
+            and ${performanceSources.externalKey} = ${item.externalKey}
+        )`,
         )
         .limit(1);
-      const next = { status: item.status };
+      const next = {
+        productionId,
+        venueId,
+        startsAt,
+        endsAt: item.endsAt === null ? null : new Date(item.endsAt),
+        status: item.status,
+        officialUrl: item.officialUrl,
+      };
       const current = currentRows[0];
       let id: string;
       if (current) {
@@ -425,7 +497,7 @@ export async function applyCatalog(
       } else {
         const [created] = await transaction
           .insert(performances)
-          .values({ productionId, venueId, startsAt, ...next })
+          .values(next)
           .returning({ id: performances.id });
         if (!created) {
           throw new Error(`Impossible de créer la séance ${item.externalKey}.`);
@@ -435,6 +507,7 @@ export async function applyCatalog(
       }
       const documentId = documentIds.get(item.sourceDocumentKey);
       if (!documentId) throw new Error("Document de représentation introuvable.");
+      performanceIds.set(item.externalKey, id);
       await transaction
         .insert(performanceSources)
         .values({ entityId: id, documentId, externalKey: item.externalKey })
@@ -442,6 +515,232 @@ export async function applyCatalog(
           target: [performanceSources.entityId, performanceSources.documentId],
           set: { externalKey: item.externalKey, observedAt: new Date() },
         });
+    }
+
+    const importedMediaKeys: string[] = [];
+    for (const item of catalog.media) {
+      const productionId = productionIds.get(item.productionExternalKey);
+      const performanceId =
+        item.performanceExternalKey === null
+          ? null
+          : performanceIds.get(item.performanceExternalKey);
+      const documentId = documentIds.get(item.sourceDocumentKey);
+      if (!productionId || !documentId) {
+        throw new Error(`Références d'affiche invalides : ${item.externalKey}`);
+      }
+      if (item.performanceExternalKey !== null && !performanceId) {
+        throw new Error(
+          `Représentation d'affiche introuvable : ${item.performanceExternalKey}`,
+        );
+      }
+
+      importedMediaKeys.push(item.externalKey);
+      const next = {
+        documentId,
+        kind: item.kind,
+        remoteUrl: item.url,
+        storagePolicy: item.storagePolicy,
+        alt: item.alt,
+        credit: item.credit,
+        copyrightHolder: item.copyrightHolder,
+        rightsStatus: item.rightsStatus,
+        license: item.license,
+        termsUrl: item.termsUrl,
+        width: item.width,
+        height: item.height,
+        mimeType: item.mimeType,
+        validFrom: item.validFrom === null ? null : new Date(item.validFrom),
+        validUntil: item.validUntil === null ? null : new Date(item.validUntil),
+        isActive: true,
+      };
+      const currentRows = await transaction
+        .select()
+        .from(mediaAssets)
+        .where(
+          and(
+            eq(mediaAssets.sourceId, sourceId),
+            eq(mediaAssets.externalKey, item.externalKey),
+          ),
+        )
+        .limit(1);
+      const current = currentRows[0];
+      let mediaId: string;
+      if (current) {
+        mediaId = current.id;
+        if (hasChanges(current, next)) {
+          const invalidateMirror =
+            current.remoteUrl !== item.url || item.storagePolicy !== "mirror";
+          await transaction
+            .update(mediaAssets)
+            .set({
+              ...next,
+              ...(invalidateMirror
+                ? { mirroredAt: null, sha256: null, storageKey: null }
+                : {}),
+              updatedAt: new Date(),
+            })
+            .where(eq(mediaAssets.id, mediaId));
+          report.updated += 1;
+        } else {
+          report.unchanged += 1;
+        }
+      } else {
+        const [created] = await transaction
+          .insert(mediaAssets)
+          .values({
+            sourceId,
+            externalKey: item.externalKey,
+            ...next,
+          })
+          .returning({ id: mediaAssets.id });
+        if (!created) {
+          throw new Error(`Impossible de créer l'affiche ${item.externalKey}.`);
+        }
+        mediaId = created.id;
+        report.inserted += 1;
+      }
+
+      await transaction
+        .insert(productionMedia)
+        .values({
+          productionId,
+          mediaId,
+          isPrimary: item.isPrimary,
+          position: item.position,
+        })
+        .onConflictDoUpdate({
+          target: [productionMedia.productionId, productionMedia.mediaId],
+          set: { isPrimary: item.isPrimary, position: item.position },
+        });
+
+      if (performanceId) {
+        await transaction
+          .insert(performanceMedia)
+          .values({ performanceId, mediaId })
+          .onConflictDoNothing();
+      }
+    }
+
+    for (const production of catalog.productions) {
+      const productionId = productionIds.get(production.externalKey);
+      if (!productionId) continue;
+      const currentKeys = catalog.media
+        .filter((media) => media.productionExternalKey === production.externalKey)
+        .map((media) => media.externalKey);
+      const linkedToProduction = sql<boolean>`exists (
+        select 1
+        from ${productionMedia}
+        where ${productionMedia.mediaId} = ${mediaAssets.id}
+          and ${productionMedia.productionId} = ${productionId}
+      )`;
+      const deactivated =
+        currentKeys.length === 0
+          ? await transaction
+              .update(mediaAssets)
+              .set({ isActive: false, updatedAt: new Date() })
+              .where(
+                and(
+                  eq(mediaAssets.sourceId, sourceId),
+                  eq(mediaAssets.isActive, true),
+                  linkedToProduction,
+                ),
+              )
+              .returning({ id: mediaAssets.id })
+          : await transaction
+              .update(mediaAssets)
+              .set({ isActive: false, updatedAt: new Date() })
+              .where(
+                and(
+                  eq(mediaAssets.sourceId, sourceId),
+                  eq(mediaAssets.isActive, true),
+                  linkedToProduction,
+                  notInArray(mediaAssets.externalKey, currentKeys),
+                ),
+              )
+              .returning({ id: mediaAssets.id });
+      report.deactivated += deactivated.length;
+    }
+
+    for (const externalKey of catalog.withdrawnProductionExternalKeys) {
+      const rows = await transaction
+        .select({ id: productions.id })
+        .from(productions)
+        .where(
+          sql<boolean>`exists (
+          select 1
+          from ${productionSources}
+          join ${sourceDocuments}
+            on ${sourceDocuments.id} = ${productionSources.documentId}
+          where ${productionSources.entityId} = ${productions.id}
+            and ${sourceDocuments.sourceId} = ${sourceId}
+            and ${productionSources.externalKey} = ${externalKey}
+        )`,
+        )
+        .limit(1);
+      const production = rows[0];
+      if (!production) {
+        report.quarantined += 1;
+        continue;
+      }
+      const deactivatedProduction = await transaction
+        .update(productions)
+        .set({ isActive: false, updatedAt: new Date() })
+        .where(and(eq(productions.id, production.id), eq(productions.isActive, true)))
+        .returning({ id: productions.id });
+      const cancelledPerformances = await transaction
+        .update(performances)
+        .set({ status: "cancelled", updatedAt: new Date() })
+        .where(
+          and(
+            eq(performances.productionId, production.id),
+            inArray(performances.status, ["scheduled", "postponed"]),
+          ),
+        )
+        .returning({ id: performances.id });
+      const deactivatedMedia = await transaction
+        .update(mediaAssets)
+        .set({ isActive: false, updatedAt: new Date() })
+        .where(
+          and(
+            eq(mediaAssets.sourceId, sourceId),
+            eq(mediaAssets.isActive, true),
+            sql<boolean>`exists (
+              select 1
+              from ${productionMedia}
+              where ${productionMedia.mediaId} = ${mediaAssets.id}
+                and ${productionMedia.productionId} = ${production.id}
+            )`,
+          ),
+        )
+        .returning({ id: mediaAssets.id });
+      report.deactivated +=
+        deactivatedProduction.length +
+        cancelledPerformances.length +
+        deactivatedMedia.length;
+    }
+
+    if (catalog.coverage.expectedCompleteness === "complete") {
+      const deactivated =
+        importedMediaKeys.length === 0
+          ? await transaction
+              .update(mediaAssets)
+              .set({ isActive: false, updatedAt: new Date() })
+              .where(
+                and(eq(mediaAssets.sourceId, sourceId), eq(mediaAssets.isActive, true)),
+              )
+              .returning({ id: mediaAssets.id })
+          : await transaction
+              .update(mediaAssets)
+              .set({ isActive: false, updatedAt: new Date() })
+              .where(
+                and(
+                  eq(mediaAssets.sourceId, sourceId),
+                  eq(mediaAssets.isActive, true),
+                  notInArray(mediaAssets.externalKey, importedMediaKeys),
+                ),
+              )
+              .returning({ id: mediaAssets.id });
+      report.deactivated += deactivated.length;
     }
 
     await transaction

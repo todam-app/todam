@@ -6,21 +6,27 @@
   "description": "Imports et tâches serveur de Todam.",
   "type": "module",
   "scripts": {
-    "build": "tsup src/index.ts src/catalog-import.ts src/purge-unverified-users.ts --format esm --dts --clean",
+    "build": "tsup --config tsup.config.ts",
     "accounts:purge-unverified": "tsx src/purge-unverified-users.ts",
+    "catalog:discover:openagenda": "tsx src/catalog-discover-openagenda.ts",
     "catalog:coverage": "tsx src/catalog-import.ts --coverage",
     "catalog:import": "tsx src/catalog-import.ts",
+    "catalog:media:mirror": "tsx src/catalog-media-mirror.ts",
+    "catalog:status": "tsx src/catalog-status.ts",
+    "catalog:sync": "tsx src/catalog-sync.ts",
     "lint": "eslint src test",
     "test": "vitest run --exclude \"test/integration/**\"",
     "test:integration": "vitest run test/integration",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "3.901.0",
     "@todam/contracts": "workspace:*",
     "@todam/database": "workspace:*",
     "@todam/domain": "workspace:*",
     "dotenv": "17.4.2",
     "drizzle-orm": "0.45.2",
+    "pg": "8.22.0",
     "zod": "4.4.3"
   },
   "devDependencies": {

@@ -15,6 +15,9 @@ if errorlevel 1 goto :failed
 call :require_pnpm
 if errorlevel 1 goto :failed
 
+call :guard
+if errorlevel 1 goto :failed
+
 where docker >nul 2>&1
 if errorlevel 1 (
   echo [ERREUR] Docker Desktop est requis mais la commande docker est introuvable.
@@ -130,6 +133,16 @@ echo [ERREUR] Todam exige pnpm 11. Version detectee :
 pnpm --version
 echo Installe-la avec : npm install --global pnpm@11.9.0
 exit /b 1
+
+:guard
+set "TODAM_RUNNING_PIDS="
+for /f "usebackq delims=" %%P in (`powershell -NoProfile -Command "$root = [regex]::Escape((Resolve-Path '.').Path); $ids = @(Get-CimInstance Win32_Process).Where({$_.Name -eq 'node.exe' -and $_.CommandLine -match $root -and ($_.CommandLine -match 'expo' -or $_.CommandLine -match 'tsx')}).ProcessId; $ids -join ','"`) do set "TODAM_RUNNING_PIDS=%%P"
+if defined TODAM_RUNNING_PIDS (
+  echo [ERREUR] Une instance Todam est deja en cours ^(PID !TODAM_RUNNING_PIDS!^).
+  echo Ferme son CMD avec Ctrl+C avant de relancer Todam.
+  exit /b 1
+)
+exit /b 0
 
 :create_env
 echo Creation de .env avec un secret local aleatoire...

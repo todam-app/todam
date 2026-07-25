@@ -53,6 +53,29 @@ export const rightsStatusEnum = pgEnum("rights_status", [
   "factual_metadata_only",
   "permission_granted",
   "open_license",
+  "contractual_display",
+  "hotlink_only",
+]);
+export const sourceConnectorKindEnum = pgEnum("source_connector_kind", [
+  "file",
+  "base_lieux",
+  "datatourisme",
+  "openagenda",
+  "ticketmaster",
+  "partner",
+]);
+export const mediaKindEnum = pgEnum("media_kind", [
+  "poster",
+  "key_visual",
+  "photo",
+  "logo",
+]);
+export const mediaStoragePolicyEnum = pgEnum("media_storage_policy", [
+  "mirror",
+  "hotlink",
+  "temporary_cache",
+  "metadata_only",
+  "forbidden",
 ]);
 export const importStatusEnum = pgEnum("import_status", [
   "running",
@@ -198,8 +221,47 @@ export const catalogSources = pgTable("catalog_sources", {
   externalKey: text("external_key").notNull().unique(),
   name: text("name").notNull(),
   homepageUrl: text("homepage_url").notNull(),
+  connectorKind: sourceConnectorKindEnum("connector_kind").default("file").notNull(),
+  metadataLicense: text("metadata_license"),
+  defaultMediaPolicy: mediaStoragePolicyEnum("default_media_policy")
+    .default("metadata_only")
+    .notNull(),
+  enabled: boolean("enabled").default(true).notNull(),
   ...timestamps,
 });
+
+export const sourceSyncStates = pgTable("source_sync_states", {
+  sourceId: uuid("source_id")
+    .primaryKey()
+    .references(() => catalogSources.id, { onDelete: "cascade" }),
+  cursor: text("cursor"),
+  etag: text("etag"),
+  lastModified: text("last_modified"),
+  lastSuccessfulAt: timestamp("last_successful_at", { withTimezone: true }),
+  nextRunAt: timestamp("next_run_at", { withTimezone: true }),
+  consecutiveFailures: integer("consecutive_failures").default(0).notNull(),
+  ...timestamps,
+});
+
+export const sourceSyncRuns = pgTable(
+  "source_sync_runs",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    sourceId: uuid("source_id")
+      .notNull()
+      .references(() => catalogSources.id, { onDelete: "cascade" }),
+    status: importStatusEnum("status").default("running").notNull(),
+    cursorBefore: text("cursor_before"),
+    cursorAfter: text("cursor_after"),
+    counts: jsonb("counts").$type<Record<string, number>>().notNull(),
+    error: text("error"),
+    startedAt: timestamp("started_at", { withTimezone: true }).defaultNow().notNull(),
+    completedAt: timestamp("completed_at", { withTimezone: true }),
+  },
+  (table) => [
+    index("source_sync_runs_source_started_idx").on(table.sourceId, table.startedAt),
+  ],
+);
 
 export const sourceDocuments = pgTable(
   "source_documents",
@@ -304,6 +366,8 @@ export const productions = pgTable(
     audience: audienceEnum("audience").default("general").notNull(),
     durationMinutes: integer("duration_minutes"),
     language: text("language"),
+    officialUrl: text("official_url"),
+    isActive: boolean("is_active").default(true).notNull(),
     ...timestamps,
   },
   (table) => [
@@ -348,7 +412,9 @@ export const performances = pgTable(
       .notNull()
       .references(() => venues.id, { onDelete: "restrict" }),
     startsAt: timestamp("starts_at", { withTimezone: true }).notNull(),
+    endsAt: timestamp("ends_at", { withTimezone: true }),
     status: performanceStatusEnum("status").default("scheduled").notNull(),
+    officialUrl: text("official_url"),
     ...timestamps,
   },
   (table) => [
@@ -359,6 +425,101 @@ export const performances = pgTable(
     ),
     index("performances_starts_at_idx").on(table.startsAt),
     index("performances_venue_idx").on(table.venueId),
+  ],
+);
+
+export const mediaAssets = pgTable(
+  "media_assets",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    sourceId: uuid("source_id")
+      .notNull()
+      .references(() => catalogSources.id, { onDelete: "cascade" }),
+    documentId: uuid("document_id")
+      .notNull()
+      .references(() => sourceDocuments.id, { onDelete: "cascade" }),
+    externalKey: text("external_key").notNull(),
+    kind: mediaKindEnum("kind").notNull(),
+    remoteUrl: text("remote_url").notNull(),
+    storageKey: text("storage_key"),
+    sha256: text("sha256"),
+    mirroredAt: timestamp("mirrored_at", { withTimezone: true }),
+    storagePolicy: mediaStoragePolicyEnum("storage_policy").notNull(),
+    alt: text("alt"),
+    credit: text("credit").notNull(),
+    copyrightHolder: text("copyright_holder"),
+    rightsStatus: rightsStatusEnum("rights_status").notNull(),
+    license: text("license"),
+    termsUrl: text("terms_url"),
+    width: integer("width"),
+    height: integer("height"),
+    mimeType: text("mime_type"),
+    validFrom: timestamp("valid_from", { withTimezone: true }),
+    validUntil: timestamp("valid_until", { withTimezone: true }),
+    isActive: boolean("is_active").default(true).notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("media_assets_external_unique").on(table.sourceId, table.externalKey),
+    index("media_assets_document_idx").on(table.documentId),
+    check(
+      "media_assets_width_positive",
+      sql`${table.width} is null or ${table.width} > 0`,
+    ),
+    check(
+      "media_assets_height_positive",
+      sql`${table.height} is null or ${table.height} > 0`,
+    ),
+    check(
+      "media_assets_storage_rights",
+      sql`${table.storagePolicy} <> 'mirror' or ${table.rightsStatus} in ('open_license', 'permission_granted')`,
+    ),
+    check(
+      "media_assets_open_license_named",
+      sql`${table.rightsStatus} <> 'open_license' or ${table.license} is not null`,
+    ),
+    check(
+      "media_assets_sha256_format",
+      sql`${table.sha256} is null or ${table.sha256} ~ '^[0-9a-f]{64}$'`,
+    ),
+  ],
+);
+
+export const productionMedia = pgTable(
+  "production_media",
+  {
+    productionId: uuid("production_id")
+      .notNull()
+      .references(() => productions.id, { onDelete: "cascade" }),
+    mediaId: uuid("media_id")
+      .notNull()
+      .references(() => mediaAssets.id, { onDelete: "cascade" }),
+    isPrimary: boolean("is_primary").default(false).notNull(),
+    position: integer("position").default(0).notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.productionId, table.mediaId] }),
+    index("production_media_order_idx").on(
+      table.productionId,
+      table.isPrimary,
+      table.position,
+    ),
+  ],
+);
+
+export const performanceMedia = pgTable(
+  "performance_media",
+  {
+    performanceId: uuid("performance_id")
+      .notNull()
+      .references(() => performances.id, { onDelete: "cascade" }),
+    mediaId: uuid("media_id")
+      .notNull()
+      .references(() => mediaAssets.id, { onDelete: "cascade" }),
+  },
+  (table) => [
+    primaryKey({ columns: [table.performanceId, table.mediaId] }),
+    index("performance_media_media_idx").on(table.mediaId),
   ],
 );
 
@@ -478,14 +639,19 @@ export const schema = {
   diaryEntries,
   importBatches,
   legalAcceptances,
+  mediaAssets,
   performanceSources,
+  performanceMedia,
   performances,
   productionCredits,
+  productionMedia,
   productionSources,
   productions,
   ratings,
   session,
   sourceDocuments,
+  sourceSyncRuns,
+  sourceSyncStates,
   user,
   venueSources,
   venues,

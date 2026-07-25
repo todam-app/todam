@@ -1316,6 +1316,82 @@
                             "type": "string",
                             "format": "date-time",
                             "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+                          },
+                          "poster": {
+                            "default": null,
+                            "nullable": true,
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string",
+                                "format": "uuid",
+                                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                              },
+                              "url": {
+                                "type": "string",
+                                "format": "uri"
+                              },
+                              "kind": {
+                                "type": "string",
+                                "enum": ["poster", "key_visual", "photo", "logo"]
+                              },
+                              "alt": {
+                                "nullable": true,
+                                "type": "string"
+                              },
+                              "credit": {
+                                "type": "string"
+                              },
+                              "copyrightHolder": {
+                                "nullable": true,
+                                "type": "string"
+                              },
+                              "license": {
+                                "nullable": true,
+                                "type": "string"
+                              },
+                              "rightsStatus": {
+                                "type": "string",
+                                "enum": [
+                                  "permission_granted",
+                                  "open_license",
+                                  "contractual_display",
+                                  "hotlink_only"
+                                ]
+                              },
+                              "sourceUrl": {
+                                "type": "string",
+                                "format": "uri"
+                              },
+                              "width": {
+                                "nullable": true,
+                                "type": "integer",
+                                "minimum": 0,
+                                "exclusiveMinimum": true,
+                                "maximum": 9007199254740991
+                              },
+                              "height": {
+                                "nullable": true,
+                                "type": "integer",
+                                "minimum": 0,
+                                "exclusiveMinimum": true,
+                                "maximum": 9007199254740991
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "url",
+                              "kind",
+                              "alt",
+                              "credit",
+                              "copyrightHolder",
+                              "license",
+                              "rightsStatus",
+                              "sourceUrl",
+                              "width",
+                              "height"
+                            ],
+                            "additionalProperties": false
                           }
                         },
                         "required": [
@@ -1327,7 +1403,8 @@
                           "workTitle",
                           "primaryCredit",
                           "venueNames",
-                          "nextPerformance"
+                          "nextPerformance",
+                          "poster"
                         ],
                         "additionalProperties": false
                       }
@@ -1623,6 +1700,90 @@
                       "nullable": true,
                       "type": "string"
                     },
+                    "officialUrl": {
+                      "default": null,
+                      "nullable": true,
+                      "type": "string",
+                      "format": "uri"
+                    },
+                    "posters": {
+                      "default": [],
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid",
+                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                          },
+                          "url": {
+                            "type": "string",
+                            "format": "uri"
+                          },
+                          "kind": {
+                            "type": "string",
+                            "enum": ["poster", "key_visual", "photo", "logo"]
+                          },
+                          "alt": {
+                            "nullable": true,
+                            "type": "string"
+                          },
+                          "credit": {
+                            "type": "string"
+                          },
+                          "copyrightHolder": {
+                            "nullable": true,
+                            "type": "string"
+                          },
+                          "license": {
+                            "nullable": true,
+                            "type": "string"
+                          },
+                          "rightsStatus": {
+                            "type": "string",
+                            "enum": [
+                              "permission_granted",
+                              "open_license",
+                              "contractual_display",
+                              "hotlink_only"
+                            ]
+                          },
+                          "sourceUrl": {
+                            "type": "string",
+                            "format": "uri"
+                          },
+                          "width": {
+                            "nullable": true,
+                            "type": "integer",
+                            "minimum": 0,
+                            "exclusiveMinimum": true,
+                            "maximum": 9007199254740991
+                          },
+                          "height": {
+                            "nullable": true,
+                            "type": "integer",
+                            "minimum": 0,
+                            "exclusiveMinimum": true,
+                            "maximum": 9007199254740991
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "url",
+                          "kind",
+                          "alt",
+                          "credit",
+                          "copyrightHolder",
+                          "license",
+                          "rightsStatus",
+                          "sourceUrl",
+                          "width",
+                          "height"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
                     "credits": {
                       "type": "array",
                       "items": {
@@ -1684,9 +1845,22 @@
                             "format": "date-time",
                             "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
                           },
+                          "endsAt": {
+                            "default": null,
+                            "nullable": true,
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+                          },
                           "status": {
                             "type": "string",
                             "enum": ["scheduled", "completed", "cancelled", "postponed"]
+                          },
+                          "officialUrl": {
+                            "default": null,
+                            "nullable": true,
+                            "type": "string",
+                            "format": "uri"
                           },
                           "venue": {
                             "type": "object",
@@ -1713,7 +1887,14 @@
                             "additionalProperties": false
                           }
                         },
-                        "required": ["id", "startsAt", "status", "venue"],
+                        "required": [
+                          "id",
+                          "startsAt",
+                          "endsAt",
+                          "status",
+                          "officialUrl",
+                          "venue"
+                        ],
                         "additionalProperties": false
                       }
                     },
@@ -1734,6 +1915,8 @@
                     "work",
                     "durationMinutes",
                     "language",
+                    "officialUrl",
+                    "posters",
                     "credits",
                     "performances",
                     "sourceUrls"
@@ -2274,6 +2457,13 @@
                                 "format": "date-time",
                                 "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
                               },
+                              "endsAt": {
+                                "default": null,
+                                "nullable": true,
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+                              },
                               "status": {
                                 "type": "string",
                                 "enum": [
@@ -2282,6 +2472,12 @@
                                   "cancelled",
                                   "postponed"
                                 ]
+                              },
+                              "officialUrl": {
+                                "default": null,
+                                "nullable": true,
+                                "type": "string",
+                                "format": "uri"
                               },
                               "venue": {
                                 "type": "object",
@@ -2314,7 +2510,14 @@
                                 "additionalProperties": false
                               }
                             },
-                            "required": ["id", "startsAt", "status", "venue"],
+                            "required": [
+                              "id",
+                              "startsAt",
+                              "endsAt",
+                              "status",
+                              "officialUrl",
+                              "venue"
+                            ],
                             "additionalProperties": false
                           }
                         },
@@ -2640,6 +2843,82 @@
                                 "type": "string",
                                 "format": "date-time",
                                 "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+                              },
+                              "poster": {
+                                "default": null,
+                                "nullable": true,
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "string",
+                                    "format": "uuid",
+                                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                                  },
+                                  "url": {
+                                    "type": "string",
+                                    "format": "uri"
+                                  },
+                                  "kind": {
+                                    "type": "string",
+                                    "enum": ["poster", "key_visual", "photo", "logo"]
+                                  },
+                                  "alt": {
+                                    "nullable": true,
+                                    "type": "string"
+                                  },
+                                  "credit": {
+                                    "type": "string"
+                                  },
+                                  "copyrightHolder": {
+                                    "nullable": true,
+                                    "type": "string"
+                                  },
+                                  "license": {
+                                    "nullable": true,
+                                    "type": "string"
+                                  },
+                                  "rightsStatus": {
+                                    "type": "string",
+                                    "enum": [
+                                      "permission_granted",
+                                      "open_license",
+                                      "contractual_display",
+                                      "hotlink_only"
+                                    ]
+                                  },
+                                  "sourceUrl": {
+                                    "type": "string",
+                                    "format": "uri"
+                                  },
+                                  "width": {
+                                    "nullable": true,
+                                    "type": "integer",
+                                    "minimum": 0,
+                                    "exclusiveMinimum": true,
+                                    "maximum": 9007199254740991
+                                  },
+                                  "height": {
+                                    "nullable": true,
+                                    "type": "integer",
+                                    "minimum": 0,
+                                    "exclusiveMinimum": true,
+                                    "maximum": 9007199254740991
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "url",
+                                  "kind",
+                                  "alt",
+                                  "credit",
+                                  "copyrightHolder",
+                                  "license",
+                                  "rightsStatus",
+                                  "sourceUrl",
+                                  "width",
+                                  "height"
+                                ],
+                                "additionalProperties": false
                               }
                             },
                             "required": [
@@ -2651,7 +2930,8 @@
                               "workTitle",
                               "primaryCredit",
                               "venueNames",
-                              "nextPerformance"
+                              "nextPerformance",
+                              "poster"
                             ],
                             "additionalProperties": false
                           },
@@ -2746,6 +3026,82 @@
                             "type": "string",
                             "format": "date-time",
                             "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+                          },
+                          "poster": {
+                            "default": null,
+                            "nullable": true,
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string",
+                                "format": "uuid",
+                                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                              },
+                              "url": {
+                                "type": "string",
+                                "format": "uri"
+                              },
+                              "kind": {
+                                "type": "string",
+                                "enum": ["poster", "key_visual", "photo", "logo"]
+                              },
+                              "alt": {
+                                "nullable": true,
+                                "type": "string"
+                              },
+                              "credit": {
+                                "type": "string"
+                              },
+                              "copyrightHolder": {
+                                "nullable": true,
+                                "type": "string"
+                              },
+                              "license": {
+                                "nullable": true,
+                                "type": "string"
+                              },
+                              "rightsStatus": {
+                                "type": "string",
+                                "enum": [
+                                  "permission_granted",
+                                  "open_license",
+                                  "contractual_display",
+                                  "hotlink_only"
+                                ]
+                              },
+                              "sourceUrl": {
+                                "type": "string",
+                                "format": "uri"
+                              },
+                              "width": {
+                                "nullable": true,
+                                "type": "integer",
+                                "minimum": 0,
+                                "exclusiveMinimum": true,
+                                "maximum": 9007199254740991
+                              },
+                              "height": {
+                                "nullable": true,
+                                "type": "integer",
+                                "minimum": 0,
+                                "exclusiveMinimum": true,
+                                "maximum": 9007199254740991
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "url",
+                              "kind",
+                              "alt",
+                              "credit",
+                              "copyrightHolder",
+                              "license",
+                              "rightsStatus",
+                              "sourceUrl",
+                              "width",
+                              "height"
+                            ],
+                            "additionalProperties": false
                           }
                         },
                         "required": [
@@ -2757,7 +3113,8 @@
                           "workTitle",
                           "primaryCredit",
                           "venueNames",
-                          "nextPerformance"
+                          "nextPerformance",
+                          "poster"
                         ],
                         "additionalProperties": false
                       }

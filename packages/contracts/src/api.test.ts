@@ -8,6 +8,7 @@ import {
   SearchQuerySchema,
   UsernameSignInBodySchema,
 } from "./api.js";
+import { ProductionCardSchema } from "./catalog.js";
 
 describe("contrats API", () => {
   it("décrit les connexions par email et nom d'utilisateur", () => {
@@ -70,5 +71,34 @@ describe("contrats API", () => {
     });
 
     expect(response.items[0]?.performance?.venue.timezone).toBe("Europe/Monaco");
+  });
+
+  it("expose une affiche avec son crédit et sa provenance", () => {
+    const card = ProductionCardSchema.parse({
+      id: "5aecf9f4-b9da-4da0-b8fa-8898e882d99f",
+      slug: "une-piece",
+      title: "Une pièce",
+      discipline: "theatre",
+      audience: "general",
+      workTitle: null,
+      primaryCredit: null,
+      venueNames: ["Scène Exemple"],
+      nextPerformance: "2026-09-10T18:00:00.000Z",
+      poster: {
+        id: "a902c9b8-7c10-4bef-898d-8037c0501480",
+        url: "https://images.example.test/affiche.jpg",
+        kind: "poster",
+        alt: "Affiche de Une pièce",
+        credit: "Compagnie Exemple",
+        copyrightHolder: null,
+        license: null,
+        rightsStatus: "hotlink_only",
+        sourceUrl: "https://example.test/une-piece",
+        width: 1200,
+        height: 1800,
+      },
+    });
+
+    expect(card.poster?.credit).toBe("Compagnie Exemple");
   });
 });

@@ -17,6 +17,8 @@ export default function SearchScreen() {
     queryKey: ["search", query],
     queryFn: () => api.search(query),
     enabled: query.length >= 2,
+    refetchOnWindowFocus: false,
+    retry: false,
   });
 
   function submit(value = input) {

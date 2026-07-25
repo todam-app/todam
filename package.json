@@ -12,7 +12,11 @@
   "scripts": {
     "build": "pnpm --recursive --if-present build",
     "accounts:purge-unverified": "pnpm --filter @todam/jobs accounts:purge-unverified",
+    "catalog:discover:openagenda": "pnpm --filter @todam/jobs catalog:discover:openagenda",
     "catalog:import": "pnpm --filter @todam/jobs catalog:import",
+    "catalog:media:mirror": "pnpm --filter @todam/jobs catalog:media:mirror",
+    "catalog:status": "pnpm --filter @todam/jobs catalog:status",
+    "catalog:sync": "pnpm --filter @todam/jobs catalog:sync",
     "catalog:coverage": "pnpm --filter @todam/jobs catalog:coverage",
     "db:generate": "pnpm --filter @todam/database db:generate",
     "db:migrate": "pnpm --filter @todam/database db:migrate",
