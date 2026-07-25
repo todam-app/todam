@@ -16,6 +16,7 @@ web-build/
 # Builds and tests
 build/
 coverage/
+apps/todam/test-results/
 .turbo/
 .cache/
 *.tsbuildinfo
@@ -46,3 +47,4 @@ Thumbs.db
 *.swp
 tmp/
 temp/
+apps/todam/public/legal/*.pdf

@@ -4,6 +4,61 @@ export type ClientOptions = {
   baseUrl: "http://localhost:3000" | (string & {});
 };
 
+export type GetV1LegalCurrentData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: "/v1/legal/current";
+};
+
+export type GetV1LegalCurrentResponses = {
+  /**
+   * Default Response
+   */
+  200: {
+    terms: {
+      version: string;
+      effectiveDate: string;
+      url: string;
+      pdfUrl: string;
+    };
+    privacyNotice: {
+      version: string;
+      effectiveDate: string;
+      url: string;
+      pdfUrl: string;
+    };
+  };
+};
+
+export type GetV1LegalCurrentResponse =
+  GetV1LegalCurrentResponses[keyof GetV1LegalCurrentResponses];
+
+export type PostV1AuthSignUpEmailData = {
+  body: {
+    name: string;
+    username: string;
+    displayUsername: string;
+    email: string;
+    password: string;
+    age15OrOlder: true;
+    termsVersion: "1.0.0";
+    privacyNoticeVersion: "1.0.0";
+    channel: "web" | "android";
+    callbackURL?: string;
+  };
+  path?: never;
+  query?: never;
+  url: "/v1/auth/sign-up/email";
+};
+
+export type PostV1AuthSignUpEmailResponses = {
+  /**
+   * Default Response
+   */
+  200: unknown;
+};
+
 export type PostV1AuthSignInEmailData = {
   body: {
     email: string;
@@ -58,6 +113,318 @@ export type GetHealthLiveResponses = {
 
 export type GetHealthLiveResponse =
   GetHealthLiveResponses[keyof GetHealthLiveResponses];
+
+export type GetV1MeExportData = {
+  body?: never;
+  path?: never;
+  query?: {
+    format?: "json" | "csv";
+  };
+  url: "/v1/me/export";
+};
+
+export type GetV1MeExportErrors = {
+  /**
+   * Default Response
+   */
+  400: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  401: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  404: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+};
+
+export type GetV1MeExportError = GetV1MeExportErrors[keyof GetV1MeExportErrors];
+
+export type GetV1MeExportResponses = {
+  /**
+   * Default Response
+   */
+  200:
+    | {
+        exportedAt: string;
+        account: {
+          id: string;
+          pseudonym: string;
+          email: string;
+          emailVerified: boolean;
+          createdAt: string;
+        };
+        legal: {
+          age15OrOlder: boolean;
+          ageConfirmedAt: string;
+          termsVersion: string;
+          termsAcceptedAt: string;
+          privacyNoticeVersion: string;
+          channel: "web" | "android";
+        };
+        diary: Array<{
+          id: string;
+          productionId: string;
+          performanceId: string | null;
+          attendedOn: string | null;
+          createdAt: string;
+        }>;
+        ratings: Array<{
+          productionId: string;
+          value: number;
+          createdAt: string;
+          updatedAt: string;
+        }>;
+        watchlist: Array<{
+          productionId: string;
+          addedAt: string;
+        }>;
+      }
+    | string;
+};
+
+export type GetV1MeExportResponse =
+  GetV1MeExportResponses[keyof GetV1MeExportResponses];
+
+export type PostV1AccountDeletionRequestData = {
+  body: {
+    email: string;
+  };
+  path?: never;
+  query?: never;
+  url: "/v1/account-deletion/request";
+};
+
+export type PostV1AccountDeletionRequestErrors = {
+  /**
+   * Default Response
+   */
+  400: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  401: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  404: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+};
+
+export type PostV1AccountDeletionRequestError =
+  PostV1AccountDeletionRequestErrors[keyof PostV1AccountDeletionRequestErrors];
+
+export type PostV1AccountDeletionRequestResponses = {
+  /**
+   * Default Response
+   */
+  202: {
+    accepted: true;
+  };
+};
+
+export type PostV1AccountDeletionRequestResponse =
+  PostV1AccountDeletionRequestResponses[keyof PostV1AccountDeletionRequestResponses];
+
+export type PostV1AccountDeletionConfirmData = {
+  body: {
+    token: string;
+  };
+  path?: never;
+  query?: never;
+  url: "/v1/account-deletion/confirm";
+};
+
+export type PostV1AccountDeletionConfirmErrors = {
+  /**
+   * Default Response
+   */
+  400: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  401: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  404: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+};
+
+export type PostV1AccountDeletionConfirmError =
+  PostV1AccountDeletionConfirmErrors[keyof PostV1AccountDeletionConfirmErrors];
+
+export type PostV1AccountDeletionConfirmResponses = {
+  /**
+   * Default Response
+   */
+  200: {
+    accepted: true;
+  };
+};
+
+export type PostV1AccountDeletionConfirmResponse =
+  PostV1AccountDeletionConfirmResponses[keyof PostV1AccountDeletionConfirmResponses];
 
 export type GetHealthReadyData = {
   body?: never;
@@ -138,6 +505,17 @@ export type GetV1SearchErrors = {
    * Default Response
    */
   409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
     type: string;
     title: string;
     status: number;
@@ -229,6 +607,17 @@ export type GetV1ProductionsBySlugErrors = {
    * Default Response
    */
   409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
     type: string;
     title: string;
     status: number;
@@ -360,6 +749,17 @@ export type GetV1MeProductionsByIdStateErrors = {
   /**
    * Default Response
    */
+  429: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   500: {
     type: string;
     title: string;
@@ -435,6 +835,17 @@ export type GetV1MeProductionsByIdDiaryErrors = {
    * Default Response
    */
   409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
     type: string;
     title: string;
     status: number;
@@ -531,6 +942,17 @@ export type GetV1MeDashboardErrors = {
    * Default Response
    */
   409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
     type: string;
     title: string;
     status: number;
@@ -665,6 +1087,17 @@ export type PostV1MeDiaryErrors = {
   /**
    * Default Response
    */
+  429: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   500: {
     type: string;
     title: string;
@@ -741,6 +1174,17 @@ export type DeleteV1MeDiaryByEntryIdErrors = {
    * Default Response
    */
   409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
     type: string;
     title: string;
     status: number;
@@ -828,6 +1272,17 @@ export type DeleteV1MeProductionsByIdRatingErrors = {
    * Default Response
    */
   409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
     type: string;
     title: string;
     status: number;
@@ -927,6 +1382,17 @@ export type PutV1MeProductionsByIdRatingErrors = {
   /**
    * Default Response
    */
+  429: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   500: {
     type: string;
     title: string;
@@ -1014,6 +1480,17 @@ export type DeleteV1MeWatchlistByIdErrors = {
   /**
    * Default Response
    */
+  429: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   500: {
     type: string;
     title: string;
@@ -1091,6 +1568,17 @@ export type PutV1MeWatchlistByIdErrors = {
    * Default Response
    */
   409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
     type: string;
     title: string;
     status: number;

@@ -13,6 +13,13 @@ import {
   type ViewerProductionState,
 } from "./api.js";
 import type { ProductionDetail } from "./catalog.js";
+import {
+  AcceptedResponseSchema,
+  AccountExportSchema,
+  LegalCurrentResponseSchema,
+  type AccountExport,
+  type LegalCurrentResponse,
+} from "./legal.js";
 
 export class TodamApiError extends Error {
   readonly problem: ProblemDetails;
@@ -36,6 +43,7 @@ export interface MarkSeenInput {
 }
 
 export interface TodamApiClient {
+  getCurrentLegalDocuments(): Promise<LegalCurrentResponse>;
   search(query: string): Promise<SearchResponse>;
   getProduction(slug: string): Promise<ProductionDetail>;
   getProductionState(productionId: string): Promise<ViewerProductionState>;
@@ -47,6 +55,9 @@ export interface TodamApiClient {
   deleteRating(productionId: string): Promise<ViewerProductionState>;
   addToWatchlist(productionId: string): Promise<ViewerProductionState>;
   removeFromWatchlist(productionId: string): Promise<ViewerProductionState>;
+  exportAccountJson(): Promise<AccountExport>;
+  requestAccountDeletion(email: string): Promise<void>;
+  confirmAccountDeletion(token: string): Promise<void>;
 }
 
 export function createTodamApiClient(options: TodamApiClientOptions): TodamApiClient {
@@ -75,6 +86,8 @@ export function createTodamApiClient(options: TodamApiClientOptions): TodamApiCl
   }
 
   return {
+    getCurrentLegalDocuments: () =>
+      request("/v1/legal/current", LegalCurrentResponseSchema),
     search: (query) =>
       request(`/v1/search?q=${encodeURIComponent(query)}`, SearchResponseSchema),
     getProduction: (slug) =>
@@ -145,6 +158,19 @@ export function createTodamApiClient(options: TodamApiClientOptions): TodamApiCl
         { method: "DELETE" },
       );
       return response.state;
+    },
+    exportAccountJson: () => request("/v1/me/export?format=json", AccountExportSchema),
+    requestAccountDeletion: async (email) => {
+      await request("/v1/account-deletion/request", AcceptedResponseSchema, {
+        method: "POST",
+        body: JSON.stringify({ email }),
+      });
+    },
+    confirmAccountDeletion: async (token) => {
+      await request("/v1/account-deletion/confirm", AcceptedResponseSchema, {
+        method: "POST",
+        body: JSON.stringify({ token }),
+      });
     },
   };
 }

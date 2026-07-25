@@ -11,6 +11,7 @@
   ],
   "scripts": {
     "build": "pnpm --recursive --if-present build",
+    "accounts:purge-unverified": "pnpm --filter @todam/jobs accounts:purge-unverified",
     "catalog:import": "pnpm --filter @todam/jobs catalog:import",
     "catalog:coverage": "pnpm --filter @todam/jobs catalog:coverage",
     "db:generate": "pnpm --filter @todam/database db:generate",
@@ -22,14 +23,17 @@
     "dev:db:down": "docker compose down",
     "dev:web": "pnpm --filter @todam/todam dev",
     "format:check": "prettier --check .",
-    "lint": "node scripts/check-repository.mjs && markdownlint-cli2 \"**/*.md\" \"#**/node_modules/**\" && eslint .",
+    "lint": "node scripts/check-repository.mjs && markdownlint-cli2 \"**/*.md\" \"#**/node_modules/**\" \"#**/.expo/**\" && eslint .",
+    "legal:generate": "node scripts/generate-legal-assets.mjs",
+    "legal:pdf": "python scripts/generate-legal-pdfs.py",
+    "legal:check": "node scripts/generate-legal-assets.mjs --check && node scripts/check-legal-release.mjs",
     "test": "pnpm --recursive --if-present test",
     "test:e2e": "pnpm --filter @todam/todam test:e2e",
     "test:integration": "pnpm --filter @todam/jobs test:integration && pnpm --filter @todam/api test:integration",
     "typecheck": "pnpm --recursive --if-present typecheck",
     "validate:openapi": "pnpm --filter @todam/api openapi:check && node scripts/check-openapi.mjs",
     "check:licenses": "node scripts/check-licenses.mjs",
-    "check": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm test && pnpm validate:openapi && pnpm build && pnpm check:licenses"
+    "check": "pnpm legal:check && pnpm lint && pnpm format:check && pnpm typecheck && pnpm test && pnpm validate:openapi && pnpm build && pnpm check:licenses"
   },
   "engines": {
     "node": ">=24 <25"

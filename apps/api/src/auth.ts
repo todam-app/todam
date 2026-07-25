@@ -1,6 +1,10 @@
 import { drizzleAdapter } from "@better-auth/drizzle-adapter";
 import { expo } from "@better-auth/expo";
 import {
+  CURRENT_PRIVACY_NOTICE_VERSION,
+  CURRENT_TERMS_VERSION,
+} from "@todam/contracts";
+import {
   account,
   schema,
   session,
@@ -9,12 +13,15 @@ import {
   type TodamDatabase,
 } from "@todam/database";
 import { betterAuth } from "better-auth";
-import type { FastifyReply, FastifyRequest } from "fastify";
 import { username } from "better-auth/plugins";
+import { eq } from "drizzle-orm";
+import type { FastifyReply, FastifyRequest } from "fastify";
 
+import type { EmailSender } from "./email.js";
 import { HttpProblem } from "./errors.js";
+import { currentLegalDocuments } from "./legal.js";
 
-export function createAuth(database: TodamDatabase) {
+export function createAuth(database: TodamDatabase, emailSender: EmailSender) {
   const baseUrl = process.env.BETTER_AUTH_URL
     ? process.env.BETTER_AUTH_URL.replace(/\/v1\/auth\/?$/, "")
     : "http://127.0.0.1:3000";
@@ -37,11 +44,70 @@ export function createAuth(database: TodamDatabase) {
         verification,
       },
     }),
+    advanced: {
+      useSecureCookies: process.env.NODE_ENV === "production",
+    },
     emailAndPassword: {
       enabled: true,
-      requireEmailVerification: false,
-      autoSignIn: true,
+      requireEmailVerification: true,
+      autoSignIn: false,
       minPasswordLength: 8,
+      resetPasswordTokenExpiresIn: 60 * 60,
+      revokeSessionsOnPasswordReset: true,
+      sendResetPassword: async ({ user: target, url }) => {
+        await emailSender.send({
+          to: target.email,
+          subject: "Réinitialisez votre mot de passe Todam",
+          text:
+            "Utilisez ce lien dans l'heure pour choisir un nouveau mot de passe : " +
+            `${url}\n\nSi vous n'êtes pas à l'origine de cette demande, ignorez cet e-mail.`,
+        });
+      },
+    },
+    emailVerification: {
+      sendOnSignUp: true,
+      sendOnSignIn: true,
+      autoSignInAfterVerification: true,
+      expiresIn: 24 * 60 * 60,
+      sendVerificationEmail: async ({ user: target, url }) => {
+        await emailSender.send({
+          to: target.email,
+          subject: "Confirmez votre adresse e-mail Todam",
+          text:
+            "Confirmez votre adresse e-mail dans les 24 heures pour activer votre compte : " +
+            `${url}\n\nSi vous n'avez pas créé ce compte, ignorez cet e-mail.`,
+        });
+      },
+      afterEmailVerification: async (verifiedUser) => {
+        const rows = await database
+          .select({
+            email: user.email,
+            termsVersion: user.termsVersion,
+            privacyNoticeVersion: user.privacyNoticeVersion,
+            termsAcceptedAt: user.termsAcceptedAt,
+          })
+          .from(user)
+          .where(eq(user.id, verifiedUser.id))
+          .limit(1);
+        const profile = rows[0];
+        if (!profile) return;
+
+        const documents = currentLegalDocuments();
+        try {
+          await emailSender.send({
+            to: profile.email,
+            subject: "Votre compte Todam est activé",
+            text:
+              "Votre compte Todam est activé.\n\n" +
+              `CGU acceptées : version ${profile.termsVersion}, le ${profile.termsAcceptedAt.toISOString()}.\n` +
+              `Politique de confidentialité présentée : version ${profile.privacyNoticeVersion}.\n` +
+              `Archive des CGU : ${documents.terms.pdfUrl}\n` +
+              `Archive de la politique : ${documents.privacyNotice.pdfUrl}`,
+          });
+        } catch {
+          console.error("L'e-mail de preuve juridique n'a pas pu être envoyé.");
+        }
+      },
     },
     disabledPaths: ["/is-username-available"],
     trustedOrigins: [
@@ -55,14 +121,53 @@ export function createAuth(database: TodamDatabase) {
       additionalFields: {
         ageConfirmedAt: {
           type: "date",
+          required: false,
+          input: false,
+        },
+        age15OrOlder: {
+          type: "boolean",
           required: true,
           input: true,
+        },
+        termsVersion: {
+          type: "string",
+          required: true,
+          input: true,
+        },
+        termsAcceptedAt: {
+          type: "date",
+          required: false,
+          input: false,
+        },
+        privacyNoticeVersion: {
+          type: "string",
+          required: true,
+          input: true,
+        },
+        channel: {
+          type: "string",
+          required: true,
+          input: true,
+          fieldName: "registrationChannel",
         },
         role: {
           type: "string",
           required: false,
           defaultValue: "member",
           input: false,
+        },
+      },
+      deleteUser: {
+        enabled: true,
+        deleteTokenExpiresIn: 24 * 60 * 60,
+        sendDeleteAccountVerification: async ({ user: target, url }) => {
+          await emailSender.send({
+            to: target.email,
+            subject: "Confirmez la suppression de votre compte Todam",
+            text:
+              "Confirmez la suppression définitive de votre compte dans les 24 heures : " +
+              `${url}\n\nSi vous n'êtes pas à l'origine de cette demande, ignorez cet e-mail.`,
+          });
         },
       },
     },
@@ -79,20 +184,44 @@ export function createAuth(database: TodamDatabase) {
                 "Le nom d'utilisateur doit contenir entre 3 et 30 caractères.",
               );
             }
-            if (!candidate.ageConfirmedAt) {
+            if (candidate.age15OrOlder !== true) {
               throw new HttpProblem(
                 400,
                 "AGE_CONFIRMATION_REQUIRED",
                 "La déclaration d'âge est obligatoire.",
               );
             }
+            if (
+              candidate.termsVersion !== CURRENT_TERMS_VERSION ||
+              candidate.privacyNoticeVersion !== CURRENT_PRIVACY_NOTICE_VERSION
+            ) {
+              throw new HttpProblem(
+                409,
+                "LEGAL_VERSION_OUTDATED",
+                "Les documents juridiques présentés ne sont plus à jour.",
+              );
+            }
+            if (candidate.channel !== "web" && candidate.channel !== "android") {
+              throw new HttpProblem(
+                400,
+                "INVALID_REGISTRATION_CHANNEL",
+                "Le canal d'inscription est invalide.",
+              );
+            }
+
+            const acceptedAt = new Date();
             return {
               data: {
                 ...candidate,
                 name: usernameValue,
                 username: usernameValue,
                 displayUsername: usernameValue,
-                ageConfirmedAt: new Date(),
+                ageConfirmedAt: acceptedAt,
+                age15OrOlder: true,
+                termsVersion: CURRENT_TERMS_VERSION,
+                termsAcceptedAt: acceptedAt,
+                privacyNoticeVersion: CURRENT_PRIVACY_NOTICE_VERSION,
+                channel: candidate.channel,
                 role: "member",
               },
             };

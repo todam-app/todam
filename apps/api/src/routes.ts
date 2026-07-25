@@ -1,8 +1,14 @@
 import {
+  AcceptedResponseSchema,
+  AccountDeletionConfirmSchema,
+  AccountDeletionRequestSchema,
+  AccountExportQuerySchema,
+  AccountExportResponseSchema,
   DashboardSchema,
   DiaryEntryIdParamsSchema,
   EmailSignInBodySchema,
   HealthResponseSchema,
+  LegalCurrentResponseSchema,
   MarkSeenBodySchema,
   MutationResponseSchema,
   ProblemDetailsSchema,
@@ -13,25 +19,31 @@ import {
   RatingBodySchema,
   SearchQuerySchema,
   SearchResponseSchema,
+  SignUpBodySchema,
   UsernameSignInBodySchema,
   ViewerProductionStateSchema,
 } from "@todam/contracts";
 import type { FastifyInstance } from "fastify";
 import type { ZodTypeProvider } from "fastify-type-provider-zod";
 
+import { accountExportToCsv, type AccountService } from "./account-service.js";
 import type { TodamAuth } from "./auth.js";
 import { getRequiredUserId, handleAuthRequest } from "./auth.js";
 import type { CatalogService } from "./catalog-service.js";
+import { currentLegalDocuments } from "./legal.js";
+import { InMemoryRateLimiter } from "./rate-limit.js";
 
 const problemResponses = {
   400: ProblemDetailsSchema,
   401: ProblemDetailsSchema,
   404: ProblemDetailsSchema,
   409: ProblemDetailsSchema,
+  429: ProblemDetailsSchema,
   500: ProblemDetailsSchema,
 };
 
 export interface RouteDependencies {
+  account: AccountService;
   auth: TodamAuth;
   catalog: CatalogService;
 }
@@ -41,7 +53,37 @@ export async function registerRoutes(
   dependencies: RouteDependencies,
 ) {
   const app = baseApp.withTypeProvider<ZodTypeProvider>();
-  const { auth, catalog } = dependencies;
+  const { account, auth, catalog } = dependencies;
+  const rateLimiter = new InMemoryRateLimiter();
+  const guardAuth = (scope: string, ip: string) =>
+    rateLimiter.assertAllowed(`auth:${scope}:${ip}`, 10, 15 * 60_000);
+  const guardDeletion = (ip: string) =>
+    rateLimiter.assertAllowed(`delete:${ip}`, 5, 60 * 60_000);
+
+  app.get(
+    "/v1/legal/current",
+    {
+      schema: {
+        tags: ["Juridique"],
+        summary: "Retourne les documents juridiques actuellement applicables",
+        response: { 200: LegalCurrentResponseSchema },
+      },
+    },
+    async () => currentLegalDocuments(),
+  );
+
+  app.post(
+    "/v1/auth/sign-up/email",
+    {
+      schema: {
+        tags: ["Authentification"],
+        summary: "Crée un compte avec les versions juridiques présentées",
+        body: SignUpBodySchema,
+      },
+      preHandler: async (request) => guardAuth("signup", request.ip),
+    },
+    (request, reply) => handleAuthRequest(auth, request, reply),
+  );
 
   app.post(
     "/v1/auth/sign-in/email",
@@ -51,6 +93,7 @@ export async function registerRoutes(
         summary: "Connecte un compte avec son email",
         body: EmailSignInBodySchema,
       },
+      preHandler: async (request) => guardAuth("signin-email", request.ip),
     },
     (request, reply) => handleAuthRequest(auth, request, reply),
   );
@@ -63,6 +106,7 @@ export async function registerRoutes(
         summary: "Connecte un compte avec son nom d'utilisateur",
         body: UsernameSignInBodySchema,
       },
+      preHandler: async (request) => guardAuth("signin-username", request.ip),
     },
     (request, reply) => handleAuthRequest(auth, request, reply),
   );
@@ -71,6 +115,9 @@ export async function registerRoutes(
     method: ["GET", "POST"],
     url: "/v1/auth/*",
     schema: { hide: true },
+    preHandler: async (request) => {
+      if (request.method === "POST") guardAuth(request.url, request.ip);
+    },
     handler: (request, reply) => handleAuthRequest(auth, request, reply),
   });
 
@@ -84,6 +131,76 @@ export async function registerRoutes(
       },
     },
     async () => ({ status: "ok" as const }),
+  );
+
+  app.get(
+    "/v1/me/export",
+    {
+      schema: {
+        tags: ["Compte"],
+        summary: "Exporte toutes les données du compte en JSON ou CSV",
+        security: [{ sessionCookie: [] }],
+        querystring: AccountExportQuerySchema,
+        response: {
+          200: AccountExportResponseSchema,
+          ...problemResponses,
+        },
+      },
+    },
+    async (request, reply) => {
+      const userId = await getRequiredUserId(auth, request);
+      const exported = await account.exportAccount(userId);
+      if (request.query.format === "csv") {
+        return reply
+          .type("text/csv; charset=utf-8")
+          .header(
+            "content-disposition",
+            `attachment; filename="todam-export-${new Date().toISOString().slice(0, 10)}.csv"`,
+          )
+          .send(accountExportToCsv(exported));
+      }
+      return exported;
+    },
+  );
+
+  app.post(
+    "/v1/account-deletion/request",
+    {
+      schema: {
+        tags: ["Compte"],
+        summary: "Envoie un lien public de suppression de compte",
+        body: AccountDeletionRequestSchema,
+        response: {
+          202: AcceptedResponseSchema,
+          ...problemResponses,
+        },
+      },
+      preHandler: async (request) => guardDeletion(request.ip),
+    },
+    async (request, reply) => {
+      await account.requestDeletion(request.body.email);
+      return reply.status(202).send({ accepted: true as const });
+    },
+  );
+
+  app.post(
+    "/v1/account-deletion/confirm",
+    {
+      schema: {
+        tags: ["Compte"],
+        summary: "Supprime le compte associé à un jeton confirmé",
+        body: AccountDeletionConfirmSchema,
+        response: {
+          200: AcceptedResponseSchema,
+          ...problemResponses,
+        },
+      },
+      preHandler: async (request) => guardDeletion(request.ip),
+    },
+    async (request) => {
+      await account.confirmDeletion(request.body.token);
+      return { accepted: true as const };
+    },
   );
 
   app.get(

@@ -2,6 +2,7 @@
 coverage
 dist
 node_modules
+apps/todam/test-results
 packages/contracts/src/generated
 pnpm-lock.yaml
 
@@ -20,3 +21,7 @@ scripts/check-dco.mjs
 scripts/check-licenses.mjs
 SECURITY.md
 TRADEMARKS.md
+
+# Ressources de marque et navigation conservées dans leur format validé
+apps/todam/assets/brand/README.md
+apps/todam/components/WebNavigation.tsx

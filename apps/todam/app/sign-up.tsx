@@ -1,12 +1,41 @@
+import { useQuery } from "@tanstack/react-query";
 import { Button, TextField } from "@todam/design-system";
-import { Link, useLocalSearchParams, useRouter } from "expo-router";
-import { useState } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { Link, useLocalSearchParams } from "expo-router";
+import * as Linking from "expo-linking";
+import { useState, type ReactNode } from "react";
+import { Platform, ScrollView, Text, View } from "react-native";
 
+import { api } from "../lib/api";
 import { authClient } from "../lib/auth-client";
 
 function parameter(value: string | string[] | undefined): string | undefined {
   return Array.isArray(value) ? value[0] : value;
+}
+
+function LegalLink({
+  children,
+  href,
+}: {
+  children: ReactNode;
+  href: "/conditions-utilisation" | "/confidentialite";
+}) {
+  if (Platform.OS === "web") {
+    return (
+      <a
+        className="font-semibold text-accent"
+        href={href}
+        rel="noreferrer"
+        target="_blank"
+      >
+        {children}
+      </a>
+    );
+  }
+  return (
+    <Link className="font-semibold text-accent" href={href}>
+      {children}
+    </Link>
+  );
 }
 
 export default function SignUpScreen() {
@@ -15,15 +44,20 @@ export default function SignUpScreen() {
     rating?: string;
     returnTo?: string;
   }>();
-  const router = useRouter();
+  const legal = useQuery({
+    queryKey: ["legal-current"],
+    queryFn: () => api.getCurrentLegalDocuments(),
+    staleTime: 5 * 60_000,
+  });
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [ageConfirmed, setAgeConfirmed] = useState(false);
+  const [created, setCreated] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
   async function submit() {
+    if (!legal.data) return;
     setPending(true);
     setError(null);
     const input = {
@@ -32,36 +66,69 @@ export default function SignUpScreen() {
       displayUsername: username.trim(),
       email: email.trim(),
       password,
-      ageConfirmedAt: new Date(),
+      age15OrOlder: true,
+      termsVersion: legal.data.terms.version,
+      privacyNoticeVersion: legal.data.privacyNotice.version,
+      channel: Platform.OS === "android" ? "android" : "web",
+      callbackURL: Linking.createURL("/email-verifie"),
     };
     const result = await authClient.signUp.email(
       input as unknown as Parameters<typeof authClient.signUp.email>[0],
     );
     setPending(false);
     if (result.error) {
-      setError(
-        result.error.status === 422
-          ? "Ce nom d'utilisateur ou cet email est déjà utilisé."
-          : "Le compte n’a pas pu être créé. Vérifie les informations.",
-      );
+      if (result.error.status === 400 || result.error.status === 409) {
+        await legal.refetch();
+        setError(
+          "Les documents juridiques ont été mis à jour. Relis-les puis réessaie.",
+        );
+      } else {
+        setError(
+          result.error.status === 422
+            ? "Ce nom d'utilisateur ou cet e-mail est déjà utilisé."
+            : "Le compte n'a pas pu être créé. Vérifie les informations.",
+        );
+      }
       return;
     }
+    setCreated(true);
+  }
 
-    const returnTo = parameter(params.returnTo) ?? "/profile";
-    router.replace({
-      pathname: returnTo,
-      params: {
-        ...(params.action ? { resumeAction: parameter(params.action) } : {}),
-        ...(params.rating ? { resumeRating: parameter(params.rating) } : {}),
-      },
-    });
+  if (created) {
+    return (
+      <View className="mx-auto w-full max-w-lg flex-1 items-center justify-center gap-5 px-5 py-12">
+        <Text
+          accessibilityRole="header"
+          className="text-center font-serif text-4xl font-black text-ink"
+        >
+          Confirme ton adresse e-mail
+        </Text>
+        <Text className="text-center leading-6 text-muted">
+          Un lien valable 24 heures a été envoyé à {email.trim()}. Ton compte sera
+          activé après cette vérification.
+        </Text>
+        <Link
+          href={{
+            pathname: "/sign-in",
+            params: {
+              ...(params.returnTo ? { returnTo: parameter(params.returnTo) } : {}),
+              ...(params.action ? { action: parameter(params.action) } : {}),
+              ...(params.rating ? { rating: parameter(params.rating) } : {}),
+            },
+          }}
+          asChild
+        >
+          <Button label="Revenir à la connexion" variant="secondary" />
+        </Link>
+      </View>
+    );
   }
 
   const canSubmit =
     username.trim().length >= 3 &&
     email.includes("@") &&
     password.length >= 8 &&
-    ageConfirmed;
+    Boolean(legal.data);
 
   return (
     <ScrollView
@@ -88,7 +155,7 @@ export default function SignUpScreen() {
         autoCapitalize="none"
         autoComplete="email"
         keyboardType="email-address"
-        label="Email"
+        label="E-mail"
         onChangeText={setEmail}
         value={email}
       />
@@ -99,22 +166,19 @@ export default function SignUpScreen() {
         secureTextEntry
         value={password}
       />
-      <Pressable
-        accessibilityLabel="Je confirme avoir 15 ans ou plus"
-        accessibilityRole="checkbox"
-        accessibilityState={{ checked: ageConfirmed }}
-        className="min-h-11 flex-row items-center gap-3"
-        onPress={() => setAgeConfirmed((value) => !value)}
-      >
-        <View
-          className={`h-6 w-6 items-center justify-center rounded border ${
-            ageConfirmed ? "border-accent bg-accent" : "border-line bg-paper"
-          }`}
-        >
-          <Text className="font-bold text-paper">{ageConfirmed ? "✓" : ""}</Text>
-        </View>
-        <Text className="flex-1 text-ink">J’ai 15 ans ou plus.</Text>
-      </Pressable>
+      <Text className="leading-6 text-muted">
+        En créant mon compte, je déclare avoir au moins 15 ans, j’accepte les{" "}
+        <LegalLink href="/conditions-utilisation">
+          Conditions générales d’utilisation
+        </LegalLink>{" "}
+        et je reconnais avoir pris connaissance de la{" "}
+        <LegalLink href="/confidentialite">Politique de confidentialité</LegalLink>.
+      </Text>
+      {legal.isError ? (
+        <Text accessibilityRole="alert" className="text-[#A1261A]">
+          Les documents juridiques ne sont pas disponibles. Réessaie plus tard.
+        </Text>
+      ) : null}
       {error ? (
         <Text accessibilityRole="alert" className="text-[#A1261A]">
           {error}
@@ -137,7 +201,7 @@ export default function SignUpScreen() {
         }}
         asChild
       >
-        <Button label="J’ai déjà un compte" variant="ghost" />
+        <Button label="J'ai déjà un compte" variant="ghost" />
       </Link>
     </ScrollView>
   );

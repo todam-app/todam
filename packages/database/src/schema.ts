@@ -59,6 +59,10 @@ export const importStatusEnum = pgEnum("import_status", [
   "completed",
   "failed",
 ]);
+export const registrationChannelEnum = pgEnum("registration_channel", [
+  "web",
+  "android",
+]);
 
 export const user = pgTable(
   "users",
@@ -72,12 +76,61 @@ export const user = pgTable(
     ageConfirmedAt: timestamp("age_confirmed_at", {
       withTimezone: true,
     }).notNull(),
+    age15OrOlder: boolean("age_15_or_older").notNull(),
+    termsVersion: text("terms_version").notNull(),
+    termsAcceptedAt: timestamp("terms_accepted_at", {
+      withTimezone: true,
+    }).notNull(),
+    privacyNoticeVersion: text("privacy_notice_version").notNull(),
+    registrationChannel: registrationChannelEnum("registration_channel").notNull(),
     role: roleEnum("role").default("member").notNull(),
     ...timestamps,
   },
   (table) => [
     uniqueIndex("users_email_unique").on(table.email),
     uniqueIndex("users_pseudonym_unique").on(table.pseudonym),
+    check("users_age_15_or_older_true", sql`${table.age15OrOlder} = true`),
+  ],
+);
+
+export const legalAcceptances = pgTable(
+  "legal_acceptances",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    age15OrOlder: boolean("age_15_or_older").notNull(),
+    termsVersion: text("terms_version").notNull(),
+    privacyNoticeVersion: text("privacy_notice_version").notNull(),
+    registrationChannel: registrationChannelEnum("registration_channel").notNull(),
+    acceptedAt: timestamp("accepted_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    index("legal_acceptances_user_idx").on(table.userId, table.acceptedAt),
+    uniqueIndex("legal_acceptances_version_unique").on(
+      table.userId,
+      table.termsVersion,
+      table.privacyNoticeVersion,
+    ),
+    check("legal_acceptances_age_true", sql`${table.age15OrOlder} = true`),
+  ],
+);
+
+export const accountDeletionRequests = pgTable(
+  "account_deletion_requests",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    tokenHash: text("token_hash").notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex("account_deletion_requests_token_unique").on(table.tokenHash),
+    index("account_deletion_requests_user_idx").on(table.userId),
   ],
 );
 
@@ -418,11 +471,13 @@ export const watchlistEntries = pgTable(
 
 export const schema = {
   account,
+  accountDeletionRequests,
   artistSources,
   artists,
   catalogSources,
   diaryEntries,
   importBatches,
+  legalAcceptances,
   performanceSources,
   performances,
   productionCredits,

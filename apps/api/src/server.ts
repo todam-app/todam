@@ -11,13 +11,17 @@ import {
 } from "fastify-type-provider-zod";
 
 import { createAuth } from "./auth.js";
+import { createAccountService } from "./account-service.js";
 import { createCatalogService } from "./catalog-service.js";
+import { createEmailSenderFromEnvironment, type EmailSender } from "./email.js";
 import { HttpProblem, problemDocument } from "./errors.js";
 import { registerRoutes } from "./routes.js";
+import { assertProductionConfiguration } from "./production-config.js";
 
 export interface BuildServerOptions {
   database: TodamDatabase;
   logger?: boolean;
+  emailSender?: EmailSender;
 }
 
 function statusTitle(status: number): string {
@@ -30,21 +34,48 @@ function statusTitle(status: number): string {
       return "Ressource introuvable";
     case 409:
       return "Conflit";
+    case 429:
+      return "Trop de requêtes";
     default:
       return "Erreur interne";
   }
 }
 
 export async function buildServer(options: BuildServerOptions) {
+  assertProductionConfiguration();
+  const redaction = {
+    paths: [
+      "req.headers.authorization",
+      "req.headers.cookie",
+      "res.headers.set-cookie",
+      "req.body.email",
+      "req.body.password",
+      "req.body.token",
+    ],
+    censor: "[MASQUÉ]",
+  };
   const logger =
     options.logger === false
       ? false
       : process.env.NODE_ENV === "development"
-        ? { transport: { target: "pino-pretty" } }
-        : true;
+        ? { redact: redaction, transport: { target: "pino-pretty" } }
+        : { redact: redaction };
   const app = Fastify({
     logger,
     trustProxy: true,
+  });
+  app.addHook("onSend", async (_request, reply, payload) => {
+    reply.header("x-content-type-options", "nosniff");
+    reply.header("x-frame-options", "DENY");
+    reply.header("referrer-policy", "no-referrer");
+    reply.header(
+      "permissions-policy",
+      "camera=(), microphone=(), geolocation=(), payment=()",
+    );
+    if (process.env.NODE_ENV === "production") {
+      reply.header("strict-transport-security", "max-age=31536000; includeSubDomains");
+    }
+    return payload;
   });
   app.setValidatorCompiler(validatorCompiler);
   app.setSerializerCompiler(serializerCompiler);
@@ -79,9 +110,11 @@ export async function buildServer(options: BuildServerOptions) {
     routePrefix: "/documentation",
   });
 
-  const auth = createAuth(options.database);
+  const emailSender = options.emailSender ?? createEmailSenderFromEnvironment();
+  const auth = createAuth(options.database, emailSender);
+  const account = createAccountService(options.database, emailSender);
   const catalog = createCatalogService(options.database);
-  await registerRoutes(app, { auth, catalog });
+  await registerRoutes(app, { account, auth, catalog });
 
   app.setNotFoundHandler((request, reply) =>
     reply

@@ -23,9 +23,14 @@ import type {
   GetHealthReadyData,
   GetHealthReadyErrors,
   GetHealthReadyResponses,
+  GetV1LegalCurrentData,
+  GetV1LegalCurrentResponses,
   GetV1MeDashboardData,
   GetV1MeDashboardErrors,
   GetV1MeDashboardResponses,
+  GetV1MeExportData,
+  GetV1MeExportErrors,
+  GetV1MeExportResponses,
   GetV1MeProductionsByIdDiaryData,
   GetV1MeProductionsByIdDiaryErrors,
   GetV1MeProductionsByIdDiaryResponses,
@@ -38,10 +43,18 @@ import type {
   GetV1SearchData,
   GetV1SearchErrors,
   GetV1SearchResponses,
+  PostV1AccountDeletionConfirmData,
+  PostV1AccountDeletionConfirmErrors,
+  PostV1AccountDeletionConfirmResponses,
+  PostV1AccountDeletionRequestData,
+  PostV1AccountDeletionRequestErrors,
+  PostV1AccountDeletionRequestResponses,
   PostV1AuthSignInEmailData,
   PostV1AuthSignInEmailResponses,
   PostV1AuthSignInUsernameData,
   PostV1AuthSignInUsernameResponses,
+  PostV1AuthSignUpEmailData,
+  PostV1AuthSignUpEmailResponses,
   PostV1MeDiaryData,
   PostV1MeDiaryErrors,
   PostV1MeDiaryResponses,
@@ -70,6 +83,36 @@ export type Options<
    */
   meta?: keyof ClientMeta extends never ? Record<string, unknown> : ClientMeta;
 };
+
+/**
+ * Retourne les documents juridiques actuellement applicables
+ */
+export const getV1LegalCurrent = <ThrowOnError extends boolean = false>(
+  options?: Options<GetV1LegalCurrentData, ThrowOnError>,
+): RequestResult<GetV1LegalCurrentResponses, unknown, ThrowOnError> =>
+  (options?.client ?? client).get<GetV1LegalCurrentResponses, unknown, ThrowOnError>({
+    url: "/v1/legal/current",
+    ...options,
+  });
+
+/**
+ * Crée un compte avec les versions juridiques présentées
+ */
+export const postV1AuthSignUpEmail = <ThrowOnError extends boolean = false>(
+  options: Options<PostV1AuthSignUpEmailData, ThrowOnError>,
+): RequestResult<PostV1AuthSignUpEmailResponses, unknown, ThrowOnError> =>
+  (options.client ?? client).post<
+    PostV1AuthSignUpEmailResponses,
+    unknown,
+    ThrowOnError
+  >({
+    url: "/v1/auth/sign-up/email",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
 
 /**
  * Connecte un compte avec son email
@@ -118,6 +161,74 @@ export const getHealthLive = <ThrowOnError extends boolean = false>(
   (options?.client ?? client).get<GetHealthLiveResponses, unknown, ThrowOnError>({
     url: "/health/live",
     ...options,
+  });
+
+/**
+ * Exporte toutes les données du compte en JSON ou CSV
+ */
+export const getV1MeExport = <ThrowOnError extends boolean = false>(
+  options?: Options<GetV1MeExportData, ThrowOnError>,
+): RequestResult<GetV1MeExportResponses, GetV1MeExportErrors, ThrowOnError> =>
+  (options?.client ?? client).get<
+    GetV1MeExportResponses,
+    GetV1MeExportErrors,
+    ThrowOnError
+  >({
+    security: [
+      {
+        in: "cookie",
+        name: "better-auth.session_token",
+        type: "apiKey",
+      },
+    ],
+    url: "/v1/me/export",
+    ...options,
+  });
+
+/**
+ * Envoie un lien public de suppression de compte
+ */
+export const postV1AccountDeletionRequest = <ThrowOnError extends boolean = false>(
+  options: Options<PostV1AccountDeletionRequestData, ThrowOnError>,
+): RequestResult<
+  PostV1AccountDeletionRequestResponses,
+  PostV1AccountDeletionRequestErrors,
+  ThrowOnError
+> =>
+  (options.client ?? client).post<
+    PostV1AccountDeletionRequestResponses,
+    PostV1AccountDeletionRequestErrors,
+    ThrowOnError
+  >({
+    url: "/v1/account-deletion/request",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * Supprime le compte associé à un jeton confirmé
+ */
+export const postV1AccountDeletionConfirm = <ThrowOnError extends boolean = false>(
+  options: Options<PostV1AccountDeletionConfirmData, ThrowOnError>,
+): RequestResult<
+  PostV1AccountDeletionConfirmResponses,
+  PostV1AccountDeletionConfirmErrors,
+  ThrowOnError
+> =>
+  (options.client ?? client).post<
+    PostV1AccountDeletionConfirmResponses,
+    PostV1AccountDeletionConfirmErrors,
+    ThrowOnError
+  >({
+    url: "/v1/account-deletion/confirm",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
   });
 
 /**

@@ -32,6 +32,7 @@ export function WebNavigation() {
             accessibilityLabel="Todam, accueil"
             accessibilityRole="link"
             className="min-h-11 justify-center"
+            testID="global-home-logo"
           >
             <Image
               accessibilityIgnoresInvertColors

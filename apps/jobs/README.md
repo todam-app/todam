@@ -10,4 +10,10 @@ pnpm catalog:import --file ../../data/fixtures/theatre-des-muses.sample.json --a
 Le mode `--apply` exécute chaque lot dans une transaction. Le mode `catalog:coverage`
 produit le rapport de couverture sans modifier PostgreSQL.
 
+La purge quotidienne des comptes jamais vérifiés depuis sept jours s'exécute avec :
+
+```bash
+pnpm accounts:purge-unverified
+```
+
 Licence : AGPL-3.0-only.

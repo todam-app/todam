@@ -1,8 +1,6 @@
 import { Tabs } from "expo-router";
 import { Platform, Text, View } from "react-native";
 
-import { WebNavigation } from "../../components/WebNavigation";
-
 const icons = {
   index: "⌂",
   profile: "◯",
@@ -12,7 +10,6 @@ const icons = {
 export default function TabLayout() {
   return (
     <View className="flex-1 bg-canvas">
-      <WebNavigation />
       <Tabs
         screenOptions={({ route }) => ({
           headerShown: false,

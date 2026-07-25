@@ -88,6 +88,9 @@ export default function SignInScreen() {
         loading={pending}
         onPress={() => void submit()}
       />
+      <Link href="/mot-de-passe-oublie" asChild>
+        <Button label="Mot de passe oublié" variant="ghost" />
+      </Link>
       <Link
         href={{
           pathname: "/sign-up",

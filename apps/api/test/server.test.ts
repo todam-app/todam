@@ -1,5 +1,9 @@
 import { randomUUID } from "node:crypto";
 
+import {
+  CURRENT_PRIVACY_NOTICE_VERSION,
+  CURRENT_TERMS_VERSION,
+} from "@todam/contracts";
 import type { TodamDatabase } from "@todam/database";
 import { describe, expect, it } from "vitest";
 
@@ -19,6 +23,21 @@ describe("API Todam", () => {
     expect(live.json()).toEqual({ status: "ok" });
     expect(openapi.statusCode).toBe(200);
     expect(openapi.json().info.title).toBe("API Todam");
+    await app.close();
+  });
+
+  it("publie les versions juridiques courantes sans accéder à la base", async () => {
+    const app = await buildServer({
+      database: {} as TodamDatabase,
+      logger: false,
+    });
+    const response = await app.inject({ method: "GET", url: "/v1/legal/current" });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toMatchObject({
+      terms: { version: CURRENT_TERMS_VERSION },
+      privacyNotice: { version: CURRENT_PRIVACY_NOTICE_VERSION },
+    });
     await app.close();
   });
 

@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   diaryEntries,
+  legalAcceptances,
   performances,
   productions,
   ratings,
@@ -19,6 +20,7 @@ describe("schéma Todam", () => {
       getTableName(diaryEntries),
       getTableName(ratings),
       getTableName(watchlistEntries),
+      getTableName(legalAcceptances),
     ]).toEqual([
       "productions",
       "performances",
@@ -26,6 +28,7 @@ describe("schéma Todam", () => {
       "diary_entries",
       "ratings",
       "watchlist_entries",
+      "legal_acceptances",
     ]);
   });
 });

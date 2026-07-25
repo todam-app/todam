@@ -8,6 +8,20 @@
       "when": 1784779200000,
       "tag": "0000_todam_01",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1784995200000,
+      "tag": "0001_legal_launch",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1784997000000,
+      "tag": "0002_legal_acceptance_trigger",
+      "breakpoints": true
     }
   ]
 }

@@ -15,6 +15,9 @@ profil.
 
 - [Fiche produit](docs/FICHE_PRODUIT.md)
 - [Architecture technique](docs/ARCHITECTURE_TECHNIQUE.md)
+- [Préparation du lancement légal](docs/LANCEMENT_LEGAL.md)
+- [Registre des traitements](docs/REGISTRE_TRAITEMENTS.md)
+- [Préparation Google Play Data Safety](docs/GOOGLE_PLAY_DATA_SAFETY.md)
 - [Validation du MVP à Avignon et Monaco](docs/MVP_VALIDATION.md)
 - [Guide de contribution](CONTRIBUTING.md)
 - [Gouvernance](GOVERNANCE.md)
@@ -69,6 +72,16 @@ et sa documentation sur `http://localhost:3000/documentation`.
 
 Le corpus réel du Théâtre des Muses reste sous `data/private/`, ignoré par Git. Le dépôt
 public fournit uniquement son schéma et une fixture synthétique.
+
+## Documents juridiques
+
+Les pages juridiques sont générées depuis `docs/legal` :
+
+```bash
+pnpm legal:generate
+pnpm legal:pdf
+pnpm legal:check
+```
 
 ## Licences et marque
 

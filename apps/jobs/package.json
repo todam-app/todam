@@ -6,7 +6,8 @@
   "description": "Imports et tâches serveur de Todam.",
   "type": "module",
   "scripts": {
-    "build": "tsup src/index.ts src/catalog-import.ts --format esm --dts --clean",
+    "build": "tsup src/index.ts src/catalog-import.ts src/purge-unverified-users.ts --format esm --dts --clean",
+    "accounts:purge-unverified": "tsx src/purge-unverified-users.ts",
     "catalog:coverage": "tsx src/catalog-import.ts --coverage",
     "catalog:import": "tsx src/catalog-import.ts",
     "lint": "eslint src test",
