@@ -27,16 +27,16 @@ jobs:
       postgres:
         image: postgis/postgis:17-3.5
         env:
-          POSTGRES_DB: todam
+          POSTGRES_DB: todam_integration
           POSTGRES_USER: todam
           POSTGRES_PASSWORD: todam
         ports:
           - 5432:5432
         options: >-
-          --health-cmd "pg_isready -U todam -d todam" --health-interval 5s
+          --health-cmd "pg_isready -U todam -d todam_integration" --health-interval 5s
           --health-timeout 5s --health-retries 10
     env:
-      DATABASE_URL: postgresql://todam:todam@127.0.0.1:5432/todam
+      DATABASE_URL: postgresql://todam:todam@127.0.0.1:5432/todam_integration
       BETTER_AUTH_SECRET: ci-only-secret-at-least-32-characters
       BETTER_AUTH_URL: http://127.0.0.1:3000/v1/auth
       WEB_APP_URL: http://127.0.0.1:8081
