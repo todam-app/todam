@@ -3,8 +3,9 @@ import { Button, TextField } from "@todam/design-system";
 import { Link, useLocalSearchParams } from "expo-router";
 import * as Linking from "expo-linking";
 import { useState, type ReactNode } from "react";
-import { Platform, ScrollView, Text, View } from "react-native";
+import { Platform, Text, View } from "react-native";
 
+import { PageScrollView } from "../components/PageScrollView";
 import { api } from "../lib/api";
 import { authClient } from "../lib/auth-client";
 
@@ -53,6 +54,7 @@ export default function SignUpScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [created, setCreated] = useState(false);
+  const [duplicateEmail, setDuplicateEmail] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
@@ -60,6 +62,7 @@ export default function SignUpScreen() {
     if (!legal.data) return;
     setPending(true);
     setError(null);
+    setDuplicateEmail(false);
     const input = {
       name: username.trim(),
       username: username.trim(),
@@ -77,17 +80,19 @@ export default function SignUpScreen() {
     );
     setPending(false);
     if (result.error) {
-      if (result.error.status === 400 || result.error.status === 409) {
+      const code = (result.error as { code?: string }).code;
+      if (code === "EMAIL_ALREADY_REGISTERED") {
+        setDuplicateEmail(true);
+        setError("Un compte existe déjà avec cette adresse e-mail");
+      } else if (code === "USERNAME_ALREADY_TAKEN") {
+        setError("Ce nom d'utilisateur est déjà utilisé.");
+      } else if (code === "LEGAL_VERSION_OUTDATED") {
         await legal.refetch();
         setError(
           "Les documents juridiques ont été mis à jour. Relis-les puis réessaie.",
         );
       } else {
-        setError(
-          result.error.status === 422
-            ? "Ce nom d'utilisateur ou cet e-mail est déjà utilisé."
-            : "Le compte n'a pas pu être créé. Vérifie les informations.",
-        );
+        setError("Le compte n'a pas pu être créé. Vérifie les informations.");
       }
       return;
     }
@@ -131,7 +136,7 @@ export default function SignUpScreen() {
     Boolean(legal.data);
 
   return (
-    <ScrollView
+    <PageScrollView
       contentContainerClassName="mx-auto w-full max-w-lg gap-6 px-5 py-10"
       keyboardShouldPersistTaps="handled"
     >
@@ -145,19 +150,21 @@ export default function SignUpScreen() {
       </View>
       <TextField
         autoCapitalize="none"
-        autoComplete="username-new"
-        label="Nom d'utilisateur"
-        maxLength={30}
-        onChangeText={setUsername}
-        value={username}
-      />
-      <TextField
-        autoCapitalize="none"
-        autoComplete="email"
+        autoComplete="username"
+        inputMode="email"
         keyboardType="email-address"
         label="E-mail"
         onChangeText={setEmail}
         value={email}
+      />
+      <TextField
+        autoCapitalize="none"
+        autoComplete="off"
+        inputMode="text"
+        label="Nom d'utilisateur"
+        maxLength={30}
+        onChangeText={setUsername}
+        value={username}
       />
       <TextField
         autoComplete="new-password"
@@ -184,6 +191,19 @@ export default function SignUpScreen() {
           {error}
         </Text>
       ) : null}
+      {duplicateEmail ? (
+        <View className="gap-2 rounded-todam border border-line bg-paper p-4">
+          <Text className="text-sm leading-5 text-muted">
+            Retrouve ton compte existant :
+          </Text>
+          <Link href="/sign-in" asChild>
+            <Button label="Se connecter" variant="secondary" />
+          </Link>
+          <Link href="/mot-de-passe-oublie" asChild>
+            <Button label="Mot de passe oublié" variant="ghost" />
+          </Link>
+        </View>
+      ) : null}
       <Button
         disabled={!canSubmit}
         label="Créer mon compte"
@@ -203,6 +223,6 @@ export default function SignUpScreen() {
       >
         <Button label="J'ai déjà un compte" variant="ghost" />
       </Link>
-    </ScrollView>
+    </PageScrollView>
   );
 }

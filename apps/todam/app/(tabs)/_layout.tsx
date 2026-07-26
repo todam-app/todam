@@ -1,6 +1,8 @@
 import { Tabs } from "expo-router";
 import { Platform, Text, View } from "react-native";
 
+const PAGE_BACKGROUND = "#F7F3EC";
+
 const icons = {
   index: "⌂",
   profile: "◯",
@@ -12,7 +14,9 @@ export default function TabLayout() {
     <View className="flex-1 bg-canvas">
       <Tabs
         screenOptions={({ route }) => ({
+          animation: "none",
           headerShown: false,
+          sceneStyle: { backgroundColor: PAGE_BACKGROUND },
           tabBarActiveTintColor: "#C43D28",
           tabBarInactiveTintColor: "#6F6B64",
           tabBarStyle:

@@ -52,7 +52,7 @@ export function LegalFooter({ alwaysVisible = false }: { alwaysVisible?: boolean
 
   return (
     <View
-      className="border-t border-line bg-paper px-5 py-10 md:px-8"
+      className="mx-auto w-full max-w-content border-t border-line bg-paper px-5 py-10 md:px-8"
       testID="site-footer"
     >
       <View className="mx-auto w-full max-w-content gap-10">

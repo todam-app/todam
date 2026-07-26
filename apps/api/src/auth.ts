@@ -18,7 +18,11 @@ import { username } from "better-auth/plugins";
 import { eq } from "drizzle-orm";
 import type { FastifyReply, FastifyRequest } from "fastify";
 
-import { createVerificationEmail, createWelcomeEmail } from "./auth-emails.js";
+import {
+  createEmailChangeVerificationEmail,
+  createVerificationEmail,
+  createWelcomeEmail,
+} from "./auth-emails.js";
 import { HttpProblem } from "./errors.js";
 import { currentLegalDocuments, publicWebUrl } from "./legal.js";
 
@@ -72,15 +76,30 @@ export function createAuth(database: TodamDatabase, emailSender: EmailSender) {
       expiresIn: 24 * 60 * 60,
       sendVerificationEmail: async ({ user: target, url }) => {
         await emailSender.send({
-          ...createVerificationEmail({
-            displayName: target.name,
-            publicWebUrl: publicWebUrl(),
-            verificationUrl: url,
-          }),
+          ...(target.emailVerified
+            ? createEmailChangeVerificationEmail({
+                displayName: target.name,
+                publicWebUrl: publicWebUrl(),
+                verificationUrl: url,
+              })
+            : createVerificationEmail({
+                displayName: target.name,
+                publicWebUrl: publicWebUrl(),
+                verificationUrl: url,
+              })),
           to: target.email,
         });
       },
-      afterEmailVerification: async (verifiedUser) => {
+      afterEmailVerification: async (verifiedUser, request) => {
+        const callbackURL = new URL(request?.url ?? baseUrl).searchParams.get(
+          "callbackURL",
+        );
+        if (
+          callbackURL &&
+          new URL(callbackURL, webAppUrl).searchParams.get("mode") === "change-email"
+        ) {
+          return;
+        }
         const rows = await database
           .select({
             email: user.email,
@@ -128,6 +147,9 @@ export function createAuth(database: TodamDatabase, emailSender: EmailSender) {
         : []),
     ],
     user: {
+      changeEmail: {
+        enabled: true,
+      },
       additionalFields: {
         ageConfirmedAt: {
           type: "date",
@@ -262,7 +284,7 @@ export function createAuth(database: TodamDatabase, emailSender: EmailSender) {
 
 export type TodamAuth = ReturnType<typeof createAuth>;
 
-function toWebHeaders(request: FastifyRequest): Headers {
+export function toWebHeaders(request: FastifyRequest): Headers {
   const headers = new Headers();
   for (const [name, value] of Object.entries(request.headers)) {
     if (Array.isArray(value)) {
@@ -272,6 +294,21 @@ function toWebHeaders(request: FastifyRequest): Headers {
     }
   }
   return headers;
+}
+
+export function forwardAuthHeaders(response: Response, reply: FastifyReply): void {
+  for (const [name, value] of response.headers.entries()) {
+    if (name.toLowerCase() !== "set-cookie") {
+      reply.header(name, value);
+    }
+  }
+  const responseHeaders = response.headers as Headers & {
+    getSetCookie?: () => string[];
+  };
+  const cookies = responseHeaders.getSetCookie?.() ?? [];
+  if (cookies.length > 0) {
+    reply.header("set-cookie", cookies);
+  }
 }
 
 export async function getRequiredUserId(
@@ -322,18 +359,7 @@ export async function handleAuthRequest(
   );
 
   reply.status(response.status);
-  for (const [name, value] of response.headers.entries()) {
-    if (name.toLowerCase() !== "set-cookie") {
-      reply.header(name, value);
-    }
-  }
-  const responseHeaders = response.headers as Headers & {
-    getSetCookie?: () => string[];
-  };
-  const cookies = responseHeaders.getSetCookie?.() ?? [];
-  if (cookies.length > 0) {
-    reply.header("set-cookie", cookies);
-  }
+  forwardAuthHeaders(response, reply);
   const payload = Buffer.from(await response.arrayBuffer());
   return reply.send(payload);
 }

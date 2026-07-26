@@ -107,12 +107,24 @@ export const user = pgTable(
     privacyNoticeVersion: text("privacy_notice_version").notNull(),
     registrationChannel: registrationChannelEnum("registration_channel").notNull(),
     role: roleEnum("role").default("member").notNull(),
+    homeLocality: text("home_locality"),
+    homeCountryCode: text("home_country_code"),
     ...timestamps,
   },
   (table) => [
     uniqueIndex("users_email_unique").on(table.email),
     uniqueIndex("users_pseudonym_unique").on(table.pseudonym),
     check("users_age_15_or_older_true", sql`${table.age15OrOlder} = true`),
+    check(
+      "users_home_city_complete",
+      sql`(
+        (${table.homeLocality} is null and ${table.homeCountryCode} is null)
+        or (
+          ${table.homeLocality} is not null
+          and ${table.homeCountryCode} ~ '^[A-Z]{2}$'
+        )
+      )`,
+    ),
   ],
 );
 
@@ -336,6 +348,7 @@ export const venues = pgTable(
   (table) => [
     uniqueIndex("venues_slug_unique").on(table.slug),
     index("venues_name_trgm_idx").using("gin", sql`${table.name} gin_trgm_ops`),
+    index("venues_locality_country_idx").on(table.locality, table.countryCode),
   ],
 );
 

@@ -137,7 +137,7 @@ export type PostV1AuthSignUpEmailData = {
     password: string;
     age15OrOlder: true;
     termsVersion: "1.0.0";
-    privacyNoticeVersion: "1.0.0";
+    privacyNoticeVersion: "1.0.1";
     channel: "web" | "android";
     callbackURL?: string;
   };
@@ -301,6 +301,10 @@ export type GetV1MeExportResponses = {
           email: string;
           emailVerified: boolean;
           createdAt: string;
+          homeCity: {
+            locality: string;
+            countryCode: string;
+          } | null;
         };
         legal: {
           age15OrOlder: boolean;
@@ -333,6 +337,288 @@ export type GetV1MeExportResponses = {
 
 export type GetV1MeExportResponse =
   GetV1MeExportResponses[keyof GetV1MeExportResponses];
+
+export type PatchV1MeUsernameData = {
+  body: {
+    username: string;
+  };
+  path?: never;
+  query?: never;
+  url: "/v1/me/username";
+};
+
+export type PatchV1MeUsernameErrors = {
+  /**
+   * Default Response
+   */
+  400: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  401: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  404: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+};
+
+export type PatchV1MeUsernameError =
+  PatchV1MeUsernameErrors[keyof PatchV1MeUsernameErrors];
+
+export type PatchV1MeUsernameResponses = {
+  /**
+   * Default Response
+   */
+  200: {
+    username: string;
+  };
+};
+
+export type PatchV1MeUsernameResponse =
+  PatchV1MeUsernameResponses[keyof PatchV1MeUsernameResponses];
+
+export type PostV1MeEmailChangeData = {
+  body: {
+    currentPassword: string;
+    newEmail: string;
+    callbackURL: string;
+  };
+  path?: never;
+  query?: never;
+  url: "/v1/me/email-change";
+};
+
+export type PostV1MeEmailChangeErrors = {
+  /**
+   * Default Response
+   */
+  400: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  401: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  404: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+};
+
+export type PostV1MeEmailChangeError =
+  PostV1MeEmailChangeErrors[keyof PostV1MeEmailChangeErrors];
+
+export type PostV1MeEmailChangeResponses = {
+  /**
+   * Default Response
+   */
+  200: {
+    verificationSent: true;
+  };
+};
+
+export type PostV1MeEmailChangeResponse =
+  PostV1MeEmailChangeResponses[keyof PostV1MeEmailChangeResponses];
+
+export type PostV1MePasswordChangeData = {
+  body: {
+    currentPassword: string;
+    newPassword: string;
+  };
+  path?: never;
+  query?: never;
+  url: "/v1/me/password-change";
+};
+
+export type PostV1MePasswordChangeErrors = {
+  /**
+   * Default Response
+   */
+  400: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  401: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  404: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+};
+
+export type PostV1MePasswordChangeError =
+  PostV1MePasswordChangeErrors[keyof PostV1MePasswordChangeErrors];
+
+export type PostV1MePasswordChangeResponses = {
+  /**
+   * Default Response
+   */
+  200: {
+    changed: true;
+  };
+};
+
+export type PostV1MePasswordChangeResponse =
+  PostV1MePasswordChangeResponses[keyof PostV1MePasswordChangeResponses];
 
 export type PostV1AccountDeletionRequestData = {
   body: {
@@ -549,6 +835,104 @@ export type GetHealthReadyResponses = {
 
 export type GetHealthReadyResponse =
   GetHealthReadyResponses[keyof GetHealthReadyResponses];
+
+export type GetV1CatalogCitiesData = {
+  body?: never;
+  path?: never;
+  query?: {
+    q?: string;
+    limit?: number;
+  };
+  url: "/v1/catalog/cities";
+};
+
+export type GetV1CatalogCitiesErrors = {
+  /**
+   * Default Response
+   */
+  400: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  401: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  404: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+};
+
+export type GetV1CatalogCitiesError =
+  GetV1CatalogCitiesErrors[keyof GetV1CatalogCitiesErrors];
+
+export type GetV1CatalogCitiesResponses = {
+  /**
+   * Default Response
+   */
+  200: {
+    items: Array<{
+      locality: string;
+      countryCode: string;
+      label: string;
+    }>;
+  };
+};
+
+export type GetV1CatalogCitiesResponse =
+  GetV1CatalogCitiesResponses[keyof GetV1CatalogCitiesResponses];
 
 export type GetV1SearchData = {
   body?: never;
@@ -1026,6 +1410,315 @@ export type GetV1MeProductionsByIdDiaryResponses = {
 
 export type GetV1MeProductionsByIdDiaryResponse =
   GetV1MeProductionsByIdDiaryResponses[keyof GetV1MeProductionsByIdDiaryResponses];
+
+export type GetV1MeHomeData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: "/v1/me/home";
+};
+
+export type GetV1MeHomeErrors = {
+  /**
+   * Default Response
+   */
+  400: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  401: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  404: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+};
+
+export type GetV1MeHomeError = GetV1MeHomeErrors[keyof GetV1MeHomeErrors];
+
+export type GetV1MeHomeResponses = {
+  /**
+   * Default Response
+   */
+  200: {
+    profile: {
+      pseudonym: string;
+    };
+    homeCity: {
+      locality: string;
+      countryCode: string;
+      label: string;
+    } | null;
+    progress: {
+      current: number;
+      target: 5;
+      completed: boolean;
+    };
+    radiusKm: 50;
+    nearby: Array<{
+      production: {
+        id: string;
+        slug: string;
+        title: string;
+        discipline: "theatre" | "opera" | "ballet";
+        audience: "general" | "family" | "children";
+        workTitle: string | null;
+        primaryCredit: string | null;
+        venueNames: Array<string>;
+        nextPerformance: string | null;
+        poster: {
+          id: string;
+          url: string;
+          kind: "poster" | "key_visual" | "photo" | "logo";
+          alt: string | null;
+          credit: string;
+          copyrightHolder: string | null;
+          license: string | null;
+          rightsStatus:
+            | "permission_granted"
+            | "open_license"
+            | "contractual_display"
+            | "hotlink_only";
+          sourceUrl: string;
+          width: number | null;
+          height: number | null;
+        } | null;
+      };
+      performance: {
+        startsAt: string;
+        venueName: string;
+        locality: string;
+        distanceKm: number | null;
+      } | null;
+    }>;
+    nationalUpcoming: Array<{
+      production: {
+        id: string;
+        slug: string;
+        title: string;
+        discipline: "theatre" | "opera" | "ballet";
+        audience: "general" | "family" | "children";
+        workTitle: string | null;
+        primaryCredit: string | null;
+        venueNames: Array<string>;
+        nextPerformance: string | null;
+        poster: {
+          id: string;
+          url: string;
+          kind: "poster" | "key_visual" | "photo" | "logo";
+          alt: string | null;
+          credit: string;
+          copyrightHolder: string | null;
+          license: string | null;
+          rightsStatus:
+            | "permission_granted"
+            | "open_license"
+            | "contractual_display"
+            | "hotlink_only";
+          sourceUrl: string;
+          width: number | null;
+          height: number | null;
+        } | null;
+      };
+      performance: {
+        startsAt: string;
+        venueName: string;
+        locality: string;
+        distanceKm: number | null;
+      } | null;
+    }>;
+    recentlyAdded: Array<{
+      production: {
+        id: string;
+        slug: string;
+        title: string;
+        discipline: "theatre" | "opera" | "ballet";
+        audience: "general" | "family" | "children";
+        workTitle: string | null;
+        primaryCredit: string | null;
+        venueNames: Array<string>;
+        nextPerformance: string | null;
+        poster: {
+          id: string;
+          url: string;
+          kind: "poster" | "key_visual" | "photo" | "logo";
+          alt: string | null;
+          credit: string;
+          copyrightHolder: string | null;
+          license: string | null;
+          rightsStatus:
+            | "permission_granted"
+            | "open_license"
+            | "contractual_display"
+            | "hotlink_only";
+          sourceUrl: string;
+          width: number | null;
+          height: number | null;
+        } | null;
+      };
+      performance: {
+        startsAt: string;
+        venueName: string;
+        locality: string;
+        distanceKm: number | null;
+      } | null;
+    }>;
+  };
+};
+
+export type GetV1MeHomeResponse = GetV1MeHomeResponses[keyof GetV1MeHomeResponses];
+
+export type PutV1MeHomeCityData = {
+  body: {
+    city: {
+      locality: string;
+      countryCode: string;
+    } | null;
+  };
+  path?: never;
+  query?: never;
+  url: "/v1/me/home-city";
+};
+
+export type PutV1MeHomeCityErrors = {
+  /**
+   * Default Response
+   */
+  400: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  401: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  404: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+};
+
+export type PutV1MeHomeCityError = PutV1MeHomeCityErrors[keyof PutV1MeHomeCityErrors];
+
+export type PutV1MeHomeCityResponses = {
+  /**
+   * Default Response
+   */
+  200: {
+    city: {
+      locality: string;
+      countryCode: string;
+      label: string;
+    } | null;
+  };
+};
+
+export type PutV1MeHomeCityResponse =
+  PutV1MeHomeCityResponses[keyof PutV1MeHomeCityResponses];
 
 export type GetV1MeDashboardData = {
   body?: never;

@@ -5,13 +5,13 @@ import {
   Linking,
   Platform,
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
   View,
 } from "react-native";
 
 import { LegalFooter } from "../components/LegalFooter";
+import { PageScrollView } from "../components/PageScrollView";
 import { api } from "../lib/api";
 import { resolveBuildInfo } from "../lib/build-info";
 
@@ -136,7 +136,7 @@ export default function TransparencyScreen() {
           name="description"
         />
       </Head>
-      <ScrollView
+      <PageScrollView
         contentContainerClassName="flex-grow"
         contentInsetAdjustmentBehavior="automatic"
       >
@@ -341,7 +341,7 @@ export default function TransparencyScreen() {
           </View>
         </View>
         <LegalFooter />
-      </ScrollView>
+      </PageScrollView>
     </>
   );
 }

@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const CURRENT_TERMS_VERSION = "1.0.0";
-export const CURRENT_PRIVACY_NOTICE_VERSION = "1.0.0";
+export const CURRENT_PRIVACY_NOTICE_VERSION = "1.0.1";
 export const LEGAL_EFFECTIVE_DATE = "2026-07-26";
 
 export const RegistrationChannelSchema = z.enum(["web", "android"]);
@@ -46,6 +46,12 @@ export const AccountExportSchema = z.object({
     email: z.string().email(),
     emailVerified: z.boolean(),
     createdAt: z.string().datetime({ offset: true }),
+    homeCity: z
+      .object({
+        locality: z.string(),
+        countryCode: z.string().regex(/^[A-Z]{2}$/),
+      })
+      .nullable(),
   }),
   legal: z.object({
     age15OrOlder: z.boolean(),

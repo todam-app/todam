@@ -1,14 +1,21 @@
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button, SectionTitle, StatCard } from "@todam/design-system";
+import { Button, SectionTitle, StatCard, tokens } from "@todam/design-system";
 import { useRouter } from "expo-router";
-import { useState } from "react";
-import { Platform, ScrollView, Share, Text, View } from "react-native";
+import { Platform, Pressable, Text, View } from "react-native";
 
 import { AsyncState } from "../../components/AsyncState";
 import { LegalFooter } from "../../components/LegalFooter";
+import { PageScrollView } from "../../components/PageScrollView";
 import { ProductionListItem } from "../../components/ProductionListItem";
 import { api } from "../../lib/api";
 import { authClient } from "../../lib/auth-client";
+
+const legalLinks = [
+  { href: "/conditions-utilisation", label: "Conditions d'utilisation" },
+  { href: "/confidentialite", label: "Politique de confidentialité" },
+  { href: "/mentions-legales", label: "Mentions légales" },
+] as const;
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -19,41 +26,9 @@ export default function ProfileScreen() {
     queryFn: () => api.getDashboard(),
     enabled: Boolean(session.data),
   });
-  const [exportPending, setExportPending] = useState(false);
-  const [exportMessage, setExportMessage] = useState<string | null>(null);
-
   async function signOut() {
     await authClient.signOut();
     queryClient.clear();
-  }
-
-  async function exportData() {
-    setExportPending(true);
-    setExportMessage(null);
-    try {
-      const exported = await api.exportAccountJson();
-      const contents = JSON.stringify(exported, null, 2);
-      if (Platform.OS === "web") {
-        const url = URL.createObjectURL(
-          new Blob([contents], { type: "application/json;charset=utf-8" }),
-        );
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = `todam-export-${new Date().toISOString().slice(0, 10)}.json`;
-        link.click();
-        URL.revokeObjectURL(url);
-      } else {
-        await Share.share({
-          message: contents,
-          title: "Export de mes données Todam",
-        });
-      }
-      setExportMessage("L'export a été préparé.");
-    } catch {
-      setExportMessage("L'export n'a pas pu être créé. Réessaie plus tard.");
-    } finally {
-      setExportPending(false);
-    }
   }
 
   if (session.isPending) {
@@ -66,7 +41,7 @@ export default function ProfileScreen() {
 
   if (!session.data) {
     return (
-      <ScrollView contentContainerClassName="flex-grow">
+      <PageScrollView contentContainerClassName="flex-grow">
         <View
           className={`${Platform.OS === "web" ? "todam-page-before-footer " : ""}mx-auto w-full max-w-xl flex-1 items-center justify-center gap-5 px-5 py-12`}
         >
@@ -90,7 +65,7 @@ export default function ProfileScreen() {
           </View>
         </View>
         <LegalFooter />
-      </ScrollView>
+      </PageScrollView>
     );
   }
 
@@ -110,7 +85,7 @@ export default function ProfileScreen() {
     : [];
 
   return (
-    <ScrollView
+    <PageScrollView
       contentContainerClassName="flex-grow"
       contentInsetAdjustmentBehavior="automatic"
     >
@@ -126,7 +101,7 @@ export default function ProfileScreen() {
         >
           {dashboard.data ? (
             <>
-              <View className="flex-row items-center justify-between gap-4">
+              <View className="flex-row flex-wrap items-center justify-between gap-4">
                 <View className="gap-1">
                   <Text className="text-sm text-muted">Mon profil</Text>
                   <Text
@@ -136,11 +111,18 @@ export default function ProfileScreen() {
                     {dashboard.data.profile.pseudonym}
                   </Text>
                 </View>
-                <Button
-                  label="Se déconnecter"
-                  onPress={() => void signOut()}
-                  variant="ghost"
-                />
+                <View className="flex-row flex-wrap items-center justify-end gap-2">
+                  <Button
+                    label="Paramètres du compte"
+                    onPress={() => router.push("/parametres-compte")}
+                    variant="secondary"
+                  />
+                  <Button
+                    label="Se déconnecter"
+                    onPress={() => void signOut()}
+                    variant="ghost"
+                  />
+                </View>
               </View>
 
               <View className="flex-row flex-wrap gap-2">
@@ -210,43 +192,39 @@ export default function ProfileScreen() {
                   </View>
                 )}
               </View>
-              <View className="gap-3">
-                <SectionTitle>Compte et confidentialité</SectionTitle>
-                <Button
-                  label="Exporter mes données"
-                  loading={exportPending}
-                  onPress={() => void exportData()}
-                  variant="secondary"
-                />
-                <Button
-                  label="Conditions d'utilisation"
-                  onPress={() => router.push("/conditions-utilisation")}
-                  variant="ghost"
-                />
-                <Button
-                  label="Politique de confidentialité"
-                  onPress={() => router.push("/confidentialite")}
-                  variant="ghost"
-                />
-                <Button
-                  label="Mentions légales"
-                  onPress={() => router.push("/mentions-legales")}
-                  variant="ghost"
-                />
-                <Button
-                  label="Supprimer mon compte"
-                  onPress={() => router.push("/supprimer-mon-compte")}
-                  variant="ghost"
-                />
-                {exportMessage ? (
-                  <Text className="text-sm leading-5 text-muted">{exportMessage}</Text>
-                ) : null}
-              </View>
+              {Platform.OS !== "web" ? (
+                <View className="w-full max-w-3xl gap-4">
+                  <SectionTitle>Informations légales</SectionTitle>
+                  <View className="overflow-hidden rounded-todam border border-line bg-paper">
+                    {legalLinks.map((item, index) => (
+                      <Pressable
+                        accessibilityRole="link"
+                        className={`min-h-14 flex-row items-center justify-between gap-4 px-4 ${
+                          index < legalLinks.length - 1 ? "border-b border-line" : ""
+                        }`}
+                        key={item.href}
+                        onPress={() => router.push(item.href)}
+                      >
+                        <Text className="flex-1 font-semibold text-ink">
+                          {item.label}
+                        </Text>
+                        <Ionicons
+                          accessibilityElementsHidden
+                          color={tokens.color.muted}
+                          importantForAccessibility="no"
+                          name="chevron-forward"
+                          size={20}
+                        />
+                      </Pressable>
+                    ))}
+                  </View>
+                </View>
+              ) : null}
             </>
           ) : null}
         </AsyncState>
       </View>
       <LegalFooter />
-    </ScrollView>
+    </PageScrollView>
   );
 }

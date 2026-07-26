@@ -14,7 +14,7 @@ import { tokens } from "./tokens.js";
 
 export { tokens } from "./tokens.js";
 
-type ButtonVariant = "primary" | "secondary" | "ghost";
+type ButtonVariant = "primary" | "secondary" | "ghost" | "danger";
 
 export interface ButtonProps extends Omit<PressableProps, "children"> {
   label: string;
@@ -40,6 +40,7 @@ export function Button({
         variant === "primary" && styles.buttonPrimary,
         variant === "secondary" && styles.buttonSecondary,
         variant === "ghost" && styles.buttonGhost,
+        variant === "danger" && styles.buttonDanger,
         state.pressed && styles.buttonPressed,
         (disabled || loading) && styles.disabled,
         typeof style === "function" ? style(state) : style,
@@ -49,13 +50,18 @@ export function Button({
       {loading ? (
         <ActivityIndicator
           accessibilityLabel="Chargement"
-          color={variant === "primary" ? tokens.color.surface : tokens.color.ink}
+          color={
+            variant === "primary" || variant === "danger"
+              ? tokens.color.surface
+              : tokens.color.ink
+          }
         />
       ) : (
         <Text
           style={[
             styles.buttonLabel,
-            variant === "primary" && styles.buttonLabelPrimary,
+            (variant === "primary" || variant === "danger") &&
+              styles.buttonLabelPrimary,
           ]}
         >
           {label}
@@ -177,6 +183,9 @@ const styles = StyleSheet.create({
   },
   buttonGhost: {
     backgroundColor: "transparent",
+  },
+  buttonDanger: {
+    backgroundColor: tokens.color.error,
   },
   buttonLabel: {
     color: tokens.color.ink,

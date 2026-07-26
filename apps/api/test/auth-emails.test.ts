@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { createVerificationEmail, createWelcomeEmail } from "../src/auth-emails.js";
+import {
+  createEmailChangeVerificationEmail,
+  createVerificationEmail,
+  createWelcomeEmail,
+} from "../src/auth-emails.js";
 
 describe("e-mails d'authentification Todam", () => {
   it("rend la confirmation en HTML et en texte sans injecter les valeurs dynamiques", () => {
@@ -56,6 +60,20 @@ describe("e-mails d'authentification Todam", () => {
     expect(email.html).toContain("Tes documents d’inscription");
     expect(email.html).toContain("CGU version 1.0.0 acceptées le 26 juillet 2026");
     expect(email.html).toContain('href="https://todam.fr/profile"');
+  });
+
+  it("distingue la confirmation d'une nouvelle adresse de l'inscription", () => {
+    const email = createEmailChangeVerificationEmail({
+      displayName: "Camille",
+      publicWebUrl: "https://todam.fr",
+      verificationUrl: "https://api.todam.fr/v1/auth/verify-email?token=change-email",
+    });
+
+    expect(email.subject).toBe("Confirme ta nouvelle adresse e-mail — Todam");
+    expect(email.text).toContain("Ton ancienne adresse reste active");
+    expect(email.html).toContain("Confirmer ma nouvelle adresse");
+    expect(email.html).toContain("Sécurité du compte");
+    expect(email.html).not.toContain("Ton journal t’attend");
   });
 
   it("conserve une mise en page éditoriale lisible sur les clients e-mail", () => {

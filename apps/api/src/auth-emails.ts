@@ -23,6 +23,8 @@ export interface VerificationEmailInput {
   verificationUrl: string;
 }
 
+export type EmailChangeVerificationInput = VerificationEmailInput;
+
 export interface WelcomeEmailInput {
   displayName: string;
   privacyNotice: {
@@ -196,6 +198,44 @@ export function createVerificationEmail(
       `Confirmer mon adresse : ${input.verificationUrl}\n\n` +
       "Ce lien est valable pendant 24 heures.\n\n" +
       "Tu n'as pas créé de compte Todam ? Tu peux ignorer cet e-mail en toute sécurité.",
+  };
+}
+
+export function createEmailChangeVerificationEmail(
+  input: EmailChangeVerificationInput,
+): AuthEmailContent {
+  const displayName = normalizeDisplayName(input.displayName);
+  const safeDisplayName = escapeHtml(displayName);
+  const safeVerificationUrl = escapeHtml(input.verificationUrl);
+  const preheader =
+    "Confirme cette nouvelle adresse pour l’utiliser sur ton compte Todam.";
+
+  const content = `
+    <p style="color:${color.ink};font-family:Arial,Helvetica,sans-serif;font-size:17px;line-height:27px;margin:0 0 14px;">Bonjour <strong>${safeDisplayName}</strong>,</p>
+    <p style="color:${color.ink};font-family:Arial,Helvetica,sans-serif;font-size:17px;line-height:27px;margin:0 0 24px;">Confirme cette adresse pour terminer la modification de ton compte Todam. Ton ancienne adresse reste active jusqu’à cette confirmation.</p>
+    ${renderButton("Confirmer ma nouvelle adresse", input.verificationUrl)}
+    <p style="color:${color.muted};font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:21px;margin:16px 0 0;">Ce lien est valable pendant 24 heures.</p>
+    <div style="border-top:1px solid ${color.border};margin:30px 0 0;padding:24px 0 0;">
+      <p style="color:${color.muted};font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:21px;margin:0 0 10px;">Le bouton ne fonctionne pas ? Copie ce lien dans ton navigateur :</p>
+      <p style="font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:19px;margin:0;overflow-wrap:anywhere;word-break:break-all;"><a href="${safeVerificationUrl}" style="color:${color.accent};text-decoration:underline;">${safeVerificationUrl}</a></p>
+    </div>
+    <p style="color:${color.muted};font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:21px;margin:24px 0 0;">Tu n’as pas demandé ce changement ? N’utilise pas ce lien et sécurise ton compte.</p>`;
+
+  return {
+    html: renderEmailFrame({
+      content,
+      eyebrow: "Sécurité du compte",
+      preheader,
+      publicWebUrl: input.publicWebUrl,
+      title: "Confirme ta nouvelle adresse e-mail.",
+    }),
+    subject: "Confirme ta nouvelle adresse e-mail — Todam",
+    text:
+      `Bonjour ${displayName},\n\n` +
+      "Confirme cette adresse pour terminer la modification de ton compte Todam. Ton ancienne adresse reste active jusqu’à cette confirmation.\n\n" +
+      `Confirmer ma nouvelle adresse : ${input.verificationUrl}\n\n` +
+      "Ce lien est valable pendant 24 heures.\n\n" +
+      "Tu n’as pas demandé ce changement ? N’utilise pas ce lien et sécurise ton compte.",
   };
 }
 

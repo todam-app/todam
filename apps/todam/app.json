@@ -22,7 +22,9 @@
     "web": {
       "bundler": "metro",
       "output": "single",
-      "favicon": "./assets/brand/todam-favicon.png"
+      "favicon": "./assets/brand/todam-favicon.png",
+      "name": "Todam - Journal de spectacles",
+      "shortName": "Todam"
     }
   }
 }

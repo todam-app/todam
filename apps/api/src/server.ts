@@ -25,6 +25,13 @@ export interface BuildServerOptions {
   emailSender?: EmailSender;
 }
 
+function corsOrigins(): string | (string | RegExp)[] {
+  const webAppOrigin = process.env.WEB_APP_URL ?? "http://localhost:8081";
+  if (process.env.NODE_ENV === "production") return webAppOrigin;
+
+  return [webAppOrigin, /^https?:\/\/(?:localhost|127\.0\.0\.1|\[::1\])(?::\d+)?$/];
+}
+
 function statusTitle(status: number): string {
   switch (status) {
     case 400:
@@ -82,7 +89,7 @@ export async function buildServer(options: BuildServerOptions) {
   app.setSerializerCompiler(serializerCompiler);
 
   await app.register(cors, {
-    origin: process.env.WEB_APP_URL ?? "http://localhost:8081",
+    origin: corsOrigins(),
     credentials: true,
     methods: ["GET", "HEAD", "POST", "PUT", "DELETE"],
   });

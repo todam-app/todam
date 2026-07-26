@@ -11,6 +11,7 @@ module.exports = {
     extend: {
       colors: {
         canvas: "#F7F3EC",
+        gutter: "#F0EAE1",
         paper: "#FFFDF8",
         ink: "#151515",
         muted: "#6F6B64",

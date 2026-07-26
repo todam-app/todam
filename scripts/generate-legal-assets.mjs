@@ -5,7 +5,7 @@ import { format } from "prettier";
 const root = process.cwd();
 const documents = {
   terms: "docs/legal/conditions-utilisation-v1.0.0.md",
-  privacy: "docs/legal/confidentialite-v1.0.0.md",
+  privacy: "docs/legal/confidentialite-v1.0.1.md",
   notices: "docs/legal/mentions-legales-v1.0.0.md",
   deletion: "docs/legal/suppression-compte-v1.0.0.md",
 };

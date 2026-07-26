@@ -3,9 +3,10 @@ import type { ViewerProductionState } from "@todam/contracts";
 import { Button, SectionTitle } from "@todam/design-system";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
-import { Linking, ScrollView, Text, View } from "react-native";
+import { Linking, Text, View } from "react-native";
 
 import { AsyncState } from "../../components/AsyncState";
+import { PageScrollView } from "../../components/PageScrollView";
 import { ProductionActions } from "../../components/ProductionActions";
 import { ProductionPoster } from "../../components/ProductionPoster";
 import { RatingPicker } from "../../components/RatingPicker";
@@ -46,6 +47,7 @@ export default function ProductionScreen() {
   function updateState(next: ViewerProductionState) {
     queryClient.setQueryData(stateKey, next);
     void queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+    void queryClient.invalidateQueries({ queryKey: ["home"] });
   }
 
   const seenMutation = useMutation({
@@ -167,7 +169,7 @@ export default function ProductionScreen() {
   ]);
 
   return (
-    <ScrollView
+    <PageScrollView
       contentContainerClassName="mx-auto w-full max-w-content gap-8 px-5 py-8 md:px-8 md:py-12"
       contentInsetAdjustmentBehavior="automatic"
     >
@@ -310,6 +312,6 @@ export default function ProductionScreen() {
           </>
         ) : null}
       </AsyncState>
-    </ScrollView>
+    </PageScrollView>
   );
 }

@@ -1,6 +1,10 @@
 import type {
+  CityOption,
+  CitySelection,
   Dashboard,
   DiarySession,
+  HomeDiscoveryItem,
+  HomeResponse,
   Poster,
   ProductionCard,
   ProductionDetail,
@@ -25,7 +29,7 @@ import {
   type TodamDatabase,
 } from "@todam/database";
 import { planRating, planSeen } from "@todam/domain";
-import { and, asc, count, desc, eq, sql } from "drizzle-orm";
+import { and, asc, count, desc, eq, inArray, notInArray, sql } from "drizzle-orm";
 
 import { HttpProblem } from "./errors.js";
 
@@ -150,8 +154,16 @@ interface CardRow {
   workTitle: string | null;
   primaryCredit: string | null;
   venueNames: string[];
-  nextPerformance: Date | null;
+  nextPerformance: Date | string | null;
   poster: PosterWithStorage | null;
+}
+
+interface HomeHighlightRow extends Record<string, unknown> {
+  production_id: string;
+  starts_at: Date | string;
+  venue_name: string;
+  locality: string;
+  distance_km: number | string | null;
 }
 
 function mapCard(row: CardRow): ProductionCard {
@@ -164,7 +176,12 @@ function mapCard(row: CardRow): ProductionCard {
     workTitle: row.workTitle,
     primaryCredit: row.primaryCredit,
     venueNames: row.venueNames,
-    nextPerformance: row.nextPerformance?.toISOString() ?? null,
+    nextPerformance:
+      row.nextPerformance instanceof Date
+        ? row.nextPerformance.toISOString()
+        : row.nextPerformance
+          ? new Date(row.nextPerformance).toISOString()
+          : null,
     poster: row.poster ? mapPoster(row.poster) : null,
   };
 }
@@ -175,10 +192,25 @@ export interface SearchInput {
   limit: number;
 }
 
+export interface CitySearchInput {
+  q?: string | undefined;
+  limit: number;
+}
+
 export interface SeenInput {
   productionId: string;
   performanceId: string | null;
   attendedOn: string | null;
+}
+
+const HOME_DISCOVERY_LIMIT = 8;
+const HOME_DISCOVERY_RADIUS_KM = 50;
+
+function cityOption(city: CitySelection): CityOption {
+  return {
+    ...city,
+    label: city.locality,
+  };
 }
 
 export function createCatalogService(database: TodamDatabase) {
@@ -195,6 +227,150 @@ export function createCatalogService(database: TodamDatabase) {
         "Ce spectacle n'existe pas dans Todam.",
       );
     }
+  }
+
+  async function getCardsByIds(productionIds: string[]): Promise<ProductionCard[]> {
+    if (productionIds.length === 0) return [];
+    const rows = await database
+      .select(cardFields)
+      .from(productions)
+      .leftJoin(works, eq(works.id, productions.workId))
+      .where(
+        and(eq(productions.isActive, true), inArray(productions.id, productionIds)),
+      );
+    const cardsById = new Map(rows.map((row) => [row.id, mapCard(row as CardRow)]));
+    return productionIds.flatMap((id) => {
+      const card = cardsById.get(id);
+      return card ? [card] : [];
+    });
+  }
+
+  async function mapHighlights(rows: HomeHighlightRow[]): Promise<HomeDiscoveryItem[]> {
+    const cards = await getCardsByIds(rows.map((row) => row.production_id));
+    const cardsById = new Map(cards.map((card) => [card.id, card]));
+    return rows.flatMap((row) => {
+      const production = cardsById.get(row.production_id);
+      if (!production) return [];
+      const distance = row.distance_km === null ? null : Number(row.distance_km);
+      return [
+        {
+          production,
+          performance: {
+            startsAt: new Date(row.starts_at).toISOString(),
+            venueName: row.venue_name,
+            locality: row.locality,
+            distanceKm:
+              distance === null || !Number.isFinite(distance)
+                ? null
+                : Math.round(distance * 10) / 10,
+          },
+        },
+      ];
+    });
+  }
+
+  async function getNationalHighlights(limit: number) {
+    const result = await database.execute<HomeHighlightRow>(sql`
+      with ranked_performances as (
+        select
+          ${performances.productionId} as production_id,
+          ${performances.startsAt} as starts_at,
+          ${venues.name} as venue_name,
+          ${venues.locality} as locality,
+          null::double precision as distance_km,
+          row_number() over (
+            partition by ${performances.productionId}
+            order by ${performances.startsAt}, ${performances.id}
+          ) as position
+        from ${performances}
+        join ${venues} on ${venues.id} = ${performances.venueId}
+        join ${productions} on ${productions.id} = ${performances.productionId}
+        where ${productions.isActive} = true
+          and ${performances.status} = 'scheduled'
+          and ${performances.startsAt} >= now()
+      )
+      select production_id, starts_at, venue_name, locality, distance_km
+      from ranked_performances
+      where position = 1
+      order by starts_at, production_id
+      limit ${limit}
+    `);
+    return result.rows;
+  }
+
+  async function getNearbyHighlights(city: CitySelection) {
+    const result = await database.execute<HomeHighlightRow>(sql`
+      with city_center as (
+        select st_centroid(st_collect(${venues.coordinates})) as coordinates
+        from ${venues}
+        where lower(unaccent(${venues.locality})) =
+              lower(unaccent(${city.locality}))
+          and ${venues.countryCode} = ${city.countryCode}
+          and ${venues.coordinates} is not null
+      ),
+      ranked_performances as (
+        select
+          ${performances.productionId} as production_id,
+          ${performances.startsAt} as starts_at,
+          ${venues.name} as venue_name,
+          ${venues.locality} as locality,
+          case
+            when city_center.coordinates is null
+              or ${venues.coordinates} is null
+            then null
+            else (
+              st_distance(
+                ${venues.coordinates}::geography,
+                city_center.coordinates::geography
+              ) / 1000.0
+            )::double precision
+          end as distance_km,
+          row_number() over (
+            partition by ${performances.productionId}
+            order by
+              ${performances.startsAt},
+              case
+                when city_center.coordinates is null
+                  or ${venues.coordinates} is null
+                then null
+                else st_distance(
+                  ${venues.coordinates}::geography,
+                  city_center.coordinates::geography
+                )
+              end nulls last,
+              ${performances.id}
+          ) as position
+        from ${performances}
+        join ${venues} on ${venues.id} = ${performances.venueId}
+        join ${productions} on ${productions.id} = ${performances.productionId}
+        cross join city_center
+        where ${productions.isActive} = true
+          and ${performances.status} = 'scheduled'
+          and ${performances.startsAt} >= now()
+          and (
+            (
+              city_center.coordinates is not null
+              and ${venues.coordinates} is not null
+              and st_dwithin(
+                ${venues.coordinates}::geography,
+                city_center.coordinates::geography,
+                ${HOME_DISCOVERY_RADIUS_KM * 1000}
+              )
+            )
+            or (
+              lower(unaccent(${venues.locality})) =
+                lower(unaccent(${city.locality}))
+              and ${venues.countryCode} = ${city.countryCode}
+            )
+          )
+      )
+      select production_id, starts_at, venue_name, locality, distance_km
+      from ranked_performances
+      where position = 1
+      order by starts_at, distance_km nulls last, production_id
+      limit ${HOME_DISCOVERY_LIMIT}
+    `);
+    return result.rows;
   }
 
   async function getProductionState(
@@ -239,6 +415,179 @@ export function createCatalogService(database: TodamDatabase) {
   return {
     async ping(): Promise<void> {
       await database.execute(sql`select 1`);
+    },
+
+    async searchCities(input: CitySearchInput): Promise<CityOption[]> {
+      const pattern = input.q ? `%${input.q}%` : null;
+      const rows = await database
+        .selectDistinct({
+          locality: venues.locality,
+          countryCode: venues.countryCode,
+        })
+        .from(venues)
+        .where(
+          pattern
+            ? sql<boolean>`unaccent(${venues.locality}) ilike unaccent(${pattern})`
+            : undefined,
+        )
+        .orderBy(asc(venues.locality), asc(venues.countryCode))
+        .limit(input.limit);
+      return rows.map(cityOption);
+    },
+
+    async setHomeCity(
+      userId: string,
+      requestedCity: CitySelection | null,
+    ): Promise<CityOption | null> {
+      if (requestedCity === null) {
+        const updated = await database
+          .update(user)
+          .set({
+            homeLocality: null,
+            homeCountryCode: null,
+            updatedAt: new Date(),
+          })
+          .where(eq(user.id, userId))
+          .returning({ id: user.id });
+        if (!updated[0]) {
+          throw new HttpProblem(
+            404,
+            "PROFILE_NOT_FOUND",
+            "Le profil associé à cette session est introuvable.",
+          );
+        }
+        return null;
+      }
+
+      const canonicalRows = await database
+        .selectDistinct({
+          locality: venues.locality,
+          countryCode: venues.countryCode,
+        })
+        .from(venues)
+        .where(
+          and(
+            eq(venues.countryCode, requestedCity.countryCode),
+            sql<boolean>`lower(unaccent(${venues.locality})) =
+              lower(unaccent(${requestedCity.locality}))`,
+          ),
+        )
+        .limit(1);
+      const canonical = canonicalRows[0];
+      if (!canonical) {
+        throw new HttpProblem(
+          404,
+          "CITY_NOT_FOUND",
+          "Cette ville n'existe pas dans le catalogue Todam.",
+        );
+      }
+
+      const updated = await database
+        .update(user)
+        .set({
+          homeLocality: canonical.locality,
+          homeCountryCode: canonical.countryCode,
+          updatedAt: new Date(),
+        })
+        .where(eq(user.id, userId))
+        .returning({ id: user.id });
+      if (!updated[0]) {
+        throw new HttpProblem(
+          404,
+          "PROFILE_NOT_FOUND",
+          "Le profil associé à cette session est introuvable.",
+        );
+      }
+      return cityOption(canonical);
+    },
+
+    async getHome(userId: string): Promise<HomeResponse> {
+      const [profileRows, progressResult] = await Promise.all([
+        database
+          .select({
+            pseudonym: user.pseudonym,
+            homeLocality: user.homeLocality,
+            homeCountryCode: user.homeCountryCode,
+          })
+          .from(user)
+          .where(eq(user.id, userId))
+          .limit(1),
+        database.execute<{ total: number | string }>(sql`
+          select count(*)::integer as total
+          from (
+            select ${diaryEntries.productionId} as production_id
+            from ${diaryEntries}
+            where ${diaryEntries.userId} = ${userId}
+            union
+            select ${ratings.productionId} as production_id
+            from ${ratings}
+            where ${ratings.userId} = ${userId}
+            union
+            select ${watchlistEntries.productionId} as production_id
+            from ${watchlistEntries}
+            where ${watchlistEntries.userId} = ${userId}
+          ) personal_productions
+        `),
+      ]);
+      const profile = profileRows[0];
+      if (!profile) {
+        throw new HttpProblem(
+          404,
+          "PROFILE_NOT_FOUND",
+          "Le profil associé à cette session est introuvable.",
+        );
+      }
+
+      const homeCity =
+        profile.homeLocality && profile.homeCountryCode
+          ? cityOption({
+              locality: profile.homeLocality,
+              countryCode: profile.homeCountryCode,
+            })
+          : null;
+      const nearbyRows = homeCity ? await getNearbyHighlights(homeCity) : [];
+      const nearby = await mapHighlights(nearbyRows);
+      const nearbyIds = new Set(nearby.map((item) => item.production.id));
+      const nationalRows = (await getNationalHighlights(HOME_DISCOVERY_LIMIT * 2))
+        .filter((row) => !nearbyIds.has(row.production_id))
+        .slice(0, HOME_DISCOVERY_LIMIT);
+      const nationalUpcoming = await mapHighlights(nationalRows);
+      const excludedIds = [
+        ...nearbyIds,
+        ...nationalUpcoming.map((item) => item.production.id),
+      ];
+      const recentRows = await database
+        .select(cardFields)
+        .from(productions)
+        .leftJoin(works, eq(works.id, productions.workId))
+        .where(
+          and(
+            eq(productions.isActive, true),
+            excludedIds.length > 0
+              ? notInArray(productions.id, excludedIds)
+              : undefined,
+          ),
+        )
+        .orderBy(desc(productions.createdAt), asc(productions.id))
+        .limit(HOME_DISCOVERY_LIMIT);
+      const progress = Number(progressResult.rows[0]?.total ?? 0);
+
+      return {
+        profile: { pseudonym: profile.pseudonym },
+        homeCity,
+        progress: {
+          current: progress,
+          target: 5,
+          completed: progress >= 5,
+        },
+        radiusKm: HOME_DISCOVERY_RADIUS_KM,
+        nearby,
+        nationalUpcoming,
+        recentlyAdded: recentRows.map((row) => ({
+          production: mapCard(row as CardRow),
+          performance: null,
+        })),
+      };
     },
 
     async search(input: SearchInput): Promise<SearchResponse> {

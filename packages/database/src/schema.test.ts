@@ -1,4 +1,4 @@
-import { getTableName } from "drizzle-orm";
+import { getTableColumns, getTableName } from "drizzle-orm";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -36,5 +36,12 @@ describe("schéma Todam", () => {
       "media_assets",
       "production_media",
     ]);
+  });
+
+  it("conserve la ville d'accueil comme prÃ©fÃ©rence facultative du compte", () => {
+    const columns = getTableColumns(user);
+
+    expect(columns.homeLocality.notNull).toBe(false);
+    expect(columns.homeCountryCode.notNull).toBe(false);
   });
 });
