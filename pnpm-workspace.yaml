@@ -1,6 +1,9 @@
 packages:
   - apps/*
   - packages/*
+# Correctif transitoire : @aws-sdk/xml-builder 3.901.0 impose encore la version vulnérable 5.2.5.
+overrides:
+  fast-xml-parser: 5.10.1
 allowBuilds:
   esbuild: true
   unrs-resolver: true
