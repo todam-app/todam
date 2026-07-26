@@ -1,7 +1,36 @@
 {
   "name": "@todam/database",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "private": true,
   "license": "AGPL-3.0-only",
-  "description": "Futurs schéma Drizzle et migrations de Todam."
+  "description": "Schéma Drizzle, migrations et accès PostgreSQL de Todam.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./schema": "./src/schema.ts"
+  },
+  "scripts": {
+    "build": "tsup src/index.ts src/schema.ts src/migrate.ts --format esm --dts --clean",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "tsx src/migrate.ts",
+    "db:studio": "drizzle-kit studio",
+    "lint": "eslint src",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@todam/contracts": "workspace:*",
+    "dotenv": "17.4.2",
+    "drizzle-orm": "0.45.2",
+    "pg": "8.22.0"
+  },
+  "devDependencies": {
+    "@types/node": "26.1.1",
+    "@types/pg": "8.20.0",
+    "drizzle-kit": "0.31.10",
+    "tsup": "8.5.1",
+    "tsx": "4.23.1",
+    "typescript": "6.0.3",
+    "vitest": "4.1.10"
+  }
 }

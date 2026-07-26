@@ -4,7 +4,7 @@
 
 ### Positionnement
 
-Todam est **le journal du spectacle vivant** : une application française permettant de retrouver, consigner, noter et partager les spectacles de théâtre, d’opéra et de ballet.
+Todam est un journal personnel de spectacles : une application française permettant de retrouver, consigner, noter et partager les spectacles de théâtre, d’opéra et de ballet.
 
 La valeur principale est personnelle : conserver la mémoire de ce que l’on a vu et comprendre ses goûts. La découverte locale et les profils suivis enrichissent cette habitude sans transformer Todam en billetterie ou en réseau social généraliste.
 
@@ -84,7 +84,7 @@ En l’absence de résultat, Todam propose de corriger la recherche, d’inclure
 En-tête :
 
 - Avatar facultatif
-- Pseudonyme obligatoire
+- Nom d'utilisateur obligatoire
 - Bio facultative
 - Ville ou région facultative
 - Abonnements et abonnés
@@ -106,7 +106,7 @@ Contenu du profil personnel :
 5. Aperçu des listes
 6. Liens « Voir tout » vers les pages complètes
 
-Le journal contient toutes les séances, même lorsqu’une production a été vue plusieurs fois. Le compteur Vus ne compte toutefois chaque production qu’une fois.
+Le journal affiche chaque production une seule fois. Le compteur Vus applique la même règle.
 
 Un genre n’entre dans « mieux notés » qu’après trois notes personnelles. Une production pouvant posséder plusieurs genres, les totaux par genre ne sont pas additionnables.
 
@@ -124,7 +124,7 @@ Le catalogue reste consultable sans compte. L’inscription intervient au premie
 Après inscription :
 
 1. Choix facultatif d’une ville.
-2. Création du pseudonyme.
+2. Création du nom d'utilisateur.
 3. Parcours guidé mais ignorable « Note cinq spectacles qui t’ont marqué ».
 4. Recherche successive de souvenirs avec option de fiche provisoire privée.
 
@@ -132,12 +132,14 @@ Aucune autorisation GPS ou notification n’est demandée au premier lancement.
 
 ### Vu, note et critique
 
-- **Vu** crée une séance dans le journal. Date, lieu et distribution sont facultatifs.
-- **Noter** enregistre immédiatement un entier de 1 à 10, marque implicitement la production comme vue et crée une séance sans date si nécessaire.
+- **Vu** ajoute simplement le spectacle au journal, sans demander de date, de lieu ou de représentation.
+- L’état **Déjà vu** confirme que le spectacle figure déjà dans le journal, sans ouvrir de gestion supplémentaire.
+- **Noter** enregistre immédiatement un entier de 1 à 10 et marque implicitement la production comme vue.
 - Une personne possède une seule note publique modifiable par production.
-- Plusieurs séances peuvent être enregistrées pour cette production.
+- Une production apparaît une seule fois dans le journal de la première version.
 - Une production notée ou marquée vue quitte automatiquement À voir, avec une action Annuler. Elle peut ensuite être ajoutée de nouveau pour une revisite.
-- Après la note, Todam propose sans l’imposer : « Ajouter la date » et « Écrire une critique ».
+- Après la note, Todam peut proposer sans l’imposer : « Écrire une critique ».
+- La gestion de plusieurs séances personnelles et leur rattachement à une représentation sont réservés à une évolution ultérieure.
 
 Une critique publiée exige :
 
@@ -168,7 +170,7 @@ Les brouillons sont privés. Les critiques valides sont publiées immédiatement
 | Œuvre | Texte, composition ou œuvre chorégraphique intemporelle |
 | Spectacle | Production ou mise en scène précise |
 | Représentation | Date, heure, lieu et distribution éventuelle |
-| Séance personnelle | Souvenir d’un membre, daté ou non |
+| Séance personnelle | Trace technique interne conservée pour une évolution ultérieure, non détaillée dans le MVP |
 | Note | Un entier de 1 à 10 par membre et spectacle |
 | Critique | Titre, texte et statut révélations associés à une note |
 | Artiste | Personne créditée et rôles associés |
@@ -231,7 +233,7 @@ Rôles : visiteur, membre, contributeur de confiance et administrateur.
 
 ### Confidentialité et conformité
 
-- Profil minimal public sous pseudonyme.
+- Profil minimal public sous nom d'utilisateur.
 - Notes publiques par défaut, avec réglage global permettant de les masquer.
 - Journal public limité au spectacle et à la note éventuelle.
 - Date exacte, lieu, distribution, À voir, historique de consultation et fiches provisoires restent privés par défaut.
@@ -273,8 +275,8 @@ Tokens provisoires :
 - Cartes sobres, ombres très légères et hiérarchie obtenue par l’espace et la typographie.
 - Icônes linéaires accompagnées d’un libellé pour les actions importantes.
 - Ton rédactionnel chaleureux, direct et non élitiste.
-- Signature : **Le journal du spectacle vivant**.
-- Sous-promesse de lancement : **Théâtre, opéra et ballet**.
+- Signature : **Mon journal de spectacles**.
+- Périmètre du catalogue au lancement : **Théâtre, opéra et ballet**.
 
 ### Accessibilité
 
@@ -308,8 +310,8 @@ Le MVP inclut :
 
 - Catalogue, recherche et pages Œuvre, Spectacle, Lieu et Artiste.
 - Carte par ville.
-- Comptes pseudonymes 15+.
-- Vu, séances multiples, note sur 10 et critiques structurées.
+- Comptes sous nom d'utilisateur, 15+.
+- Statut Vu simple, note sur 10 et critiques structurées.
 - Profil, journal, quatre compteurs et statistiques.
 - À voir et listes personnalisées.
 - Profils suivis sans réactions.
@@ -326,11 +328,11 @@ Scénarios obligatoires avant ouverture :
 - Distinguer une œuvre de plusieurs mises en scène portant le même titre.
 - Noter en moins de dix secondes sans remplir date ou commentaire.
 - Marquer vu sans noter.
-- Enregistrer deux séances d’une production sans augmenter Vus deux fois.
+- Vérifier qu’un spectacle vu apparaît une seule fois dans le journal.
 - Retirer automatiquement un spectacle de À voir puis annuler.
 - Comprendre pourquoi une moyenne n’apparaît pas avant cinq notes.
-- Vérifier depuis une session déconnectée que date et lieu personnels restent privés.
-- Créer une fiche provisoire, la valider puis conserver séance et note.
+- Vérifier depuis une session déconnectée que les actions personnelles restent privées.
+- Créer une fiche provisoire, la valider puis conserver le statut Vu et la note.
 - Résoudre un homonyme artiste et fusionner un doublon de production.
 - Publier, masquer, signaler, modifier et supprimer une critique.
 - Utiliser recherche, carte, histogramme et navigation avec des technologies d’assistance.
@@ -343,13 +345,14 @@ Indicateurs à suivre :
 - Taux de recherches menant à une fiche ou une suggestion.
 - Recherches sans résultat et doublons créés.
 - Rétention à 30 et 90 jours des membres activés.
-- Nombre de séances consignées par membre actif sur 90 jours.
+- Nombre de spectacles consignés par membre actif sur 90 jours.
 - Délai de traitement des suggestions et signalements.
 - Part des notes accompagnées d’une critique, sans en faire un objectif de croissance.
 
 ### Boîte à idées et roadmap
 
 - Sous-notes facultatives par discipline.
+- Gestion de plusieurs séances personnelles avec date et représentation précises.
 - Import CSV avec résolution des correspondances.
 - Rétrospective annuelle partageable.
 - Votes « critique utile ».

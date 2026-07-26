@@ -1,0 +1,46 @@
+# syntax=docker/dockerfile:1.7
+
+FROM node:24-bookworm-slim AS build
+
+WORKDIR /workspace
+RUN corepack enable
+
+COPY . .
+RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store \
+    pnpm install --frozen-lockfile
+
+ARG EXPO_PUBLIC_API_URL=https://api.todam.fr
+ARG EXPO_PUBLIC_WEB_URL=https://todam.fr
+ARG EXPO_PUBLIC_LEGAL_OPERATOR_NAME
+ARG EXPO_PUBLIC_PRIMARY_HOST_NAME=OVH SAS
+ARG EXPO_PUBLIC_PRIMARY_HOST_ADDRESS=2 rue Kellermann, 59100 Roubaix, France
+ARG EXPO_PUBLIC_PRIMARY_HOST_PHONE=+33 9 72 10 10 07
+ARG EXPO_PUBLIC_PRIMARY_HOST_URL=https://www.ovhcloud.com
+ARG EXPO_PUBLIC_OBJECT_HOST_NAME=Cloudflare, Inc.
+ARG EXPO_PUBLIC_OBJECT_HOST_ADDRESS=101 Townsend Street, San Francisco, CA 94107, USA
+ARG EXPO_PUBLIC_OBJECT_HOST_URL=https://www.cloudflare.com
+
+ENV EXPO_PUBLIC_API_URL=${EXPO_PUBLIC_API_URL}
+ENV EXPO_PUBLIC_WEB_URL=${EXPO_PUBLIC_WEB_URL}
+ENV EXPO_PUBLIC_LEGAL_OPERATOR_NAME=${EXPO_PUBLIC_LEGAL_OPERATOR_NAME}
+ENV EXPO_PUBLIC_PRIMARY_HOST_NAME=${EXPO_PUBLIC_PRIMARY_HOST_NAME}
+ENV EXPO_PUBLIC_PRIMARY_HOST_ADDRESS=${EXPO_PUBLIC_PRIMARY_HOST_ADDRESS}
+ENV EXPO_PUBLIC_PRIMARY_HOST_PHONE=${EXPO_PUBLIC_PRIMARY_HOST_PHONE}
+ENV EXPO_PUBLIC_PRIMARY_HOST_URL=${EXPO_PUBLIC_PRIMARY_HOST_URL}
+ENV EXPO_PUBLIC_OBJECT_HOST_NAME=${EXPO_PUBLIC_OBJECT_HOST_NAME}
+ENV EXPO_PUBLIC_OBJECT_HOST_ADDRESS=${EXPO_PUBLIC_OBJECT_HOST_ADDRESS}
+ENV EXPO_PUBLIC_OBJECT_HOST_URL=${EXPO_PUBLIC_OBJECT_HOST_URL}
+
+RUN test -f apps/todam/public/legal/cgu-todam-v1.0.0.pdf
+RUN pnpm legal:generate
+RUN pnpm --filter @todam/todam build
+
+FROM nginx:1.29-alpine AS runtime
+
+COPY deploy/nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=build /workspace/apps/todam/dist /usr/share/nginx/html
+
+EXPOSE 8080
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD wget --quiet --output-document=/dev/null http://127.0.0.1:8080/health/live || exit 1

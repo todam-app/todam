@@ -1,7 +1,25 @@
 {
   "name": "@todam/domain",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "private": true,
   "license": "AGPL-3.0-only",
-  "description": "Futures règles métier serveur de Todam."
+  "description": "Règles métier serveur de Todam.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts --clean",
+    "lint": "eslint src test",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@todam/contracts": "workspace:*"
+  },
+  "devDependencies": {
+    "tsup": "8.5.1",
+    "typescript": "6.0.3",
+    "vitest": "4.1.10"
+  }
 }

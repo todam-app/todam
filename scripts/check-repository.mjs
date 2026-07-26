@@ -1,9 +1,4 @@
-import {
-  existsSync,
-  readFileSync,
-  readdirSync,
-  statSync,
-} from "node:fs";
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { extname, join, relative, sep } from "node:path";
 
 const requiredPaths = [
@@ -19,6 +14,12 @@ const requiredPaths = [
   "AGENTS.md",
   "docs/FICHE_PRODUIT.md",
   "docs/ARCHITECTURE_TECHNIQUE.md",
+  "docs/MVP_VALIDATION.md",
+  "deploy/nginx.conf",
+  "docker-compose.yml",
+  ".env.example",
+  "data/README.md",
+  "data/fixtures/theatre-des-muses.sample.json",
   "apps/todam/package.json",
   "apps/api/package.json",
   "apps/jobs/package.json",
@@ -32,11 +33,7 @@ const errors = requiredPaths
   .filter((path) => !existsSync(path))
   .map((path) => `Chemin requis absent : ${path}`);
 
-const apacheRoots = [
-  "apps/todam",
-  "packages/contracts",
-  "packages/design-system",
-];
+const apacheRoots = ["apps/todam", "packages/contracts", "packages/design-system"];
 const sourceExtensions = new Set([".js", ".jsx", ".mjs", ".ts", ".tsx"]);
 const forbiddenImports = [
   "@todam/api",
@@ -53,15 +50,21 @@ function walk(directory) {
   if (!existsSync(directory)) return [];
 
   return readdirSync(directory).flatMap((entry) => {
+    if (
+      entry === "node_modules" ||
+      entry === ".git" ||
+      entry === "dist" ||
+      entry === ".expo"
+    ) {
+      return [];
+    }
     const path = join(directory, entry);
     return statSync(path).isDirectory() ? walk(path) : [path];
   });
 }
 
 for (const root of apacheRoots) {
-  for (const file of walk(root).filter((path) =>
-    sourceExtensions.has(extname(path)),
-  )) {
+  for (const file of walk(root).filter((path) => sourceExtensions.has(extname(path)))) {
     const source = readFileSync(file, "utf8");
     for (const forbidden of forbiddenImports) {
       if (source.includes(forbidden)) {
@@ -74,12 +77,7 @@ for (const root of apacheRoots) {
   }
 }
 
-for (const markdown of walk(".").filter(
-  (path) =>
-    extname(path) === ".md" &&
-    !path.includes(`${sep}.git${sep}`) &&
-    !path.includes(`${sep}node_modules${sep}`),
-)) {
+for (const markdown of walk(".").filter((path) => extname(path) === ".md")) {
   const content = readFileSync(markdown, "utf8");
   if (!content.startsWith("# ")) {
     errors.push(`${relative(".", markdown)} doit commencer par un titre H1.`);
@@ -89,11 +87,48 @@ for (const markdown of walk(".").filter(
   }
 }
 
+const nginxConfig = readFileSync("deploy/nginx.conf", "utf8");
+const legalRobotsHeader =
+  'add_header X-Robots-Tag "noindex, nofollow, noarchive, nosnippet" always;';
+const legalRobotsHeaderCount = nginxConfig.split(legalRobotsHeader).length - 1;
+if (legalRobotsHeaderCount !== 2) {
+  errors.push(
+    "deploy/nginx.conf doit protéger les pages juridiques et leurs PDF avec X-Robots-Tag.",
+  );
+}
+
+const publicLegalPipelineFiles = [
+  ".env.example",
+  ".github/workflows/publish-images.yml",
+  "Dockerfile.web",
+  "apps/todam/lib/legal-documents.ts",
+  "scripts/generate-legal-pdfs.py",
+];
+const retiredPublisherVariables = [
+  "LEGAL_SIREN",
+  "LEGAL_SIRET",
+  "LEGAL_RNE_REGISTRATION_DATE",
+  "LEGAL_ACTIVITY_START_DATE",
+  "LEGAL_LEGAL_FORM",
+  "LEGAL_ACTIVITY",
+  "LEGAL_APE",
+  "LEGAL_ADDRESS",
+  "LEGAL_PHONE",
+];
+for (const file of publicLegalPipelineFiles) {
+  const content = readFileSync(file, "utf8");
+  for (const variable of retiredPublisherVariables) {
+    if (content.includes(variable)) {
+      errors.push(
+        `${file} réintroduit la variable d'éditeur professionnel retirée : ${variable}`,
+      );
+    }
+  }
+}
+
 if (errors.length > 0) {
   console.error(errors.join("\n"));
   process.exit(1);
 }
 
-console.log(
-  "Dépôt : structure, Markdown UTF-8 et frontière Apache/AGPL cohérents.",
-);
+console.log("Dépôt : structure, Markdown UTF-8 et frontière Apache/AGPL cohérents.");

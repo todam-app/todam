@@ -11,24 +11,55 @@ permissions:
 
 jobs:
   quality:
-    name: lint, types, tests and OpenAPI
+    name: lint, types, tests, database and Web build
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgis/postgis:17-3.5
+        env:
+          POSTGRES_DB: todam
+          POSTGRES_USER: todam
+          POSTGRES_PASSWORD: todam
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U todam -d todam" --health-interval 5s
+          --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://todam:todam@127.0.0.1:5432/todam
+      BETTER_AUTH_SECRET: ci-only-secret-at-least-32-characters
+      BETTER_AUTH_URL: http://127.0.0.1:3000/v1/auth
+      WEB_APP_URL: http://127.0.0.1:8081
+      EXPO_PUBLIC_API_URL: http://127.0.0.1:3000
     steps:
       - name: Checkout
         uses: actions/checkout@v7
-      - name: Set up Node.js
+      - name: Installer pnpm
+        uses: pnpm/action-setup@v6
+      - name: Configurer Node.js
         uses: actions/setup-node@v7
         with:
-          node-version: 22
-      - name: Enable pnpm
-        run: corepack enable
+          node-version: 24
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
       - name: Lint repository
         run: pnpm lint
       - name: Check types
         run: pnpm typecheck
       - name: Run tests
         run: pnpm test
+      - name: Migrate an empty PostgreSQL database
+        run: pnpm db:migrate
+      - name: Import and re-import the synthetic catalogue
+        run: |
+          pnpm catalog:import --file data/fixtures/theatre-des-muses.sample.json --apply
+          pnpm catalog:import --file data/fixtures/theatre-des-muses.sample.json --apply
+      - name: Run PostgreSQL integration tests
+        run: pnpm test:integration
       - name: Validate OpenAPI
         run: pnpm validate:openapi
+      - name: Build all workspaces, including Expo Web
+        run: pnpm build
       - name: Check licences
         run: pnpm check:licenses

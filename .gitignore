@@ -16,6 +16,7 @@ web-build/
 # Builds and tests
 build/
 coverage/
+apps/todam/test-results/
 .turbo/
 .cache/
 *.tsbuildinfo
@@ -24,6 +25,7 @@ coverage/
 .env
 .env.*
 !.env.example
+data/private/
 
 # Logs
 *.log
@@ -40,7 +42,9 @@ yarn-error.log*
 Thumbs.db
 
 # Temporary files
+.codex-remote-attachments/
 *.tmp
 *.swp
 tmp/
 temp/
+apps/todam/public/legal/*.pdf

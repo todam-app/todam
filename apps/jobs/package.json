@@ -1,7 +1,40 @@
 {
   "name": "@todam/jobs",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "private": true,
   "license": "AGPL-3.0-only",
-  "description": "Futurs imports et tâches serveur de Todam."
+  "description": "Imports et tâches serveur de Todam.",
+  "type": "module",
+  "scripts": {
+    "build": "tsup --config tsup.config.ts",
+    "accounts:report": "tsx src/account-report.ts",
+    "accounts:purge-unverified": "tsx src/purge-unverified-users.ts",
+    "catalog:discover:openagenda": "tsx src/catalog-discover-openagenda.ts",
+    "catalog:coverage": "tsx src/catalog-import.ts --coverage",
+    "catalog:import": "tsx src/catalog-import.ts",
+    "catalog:media:mirror": "tsx src/catalog-media-mirror.ts",
+    "catalog:status": "tsx src/catalog-status.ts",
+    "catalog:sync": "tsx src/catalog-sync.ts",
+    "lint": "eslint src test",
+    "test": "vitest run --exclude \"test/integration/**\"",
+    "test:integration": "vitest run test/integration",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "3.1090.0",
+    "@todam/contracts": "workspace:*",
+    "@todam/database": "workspace:*",
+    "@todam/domain": "workspace:*",
+    "dotenv": "17.4.2",
+    "drizzle-orm": "0.45.2",
+    "pg": "8.22.0",
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "26.1.1",
+    "tsup": "8.5.1",
+    "tsx": "4.23.1",
+    "typescript": "6.0.3",
+    "vitest": "4.1.10"
+  }
 }

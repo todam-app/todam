@@ -1,0 +1,69 @@
+import {
+  CURRENT_PRIVACY_NOTICE_VERSION,
+  CURRENT_TERMS_VERSION,
+} from "@todam/contracts";
+
+import { legalMarkdown } from "./legal-generated";
+
+export type LegalDocumentId = keyof typeof legalMarkdown;
+
+function configuredValue(value: string | undefined, fallback: string): string {
+  return value?.trim() || fallback;
+}
+
+const placeholderValues: Record<string, string> = {
+  "{{LEGAL_OPERATOR_NAME}}": configuredValue(
+    process.env.EXPO_PUBLIC_LEGAL_OPERATOR_NAME,
+    "[nom de l'éditeur à configurer avant publication]",
+  ),
+  "{{PRIMARY_HOST_NAME}}": configuredValue(
+    process.env.EXPO_PUBLIC_PRIMARY_HOST_NAME,
+    "OVH SAS",
+  ),
+  "{{PRIMARY_HOST_ADDRESS}}": configuredValue(
+    process.env.EXPO_PUBLIC_PRIMARY_HOST_ADDRESS,
+    "2 rue Kellermann, 59100 Roubaix, France",
+  ),
+  "{{PRIMARY_HOST_PHONE}}": configuredValue(
+    process.env.EXPO_PUBLIC_PRIMARY_HOST_PHONE,
+    "+33 9 72 10 10 07",
+  ),
+  "{{PRIMARY_HOST_URL}}": configuredValue(
+    process.env.EXPO_PUBLIC_PRIMARY_HOST_URL,
+    "https://www.ovhcloud.com",
+  ),
+  "{{OBJECT_HOST_NAME}}": configuredValue(
+    process.env.EXPO_PUBLIC_OBJECT_HOST_NAME,
+    "Cloudflare, Inc.",
+  ),
+  "{{OBJECT_HOST_ADDRESS}}": configuredValue(
+    process.env.EXPO_PUBLIC_OBJECT_HOST_ADDRESS,
+    "101 Townsend Street, San Francisco, CA 94107, USA",
+  ),
+  "{{OBJECT_HOST_URL}}": configuredValue(
+    process.env.EXPO_PUBLIC_OBJECT_HOST_URL,
+    "https://www.cloudflare.com",
+  ),
+};
+
+export function legalDocumentMarkdown(id: LegalDocumentId): string {
+  let document: string = legalMarkdown[id];
+  for (const [placeholder, value] of Object.entries(placeholderValues)) {
+    document = document.replaceAll(placeholder, value);
+  }
+  return document;
+}
+
+export function legalPdfUrl(id: LegalDocumentId): string {
+  const base = (process.env.EXPO_PUBLIC_WEB_URL ?? "https://todam.fr").replace(
+    /\/$/,
+    "",
+  );
+  const filenames: Record<LegalDocumentId, string> = {
+    terms: `cgu-todam-v${CURRENT_TERMS_VERSION}.pdf`,
+    privacy: `confidentialite-todam-v${CURRENT_PRIVACY_NOTICE_VERSION}.pdf`,
+    notices: "mentions-legales-todam-v1.0.0.pdf",
+    deletion: "suppression-compte-todam-v1.0.0.pdf",
+  };
+  return `${base}/legal/${filenames[id]}`;
+}

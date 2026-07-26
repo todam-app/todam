@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="22 64 359 378" role="img" aria-labelledby="title">
+  <title id="title">Symbole Todam</title>
+  <g fill="none" stroke="#151515" stroke-width="16" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 38 116
+             C 82 80, 123 91, 175 108
+             C 223 124, 276 124, 365 104"/>
+    <path d="M 176 310
+             C 152 278, 154 225, 179 183
+             C 194 159, 216 147, 230 160
+             C 245 176, 228 217, 208 251
+             C 194 275, 181 299, 176 310
+             C 160 336, 142 369, 139 395
+             C 137 414, 146 423, 157 426"/>
+    <path d="M 176 310
+             C 194 331, 211 356, 224 371"/>
+  </g>
+  <circle cx="288" cy="167" r="28" fill="#C43D28"/>
+</svg>

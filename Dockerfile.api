@@ -1,0 +1,33 @@
+# syntax=docker/dockerfile:1.7
+
+FROM node:24-bookworm-slim AS build
+
+WORKDIR /workspace
+RUN corepack enable
+
+COPY . .
+RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store \
+    pnpm install --frozen-lockfile
+RUN pnpm --filter @todam/api... build
+RUN pnpm --filter @todam/api deploy --prod --legacy /output
+
+FROM node:24-bookworm-slim AS runtime
+
+ENV HOST=0.0.0.0
+ENV NODE_ENV=production
+ENV PORT=3000
+
+WORKDIR /app
+RUN corepack enable
+
+COPY --from=build --chown=node:node /output ./
+COPY --chown=node:node deploy/api-entrypoint.sh /usr/local/bin/todam-api-entrypoint
+RUN chmod +x /usr/local/bin/todam-api-entrypoint
+
+USER node
+EXPOSE 3000
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+  CMD ["node", "-e", "fetch('http://127.0.0.1:3000/health/ready').then((response) => { if (!response.ok) process.exit(1); }).catch(() => process.exit(1));"]
+
+ENTRYPOINT ["/usr/local/bin/todam-api-entrypoint"]

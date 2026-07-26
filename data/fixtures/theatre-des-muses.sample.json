@@ -1,0 +1,153 @@
+{
+  "schemaVersion": 2,
+  "source": {
+    "externalKey": "fixture.theatre-des-muses",
+    "name": "Fixture synthétique — Théâtre des Muses",
+    "homepageUrl": "https://example.invalid/todam-fixture",
+    "connectorKind": "file",
+    "metadataLicense": "CC0-1.0",
+    "defaultMediaPolicy": "mirror"
+  },
+  "coverage": {
+    "countryCodes": ["MC"],
+    "inseeTerritoryCodes": [],
+    "label": "Fixture synthétique 2025-2026",
+    "startsOn": "2025-09-01",
+    "endsOn": "2026-06-30",
+    "expectedCompleteness": "sample"
+  },
+  "documents": [
+    {
+      "externalKey": "fixture.document",
+      "title": "Document synthétique Todam",
+      "url": "https://example.invalid/todam-fixture/programme",
+      "retrievedAt": "2026-07-23T12:00:00+02:00",
+      "rightsStatus": "open_license",
+      "license": "CC0-1.0"
+    }
+  ],
+  "works": [
+    {
+      "externalKey": "work.les-lumieres",
+      "sourceDocumentKey": "fixture.document",
+      "title": "Les Lumières",
+      "slug": "les-lumieres",
+      "discipline": "theatre"
+    }
+  ],
+  "venues": [
+    {
+      "externalKey": "venue.theatre-des-muses",
+      "sourceDocumentKey": "fixture.document",
+      "name": "Théâtre des Muses",
+      "slug": "theatre-des-muses-monaco",
+      "addressLine1": "45 A, boulevard du Jardin Exotique",
+      "postalCode": "98000",
+      "locality": "Monaco",
+      "countryCode": "MC",
+      "timezone": "Europe/Monaco",
+      "latitude": 43.7316,
+      "longitude": 7.4136
+    }
+  ],
+  "artists": [
+    {
+      "externalKey": "artist.jeanne-exemple",
+      "sourceDocumentKey": "fixture.document",
+      "name": "Jeanne Exemple",
+      "slug": "jeanne-exemple"
+    }
+  ],
+  "productions": [
+    {
+      "externalKey": "production.les-lumieres",
+      "sourceDocumentKey": "fixture.document",
+      "workExternalKey": "work.les-lumieres",
+      "title": "Les Lumières",
+      "slug": "les-lumieres-jeanne-exemple-2025",
+      "discipline": "theatre",
+      "audience": "general",
+      "durationMinutes": 90,
+      "language": "français",
+      "credits": [
+        {
+          "artistExternalKey": "artist.jeanne-exemple",
+          "role": "director",
+          "label": "Mise en scène",
+          "position": 0
+        }
+      ]
+    },
+    {
+      "externalKey": "production.le-petit-nuage",
+      "sourceDocumentKey": "fixture.document",
+      "workExternalKey": null,
+      "title": "Le Petit Nuage",
+      "slug": "le-petit-nuage-fixture-2026",
+      "discipline": "theatre",
+      "audience": "children",
+      "durationMinutes": 50,
+      "language": "français",
+      "credits": []
+    }
+  ],
+  "performances": [
+    {
+      "externalKey": "performance.les-lumieres.2025-10-09",
+      "sourceDocumentKey": "fixture.document",
+      "productionExternalKey": "production.les-lumieres",
+      "venueExternalKey": "venue.theatre-des-muses",
+      "startsAt": "2025-10-09T20:30:00+02:00",
+      "status": "completed"
+    },
+    {
+      "externalKey": "performance.les-lumieres.2025-10-10",
+      "sourceDocumentKey": "fixture.document",
+      "productionExternalKey": "production.les-lumieres",
+      "venueExternalKey": "venue.theatre-des-muses",
+      "startsAt": "2025-10-10T20:30:00+02:00",
+      "status": "completed"
+    },
+    {
+      "externalKey": "performance.le-petit-nuage.2026-01-07",
+      "sourceDocumentKey": "fixture.document",
+      "productionExternalKey": "production.le-petit-nuage",
+      "venueExternalKey": "venue.theatre-des-muses",
+      "startsAt": "2026-01-07T15:00:00+01:00",
+      "status": "completed"
+    }
+  ],
+  "media": [
+    {
+      "externalKey": "media.les-lumieres.poster",
+      "sourceDocumentKey": "fixture.document",
+      "productionExternalKey": "production.les-lumieres",
+      "performanceExternalKey": null,
+      "kind": "poster",
+      "url": "https://example.invalid/todam-fixture/les-lumieres.jpg",
+      "alt": "Affiche synthétique du spectacle Les Lumières",
+      "credit": "Illustration synthétique Todam",
+      "copyrightHolder": "Todam",
+      "rightsStatus": "open_license",
+      "license": "CC0-1.0",
+      "termsUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "storagePolicy": "mirror",
+      "width": 1200,
+      "height": 1800,
+      "mimeType": "image/jpeg",
+      "validFrom": null,
+      "validUntil": null,
+      "isPrimary": true,
+      "position": 0
+    }
+  ],
+  "exclusions": [
+    {
+      "externalKey": "exclusion.cours-enfants",
+      "sourceDocumentKey": "fixture.document",
+      "title": "Cours hebdomadaire enfants",
+      "category": "cours",
+      "reason": "Activité pédagogique, pas une représentation publique."
+    }
+  ]
+}

@@ -1,7 +1,29 @@
 {
   "name": "@todam/contracts",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "private": true,
   "license": "Apache-2.0",
-  "description": "Futurs contrats Zod et OpenAPI partagés de Todam."
+  "description": "Contrats Zod, OpenAPI et client HTTP partagés de Todam.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./client": "./src/client.ts",
+    "./generated": "./src/generated/index.ts"
+  },
+  "scripts": {
+    "build": "tsup src/index.ts src/client.ts src/generated/index.ts --format esm --dts --clean",
+    "client:generate": "openapi-ts --file openapi-ts.config.ts",
+    "lint": "eslint src",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@hey-api/openapi-ts": "0.99.0",
+    "tsup": "8.5.1",
+    "typescript": "6.0.3",
+    "vitest": "4.1.10"
+  }
 }

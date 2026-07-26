@@ -1,26 +1,56 @@
 {
   "name": "todam",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "private": true,
   "license": "Apache-2.0",
-  "description": "Le journal open source du spectacle vivant.",
+  "description": "Todam — Mon journal de spectacles open source.",
   "packageManager": "pnpm@11.9.0",
   "workspaces": [
     "apps/*",
     "packages/*"
   ],
   "scripts": {
-    "lint": "node scripts/check-repository.mjs && markdownlint-cli2 \"**/*.md\" \"#node_modules\"",
-    "typecheck": "node scripts/check-placeholder.mjs typecheck",
-    "test": "node --test",
-    "validate:openapi": "node scripts/check-openapi.mjs",
+    "build": "pnpm --recursive --if-present build",
+    "accounts:report": "pnpm --filter @todam/jobs accounts:report",
+    "accounts:purge-unverified": "pnpm --filter @todam/jobs accounts:purge-unverified",
+    "catalog:discover:openagenda": "pnpm --filter @todam/jobs catalog:discover:openagenda",
+    "catalog:import": "pnpm --filter @todam/jobs catalog:import",
+    "catalog:media:mirror": "pnpm --filter @todam/jobs catalog:media:mirror",
+    "catalog:status": "pnpm --filter @todam/jobs catalog:status",
+    "catalog:sync": "pnpm --filter @todam/jobs catalog:sync",
+    "catalog:coverage": "pnpm --filter @todam/jobs catalog:coverage",
+    "db:generate": "pnpm --filter @todam/database db:generate",
+    "db:migrate": "pnpm --filter @todam/database db:migrate",
+    "db:studio": "pnpm --filter @todam/database db:studio",
+    "dev": "pnpm --parallel --filter @todam/api --filter @todam/todam dev",
+    "dev:api": "pnpm --filter @todam/api dev",
+    "dev:db": "docker compose up -d postgres",
+    "dev:db:down": "docker compose down",
+    "dev:web": "pnpm --filter @todam/todam dev",
+    "format:check": "prettier --check .",
+    "lint": "node scripts/check-repository.mjs && markdownlint-cli2 \"**/*.md\" \"#**/node_modules/**\" \"#**/.expo/**\" && eslint .",
+    "legal:generate": "node scripts/generate-legal-assets.mjs",
+    "legal:pdf": "python scripts/generate-legal-pdfs.py",
+    "legal:check": "node scripts/generate-legal-assets.mjs --check && node scripts/check-legal-release.mjs",
+    "test": "pnpm --recursive --if-present test",
+    "test:e2e": "pnpm --filter @todam/todam test:e2e",
+    "test:integration": "pnpm --filter @todam/jobs test:integration && pnpm --filter @todam/api test:integration",
+    "typecheck": "pnpm --recursive --if-present typecheck",
+    "validate:openapi": "pnpm --filter @todam/api openapi:check && node scripts/check-openapi.mjs",
     "check:licenses": "node scripts/check-licenses.mjs",
-    "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm validate:openapi && pnpm check:licenses"
+    "check": "pnpm legal:check && pnpm lint && pnpm format:check && pnpm typecheck && pnpm test && pnpm validate:openapi && pnpm build && pnpm check:licenses"
   },
   "engines": {
-    "node": ">=22"
+    "node": ">=24 <25"
   },
   "devDependencies": {
-    "markdownlint-cli2": "0.23.1"
+    "@types/node": "26.1.1",
+    "eslint": "9.39.5",
+    "eslint-config-expo": "57.0.0",
+    "markdownlint-cli2": "0.23.1",
+    "prettier": "3.9.6",
+    "tsx": "4.23.1",
+    "typescript": "6.0.3",
+    "vitest": "4.1.10"
   }
 }
