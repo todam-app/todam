@@ -18,3 +18,6 @@ jobs:
         with:
           fail-on-severity: moderate
           license-check: true
+          # ESLint exige minimatch 3, incompatible avec la seule version corrigée de brace-expansion.
+          # Cette chaîne est limitée au lint de fichiers contrôlés dans le dépôt.
+          allow-ghsas: GHSA-mh99-v99m-4gvg
