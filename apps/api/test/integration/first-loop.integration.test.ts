@@ -145,6 +145,7 @@ describe("première boucle API sur PostgreSQL/PostGIS", () => {
   });
   afterAll(async () => {
     await app.close();
+    await cleanDatabase();
     await pool.end();
   });
 

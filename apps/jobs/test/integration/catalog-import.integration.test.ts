@@ -38,7 +38,10 @@ async function loadFixture(): Promise<CatalogImport> {
 
 describe("import PostgreSQL réel", () => {
   beforeEach(cleanDatabase);
-  afterAll(() => pool.end());
+  afterAll(async () => {
+    await cleanDatabase();
+    await pool.end();
+  });
 
   it("ne crée aucun doublon lors d'une réexécution", async () => {
     const catalog = await loadFixture();
