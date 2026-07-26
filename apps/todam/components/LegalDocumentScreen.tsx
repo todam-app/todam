@@ -1,12 +1,6 @@
 import Head from "expo-router/head";
 import type { ReactNode } from "react";
-import {
-  Linking,
-  Platform,
-  Text,
-  View,
-  type ViewProps,
-} from "react-native";
+import { Linking, Platform, Text, View, type ViewProps } from "react-native";
 
 import {
   legalDocumentMarkdown,

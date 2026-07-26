@@ -93,10 +93,7 @@ async function mockAuthenticatedProfile(
         profile: { pseudonym: "spectatrice-test" },
         counts: {
           seen: 0,
-          ratings: ratingDistribution.reduce(
-            (total, item) => total + item.count,
-            0,
-          ),
+          ratings: ratingDistribution.reduce((total, item) => total + item.count, 0),
           watchlist: 0,
           lists: 0,
         },
@@ -218,8 +215,8 @@ test("l'accueil connecté salue l'utilisateur et remplace le discours marketing"
 
   await page.setViewportSize({ width: 375, height: 800 });
   const mobileBlocks = await Promise.all(
-    ["home-progress-card", "home-recent-search", "home-city-selector"].map(
-      (testID) => page.getByTestId(testID).boundingBox(),
+    ["home-progress-card", "home-recent-search", "home-city-selector"].map((testID) =>
+      page.getByTestId(testID).boundingBox(),
     ),
   );
   mobileBlocks.forEach((box) => expect(box).not.toBeNull());
@@ -458,9 +455,7 @@ test("les pages juridiques utilisent le fond Web commun", async ({ page }) => {
   });
 
   expect(opaqueAncestors.length).toBeGreaterThan(0);
-  expect(
-    opaqueAncestors.every((color) => color === "rgb(247, 243, 236)"),
-  ).toBe(true);
+  expect(opaqueAncestors.every((color) => color === "rgb(247, 243, 236)")).toBe(true);
   await expect(pageScroller).toHaveCSS("background-color", "rgb(240, 234, 225)");
   await expect(page.locator("body")).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
   const htmlBackground = await page.locator("html").evaluate((element) => {

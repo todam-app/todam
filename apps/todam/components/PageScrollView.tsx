@@ -39,10 +39,7 @@ export function WebPageScrollProvider({ children }: { children: ReactNode }) {
     return () => window.cancelAnimationFrame(resetFrame);
   }, [pathname]);
 
-  const value = useMemo(
-    () => ({ isScrolled, setIsScrolled }),
-    [isScrolled],
-  );
+  const value = useMemo(() => ({ isScrolled, setIsScrolled }), [isScrolled]);
 
   return (
     <WebPageScrollContext.Provider value={value}>
@@ -85,8 +82,7 @@ export function PageScrollView({
     Platform.OS === "web"
       ? `todam-web-page-scroll${className ? ` ${className}` : ""}`
       : className;
-  const scrollHandler =
-    Platform.OS === "web" || onScroll ? handleScroll : undefined;
+  const scrollHandler = Platform.OS === "web" || onScroll ? handleScroll : undefined;
 
   return (
     <ScrollView
