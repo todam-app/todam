@@ -1,11 +1,9 @@
 name: Publier les images de production
 
 on:
-  pull_request:
+  push:
     branches:
       - main
-    types:
-      - closed
   workflow_dispatch:
     inputs:
       deploy:
@@ -24,9 +22,6 @@ env:
 jobs:
   quality:
     name: Vérifications avant publication
-    if:
-      ${{ github.event_name == 'workflow_dispatch' || github.event.pull_request.merged
-      == true }}
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -100,7 +95,7 @@ jobs:
             ${{ env.REGISTRY }}/${{ steps.registry.outputs.owner }}/todam-${{ matrix.component }}:latest
             ${{ env.REGISTRY }}/${{ steps.registry.outputs.owner }}/todam-${{ matrix.component }}:${{ github.sha }}
           cache-from: type=gha,scope=${{ matrix.component }}
-          cache-to: type=gha,mode=max,scope=${{ matrix.component }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.component }},ignore-error=true
 
   web-image:
     name: Construire le Web et les archives juridiques
@@ -188,14 +183,13 @@ jobs:
             EXPO_PUBLIC_OBJECT_HOST_ADDRESS=101 Townsend Street, San Francisco, CA 94107, USA
             EXPO_PUBLIC_OBJECT_HOST_URL=https://www.cloudflare.com
           cache-from: type=gha,scope=web
-          cache-to: type=gha,mode=max,scope=web
+          cache-to: type=gha,mode=max,scope=web,ignore-error=true
 
   deploy:
     name: Déclencher Coolify
     if:
       ${{ (github.event_name == 'workflow_dispatch' && inputs.deploy) ||
-      (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
-      }}
+      github.event_name == 'push' }}
     needs:
       - server-images
       - web-image
