@@ -25,7 +25,7 @@ ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "apps" / "todam" / "public" / "legal"
 DOCUMENTS = {
     "conditions-utilisation-v1.0.0.md": "cgu-todam-v1.0.0.pdf",
-    "confidentialite-v1.0.0.md": "confidentialite-todam-v1.0.0.pdf",
+    "confidentialite-v1.0.1.md": "confidentialite-todam-v1.0.1.pdf",
     "mentions-legales-v1.0.0.md": "mentions-legales-todam-v1.0.0.pdf",
     "suppression-compte-v1.0.0.md": "suppression-compte-todam-v1.0.0.pdf",
 }

@@ -1,12 +1,18 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  CitySearchQuerySchema,
+  EmailChangeBodySchema,
   EmailSignInBodySchema,
+  HomeCityBodySchema,
+  HomeResponseSchema,
   MarkSeenBodySchema,
+  PasswordChangeBodySchema,
   ProductionDiaryResponseSchema,
   RatingBodySchema,
   SearchQuerySchema,
   UsernameSignInBodySchema,
+  UpdateUsernameBodySchema,
 } from "./api.js";
 import { ProductionCardSchema } from "./catalog.js";
 
@@ -26,11 +32,70 @@ describe("contrats API", () => {
     ).toMatchObject({ username: "spectatrice" });
   });
 
+  it("décrit les changements sensibles du compte", () => {
+    expect(UpdateUsernameBodySchema.parse({ username: "  nouvelle-scene  " })).toEqual({
+      username: "nouvelle-scene",
+    });
+    expect(
+      EmailChangeBodySchema.parse({
+        currentPassword: "Todam-test-2026",
+        newEmail: "nouvelle@example.test",
+        callbackURL: "https://todam.fr/email-verifie?mode=change-email",
+      }),
+    ).toMatchObject({ newEmail: "nouvelle@example.test" });
+    expect(
+      PasswordChangeBodySchema.parse({
+        currentPassword: "Todam-test-2026",
+        newPassword: "Todam-test-2027",
+      }),
+    ).toMatchObject({ newPassword: "Todam-test-2027" });
+    expect(() => UpdateUsernameBodySchema.parse({ username: "ab" })).toThrow();
+  });
+
   it("normalise la pagination de recherche", () => {
     expect(SearchQuerySchema.parse({ q: "Muses" })).toEqual({
       q: "Muses",
       limit: 20,
     });
+  });
+
+  it("contraint la ville à une option canonique du catalogue", () => {
+    expect(CitySearchQuerySchema.parse({ q: "Mon" })).toEqual({
+      q: "Mon",
+      limit: 10,
+    });
+    expect(
+      HomeCityBodySchema.parse({
+        city: { locality: "Monaco", countryCode: "MC" },
+      }),
+    ).toEqual({
+      city: { locality: "Monaco", countryCode: "MC" },
+    });
+    expect(() =>
+      HomeCityBodySchema.parse({
+        city: { locality: "Monaco", countryCode: "Monaco" },
+      }),
+    ).toThrow();
+    expect(HomeCityBodySchema.parse({ city: null })).toEqual({ city: null });
+  });
+
+  it("décrit l'accueil connecté et sa progression sur cinq spectacles", () => {
+    const home = HomeResponseSchema.parse({
+      profile: { pseudonym: "spectatrice" },
+      homeCity: {
+        locality: "Monaco",
+        countryCode: "MC",
+        label: "Monaco",
+      },
+      progress: { current: 4, target: 5, completed: false },
+      radiusKm: 50,
+      nearby: [],
+      nationalUpcoming: [],
+      recentlyAdded: [],
+    });
+
+    expect(home.profile.pseudonym).toBe("spectatrice");
+    expect(home.progress).toEqual({ current: 4, target: 5, completed: false });
   });
 
   it("refuse une note hors de l'échelle de 1 à 10", () => {

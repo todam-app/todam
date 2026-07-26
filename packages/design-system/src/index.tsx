@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -14,7 +14,7 @@ import { tokens } from "./tokens.js";
 
 export { tokens } from "./tokens.js";
 
-type ButtonVariant = "primary" | "secondary" | "ghost";
+type ButtonVariant = "primary" | "secondary" | "ghost" | "danger";
 
 export interface ButtonProps extends Omit<PressableProps, "children"> {
   label: string;
@@ -40,6 +40,7 @@ export function Button({
         variant === "primary" && styles.buttonPrimary,
         variant === "secondary" && styles.buttonSecondary,
         variant === "ghost" && styles.buttonGhost,
+        variant === "danger" && styles.buttonDanger,
         state.pressed && styles.buttonPressed,
         (disabled || loading) && styles.disabled,
         typeof style === "function" ? style(state) : style,
@@ -49,13 +50,18 @@ export function Button({
       {loading ? (
         <ActivityIndicator
           accessibilityLabel="Chargement"
-          color={variant === "primary" ? tokens.color.surface : tokens.color.ink}
+          color={
+            variant === "primary" || variant === "danger"
+              ? tokens.color.surface
+              : tokens.color.ink
+          }
         />
       ) : (
         <Text
           style={[
             styles.buttonLabel,
-            variant === "primary" && styles.buttonLabelPrimary,
+            (variant === "primary" || variant === "danger") &&
+              styles.buttonLabelPrimary,
           ]}
         >
           {label}
@@ -70,15 +76,38 @@ export interface TextFieldProps extends TextInputProps {
   error?: string | undefined;
 }
 
-export function TextField({ label, error, style, ...props }: TextFieldProps) {
+export function TextField({
+  label,
+  error,
+  style,
+  onBlur,
+  onFocus,
+  ...props
+}: TextFieldProps) {
+  const [focused, setFocused] = useState(false);
+
   return (
     <View style={styles.field}>
       <Text style={styles.fieldLabel}>{label}</Text>
       <TextInput
         accessibilityLabel={label}
         accessibilityHint={error}
+        onBlur={(event) => {
+          setFocused(false);
+          onBlur?.(event);
+        }}
+        onFocus={(event) => {
+          setFocused(true);
+          onFocus?.(event);
+        }}
         placeholderTextColor={tokens.color.muted}
-        style={[styles.input, error && styles.inputError, style]}
+        style={[
+          styles.input,
+          style,
+          focused && styles.inputFocused,
+          error && styles.inputError,
+          error && focused && styles.inputErrorFocused,
+        ]}
         {...props}
       />
       {error ? (
@@ -178,6 +207,9 @@ const styles = StyleSheet.create({
   buttonGhost: {
     backgroundColor: "transparent",
   },
+  buttonDanger: {
+    backgroundColor: tokens.color.error,
+  },
   buttonLabel: {
     color: tokens.color.ink,
     fontSize: 16,
@@ -234,11 +266,22 @@ const styles = StyleSheet.create({
     color: tokens.color.ink,
     fontSize: 16,
     minHeight: 48,
+    outlineWidth: 0,
     paddingHorizontal: 14,
     paddingVertical: 10,
   },
+  inputFocused: {
+    borderColor: tokens.color.accent,
+    outlineColor: "rgba(196, 61, 40, 0.14)",
+    outlineOffset: 0,
+    outlineStyle: "solid",
+    outlineWidth: 3,
+  },
   inputError: {
     borderColor: tokens.color.error,
+  },
+  inputErrorFocused: {
+    outlineColor: "rgba(161, 38, 26, 0.14)",
   },
   poster: {
     alignItems: "flex-start",

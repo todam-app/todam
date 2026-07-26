@@ -1,8 +1,11 @@
 import { defineConfig } from "@playwright/test";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 
 const e2ePort = 8082;
 
 export default defineConfig({
+  outputDir: join(tmpdir(), "todam-playwright-results"),
   testDir: "./e2e",
   fullyParallel: false,
   use: {

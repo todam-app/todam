@@ -25,10 +25,10 @@ const requiredProductionVariables = [
 ];
 
 const documents = [
-  "docs/legal/conditions-utilisation-v1.0.0.md",
-  "docs/legal/confidentialite-v1.0.0.md",
-  "docs/legal/mentions-legales-v1.0.0.md",
-  "docs/legal/suppression-compte-v1.0.0.md",
+  ["docs/legal/conditions-utilisation-v1.0.0.md", "1.0.0"],
+  ["docs/legal/confidentialite-v1.0.1.md", "1.0.1"],
+  ["docs/legal/mentions-legales-v1.0.0.md", "1.0.0"],
+  ["docs/legal/suppression-compte-v1.0.0.md", "1.0.0"],
 ];
 
 const forbiddenPublisherMarkers = [
@@ -51,9 +51,9 @@ const forbiddenPublisherMarkers = [
   "Téléphone :",
 ];
 
-for (const document of documents) {
+for (const [document, version] of documents) {
   const contents = await readFile(document, "utf8");
-  if (!contents.includes("Version 1.0.0")) {
+  if (!contents.includes(`Version ${version}`)) {
     throw new Error(`${document} ne contient pas sa version attendue.`);
   }
   if (!contents.includes("Date d'effet : 26 juillet 2026")) {

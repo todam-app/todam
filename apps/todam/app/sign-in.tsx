@@ -1,8 +1,9 @@
 import { Button, TextField } from "@todam/design-system";
 import { Link, useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
-import { ScrollView, Text, View } from "react-native";
+import { Text, View } from "react-native";
 
+import { PageScrollView } from "../components/PageScrollView";
 import { authClient } from "../lib/auth-client";
 
 function parameter(value: string | string[] | undefined): string | undefined {
@@ -50,7 +51,7 @@ export default function SignInScreen() {
   }
 
   return (
-    <ScrollView
+    <PageScrollView
       contentContainerClassName="mx-auto w-full max-w-lg gap-6 px-5 py-10"
       keyboardShouldPersistTaps="handled"
     >
@@ -66,6 +67,7 @@ export default function SignInScreen() {
       <TextField
         autoCapitalize="none"
         autoComplete="username"
+        inputMode="text"
         label="Email ou nom d'utilisateur"
         onChangeText={setIdentifier}
         value={identifier}
@@ -104,6 +106,6 @@ export default function SignInScreen() {
       >
         <Button label="Créer un compte" variant="ghost" />
       </Link>
-    </ScrollView>
+    </PageScrollView>
   );
 }

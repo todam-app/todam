@@ -23,6 +23,9 @@ import type {
   GetHealthReadyData,
   GetHealthReadyErrors,
   GetHealthReadyResponses,
+  GetV1CatalogCitiesData,
+  GetV1CatalogCitiesErrors,
+  GetV1CatalogCitiesResponses,
   GetV1LegalCurrentData,
   GetV1LegalCurrentResponses,
   GetV1MeDashboardData,
@@ -31,6 +34,9 @@ import type {
   GetV1MeExportData,
   GetV1MeExportErrors,
   GetV1MeExportResponses,
+  GetV1MeHomeData,
+  GetV1MeHomeErrors,
+  GetV1MeHomeResponses,
   GetV1MeProductionsByIdDiaryData,
   GetV1MeProductionsByIdDiaryErrors,
   GetV1MeProductionsByIdDiaryResponses,
@@ -40,9 +46,15 @@ import type {
   GetV1ProductionsBySlugData,
   GetV1ProductionsBySlugErrors,
   GetV1ProductionsBySlugResponses,
+  GetV1PublicStatsData,
+  GetV1PublicStatsErrors,
+  GetV1PublicStatsResponses,
   GetV1SearchData,
   GetV1SearchErrors,
   GetV1SearchResponses,
+  PatchV1MeUsernameData,
+  PatchV1MeUsernameErrors,
+  PatchV1MeUsernameResponses,
   PostV1AccountDeletionConfirmData,
   PostV1AccountDeletionConfirmErrors,
   PostV1AccountDeletionConfirmResponses,
@@ -58,6 +70,15 @@ import type {
   PostV1MeDiaryData,
   PostV1MeDiaryErrors,
   PostV1MeDiaryResponses,
+  PostV1MeEmailChangeData,
+  PostV1MeEmailChangeErrors,
+  PostV1MeEmailChangeResponses,
+  PostV1MePasswordChangeData,
+  PostV1MePasswordChangeErrors,
+  PostV1MePasswordChangeResponses,
+  PutV1MeHomeCityData,
+  PutV1MeHomeCityErrors,
+  PutV1MeHomeCityResponses,
   PutV1MeProductionsByIdRatingData,
   PutV1MeProductionsByIdRatingErrors,
   PutV1MeProductionsByIdRatingResponses,
@@ -94,6 +115,18 @@ export const getV1LegalCurrent = <ThrowOnError extends boolean = false>(
     url: "/v1/legal/current",
     ...options,
   });
+
+/**
+ * Retourne les chiffres publics de Todam
+ */
+export const getV1PublicStats = <ThrowOnError extends boolean = false>(
+  options?: Options<GetV1PublicStatsData, ThrowOnError>,
+): RequestResult<GetV1PublicStatsResponses, GetV1PublicStatsErrors, ThrowOnError> =>
+  (options?.client ?? client).get<
+    GetV1PublicStatsResponses,
+    GetV1PublicStatsErrors,
+    ThrowOnError
+  >({ url: "/v1/public/stats", ...options });
 
 /**
  * Crée un compte avec les versions juridiques présentées
@@ -186,6 +219,92 @@ export const getV1MeExport = <ThrowOnError extends boolean = false>(
   });
 
 /**
+ * Modifie le nom d'utilisateur du compte
+ */
+export const patchV1MeUsername = <ThrowOnError extends boolean = false>(
+  options: Options<PatchV1MeUsernameData, ThrowOnError>,
+): RequestResult<PatchV1MeUsernameResponses, PatchV1MeUsernameErrors, ThrowOnError> =>
+  (options.client ?? client).patch<
+    PatchV1MeUsernameResponses,
+    PatchV1MeUsernameErrors,
+    ThrowOnError
+  >({
+    security: [
+      {
+        in: "cookie",
+        name: "better-auth.session_token",
+        type: "apiKey",
+      },
+    ],
+    url: "/v1/me/username",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * Envoie la confirmation d'une nouvelle adresse e-mail
+ */
+export const postV1MeEmailChange = <ThrowOnError extends boolean = false>(
+  options: Options<PostV1MeEmailChangeData, ThrowOnError>,
+): RequestResult<
+  PostV1MeEmailChangeResponses,
+  PostV1MeEmailChangeErrors,
+  ThrowOnError
+> =>
+  (options.client ?? client).post<
+    PostV1MeEmailChangeResponses,
+    PostV1MeEmailChangeErrors,
+    ThrowOnError
+  >({
+    security: [
+      {
+        in: "cookie",
+        name: "better-auth.session_token",
+        type: "apiKey",
+      },
+    ],
+    url: "/v1/me/email-change",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * Modifie le mot de passe et révoque les autres sessions
+ */
+export const postV1MePasswordChange = <ThrowOnError extends boolean = false>(
+  options: Options<PostV1MePasswordChangeData, ThrowOnError>,
+): RequestResult<
+  PostV1MePasswordChangeResponses,
+  PostV1MePasswordChangeErrors,
+  ThrowOnError
+> =>
+  (options.client ?? client).post<
+    PostV1MePasswordChangeResponses,
+    PostV1MePasswordChangeErrors,
+    ThrowOnError
+  >({
+    security: [
+      {
+        in: "cookie",
+        name: "better-auth.session_token",
+        type: "apiKey",
+      },
+    ],
+    url: "/v1/me/password-change",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
  * Envoie un lien public de suppression de compte
  */
 export const postV1AccountDeletionRequest = <ThrowOnError extends boolean = false>(
@@ -242,6 +361,18 @@ export const getHealthReady = <ThrowOnError extends boolean = false>(
     GetHealthReadyErrors,
     ThrowOnError
   >({ url: "/health/ready", ...options });
+
+/**
+ * Recherche les villes présentes dans le catalogue
+ */
+export const getV1CatalogCities = <ThrowOnError extends boolean = false>(
+  options?: Options<GetV1CatalogCitiesData, ThrowOnError>,
+): RequestResult<GetV1CatalogCitiesResponses, GetV1CatalogCitiesErrors, ThrowOnError> =>
+  (options?.client ?? client).get<
+    GetV1CatalogCitiesResponses,
+    GetV1CatalogCitiesErrors,
+    ThrowOnError
+  >({ url: "/v1/catalog/cities", ...options });
 
 /**
  * Recherche des spectacles, artistes et lieux
@@ -319,6 +450,54 @@ export const getV1MeProductionsByIdDiary = <ThrowOnError extends boolean = false
     ],
     url: "/v1/me/productions/{id}/diary",
     ...options,
+  });
+
+/**
+ * Consulte l'accueil personnalisé
+ */
+export const getV1MeHome = <ThrowOnError extends boolean = false>(
+  options?: Options<GetV1MeHomeData, ThrowOnError>,
+): RequestResult<GetV1MeHomeResponses, GetV1MeHomeErrors, ThrowOnError> =>
+  (options?.client ?? client).get<
+    GetV1MeHomeResponses,
+    GetV1MeHomeErrors,
+    ThrowOnError
+  >({
+    security: [
+      {
+        in: "cookie",
+        name: "better-auth.session_token",
+        type: "apiKey",
+      },
+    ],
+    url: "/v1/me/home",
+    ...options,
+  });
+
+/**
+ * Enregistre la ville de découverte
+ */
+export const putV1MeHomeCity = <ThrowOnError extends boolean = false>(
+  options: Options<PutV1MeHomeCityData, ThrowOnError>,
+): RequestResult<PutV1MeHomeCityResponses, PutV1MeHomeCityErrors, ThrowOnError> =>
+  (options.client ?? client).put<
+    PutV1MeHomeCityResponses,
+    PutV1MeHomeCityErrors,
+    ThrowOnError
+  >({
+    security: [
+      {
+        in: "cookie",
+        name: "better-auth.session_token",
+        type: "apiKey",
+      },
+    ],
+    url: "/v1/me/home-city",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
   });
 
 /**

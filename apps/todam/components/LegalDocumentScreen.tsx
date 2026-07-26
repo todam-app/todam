@@ -1,13 +1,6 @@
 import Head from "expo-router/head";
 import type { ReactNode } from "react";
-import {
-  Linking,
-  Platform,
-  ScrollView,
-  Text,
-  View,
-  type ViewProps,
-} from "react-native";
+import { Linking, Platform, Text, View, type ViewProps } from "react-native";
 
 import {
   legalDocumentMarkdown,
@@ -15,6 +8,7 @@ import {
   type LegalDocumentId,
 } from "../lib/legal-documents";
 import { LegalFooter } from "./LegalFooter";
+import { PageScrollView } from "./PageScrollView";
 
 interface Block {
   kind: "title" | "section" | "paragraph" | "bullet";
@@ -93,7 +87,7 @@ export function LegalDocumentScreen({
         <title>{title}</title>
         <meta content="noindex,nofollow,noarchive,nosnippet" name="robots" />
       </Head>
-      <ScrollView
+      <PageScrollView
         contentContainerClassName="flex-grow"
         contentInsetAdjustmentBehavior="automatic"
       >
@@ -146,7 +140,7 @@ export function LegalDocumentScreen({
           </Text>
         </View>
         <LegalFooter alwaysVisible />
-      </ScrollView>
+      </PageScrollView>
     </>
   );
 }

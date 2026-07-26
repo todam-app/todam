@@ -10,7 +10,7 @@ import {
   type TodamDatabase,
 } from "@todam/database";
 import type { EmailSender } from "@todam/domain";
-import { and, eq, gt } from "drizzle-orm";
+import { and, eq, gt, ne } from "drizzle-orm";
 
 import { HttpProblem } from "./errors.js";
 import { publicWebUrl } from "./legal.js";
@@ -36,6 +36,15 @@ export function accountExportToCsv(data: AccountExport): string {
       data.account.createdAt,
     ],
     ["compte", data.account.id, "email", data.account.email, data.account.createdAt],
+    [
+      "compte",
+      data.account.id,
+      "ville_accueil",
+      data.account.homeCity
+        ? `${data.account.homeCity.locality} (${data.account.homeCity.countryCode})`
+        : null,
+      data.account.createdAt,
+    ],
     [
       "juridique",
       data.account.id,
@@ -80,6 +89,81 @@ export function createAccountService(
   emailSender: EmailSender,
 ) {
   return {
+    async getIdentity(userId: string) {
+      const rows = await database
+        .select({
+          email: user.email,
+          pseudonym: user.pseudonym,
+        })
+        .from(user)
+        .where(eq(user.id, userId))
+        .limit(1);
+      const identity = rows[0];
+      if (!identity) {
+        throw new HttpProblem(
+          404,
+          "PROFILE_NOT_FOUND",
+          "Le profil associé à cette session est introuvable.",
+        );
+      }
+      return identity;
+    },
+
+    async assertEmailAvailable(email: string, exceptUserId?: string): Promise<void> {
+      const normalizedEmail = email.trim().toLowerCase();
+      const rows = await database
+        .select({ id: user.id })
+        .from(user)
+        .where(
+          exceptUserId
+            ? and(eq(user.email, normalizedEmail), ne(user.id, exceptUserId))
+            : eq(user.email, normalizedEmail),
+        )
+        .limit(1);
+      if (rows.length > 0) {
+        throw new HttpProblem(
+          409,
+          "EMAIL_ALREADY_REGISTERED",
+          "Un compte existe déjà avec cette adresse e-mail.",
+        );
+      }
+    },
+
+    async assertUsernameAvailable(
+      username: string,
+      exceptUserId?: string,
+    ): Promise<void> {
+      const normalizedUsername = username.trim();
+      const rows = await database
+        .select({ id: user.id })
+        .from(user)
+        .where(
+          exceptUserId
+            ? and(eq(user.pseudonym, normalizedUsername), ne(user.id, exceptUserId))
+            : eq(user.pseudonym, normalizedUsername),
+        )
+        .limit(1);
+      if (rows.length > 0) {
+        throw new HttpProblem(
+          409,
+          "USERNAME_ALREADY_TAKEN",
+          "Ce nom d'utilisateur est déjà utilisé.",
+        );
+      }
+    },
+
+    async notifyEmailChangeRequested(userId: string, newEmail: string): Promise<void> {
+      const identity = await this.getIdentity(userId);
+      await emailSender.send({
+        to: identity.email,
+        subject: "Demande de changement d’adresse e-mail — Todam",
+        text:
+          `Une demande a été faite pour remplacer l’adresse e-mail de ton compte Todam par ${newEmail}.\n\n` +
+          "Ton adresse actuelle reste active tant que la nouvelle n’a pas été confirmée.\n\n" +
+          "Si tu n’es pas à l’origine de cette demande, change immédiatement ton mot de passe.",
+      });
+    },
+
     async exportAccount(userId: string): Promise<AccountExport> {
       const [accountRows, diary, ratingRows, watchlist] = await Promise.all([
         database
@@ -88,6 +172,8 @@ export function createAccountService(
             pseudonym: user.pseudonym,
             email: user.email,
             emailVerified: user.emailVerified,
+            homeLocality: user.homeLocality,
+            homeCountryCode: user.homeCountryCode,
             createdAt: user.createdAt,
             age15OrOlder: user.age15OrOlder,
             ageConfirmedAt: user.ageConfirmedAt,
@@ -143,6 +229,13 @@ export function createAccountService(
           email: profile.email,
           emailVerified: profile.emailVerified,
           createdAt: profile.createdAt.toISOString(),
+          homeCity:
+            profile.homeLocality && profile.homeCountryCode
+              ? {
+                  locality: profile.homeLocality,
+                  countryCode: profile.homeCountryCode,
+                }
+              : null,
         },
         legal: {
           age15OrOlder: profile.age15OrOlder,

@@ -4,22 +4,34 @@ import {
   AccountDeletionRequestSchema,
   AccountExportQuerySchema,
   AccountExportResponseSchema,
+  CitySearchQuerySchema,
+  CitySearchResponseSchema,
   DashboardSchema,
   DiaryEntryIdParamsSchema,
+  EmailChangeBodySchema,
+  EmailChangeResponseSchema,
   EmailSignInBodySchema,
   HealthResponseSchema,
+  HomeCityBodySchema,
+  HomeCityResponseSchema,
+  HomeResponseSchema,
   LegalCurrentResponseSchema,
   MarkSeenBodySchema,
   MutationResponseSchema,
+  PasswordChangeBodySchema,
+  PasswordChangeResponseSchema,
   ProblemDetailsSchema,
   ProductionDiaryResponseSchema,
   ProductionIdParamsSchema,
   ProductionParamsSchema,
   ProductionResponseSchema,
+  PublicStatsSchema,
   RatingBodySchema,
   SearchQuerySchema,
   SearchResponseSchema,
   SignUpBodySchema,
+  UpdateUsernameBodySchema,
+  UpdateUsernameResponseSchema,
   UsernameSignInBodySchema,
   ViewerProductionStateSchema,
 } from "@todam/contracts";
@@ -28,9 +40,16 @@ import type { ZodTypeProvider } from "fastify-type-provider-zod";
 
 import { accountExportToCsv, type AccountService } from "./account-service.js";
 import type { TodamAuth } from "./auth.js";
-import { getRequiredUserId, handleAuthRequest } from "./auth.js";
+import {
+  forwardAuthHeaders,
+  getRequiredUserId,
+  handleAuthRequest,
+  toWebHeaders,
+} from "./auth.js";
 import type { CatalogService } from "./catalog-service.js";
+import { HttpProblem } from "./errors.js";
 import { currentLegalDocuments } from "./legal.js";
+import type { PublicStatsService } from "./public-stats-service.js";
 import { InMemoryRateLimiter } from "./rate-limit.js";
 
 const problemResponses = {
@@ -46,6 +65,7 @@ export interface RouteDependencies {
   account: AccountService;
   auth: TodamAuth;
   catalog: CatalogService;
+  publicStats: PublicStatsService;
 }
 
 export async function registerRoutes(
@@ -53,12 +73,32 @@ export async function registerRoutes(
   dependencies: RouteDependencies,
 ) {
   const app = baseApp.withTypeProvider<ZodTypeProvider>();
-  const { account, auth, catalog } = dependencies;
+  const { account, auth, catalog, publicStats } = dependencies;
   const rateLimiter = new InMemoryRateLimiter();
   const guardAuth = (scope: string, ip: string) =>
     rateLimiter.assertAllowed(`auth:${scope}:${ip}`, 10, 15 * 60_000);
   const guardDeletion = (ip: string) =>
     rateLimiter.assertAllowed(`delete:${ip}`, 5, 60 * 60_000);
+  const guardSensitiveAccountChange = (scope: string, userId: string, ip: string) =>
+    rateLimiter.assertAllowed(`account:${scope}:${userId}:${ip}`, 5, 60 * 60_000);
+
+  const verifyCurrentPassword = async (
+    request: Parameters<typeof toWebHeaders>[0],
+    password: string,
+  ) => {
+    try {
+      await auth.api.verifyPassword({
+        body: { password },
+        headers: toWebHeaders(request),
+      });
+    } catch {
+      throw new HttpProblem(
+        400,
+        "INVALID_CURRENT_PASSWORD",
+        "Le mot de passe actuel est incorrect.",
+      );
+    }
+  };
 
   app.get(
     "/v1/legal/current",
@@ -72,6 +112,24 @@ export async function registerRoutes(
     async () => currentLegalDocuments(),
   );
 
+  app.get(
+    "/v1/public/stats",
+    {
+      schema: {
+        tags: ["Transparence"],
+        summary: "Retourne les chiffres publics de Todam",
+        response: {
+          200: PublicStatsSchema,
+          ...problemResponses,
+        },
+      },
+    },
+    async (_request, reply) =>
+      reply
+        .header("cache-control", "public, max-age=60, stale-while-revalidate=300")
+        .send(await publicStats.getStats()),
+  );
+
   app.post(
     "/v1/auth/sign-up/email",
     {
@@ -80,7 +138,11 @@ export async function registerRoutes(
         summary: "Crée un compte avec les versions juridiques présentées",
         body: SignUpBodySchema,
       },
-      preHandler: async (request) => guardAuth("signup", request.ip),
+      preHandler: async (request) => {
+        guardAuth("signup", request.ip);
+        await account.assertEmailAvailable(request.body.email);
+        await account.assertUsernameAvailable(request.body.username);
+      },
     },
     (request, reply) => handleAuthRequest(auth, request, reply),
   );
@@ -116,6 +178,18 @@ export async function registerRoutes(
     url: "/v1/auth/*",
     schema: { hide: true },
     preHandler: async (request) => {
+      const authPath = request.url.split("?")[0];
+      if (
+        authPath === "/v1/auth/change-email" ||
+        authPath === "/v1/auth/change-password" ||
+        authPath === "/v1/auth/update-user"
+      ) {
+        throw new HttpProblem(
+          404,
+          "ROUTE_NOT_FOUND",
+          "Utilise les paramètres du compte pour effectuer cette modification.",
+        );
+      }
       if (request.method === "POST") guardAuth(request.url, request.ip);
     },
     handler: (request, reply) => handleAuthRequest(auth, request, reply),
@@ -160,6 +234,118 @@ export async function registerRoutes(
           .send(accountExportToCsv(exported));
       }
       return exported;
+    },
+  );
+
+  app.patch(
+    "/v1/me/username",
+    {
+      schema: {
+        tags: ["Compte"],
+        summary: "Modifie le nom d'utilisateur du compte",
+        security: [{ sessionCookie: [] }],
+        body: UpdateUsernameBodySchema,
+        response: {
+          200: UpdateUsernameResponseSchema,
+          ...problemResponses,
+        },
+      },
+    },
+    async (request, reply) => {
+      const userId = await getRequiredUserId(auth, request);
+      guardSensitiveAccountChange("username", userId, request.ip);
+      const username = request.body.username.trim();
+      await account.assertUsernameAvailable(username, userId);
+      const response = await auth.api.updateUser({
+        body: {
+          name: username,
+          username,
+          displayUsername: username,
+        },
+        headers: toWebHeaders(request),
+        asResponse: true,
+      });
+      forwardAuthHeaders(response, reply);
+      return { username };
+    },
+  );
+
+  app.post(
+    "/v1/me/email-change",
+    {
+      schema: {
+        tags: ["Compte"],
+        summary: "Envoie la confirmation d'une nouvelle adresse e-mail",
+        security: [{ sessionCookie: [] }],
+        body: EmailChangeBodySchema,
+        response: {
+          200: EmailChangeResponseSchema,
+          ...problemResponses,
+        },
+      },
+    },
+    async (request) => {
+      const userId = await getRequiredUserId(auth, request);
+      guardSensitiveAccountChange("email", userId, request.ip);
+      const identity = await account.getIdentity(userId);
+      const newEmail = request.body.newEmail.trim().toLowerCase();
+      if (identity.email.trim().toLowerCase() === newEmail) {
+        throw new HttpProblem(
+          409,
+          "EMAIL_UNCHANGED",
+          "Cette adresse e-mail est déjà associée à ton compte.",
+        );
+      }
+      await account.assertEmailAvailable(newEmail, userId);
+      await verifyCurrentPassword(request, request.body.currentPassword);
+      await auth.api.changeEmail({
+        body: {
+          newEmail,
+          callbackURL: request.body.callbackURL,
+        },
+        headers: toWebHeaders(request),
+      });
+      await account.notifyEmailChangeRequested(userId, newEmail);
+      return { verificationSent: true as const };
+    },
+  );
+
+  app.post(
+    "/v1/me/password-change",
+    {
+      schema: {
+        tags: ["Compte"],
+        summary: "Modifie le mot de passe et révoque les autres sessions",
+        security: [{ sessionCookie: [] }],
+        body: PasswordChangeBodySchema,
+        response: {
+          200: PasswordChangeResponseSchema,
+          ...problemResponses,
+        },
+      },
+    },
+    async (request, reply) => {
+      const userId = await getRequiredUserId(auth, request);
+      guardSensitiveAccountChange("password", userId, request.ip);
+      if (request.body.currentPassword === request.body.newPassword) {
+        throw new HttpProblem(
+          409,
+          "PASSWORD_UNCHANGED",
+          "Le nouveau mot de passe doit être différent du mot de passe actuel.",
+        );
+      }
+      await verifyCurrentPassword(request, request.body.currentPassword);
+      const response = await auth.api.changePassword({
+        body: {
+          currentPassword: request.body.currentPassword,
+          newPassword: request.body.newPassword,
+          revokeOtherSessions: true,
+        },
+        headers: toWebHeaders(request),
+        asResponse: true,
+      });
+      forwardAuthHeaders(response, reply);
+      return { changed: true as const };
     },
   );
 
@@ -236,6 +422,22 @@ export async function registerRoutes(
   );
 
   app.get(
+    "/v1/catalog/cities",
+    {
+      schema: {
+        tags: ["Catalogue"],
+        summary: "Recherche les villes présentes dans le catalogue",
+        querystring: CitySearchQuerySchema,
+        response: {
+          200: CitySearchResponseSchema,
+          ...problemResponses,
+        },
+      },
+    },
+    async (request) => ({ items: await catalog.searchCities(request.query) }),
+  );
+
+  app.get(
     "/v1/search",
     {
       schema: {
@@ -305,6 +507,45 @@ export async function registerRoutes(
       const userId = await getRequiredUserId(auth, request);
       const items = await catalog.getProductionDiary(userId, request.params.id);
       return { items };
+    },
+  );
+
+  app.get(
+    "/v1/me/home",
+    {
+      schema: {
+        tags: ["Compte"],
+        summary: "Consulte l'accueil personnalisé",
+        security: [{ sessionCookie: [] }],
+        response: {
+          200: HomeResponseSchema,
+          ...problemResponses,
+        },
+      },
+    },
+    async (request) => {
+      const userId = await getRequiredUserId(auth, request);
+      return catalog.getHome(userId);
+    },
+  );
+
+  app.put(
+    "/v1/me/home-city",
+    {
+      schema: {
+        tags: ["Compte"],
+        summary: "Enregistre la ville de découverte",
+        security: [{ sessionCookie: [] }],
+        body: HomeCityBodySchema,
+        response: {
+          200: HomeCityResponseSchema,
+          ...problemResponses,
+        },
+      },
+    },
+    async (request) => {
+      const userId = await getRequiredUserId(auth, request);
+      return { city: await catalog.setHomeCity(userId, request.body.city) };
     },
   );
 

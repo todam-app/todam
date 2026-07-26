@@ -63,19 +63,21 @@ describe("API Todam", () => {
       logger: false,
     });
 
-    for (const method of ["PUT", "DELETE"]) {
-      const response = await app.inject({
-        method: "OPTIONS",
-        url: `/v1/me/watchlist/${randomUUID()}`,
-        headers: {
-          origin: webAppOrigin,
-          "access-control-request-method": method,
-        },
-      });
+    for (const origin of [webAppOrigin, "http://127.0.0.1:8082"]) {
+      for (const method of ["PUT", "DELETE"]) {
+        const response = await app.inject({
+          method: "OPTIONS",
+          url: `/v1/me/watchlist/${randomUUID()}`,
+          headers: {
+            origin,
+            "access-control-request-method": method,
+          },
+        });
 
-      expect(response.statusCode).toBe(204);
-      expect(response.headers["access-control-allow-origin"]).toBe(webAppOrigin);
-      expect(response.headers["access-control-allow-methods"]).toContain(method);
+        expect(response.statusCode).toBe(204);
+        expect(response.headers["access-control-allow-origin"]).toBe(origin);
+        expect(response.headers["access-control-allow-methods"]).toContain(method);
+      }
     }
 
     await app.close();

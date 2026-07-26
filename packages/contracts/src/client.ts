@@ -1,14 +1,25 @@
 import {
+  CitySearchResponseSchema,
   DashboardSchema,
+  EmailChangeResponseSchema,
+  HomeCityResponseSchema,
+  HomeResponseSchema,
   MutationResponseSchema,
+  PasswordChangeResponseSchema,
   ProblemDetailsSchema,
   ProductionDiaryResponseSchema,
   ProductionResponseSchema,
+  PublicStatsSchema,
   SearchResponseSchema,
+  UpdateUsernameResponseSchema,
   ViewerProductionStateSchema,
+  type CityOption,
+  type CitySelection,
   type Dashboard,
   type DiarySession,
+  type HomeResponse,
   type ProblemDetails,
+  type PublicStats,
   type SearchResponse,
   type ViewerProductionState,
 } from "./api.js";
@@ -44,10 +55,24 @@ export interface MarkSeenInput {
 
 export interface TodamApiClient {
   getCurrentLegalDocuments(): Promise<LegalCurrentResponse>;
+  getPublicStats(): Promise<PublicStats>;
   search(query: string): Promise<SearchResponse>;
+  searchCities(query?: string): Promise<CityOption[]>;
   getProduction(slug: string): Promise<ProductionDetail>;
   getProductionState(productionId: string): Promise<ViewerProductionState>;
   getDashboard(): Promise<Dashboard>;
+  getHome(): Promise<HomeResponse>;
+  setHomeCity(city: CitySelection | null): Promise<CityOption | null>;
+  updateUsername(username: string): Promise<string>;
+  requestEmailChange(input: {
+    currentPassword: string;
+    newEmail: string;
+    callbackURL: string;
+  }): Promise<void>;
+  changePassword(input: {
+    currentPassword: string;
+    newPassword: string;
+  }): Promise<void>;
   getProductionDiary(productionId: string): Promise<DiarySession[]>;
   markSeen(input: MarkSeenInput): Promise<ViewerProductionState>;
   deleteDiaryEntry(entryId: string): Promise<ViewerProductionState>;
@@ -88,8 +113,16 @@ export function createTodamApiClient(options: TodamApiClientOptions): TodamApiCl
   return {
     getCurrentLegalDocuments: () =>
       request("/v1/legal/current", LegalCurrentResponseSchema),
+    getPublicStats: () => request("/v1/public/stats", PublicStatsSchema),
     search: (query) =>
       request(`/v1/search?q=${encodeURIComponent(query)}`, SearchResponseSchema),
+    searchCities: async (query) => {
+      const response = await request(
+        `/v1/catalog/cities${query ? `?q=${encodeURIComponent(query)}` : ""}`,
+        CitySearchResponseSchema,
+      );
+      return response.items;
+    },
     getProduction: (slug) =>
       request(`/v1/productions/${encodeURIComponent(slug)}`, ProductionResponseSchema),
     getProductionState: (productionId) =>
@@ -98,6 +131,33 @@ export function createTodamApiClient(options: TodamApiClientOptions): TodamApiCl
         ViewerProductionStateSchema,
       ),
     getDashboard: () => request("/v1/me/dashboard", DashboardSchema),
+    getHome: () => request("/v1/me/home", HomeResponseSchema),
+    setHomeCity: async (city) => {
+      const response = await request("/v1/me/home-city", HomeCityResponseSchema, {
+        method: "PUT",
+        body: JSON.stringify({ city }),
+      });
+      return response.city;
+    },
+    updateUsername: async (username) => {
+      const response = await request("/v1/me/username", UpdateUsernameResponseSchema, {
+        method: "PATCH",
+        body: JSON.stringify({ username }),
+      });
+      return response.username;
+    },
+    requestEmailChange: async (input) => {
+      await request("/v1/me/email-change", EmailChangeResponseSchema, {
+        method: "POST",
+        body: JSON.stringify(input),
+      });
+    },
+    changePassword: async (input) => {
+      await request("/v1/me/password-change", PasswordChangeResponseSchema, {
+        method: "POST",
+        body: JSON.stringify(input),
+      });
+    },
     getProductionDiary: async (productionId) => {
       const response = await request(
         `/v1/me/productions/${encodeURIComponent(productionId)}/diary`,

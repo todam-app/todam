@@ -1,8 +1,9 @@
 import { Button, TextField } from "@todam/design-system";
 import * as Linking from "expo-linking";
 import { useState } from "react";
-import { Text, View } from "react-native";
+import { Text } from "react-native";
 
+import { PageStaticView } from "../components/PageScrollView";
 import { authClient } from "../lib/auth-client";
 
 export default function DeleteMyAccountScreen() {
@@ -29,7 +30,7 @@ export default function DeleteMyAccountScreen() {
   }
 
   return (
-    <View className="mx-auto w-full max-w-lg flex-1 justify-center gap-5 px-5 py-12">
+    <PageStaticView className="mx-auto w-full max-w-lg flex-1 justify-center gap-5 px-5 py-12">
       <Text
         accessibilityRole="header"
         className="font-serif text-4xl font-black text-ink"
@@ -59,6 +60,6 @@ export default function DeleteMyAccountScreen() {
           {error}
         </Text>
       ) : null}
-    </View>
+    </PageStaticView>
   );
 }

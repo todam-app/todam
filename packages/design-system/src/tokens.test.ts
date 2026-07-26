@@ -27,4 +27,8 @@ describe("tokens accessibles", () => {
   it("garde le texte principal au niveau WCAG AA sur le fond", () => {
     expect(contrast(tokens.color.ink, tokens.color.background)).toBeGreaterThan(4.5);
   });
+
+  it("garde le libellé du bouton destructif au niveau WCAG AA", () => {
+    expect(contrast(tokens.color.surface, tokens.color.error)).toBeGreaterThan(4.5);
+  });
 });

@@ -1,8 +1,9 @@
 import { Button, TextField } from "@todam/design-system";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
-import { Text, View } from "react-native";
+import { Text } from "react-native";
 
+import { PageStaticView } from "../components/PageScrollView";
 import { authClient } from "../lib/auth-client";
 
 function first(value: string | string[] | undefined): string {
@@ -33,7 +34,7 @@ export default function ResetPasswordScreen() {
   }
 
   return (
-    <View className="mx-auto w-full max-w-lg flex-1 justify-center gap-5 px-5 py-12">
+    <PageStaticView className="mx-auto w-full max-w-lg flex-1 justify-center gap-5 px-5 py-12">
       <Text
         accessibilityRole="header"
         className="font-serif text-4xl font-black text-ink"
@@ -58,6 +59,6 @@ export default function ResetPasswordScreen() {
         loading={pending}
         onPress={() => void submit()}
       />
-    </View>
+    </PageStaticView>
   );
 }

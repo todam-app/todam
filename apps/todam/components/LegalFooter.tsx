@@ -9,7 +9,8 @@ const productLinks = [
   { href: "/sign-up", label: "Créer un compte" },
 ] as const;
 
-const legalLinks = [
+const informationLinks = [
+  { href: "/transparence", label: "Transparence & open source" },
   { href: "/conditions-utilisation", label: "Conditions d'utilisation" },
   { href: "/confidentialite", label: "Confidentialité" },
   { href: "/mentions-legales", label: "Mentions légales" },
@@ -20,7 +21,8 @@ function FooterInternalLink({
   href,
   label,
 }: {
-  href: (typeof productLinks)[number]["href"] | (typeof legalLinks)[number]["href"];
+  href:
+    (typeof productLinks)[number]["href"] | (typeof informationLinks)[number]["href"];
   label: string;
 }) {
   return (
@@ -50,7 +52,7 @@ export function LegalFooter({ alwaysVisible = false }: { alwaysVisible?: boolean
 
   return (
     <View
-      className="border-t border-line bg-paper px-5 py-10 md:px-8"
+      className="mx-auto w-full max-w-content border-t border-line bg-paper px-5 py-10 md:px-8"
       testID="site-footer"
     >
       <View className="mx-auto w-full max-w-content gap-10">
@@ -85,7 +87,7 @@ export function LegalFooter({ alwaysVisible = false }: { alwaysVisible?: boolean
 
           <View className="min-w-44 gap-1">
             <Text className="mb-2 font-semibold text-ink">Informations</Text>
-            {legalLinks.map((item) => (
+            {informationLinks.map((item) => (
               <FooterInternalLink {...item} key={item.href} />
             ))}
           </View>

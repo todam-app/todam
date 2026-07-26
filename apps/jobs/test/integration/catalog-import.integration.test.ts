@@ -9,7 +9,7 @@ import {
   productions,
 } from "@todam/database";
 import { count, eq } from "drizzle-orm";
-import { afterAll, beforeEach, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
 import { applyCatalog } from "../../src/importer.js";
 
@@ -19,10 +19,23 @@ const fixturePath = resolve(
 );
 const { db, pool } = createDatabase();
 
+async function assertIsolatedDatabase() {
+  const result = await pool.query<{ database: string }>(
+    "select current_database() as database",
+  );
+  const database = result.rows[0]?.database ?? "";
+  if (!/(test|integration)/iu.test(database)) {
+    throw new Error(
+      `La base d'intégration doit contenir test ou integration dans son nom : ${database}`,
+    );
+  }
+}
+
 async function cleanDatabase() {
   const tables = await pool.query<{ tablename: string }>(
     "select tablename from pg_tables " +
-      "where schemaname = 'public' and tablename <> '__drizzle_migrations'",
+      "where schemaname = 'public' " +
+      "and tablename not in ('__drizzle_migrations', 'spatial_ref_sys')",
   );
   if (tables.rows.length === 0) return;
   const names = tables.rows
@@ -37,6 +50,7 @@ async function loadFixture(): Promise<CatalogImport> {
 }
 
 describe("import PostgreSQL réel", () => {
+  beforeAll(assertIsolatedDatabase);
   beforeEach(cleanDatabase);
   afterAll(async () => {
     await cleanDatabase();

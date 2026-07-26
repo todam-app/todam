@@ -15,13 +15,21 @@ import { createAuth } from "./auth.js";
 import { createAccountService } from "./account-service.js";
 import { createCatalogService } from "./catalog-service.js";
 import { HttpProblem, problemDocument } from "./errors.js";
-import { registerRoutes } from "./routes.js";
 import { assertProductionConfiguration } from "./production-config.js";
+import { createPublicStatsService } from "./public-stats-service.js";
+import { registerRoutes } from "./routes.js";
 
 export interface BuildServerOptions {
   database: TodamDatabase;
   logger?: boolean;
   emailSender?: EmailSender;
+}
+
+function corsOrigins(): string | (string | RegExp)[] {
+  const webAppOrigin = process.env.WEB_APP_URL ?? "http://localhost:8081";
+  if (process.env.NODE_ENV === "production") return webAppOrigin;
+
+  return [webAppOrigin, /^https?:\/\/(?:localhost|127\.0\.0\.1|\[::1\])(?::\d+)?$/];
 }
 
 function statusTitle(status: number): string {
@@ -81,7 +89,7 @@ export async function buildServer(options: BuildServerOptions) {
   app.setSerializerCompiler(serializerCompiler);
 
   await app.register(cors, {
-    origin: process.env.WEB_APP_URL ?? "http://localhost:8081",
+    origin: corsOrigins(),
     credentials: true,
     methods: ["GET", "HEAD", "POST", "PUT", "DELETE"],
   });
@@ -114,7 +122,8 @@ export async function buildServer(options: BuildServerOptions) {
   const auth = createAuth(options.database, emailSender);
   const account = createAccountService(options.database, emailSender);
   const catalog = createCatalogService(options.database);
-  await registerRoutes(app, { account, auth, catalog });
+  const publicStats = createPublicStatsService(options.database);
+  await registerRoutes(app, { account, auth, catalog, publicStats });
 
   app.setNotFoundHandler((request, reply) =>
     reply

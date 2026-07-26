@@ -3,14 +3,144 @@
 @tailwind utilities;
 
 :root {
-  --todam-web-header-height: 69px;
+  --todam-color-canvas: #f7f3ec;
+  --todam-color-gutter: #f0eae1;
+  --todam-color-page: var(--todam-color-canvas);
+  --todam-web-content-width: 1120px;
+  --todam-web-header-height: 70px;
 }
 
 html,
 body,
 #root {
   min-height: 100%;
-  background: #f7f3ec;
+}
+
+html {
+  background-attachment: fixed;
+  background-color: var(--todam-color-gutter);
+  background-image: linear-gradient(
+    to right,
+    var(--todam-color-gutter) 0,
+    var(--todam-color-gutter) calc(50% - 560px),
+    var(--todam-color-page) calc(50% - 560px),
+    var(--todam-color-page) calc(50% + 560px),
+    var(--todam-color-gutter) calc(50% + 560px),
+    var(--todam-color-gutter) 100%
+  );
+}
+
+body {
+  background: transparent;
+  overflow-y: hidden !important;
+}
+
+#root,
+.todam-web-root,
+.todam-web-shell {
+  background: transparent;
+}
+
+.todam-web-header {
+  left: 0;
+  margin-inline: auto;
+  max-width: var(--todam-web-content-width);
+  position: fixed;
+  right: 0;
+  box-shadow: none;
+  top: 0;
+  width: 100%;
+  z-index: 100;
+}
+
+.todam-web-header--scrolled {
+  box-shadow: 0 3px 10px rgba(75, 58, 36, 0.12);
+}
+
+.todam-web-page-scroll {
+  background-color: var(--todam-color-gutter) !important;
+  background-image: linear-gradient(
+    to right,
+    var(--todam-color-gutter) 0,
+    var(--todam-color-gutter) calc(50% - 560px),
+    var(--todam-color-page) calc(50% - 560px),
+    var(--todam-color-page) calc(50% + 560px),
+    var(--todam-color-gutter) calc(50% + 560px),
+    var(--todam-color-gutter) 100%
+  ) !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  padding-top: var(--todam-web-header-height);
+}
+
+.todam-web-page-static {
+  padding-top: var(--todam-web-header-height);
+}
+
+.todam-search-bar input:focus {
+  outline: none;
+}
+
+.todam-search-bar:focus-within {
+  border-color: #c43d28 !important;
+  box-shadow: 0 0 0 3px rgba(196, 61, 40, 0.14);
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  caret-color: #151515;
+  -webkit-box-shadow: 0 0 0 1000px #fffdf8 inset !important;
+  -webkit-text-fill-color: #151515;
+}
+
+@media (max-width: 1119px) {
+  html {
+    background: var(--todam-color-page);
+  }
+
+  .todam-web-page-scroll {
+    background: var(--todam-color-page) !important;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .todam-web-header {
+    transition: box-shadow 160ms ease;
+  }
+
+  .todam-search-bar {
+    transition:
+      border-color 120ms ease,
+      box-shadow 120ms ease;
+  }
+}
+
+@media (pointer: fine) {
+  * {
+    scrollbar-color: #b9b0a4 transparent;
+    scrollbar-width: thin;
+  }
+
+  *::-webkit-scrollbar {
+    height: 8px;
+    width: 8px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background-clip: padding-box;
+    background-color: #b9b0a4;
+    border: 2px solid transparent;
+    border-radius: 999px;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background-color: #9f9588;
+  }
 }
 
 .todam-page-before-footer {
