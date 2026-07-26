@@ -118,6 +118,9 @@ def verify_pdf(
     extracted = normalized_text(
         " ".join(page.extract_text() or "" for page in reader.pages)
     )
+    if not reader.pages or len(extracted) < 500:
+        raise RuntimeError(f"Le PDF généré semble incomplet : {destination}")
+
     if "Date d'effet : 26 juillet 2026" not in extracted:
         raise RuntimeError(f"La date attendue est absente du PDF : {destination}")
 
@@ -313,8 +316,6 @@ def build_pdf(source: Path, destination: Path) -> None:
     flush_paragraph()
     document.build(story)
 
-    if destination.stat().st_size < 5_000:
-        raise RuntimeError(f"Le PDF généré semble incomplet : {destination}")
     verify_pdf(source, destination, resolved_values)
 
 
