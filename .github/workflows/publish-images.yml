@@ -41,13 +41,13 @@ jobs:
     steps:
       - name: Récupérer le dépôt
         uses: actions/checkout@v7
+      - name: Installer pnpm
+        uses: pnpm/action-setup@v6
       - name: Configurer Node.js
         uses: actions/setup-node@v7
         with:
           node-version: 24
           cache: pnpm
-      - name: Activer pnpm
-        run: corepack enable
       - name: Installer les dépendances
         run: pnpm install --frozen-lockfile
       - name: Vérifier le monorepo
@@ -142,6 +142,8 @@ jobs:
     steps:
       - name: Récupérer le dépôt
         uses: actions/checkout@v7
+      - name: Installer pnpm
+        uses: pnpm/action-setup@v6
       - name: Configurer Node.js
         uses: actions/setup-node@v7
         with:
@@ -151,8 +153,6 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: "3.14"
-      - name: Activer pnpm
-        run: corepack enable
       - name: Installer les dépendances
         run: pnpm install --frozen-lockfile
       - name: Installer le générateur PDF
