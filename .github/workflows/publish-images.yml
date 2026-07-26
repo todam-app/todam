@@ -212,14 +212,21 @@ jobs:
         run: |
           set -euo pipefail
           test -n "$COOLIFY_TOKEN"
-          for webhook in \
-            "$COOLIFY_API_WEBHOOK" \
-            "$COOLIFY_JOBS_WEBHOOK" \
+
+          components=("API" "Jobs" "Web")
+          webhooks=(
+            "$COOLIFY_API_WEBHOOK"
+            "$COOLIFY_JOBS_WEBHOOK"
             "$COOLIFY_WEB_WEBHOOK"
-          do
+          )
+
+          for index in "${!webhooks[@]}"; do
+            webhook="${webhooks[$index]}"
             test -n "$webhook"
+            printf 'Déclenchement Coolify : %s\n' "${components[$index]}"
             curl \
-              --fail \
+              --request POST \
+              --fail-with-body \
               --retry 3 \
               --show-error \
               --silent \
