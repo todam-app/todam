@@ -119,9 +119,10 @@ async function signUp(
   expect(response.statusCode).toBe(200);
   expect(response.headers["set-cookie"]).toBeFalsy();
   const verificationEmail = sentEmails.find((message) =>
-    message.subject.includes("Confirmez votre adresse"),
+    message.subject.includes("Confirme ton adresse"),
   );
   expect(verificationEmail).toBeTruthy();
+  expect(verificationEmail!.html).toContain("Ton journal t’attend.");
   const verificationUrl = verificationEmail!.text.match(/https?:\/\/\S+/)?.[0];
   expect(verificationUrl).toBeTruthy();
   const target = new URL(verificationUrl!);
@@ -130,6 +131,10 @@ async function signUp(
     url: `${target.pathname}${target.search}`,
   });
   expect([200, 302]).toContain(verification.statusCode);
+  const welcomeEmail = sentEmails.find((message) =>
+    message.subject.includes("Bienvenue sur Todam"),
+  );
+  expect(welcomeEmail?.html).toContain("Tes documents d’inscription");
   const cookie = verification.headers["set-cookie"];
   expect(cookie).toBeTruthy();
   return Array.isArray(cookie) ? cookie.join("; ") : cookie!;
@@ -250,7 +255,7 @@ describe("première boucle API sur PostgreSQL/PostGIS", () => {
 
     expect(response.statusCode).toBe(200);
     expect(response.headers["set-cookie"]).toBeFalsy();
-    expect(sentEmails.some((email) => email.subject.includes("Confirmez"))).toBe(true);
+    expect(sentEmails.some((email) => email.subject.includes("Confirme"))).toBe(true);
     const proof = await db
       .select({ acceptedAt: legalAcceptances.acceptedAt })
       .from(legalAcceptances)

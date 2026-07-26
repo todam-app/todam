@@ -18,8 +18,9 @@ import { username } from "better-auth/plugins";
 import { eq } from "drizzle-orm";
 import type { FastifyReply, FastifyRequest } from "fastify";
 
+import { createVerificationEmail, createWelcomeEmail } from "./auth-emails.js";
 import { HttpProblem } from "./errors.js";
-import { currentLegalDocuments } from "./legal.js";
+import { currentLegalDocuments, publicWebUrl } from "./legal.js";
 
 export function createAuth(database: TodamDatabase, emailSender: EmailSender) {
   const baseUrl = process.env.BETTER_AUTH_URL
@@ -71,17 +72,19 @@ export function createAuth(database: TodamDatabase, emailSender: EmailSender) {
       expiresIn: 24 * 60 * 60,
       sendVerificationEmail: async ({ user: target, url }) => {
         await emailSender.send({
+          ...createVerificationEmail({
+            displayName: target.name,
+            publicWebUrl: publicWebUrl(),
+            verificationUrl: url,
+          }),
           to: target.email,
-          subject: "Confirmez votre adresse e-mail Todam",
-          text:
-            "Confirmez votre adresse e-mail dans les 24 heures pour activer votre compte : " +
-            `${url}\n\nSi vous n'avez pas créé ce compte, ignorez cet e-mail.`,
         });
       },
       afterEmailVerification: async (verifiedUser) => {
         const rows = await database
           .select({
             email: user.email,
+            pseudonym: user.pseudonym,
             termsVersion: user.termsVersion,
             privacyNoticeVersion: user.privacyNoticeVersion,
             termsAcceptedAt: user.termsAcceptedAt,
@@ -95,14 +98,21 @@ export function createAuth(database: TodamDatabase, emailSender: EmailSender) {
         const documents = currentLegalDocuments();
         try {
           await emailSender.send({
+            ...createWelcomeEmail({
+              displayName: profile.pseudonym,
+              privacyNotice: {
+                pdfUrl: documents.privacyNotice.pdfUrl,
+                version: profile.privacyNoticeVersion,
+              },
+              profileUrl: `${webAppUrl.replace(/\/+$/u, "")}/profile`,
+              publicWebUrl: publicWebUrl(),
+              terms: {
+                acceptedAt: profile.termsAcceptedAt,
+                pdfUrl: documents.terms.pdfUrl,
+                version: profile.termsVersion,
+              },
+            }),
             to: profile.email,
-            subject: "Votre compte Todam est activé",
-            text:
-              "Votre compte Todam est activé.\n\n" +
-              `CGU acceptées : version ${profile.termsVersion}, le ${profile.termsAcceptedAt.toISOString()}.\n` +
-              `Politique de confidentialité présentée : version ${profile.privacyNoticeVersion}.\n` +
-              `Archive des CGU : ${documents.terms.pdfUrl}\n` +
-              `Archive de la politique : ${documents.privacyNotice.pdfUrl}`,
           });
         } catch {
           console.error("L'e-mail de preuve juridique n'a pas pu être envoyé.");

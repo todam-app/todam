@@ -36,9 +36,8 @@ class BrevoEmailSender implements EmailSender {
         sender: { email: this.from, name: this.fromName },
         to: [{ email: message.to }],
         subject: message.subject,
-        ...(message.html
-          ? { htmlContent: message.html }
-          : { textContent: message.text }),
+        textContent: message.text,
+        ...(message.html ? { htmlContent: message.html } : {}),
       }),
     });
 
