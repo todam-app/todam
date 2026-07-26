@@ -230,7 +230,7 @@ export default function AccountSettingsScreen() {
           </Text>
         </View>
 
-        <View className="gap-4 rounded-todam bg-paper p-5 shadow-sm md:p-6">
+        <View className="gap-4 rounded-todam border border-line bg-paper p-5 md:p-6">
           <SectionTitle>Adresse e-mail</SectionTitle>
           <Text className="leading-6 text-muted">
             Adresse actuelle : {sessionUser?.email}
@@ -259,15 +259,19 @@ export default function AccountSettingsScreen() {
           {emailMessage ? (
             <Text className="leading-6 text-ink">{emailMessage}</Text>
           ) : null}
-          <Button
-            disabled={!newEmail.includes("@") || emailPassword.length < 8}
-            label="Confirmer la nouvelle adresse"
-            loading={emailPending}
-            onPress={() => void submitEmailChange()}
-          />
+          <View className="w-full md:items-end">
+            <View className="w-full md:w-auto md:min-w-[240px]">
+              <Button
+                disabled={!newEmail.includes("@") || emailPassword.length < 8}
+                label="Confirmer la nouvelle adresse"
+                loading={emailPending}
+                onPress={() => void submitEmailChange()}
+              />
+            </View>
+          </View>
         </View>
 
-        <View className="gap-4 rounded-todam bg-paper p-5 shadow-sm md:p-6">
+        <View className="gap-4 rounded-todam border border-line bg-paper p-5 md:p-6">
           <SectionTitle>Nom d{"'"}utilisateur</SectionTitle>
           <Text className="leading-6 text-muted">
             Entre 3 et 30 caractères. Actuellement : {currentUsername}
@@ -289,18 +293,22 @@ export default function AccountSettingsScreen() {
           {usernameMessage ? (
             <Text className="leading-6 text-ink">{usernameMessage}</Text>
           ) : null}
-          <Button
-            disabled={
-              usernameValue.trim().length < 3 ||
-              usernameValue.trim() === currentUsername
-            }
-            label="Modifier le nom d'utilisateur"
-            loading={usernamePending}
-            onPress={() => void submitUsername()}
-          />
+          <View className="w-full md:items-end">
+            <View className="w-full md:w-auto md:min-w-[240px]">
+              <Button
+                disabled={
+                  usernameValue.trim().length < 3 ||
+                  usernameValue.trim() === currentUsername
+                }
+                label="Modifier le nom d'utilisateur"
+                loading={usernamePending}
+                onPress={() => void submitUsername()}
+              />
+            </View>
+          </View>
         </View>
 
-        <View className="gap-4 rounded-todam bg-paper p-5 shadow-sm md:p-6">
+        <View className="gap-4 rounded-todam border border-line bg-paper p-5 md:p-6">
           <SectionTitle>Mot de passe</SectionTitle>
           <TextField
             autoComplete="current-password"
@@ -331,20 +339,24 @@ export default function AccountSettingsScreen() {
           {passwordMessage ? (
             <Text className="leading-6 text-ink">{passwordMessage}</Text>
           ) : null}
-          <Button
-            disabled={
-              currentPassword.length < 8 ||
-              newPassword.length < 8 ||
-              passwordConfirmation.length < 8
-            }
-            label="Modifier le mot de passe"
-            loading={passwordPending}
-            onPress={() => void submitPassword()}
-          />
+          <View className="w-full md:items-end">
+            <View className="w-full md:w-auto md:min-w-[240px]">
+              <Button
+                disabled={
+                  currentPassword.length < 8 ||
+                  newPassword.length < 8 ||
+                  passwordConfirmation.length < 8
+                }
+                label="Modifier le mot de passe"
+                loading={passwordPending}
+                onPress={() => void submitPassword()}
+              />
+            </View>
+          </View>
         </View>
 
         <View
-          className="gap-6 rounded-todam bg-paper p-5 shadow-sm md:p-6"
+          className="gap-6 rounded-todam border border-line bg-paper p-5 md:p-6"
           testID="account-data-card"
         >
           <View className="gap-4">
@@ -352,12 +364,14 @@ export default function AccountSettingsScreen() {
             <Text className="leading-6 text-muted">
               Télécharge une copie de tes données Todam au format JSON.
             </Text>
-            <Button
-              label="Exporter mes données"
-              loading={exportPending}
-              onPress={() => void exportData()}
-              variant="secondary"
-            />
+            <View className="w-full md:self-start md:w-auto">
+              <Button
+                label="Exporter mes données"
+                loading={exportPending}
+                onPress={() => void exportData()}
+                variant="secondary"
+              />
+            </View>
             {exportMessage ? (
               <Text className="text-sm leading-5 text-muted">{exportMessage}</Text>
             ) : null}
@@ -379,11 +393,13 @@ export default function AccountSettingsScreen() {
               La suppression effacera ton journal, tes notes et ta liste « À voir ».
               Elle devra être confirmée depuis l’e-mail envoyé par Todam.
             </Text>
-            <Button
-              label="Supprimer mon compte"
-              onPress={() => router.push("/supprimer-mon-compte")}
-              variant="danger"
-            />
+            <View className="w-full md:self-start md:w-auto">
+              <Button
+                label="Supprimer mon compte"
+                onPress={() => router.push("/supprimer-mon-compte")}
+                variant="danger"
+              />
+            </View>
           </View>
         </View>
       </View>

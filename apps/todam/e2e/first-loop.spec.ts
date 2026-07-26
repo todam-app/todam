@@ -38,9 +38,20 @@ async function expectFooterBelowViewport(page: Page) {
     .toBe(0);
 }
 
-async function mockAuthenticatedProfile(page: Page) {
+async function mockAuthenticatedProfile(
+  page: Page,
+  options: {
+    ratingDistribution?: { value: number; count: number }[];
+  } = {},
+) {
   const now = "2026-07-26T12:00:00.000Z";
   const later = "2026-07-27T12:00:00.000Z";
+  const ratingDistribution =
+    options.ratingDistribution ??
+    Array.from({ length: 10 }, (_, index) => ({
+      value: index + 1,
+      count: 0,
+    }));
 
   await page.route("**/v1/auth/get-session", async (route) => {
     await route.fulfill({
@@ -80,12 +91,17 @@ async function mockAuthenticatedProfile(page: Page) {
       contentType: "application/json",
       body: JSON.stringify({
         profile: { pseudonym: "spectatrice-test" },
-        counts: { seen: 0, ratings: 0, watchlist: 0, lists: 0 },
+        counts: {
+          seen: 0,
+          ratings: ratingDistribution.reduce(
+            (total, item) => total + item.count,
+            0,
+          ),
+          watchlist: 0,
+          lists: 0,
+        },
         recentDiary: [],
-        ratingDistribution: Array.from({ length: 10 }, (_, index) => ({
-          value: index + 1,
-          count: 0,
-        })),
+        ratingDistribution,
         watchlist: [],
       }),
     });
@@ -161,6 +177,7 @@ test("l'accueil connecté salue l'utilisateur et remplace le discours marketing"
   page,
 }) => {
   await mockAuthenticatedProfile(page);
+  await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/");
 
   await expect(
@@ -173,6 +190,51 @@ test("l'accueil connecté salue l'utilisateur et remplace le discours marketing"
     page.getByRole("heading", { exact: true, name: "À l'affiche en ce moment" }),
   ).toBeVisible();
   await expect(page.getByRole("link", { name: "Une pièce" })).toBeVisible();
+
+  const desktopBlocks = await Promise.all(
+    [
+      "home-progress-card",
+      "home-recent-search",
+      "home-city-selector",
+      "home-discovery-section",
+    ].map((testID) => page.getByTestId(testID).boundingBox()),
+  );
+  desktopBlocks.forEach((box) => expect(box).not.toBeNull());
+  desktopBlocks.forEach((box) => {
+    expect(box!.x).toBeCloseTo(desktopBlocks[0]!.x, 0);
+    expect(box!.width).toBeCloseTo(desktopBlocks[0]!.width, 0);
+  });
+  expect(desktopBlocks[0]!.x).toBeCloseTo(192, 0);
+  expect(desktopBlocks[0]!.width).toBeCloseTo(1056, 0);
+
+  const desktopSteps = await Promise.all(
+    [0, 1, 2].map((index) =>
+      page.getByTestId(`home-progress-step-${index}`).boundingBox(),
+    ),
+  );
+  desktopSteps.forEach((box) => expect(box).not.toBeNull());
+  expect(desktopSteps[0]!.y).toBeCloseTo(desktopSteps[1]!.y, 0);
+  expect(desktopSteps[1]!.y).toBeCloseTo(desktopSteps[2]!.y, 0);
+
+  await page.setViewportSize({ width: 375, height: 800 });
+  const mobileBlocks = await Promise.all(
+    ["home-progress-card", "home-recent-search", "home-city-selector"].map(
+      (testID) => page.getByTestId(testID).boundingBox(),
+    ),
+  );
+  mobileBlocks.forEach((box) => expect(box).not.toBeNull());
+  mobileBlocks.forEach((box) => {
+    expect(box!.x).toBeCloseTo(20, 0);
+    expect(box!.width).toBeCloseTo(335, 0);
+  });
+  const mobileSteps = await Promise.all(
+    [0, 1, 2].map((index) =>
+      page.getByTestId(`home-progress-step-${index}`).boundingBox(),
+    ),
+  );
+  mobileSteps.forEach((box) => expect(box).not.toBeNull());
+  expect(mobileSteps[1]!.y).toBeGreaterThan(mobileSteps[0]!.y);
+  expect(mobileSteps[2]!.y).toBeGreaterThan(mobileSteps[1]!.y);
 
   const homeSearch = page.getByLabel("Rechercher un spectacle depuis l'accueil");
   await homeSearch.fill("Muses");
@@ -419,6 +481,33 @@ test("le profil ouvre les paramètres du compte et conserve le footer légal", a
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/profile");
 
+  await expect(
+    page.getByText("La répartition apparaîtra après ta première note."),
+  ).toBeVisible();
+  await expect(page.getByLabel("Histogramme des notes de 1 à 10")).toHaveCount(0);
+
+  const desktopStats = await Promise.all(
+    [0, 1, 2, 3].map((index) =>
+      page.getByTestId(`profile-stat-${index}`).boundingBox(),
+    ),
+  );
+  desktopStats.forEach((box) => expect(box).not.toBeNull());
+  desktopStats.forEach((box) => {
+    expect(box!.y).toBeCloseTo(desktopStats[0]!.y, 0);
+  });
+
+  await page.setViewportSize({ width: 375, height: 800 });
+  const mobileStats = await Promise.all(
+    [0, 1, 2, 3].map((index) =>
+      page.getByTestId(`profile-stat-${index}`).boundingBox(),
+    ),
+  );
+  mobileStats.forEach((box) => expect(box).not.toBeNull());
+  expect(mobileStats[0]!.y).toBeCloseTo(mobileStats[1]!.y, 0);
+  expect(mobileStats[2]!.y).toBeCloseTo(mobileStats[3]!.y, 0);
+  expect(mobileStats[2]!.y).toBeGreaterThan(mobileStats[0]!.y);
+
+  await page.setViewportSize({ width: 1440, height: 900 });
   const settingsButton = page.getByRole("button", {
     name: "Paramètres du compte",
   });
@@ -451,6 +540,11 @@ test("le profil ouvre les paramètres du compte et conserve le footer légal", a
   await expect(page.getByText("Zone sensible", { exact: true })).toBeVisible();
   const deleteButton = page.getByRole("button", { name: "Supprimer mon compte" });
   await expect(deleteButton).toHaveCSS("background-color", "rgb(161, 38, 26)");
+  const emailSubmitWidth = await page
+    .getByRole("button", { name: "Confirmer la nouvelle adresse" })
+    .evaluate((element) => element.getBoundingClientRect().width);
+  expect(emailSubmitWidth).toBeGreaterThanOrEqual(240);
+  expect(emailSubmitWidth).toBeLessThan(400);
 
   await page.setViewportSize({ width: 375, height: 800 });
   const [hasHorizontalOverflow, exportButtonWidth, deleteButtonWidth] =
@@ -467,6 +561,21 @@ test("le profil ouvre les paramètres du compte et conserve le footer légal", a
 
   await deleteButton.click();
   await expect(page).toHaveURL("/supprimer-mon-compte");
+});
+
+test("le profil affiche l'histogramme dès qu'une note existe", async ({ page }) => {
+  await mockAuthenticatedProfile(page, {
+    ratingDistribution: Array.from({ length: 10 }, (_, index) => ({
+      value: index + 1,
+      count: index === 7 ? 1 : 0,
+    })),
+  });
+  await page.goto("/profile");
+
+  await expect(page.getByLabel("Histogramme des notes de 1 à 10")).toBeVisible();
+  await expect(
+    page.getByText("La répartition apparaîtra après ta première note."),
+  ).toHaveCount(0);
 });
 
 test("l'export des paramètres affiche ses états de chargement, succès et erreur", async ({
@@ -707,6 +816,11 @@ test("les paramètres exposent les bons champs et confirment les modifications",
   await expect(newPasswords).toHaveCount(2);
   await expect(newPasswords.nth(0)).toHaveAttribute("type", "password");
   await expect(newPasswords.nth(1)).toHaveAttribute("type", "password");
+  await newEmail.focus();
+  await expect(newEmail).toHaveCSS("border-color", "rgb(196, 61, 40)");
+  await expect(newEmail).toHaveCSS("outline-width", "3px");
+  await newEmail.blur();
+  await expect(newEmail).toHaveCSS("outline-width", "0px");
 
   await username.fill("nouveau-pseudonyme");
   await page.getByRole("button", { name: "Modifier le nom d'utilisateur" }).click();

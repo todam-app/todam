@@ -28,7 +28,10 @@ export function HomeCitySelector({ city }: { city: CityOption | null }) {
 
   if (!editing && city) {
     return (
-      <View className="gap-3 rounded-todam border border-line bg-paper p-5 md:flex-row md:items-center md:justify-between">
+      <View
+        className="gap-3 rounded-todam border border-line bg-paper p-5 md:flex-row md:items-center md:justify-between"
+        testID="home-city-selector"
+      >
         <View className="min-w-0 flex-1 gap-1">
           <Text className="text-xs font-extrabold uppercase tracking-[1.5px] text-accent">
             Votre ville
@@ -56,7 +59,10 @@ export function HomeCitySelector({ city }: { city: CityOption | null }) {
   }
 
   return (
-    <View className="gap-4 rounded-todam border border-line bg-paper p-5">
+    <View
+      className="gap-4 rounded-todam border border-line bg-paper p-5"
+      testID="home-city-selector"
+    >
       <View className="gap-1">
         <Text className="text-lg font-semibold text-ink">Choisissez votre ville</Text>
         <Text className="leading-5 text-muted">

@@ -1,6 +1,6 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button, SectionTitle, StatCard, tokens } from "@todam/design-system";
+import { Button, SectionTitle, tokens } from "@todam/design-system";
 import { useRouter } from "expo-router";
 import { Platform, Pressable, Text, View } from "react-native";
 
@@ -16,6 +16,20 @@ const legalLinks = [
   { href: "/confidentialite", label: "Politique de confidentialité" },
   { href: "/mentions-legales", label: "Mentions légales" },
 ] as const;
+
+function EmptyProfileSection({
+  message,
+  testID,
+}: {
+  message: string;
+  testID?: string;
+}) {
+  return (
+    <View className="border-l-2 border-accent py-1 pl-4" testID={testID}>
+      <Text className="leading-6 text-muted">{message}</Text>
+    </View>
+  );
+}
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -73,6 +87,8 @@ export default function ProfileScreen() {
     1,
     ...(dashboard.data?.ratingDistribution.map((item) => item.count) ?? [1]),
   );
+  const hasRatings =
+    dashboard.data?.ratingDistribution.some((item) => item.count > 0) ?? false;
   const recentProductions = dashboard.data
     ? Array.from(
         new Map(
@@ -82,6 +98,14 @@ export default function ProfileScreen() {
           ]),
         ).values(),
       )
+    : [];
+  const profileStats = dashboard.data
+    ? [
+        { label: "Notes", value: dashboard.data.counts.ratings },
+        { label: "Vus", value: dashboard.data.counts.seen },
+        { label: "À voir", value: dashboard.data.counts.watchlist },
+        { label: "Listes", value: dashboard.data.counts.lists },
+      ]
     : [];
 
   return (
@@ -103,7 +127,9 @@ export default function ProfileScreen() {
             <>
               <View className="flex-row flex-wrap items-center justify-between gap-4">
                 <View className="gap-1">
-                  <Text className="text-sm text-muted">Mon profil</Text>
+                  <Text className="text-xs font-extrabold uppercase tracking-[1.5px] text-accent">
+                    Mon profil
+                  </Text>
                   <Text
                     accessibilityRole="header"
                     className="font-serif text-4xl font-black text-ink"
@@ -125,19 +151,37 @@ export default function ProfileScreen() {
                 </View>
               </View>
 
-              <View className="flex-row flex-wrap gap-2">
-                <StatCard label="Notes" value={dashboard.data.counts.ratings} />
-                <StatCard label="Vus" value={dashboard.data.counts.seen} />
-                <StatCard label="À voir" value={dashboard.data.counts.watchlist} />
-                <StatCard label="Listes" value={dashboard.data.counts.lists} />
+              <View
+                className="overflow-hidden rounded-todam border border-line bg-paper"
+                testID="profile-stats-strip"
+              >
+                <View className="flex-row flex-wrap">
+                  {profileStats.map((stat, index) => (
+                    <View
+                      accessibilityLabel={`${stat.label} : ${stat.value}`}
+                      className={`w-1/2 items-center justify-center gap-1 px-3 py-5 md:w-1/4 ${
+                        index % 2 === 1 ? "border-l border-line" : ""
+                      } ${index >= 2 ? "border-t border-line md:border-t-0" : ""} ${
+                        index > 0 ? "md:border-l md:border-line" : ""
+                      }`}
+                      key={stat.label}
+                      testID={`profile-stat-${index}`}
+                    >
+                      <Text className="text-3xl font-extrabold text-accent">
+                        {stat.value}
+                      </Text>
+                      <Text className="text-sm font-semibold text-muted">
+                        {stat.label}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
               </View>
 
               <View className="gap-4">
                 <SectionTitle>Mon journal récent</SectionTitle>
                 {recentProductions.length === 0 ? (
-                  <Text className="rounded-todam border border-line bg-paper p-5 text-muted">
-                    Aucun spectacle vu pour le moment.
-                  </Text>
+                  <EmptyProfileSection message="Aucun spectacle vu pour le moment." />
                 ) : (
                   <View className="gap-3">
                     {recentProductions.map((production) => (
@@ -149,41 +193,48 @@ export default function ProfileScreen() {
 
               <View className="gap-4">
                 <SectionTitle>Répartition de mes notes</SectionTitle>
-                <View
-                  accessibilityLabel="Histogramme des notes de 1 à 10"
-                  className="h-56 flex-row items-end gap-2 rounded-todam border border-line bg-paper p-4"
-                >
-                  {dashboard.data.ratingDistribution.map((item) => (
+                {hasRatings ? (
+                  <>
                     <View
-                      accessibilityLabel={`${item.count} notes à ${item.value} sur 10`}
-                      className="flex-1 items-center justify-end gap-2"
-                      key={item.value}
+                      accessibilityLabel="Histogramme des notes de 1 à 10"
+                      className="h-56 flex-row items-end gap-2 rounded-todam border border-line bg-paper p-4"
                     >
-                      <Text className="text-xs text-muted">{item.count}</Text>
-                      <View
-                        className="w-full min-w-2 rounded-t bg-accent"
-                        style={{
-                          height: Math.max(3, (item.count / maxRatingCount) * 150),
-                        }}
-                      />
-                      <Text className="text-xs font-semibold text-ink">
-                        {item.value}
-                      </Text>
+                      {dashboard.data.ratingDistribution.map((item) => (
+                        <View
+                          accessibilityLabel={`${item.count} notes à ${item.value} sur 10`}
+                          className="flex-1 items-center justify-end gap-2"
+                          key={item.value}
+                        >
+                          <Text className="text-xs text-muted">{item.count}</Text>
+                          <View
+                            className="w-full min-w-2 rounded-t bg-accent"
+                            style={{
+                              height: Math.max(3, (item.count / maxRatingCount) * 150),
+                            }}
+                          />
+                          <Text className="text-xs font-semibold text-ink">
+                            {item.value}
+                          </Text>
+                        </View>
+                      ))}
                     </View>
-                  ))}
-                </View>
-                <Text className="text-sm text-muted">
-                  Chaque barre indique le nombre de spectacles associés à la note
-                  affichée.
-                </Text>
+                    <Text className="text-sm text-muted">
+                      Chaque barre indique le nombre de spectacles associés à la note
+                      affichée.
+                    </Text>
+                  </>
+                ) : (
+                  <EmptyProfileSection
+                    message="La répartition apparaîtra après ta première note."
+                    testID="profile-empty-rating-distribution"
+                  />
+                )}
               </View>
 
               <View className="gap-4">
                 <SectionTitle>À voir</SectionTitle>
                 {dashboard.data.watchlist.length === 0 ? (
-                  <Text className="rounded-todam border border-line bg-paper p-5 text-muted">
-                    Ta liste est vide. Recherche un spectacle pour l’ajouter.
-                  </Text>
+                  <EmptyProfileSection message="Ta liste « À voir » est vide pour le moment." />
                 ) : (
                   <View className="gap-3">
                     {dashboard.data.watchlist.map((production) => (

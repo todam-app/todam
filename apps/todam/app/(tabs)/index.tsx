@@ -88,7 +88,7 @@ function ConnectedHome() {
         >
           {home.data ? (
             <View className="gap-10">
-              <View className="max-w-3xl gap-5">
+              <View className="w-full gap-5">
                 <View className="min-w-0 gap-2">
                   <Text
                     accessibilityRole="header"
@@ -96,7 +96,7 @@ function ConnectedHome() {
                   >
                     {getHomeGreeting(home.data.profile.pseudonym)}
                   </Text>
-                  <Text className="text-base leading-6 text-muted">
+                  <Text className="max-w-3xl text-base leading-6 text-muted">
                     {home.data.progress.completed
                       ? "Découvrez les spectacles programmés près de vous et les derniers ajouts à Todam."
                       : "Ajoutez cinq spectacles pour commencer à construire votre journal et personnaliser votre accueil."}
@@ -104,7 +104,10 @@ function ConnectedHome() {
                 </View>
 
                 {!home.data.progress.completed ? (
-                  <View className="gap-4 rounded-todam border border-line bg-paper p-5">
+                  <View
+                    className="gap-4 rounded-todam border border-line bg-paper p-5"
+                    testID="home-progress-card"
+                  >
                     <View
                       accessibilityLabel={`${home.data.progress.current} spectacles sur ${home.data.progress.target}`}
                       accessibilityRole="progressbar"
@@ -135,27 +138,37 @@ function ConnectedHome() {
                         />
                       </View>
                     </View>
-                    <View className="gap-2 md:flex-row">
+                    <View className="md:flex-row">
                       {[
                         ["Vu", "Gardez une trace d'un spectacle."],
                         ["Noter", "Attribuez simplement une note sur 10."],
                         ["À voir", "Retrouvez les spectacles qui vous tentent."],
-                      ].map(([label, description]) => (
+                      ].map(([label, description], index) => (
                         <View
-                          className="flex-1 rounded-todam border border-line p-3"
+                          className={`flex-1 gap-2 ${
+                            index === 0
+                              ? "pb-4 md:pb-0 md:pr-5"
+                              : index === 1
+                                ? "border-t border-line py-4 md:border-l md:border-t-0 md:px-5 md:py-0"
+                                : "border-t border-line pt-4 md:border-l md:border-t-0 md:pl-5 md:pt-0"
+                          }`}
                           key={label}
+                          testID={`home-progress-step-${index}`}
                         >
-                          <Text className="font-semibold text-ink">{label}</Text>
-                          <Text className="text-sm leading-5 text-muted">
-                            {description}
-                          </Text>
+                          <View className="h-0.5 w-6 rounded-full bg-accent" />
+                          <View>
+                            <Text className="font-semibold text-ink">{label}</Text>
+                            <Text className="text-sm leading-5 text-muted">
+                              {description}
+                            </Text>
+                          </View>
                         </View>
                       ))}
                     </View>
                   </View>
                 ) : null}
 
-                <View className="gap-2">
+                <View className="gap-2" testID="home-recent-search">
                   <Text className="font-semibold text-ink">
                     {"Qu'avez-vous vu récemment ?"}
                   </Text>
@@ -173,7 +186,7 @@ function ConnectedHome() {
               <HomeCitySelector city={home.data.homeCity} />
 
               {home.data.homeCity ? (
-                <View className="gap-4">
+                <View className="gap-4" testID="home-discovery-section">
                   <SectionTitle>
                     {"À l'affiche près de "}
                     {home.data.homeCity.label}
@@ -201,7 +214,7 @@ function ConnectedHome() {
                   )}
                 </View>
               ) : (
-                <View className="gap-4">
+                <View className="gap-4" testID="home-discovery-section">
                   <SectionTitle>{"À l'affiche en ce moment"}</SectionTitle>
                   <HomeDiscoveryCollection
                     emptyMessage="Aucune représentation future n'est encore référencée."
