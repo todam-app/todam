@@ -57,6 +57,7 @@ describe("API Todam", () => {
   });
 
   it("autorise les mutations personnelles dans les précontrôles CORS", async () => {
+    const webAppOrigin = process.env.WEB_APP_URL ?? "http://localhost:8081";
     const app = await buildServer({
       database: {} as TodamDatabase,
       logger: false,
@@ -67,15 +68,13 @@ describe("API Todam", () => {
         method: "OPTIONS",
         url: `/v1/me/watchlist/${randomUUID()}`,
         headers: {
-          origin: "http://localhost:8081",
+          origin: webAppOrigin,
           "access-control-request-method": method,
         },
       });
 
       expect(response.statusCode).toBe(204);
-      expect(response.headers["access-control-allow-origin"]).toBe(
-        "http://localhost:8081",
-      );
+      expect(response.headers["access-control-allow-origin"]).toBe(webAppOrigin);
       expect(response.headers["access-control-allow-methods"]).toContain(method);
     }
 
