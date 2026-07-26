@@ -107,20 +107,21 @@ jobs:
       LEGAL_OPERATOR_NAME: ${{ secrets.LEGAL_OPERATOR_NAME }}
       PRIMARY_HOST_NAME: OVH SAS
       PRIMARY_HOST_ADDRESS: 2 rue Kellermann, 59100 Roubaix, France
-      PRIMARY_HOST_PHONE: ${{ secrets.PRIMARY_HOST_PHONE }}
+      PRIMARY_HOST_PHONE: "+33 9 72 10 10 07"
       PRIMARY_HOST_URL: https://www.ovhcloud.com
       OBJECT_HOST_NAME: Cloudflare, Inc.
-      OBJECT_HOST_ADDRESS: ${{ secrets.OBJECT_HOST_ADDRESS }}
+      OBJECT_HOST_ADDRESS: "101 Townsend Street, San Francisco, CA 94107, USA"
       OBJECT_HOST_URL: https://www.cloudflare.com
       BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
       EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
       EXPO_PUBLIC_LEGAL_OPERATOR_NAME: ${{ secrets.LEGAL_OPERATOR_NAME }}
       EXPO_PUBLIC_PRIMARY_HOST_NAME: OVH SAS
       EXPO_PUBLIC_PRIMARY_HOST_ADDRESS: 2 rue Kellermann, 59100 Roubaix, France
-      EXPO_PUBLIC_PRIMARY_HOST_PHONE: ${{ secrets.PRIMARY_HOST_PHONE }}
+      EXPO_PUBLIC_PRIMARY_HOST_PHONE: "+33 9 72 10 10 07"
       EXPO_PUBLIC_PRIMARY_HOST_URL: https://www.ovhcloud.com
       EXPO_PUBLIC_OBJECT_HOST_NAME: Cloudflare, Inc.
-      EXPO_PUBLIC_OBJECT_HOST_ADDRESS: ${{ secrets.OBJECT_HOST_ADDRESS }}
+      EXPO_PUBLIC_OBJECT_HOST_ADDRESS:
+        "101 Townsend Street, San Francisco, CA 94107, USA"
       EXPO_PUBLIC_OBJECT_HOST_URL: https://www.cloudflare.com
     steps:
       - name: Récupérer le dépôt
@@ -173,10 +174,10 @@ jobs:
             EXPO_PUBLIC_LEGAL_OPERATOR_NAME=${{ secrets.LEGAL_OPERATOR_NAME }}
             EXPO_PUBLIC_PRIMARY_HOST_NAME=OVH SAS
             EXPO_PUBLIC_PRIMARY_HOST_ADDRESS=2 rue Kellermann, 59100 Roubaix, France
-            EXPO_PUBLIC_PRIMARY_HOST_PHONE=${{ secrets.PRIMARY_HOST_PHONE }}
+            EXPO_PUBLIC_PRIMARY_HOST_PHONE=+33 9 72 10 10 07
             EXPO_PUBLIC_PRIMARY_HOST_URL=https://www.ovhcloud.com
             EXPO_PUBLIC_OBJECT_HOST_NAME=Cloudflare, Inc.
-            EXPO_PUBLIC_OBJECT_HOST_ADDRESS=${{ secrets.OBJECT_HOST_ADDRESS }}
+            EXPO_PUBLIC_OBJECT_HOST_ADDRESS=101 Townsend Street, San Francisco, CA 94107, USA
             EXPO_PUBLIC_OBJECT_HOST_URL=https://www.cloudflare.com
           cache-from: type=gha,scope=web
           cache-to: type=gha,mode=max,scope=web

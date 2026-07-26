@@ -59,7 +59,7 @@ Le workflow manuel **Publier les images de production** :
 
 Créer un environnement GitHub `production`. Y ajouter :
 
-- `LEGAL_OPERATOR_NAME`, `PRIMARY_HOST_PHONE` et `OBJECT_HOST_ADDRESS` ;
+- `LEGAL_OPERATOR_NAME` ;
 - `BREVO_API_KEY` et `EMAIL_FROM`, requis par le contrôle juridique ;
 - `COOLIFY_TOKEN`, limité au déploiement ;
 - `COOLIFY_WEB_WEBHOOK`, `COOLIFY_API_WEBHOOK` et `COOLIFY_JOBS_WEBHOOK`.
@@ -96,11 +96,11 @@ EMAIL_FROM_NAME=Todam
 TODAM_OPERATIONS_EMAIL=<adresse-de-pilotage>
 ```
 
-Les variables Expo, le nom de l'éditeur et les coordonnées des hébergeurs sont injectés
-pendant le build Web par GitHub Actions ; ils ne sont pas lus dynamiquement par Nginx.
-Le numéro `PRIMARY_HOST_PHONE` doit être confirmé dans le contrat OVH avant publication.
-Aucune adresse ou aucun téléphone personnel de l'éditeur ne doit être ajouté à ces
-variables.
+Les variables Expo, le nom de l'éditeur et les coordonnées publiques des hébergeurs sont
+injectés pendant le build Web par GitHub Actions ; ils ne sont pas lus dynamiquement par
+Nginx. Le numéro OVHcloud et l'adresse de Cloudflare sont publics dans le dépôt et ne
+doivent pas être recréés comme secrets. Aucune adresse ou aucun téléphone personnel de
+l'éditeur ne doit être ajouté à ces variables.
 
 Au lancement, l'entrée de l'image API exécute les migrations Drizzle avant de démarrer
 Fastify. Cette stratégie convient à une seule instance. Avant d'en lancer plusieurs,

@@ -187,8 +187,10 @@ test("les pages publiques Web utilisent uniquement l'en-tête Todam", async ({
       expect(legalText).toContain("à titre non professionnel");
       expect(legalText).toContain("OVH SAS");
       expect(legalText).toContain("2 rue Kellermann, 59100 Roubaix, France");
-      expect(legalText).toContain("numéro contractuel test");
+      expect(legalText).toContain("+33 9 72 10 10 07");
       expect(legalText).toContain("Cloudflare, Inc.");
+      expect(legalText).toContain("101 Townsend Street, San Francisco, CA 94107, USA");
+      expect(legalText).not.toMatch(/à vérifier avant publication/i);
       expect(legalText).not.toMatch(
         /entrepreneur individuel|SIREN|SIRET|RNE|code APE|forme juridique|activité principale/i,
       );

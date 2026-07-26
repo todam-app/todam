@@ -7,26 +7,43 @@ import { legalMarkdown } from "./legal-generated";
 
 export type LegalDocumentId = keyof typeof legalMarkdown;
 
+function configuredValue(value: string | undefined, fallback: string): string {
+  return value?.trim() || fallback;
+}
+
 const placeholderValues: Record<string, string> = {
-  "{{LEGAL_OPERATOR_NAME}}":
-    process.env.EXPO_PUBLIC_LEGAL_OPERATOR_NAME ??
+  "{{LEGAL_OPERATOR_NAME}}": configuredValue(
+    process.env.EXPO_PUBLIC_LEGAL_OPERATOR_NAME,
     "[nom de l'éditeur à configurer avant publication]",
-  "{{PRIMARY_HOST_NAME}}": process.env.EXPO_PUBLIC_PRIMARY_HOST_NAME ?? "OVH SAS",
-  "{{PRIMARY_HOST_ADDRESS}}":
-    process.env.EXPO_PUBLIC_PRIMARY_HOST_ADDRESS ??
+  ),
+  "{{PRIMARY_HOST_NAME}}": configuredValue(
+    process.env.EXPO_PUBLIC_PRIMARY_HOST_NAME,
+    "OVH SAS",
+  ),
+  "{{PRIMARY_HOST_ADDRESS}}": configuredValue(
+    process.env.EXPO_PUBLIC_PRIMARY_HOST_ADDRESS,
     "2 rue Kellermann, 59100 Roubaix, France",
-  "{{PRIMARY_HOST_PHONE}}":
-    process.env.EXPO_PUBLIC_PRIMARY_HOST_PHONE ??
-    "[téléphone de l'hébergeur à vérifier avant publication]",
-  "{{PRIMARY_HOST_URL}}":
-    process.env.EXPO_PUBLIC_PRIMARY_HOST_URL ?? "https://www.ovhcloud.com",
-  "{{OBJECT_HOST_NAME}}":
-    process.env.EXPO_PUBLIC_OBJECT_HOST_NAME ?? "Cloudflare, Inc.",
-  "{{OBJECT_HOST_ADDRESS}}":
-    process.env.EXPO_PUBLIC_OBJECT_HOST_ADDRESS ??
-    "[adresse contractuelle Cloudflare à vérifier avant publication]",
-  "{{OBJECT_HOST_URL}}":
-    process.env.EXPO_PUBLIC_OBJECT_HOST_URL ?? "https://www.cloudflare.com",
+  ),
+  "{{PRIMARY_HOST_PHONE}}": configuredValue(
+    process.env.EXPO_PUBLIC_PRIMARY_HOST_PHONE,
+    "+33 9 72 10 10 07",
+  ),
+  "{{PRIMARY_HOST_URL}}": configuredValue(
+    process.env.EXPO_PUBLIC_PRIMARY_HOST_URL,
+    "https://www.ovhcloud.com",
+  ),
+  "{{OBJECT_HOST_NAME}}": configuredValue(
+    process.env.EXPO_PUBLIC_OBJECT_HOST_NAME,
+    "Cloudflare, Inc.",
+  ),
+  "{{OBJECT_HOST_ADDRESS}}": configuredValue(
+    process.env.EXPO_PUBLIC_OBJECT_HOST_ADDRESS,
+    "101 Townsend Street, San Francisco, CA 94107, USA",
+  ),
+  "{{OBJECT_HOST_URL}}": configuredValue(
+    process.env.EXPO_PUBLIC_OBJECT_HOST_URL,
+    "https://www.cloudflare.com",
+  ),
 };
 
 export function legalDocumentMarkdown(id: LegalDocumentId): string {

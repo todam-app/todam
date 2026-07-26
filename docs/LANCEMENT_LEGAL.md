@@ -35,9 +35,9 @@ en cache. Elles n'empêchent ni l'accès direct ni la copie d'une page publique.
       et DMARC ;
 - [ ] renseigner le nom de l'éditeur dans `LEGAL_OPERATOR_NAME`, sans adresse ni
       téléphone personnels et sans donnée d'entreprise ;
-- [ ] vérifier que le contrat est conclu avec OVH SAS, 2 rue Kellermann, 59100 Roubaix,
-      France, confirmer son numéro de téléphone contractuel et l'entité contractuelle
-      Cloudflare ;
+- [ ] vérifier dans les comptes clients que les services sont bien conclus avec OVH SAS
+      et Cloudflare, Inc. ; leurs coordonnées publiques sont déjà renseignées dans le
+      dépôt ;
 - [ ] signer ou accepter les accords de sous-traitance et garanties de transfert ;
 - [ ] configurer Brevo et tester vérification, réinitialisation, reçu juridique et
       suppression ;
@@ -58,8 +58,8 @@ en cache. Elles n'empêchent ni l'accès direct ni la copie d'une page publique.
       reste privée et que seul l'e-mail développeur attendu est affiché publiquement ;
 - [ ] compléter la fiche Data Safety après audit du binaire Android final ;
 - [ ] fournir `https://todam.fr/suppression-compte` dans Play Console ;
-- [ ] générer les PDF définitifs avec le nom de l'éditeur et les coordonnées confirmées
-      des hébergeurs, hors Git ;
+- [ ] générer les PDF définitifs hors Git avec le nom de l'éditeur injecté depuis le
+      secret de production et les coordonnées publiques des hébergeurs ;
 - [ ] exécuter les contrôles techniques et juridiques de la section suivante.
 
 Cette phase personnelle ne nécessite ni compte bancaire professionnel, ni mise à jour

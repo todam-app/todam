@@ -39,6 +39,17 @@ TOKENS = {
     "{{OBJECT_HOST_ADDRESS}}": "OBJECT_HOST_ADDRESS",
     "{{OBJECT_HOST_URL}}": "OBJECT_HOST_URL",
 }
+PUBLIC_PROVIDER_VALUES = {
+    "PRIMARY_HOST_NAME": "OVH SAS",
+    "PRIMARY_HOST_ADDRESS": "2 rue Kellermann, 59100 Roubaix, France",
+    "PRIMARY_HOST_PHONE": "+33 9 72 10 10 07",
+    "PRIMARY_HOST_URL": "https://www.ovhcloud.com",
+    "OBJECT_HOST_NAME": "Cloudflare, Inc.",
+    "OBJECT_HOST_ADDRESS": (
+        "101 Townsend Street, San Francisco, CA 94107, USA"
+    ),
+    "OBJECT_HOST_URL": "https://www.cloudflare.com",
+}
 
 
 def load_local_environment() -> None:
@@ -73,7 +84,9 @@ def resolve_tokens(markdown: str) -> tuple[str, bool, dict[str, str]]:
     draft = False
     resolved_values: dict[str, str] = {}
     for token, environment_name in TOKENS.items():
-        value = os.environ.get(environment_name)
+        value = os.environ.get(environment_name) or PUBLIC_PROVIDER_VALUES.get(
+            environment_name
+        )
         if not value:
             draft = True
             value = f"[{environment_name} À CONFIGURER]"
