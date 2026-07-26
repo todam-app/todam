@@ -1,12 +1,11 @@
 # Politique de confidentialité de Todam
 
-Version 1.0.0 — Date d'effet : 25 juillet 2026
+Version 1.0.0 — Date d'effet : 26 juillet 2026
 
 ## 1. Responsable du traitement
 
-Le responsable du traitement est {{LEGAL_OPERATOR_NAME}}, entrepreneur individuel
-exerçant sous le nom commercial « Todam », SIREN {{LEGAL_SIREN}}, domicilié
-{{LEGAL_ADDRESS}}. Pour exercer vos droits :
+Le responsable du traitement est {{LEGAL_OPERATOR_NAME}}, personne physique éditant
+Todam à titre non professionnel. Pour exercer vos droits :
 [donnees@todam.fr](mailto:donnees@todam.fr). Todam n'a pas désigné artificiellement de
 délégué à la protection des données.
 

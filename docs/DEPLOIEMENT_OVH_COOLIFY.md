@@ -59,7 +59,7 @@ Le workflow manuel **Publier les images de production** :
 
 Créer un environnement GitHub `production`. Y ajouter :
 
-- les secrets d'identité `LEGAL_OPERATOR_*` et `OBJECT_HOST_ADDRESS` ;
+- `LEGAL_OPERATOR_NAME`, `PRIMARY_HOST_PHONE` et `OBJECT_HOST_ADDRESS` ;
 - `BREVO_API_KEY` et `EMAIL_FROM`, requis par le contrôle juridique ;
 - `COOLIFY_TOKEN`, limité au déploiement ;
 - `COOLIFY_WEB_WEBHOOK`, `COOLIFY_API_WEBHOOK` et `COOLIFY_JOBS_WEBHOOK`.
@@ -86,9 +86,21 @@ EMAIL_FROM=<adresse-validee>
 EMAIL_FROM_NAME=Todam
 ```
 
-Configurer `DATABASE_URL` sur `todam-jobs`. Les variables Expo et les coordonnées
-juridiques sont injectées pendant le build Web par GitHub Actions ; elles ne sont pas
-lues dynamiquement par Nginx.
+Configurer sur `todam-jobs` :
+
+```dotenv
+DATABASE_URL=postgresql://<user>:<password>@<hote-prive>:5432/<base>
+BREVO_API_KEY=<secret>
+EMAIL_FROM=<adresse-validee>
+EMAIL_FROM_NAME=Todam
+TODAM_OPERATIONS_EMAIL=<adresse-de-pilotage>
+```
+
+Les variables Expo, le nom de l'éditeur et les coordonnées des hébergeurs sont injectés
+pendant le build Web par GitHub Actions ; ils ne sont pas lus dynamiquement par Nginx.
+Le numéro `PRIMARY_HOST_PHONE` doit être confirmé dans le contrat OVH avant publication.
+Aucune adresse ou aucun téléphone personnel de l'éditeur ne doit être ajouté à ces
+variables.
 
 Au lancement, l'entrée de l'image API exécute les migrations Drizzle avant de démarrer
 Fastify. Cette stratégie convient à une seule instance. Avant d'en lancer plusieurs,
@@ -109,11 +121,16 @@ quatre PDF juridiques.
 ## Tâches planifiées
 
 Le conteneur `todam-jobs` reste en attente pour permettre à Coolify d'y exécuter des
-commandes planifiées. Ajouter au minimum une tâche quotidienne :
+commandes planifiées. Ajouter ces deux tâches :
 
-```bash
-node dist/purge-unverified-users.js
-```
+| Fréquence                | Commande                              |
+| ------------------------ | ------------------------------------- |
+| Chaque jour              | `node dist/purge-unverified-users.js` |
+| Chaque lundi à 07:00 UTC | `node dist/account-report.js`         |
+
+Le rapport du lundi est envoyé à `TODAM_OPERATIONS_EMAIL`. À partir de 900 comptes, il
+demande explicitement de préparer le passage professionnel ; 1 000 comptes est le seuil
+maximal de cette phase personnelle.
 
 L'import du catalogue reste une opération volontaire, avec un fichier dont la provenance
 et la licence ont été vérifiées :

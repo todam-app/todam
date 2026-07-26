@@ -4,6 +4,7 @@ export default defineConfig({
   clean: true,
   dts: true,
   entry: [
+    "src/account-report.ts",
     "src/catalog-discover-openagenda.ts",
     "src/index.ts",
     "src/catalog-import.ts",

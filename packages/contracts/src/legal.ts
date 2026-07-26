@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const CURRENT_TERMS_VERSION = "1.0.0";
 export const CURRENT_PRIVACY_NOTICE_VERSION = "1.0.0";
-export const LEGAL_EFFECTIVE_DATE = "2026-07-25";
+export const LEGAL_EFFECTIVE_DATE = "2026-07-26";
 
 export const RegistrationChannelSchema = z.enum(["web", "android"]);
 export type RegistrationChannel = z.infer<typeof RegistrationChannelSchema>;

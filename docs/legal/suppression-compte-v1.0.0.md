@@ -1,6 +1,6 @@
 # Suppression d'un compte Todam
 
-Version 1.0.0 — Date d'effet : 25 juillet 2026
+Version 1.0.0 — Date d'effet : 26 juillet 2026
 
 ## Depuis Todam
 

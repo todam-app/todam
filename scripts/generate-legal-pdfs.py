@@ -19,6 +19,7 @@ from reportlab.platypus import (
     PageTemplate,
     Paragraph,
 )
+from pypdf import PdfReader
 
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "apps" / "todam" / "public" / "legal"
@@ -30,17 +31,9 @@ DOCUMENTS = {
 }
 TOKENS = {
     "{{LEGAL_OPERATOR_NAME}}": "LEGAL_OPERATOR_NAME",
-    "{{LEGAL_SIREN}}": "LEGAL_SIREN",
-    "{{LEGAL_SIRET}}": "LEGAL_SIRET",
-    "{{LEGAL_RNE_REGISTRATION_DATE}}": "LEGAL_RNE_REGISTRATION_DATE",
-    "{{LEGAL_ACTIVITY_START_DATE}}": "LEGAL_ACTIVITY_START_DATE",
-    "{{LEGAL_LEGAL_FORM}}": "LEGAL_LEGAL_FORM",
-    "{{LEGAL_ACTIVITY}}": "LEGAL_ACTIVITY",
-    "{{LEGAL_APE}}": "LEGAL_APE",
-    "{{LEGAL_ADDRESS}}": "LEGAL_ADDRESS",
-    "{{LEGAL_PHONE}}": "LEGAL_PHONE",
     "{{PRIMARY_HOST_NAME}}": "PRIMARY_HOST_NAME",
     "{{PRIMARY_HOST_ADDRESS}}": "PRIMARY_HOST_ADDRESS",
+    "{{PRIMARY_HOST_PHONE}}": "PRIMARY_HOST_PHONE",
     "{{PRIMARY_HOST_URL}}": "PRIMARY_HOST_URL",
     "{{OBJECT_HOST_NAME}}": "OBJECT_HOST_NAME",
     "{{OBJECT_HOST_ADDRESS}}": "OBJECT_HOST_ADDRESS",
@@ -76,15 +69,17 @@ def register_fonts() -> tuple[str, str]:
 REGULAR_FONT, BOLD_FONT = register_fonts()
 
 
-def resolve_tokens(markdown: str) -> tuple[str, bool]:
+def resolve_tokens(markdown: str) -> tuple[str, bool, dict[str, str]]:
     draft = False
+    resolved_values: dict[str, str] = {}
     for token, environment_name in TOKENS.items():
         value = os.environ.get(environment_name)
         if not value:
             draft = True
             value = f"[{environment_name} À CONFIGURER]"
+        resolved_values[token] = value
         markdown = markdown.replace(token, value)
-    return markdown, draft
+    return markdown, draft, resolved_values
 
 
 def inline_markup(text: str) -> str:
@@ -97,8 +92,79 @@ def inline_markup(text: str) -> str:
     return re.sub(r"`([^`]+)`", r"<font name='Courier'>\1</font>", escaped)
 
 
+def normalized_text(value: str) -> str:
+    return " ".join(value.split())
+
+
+def verify_pdf(
+    source: Path,
+    destination: Path,
+    resolved_values: dict[str, str],
+) -> None:
+    reader = PdfReader(destination)
+    extracted = normalized_text(
+        " ".join(page.extract_text() or "" for page in reader.pages)
+    )
+    if "Date d'effet : 26 juillet 2026" not in extracted:
+        raise RuntimeError(f"La date attendue est absente du PDF : {destination}")
+
+    forbidden_markers = (
+        "entrepreneur individuel",
+        "entreprise individuelle",
+        "SIREN",
+        "SIRET",
+        "forme juridique",
+        "activité principale",
+        "Adresse :",
+        "Téléphone :",
+    )
+    for marker in forbidden_markers:
+        if marker.casefold() in extracted.casefold():
+            raise RuntimeError(
+                f"Le PDF réintroduit une information interdite ({marker}) : "
+                f"{destination}"
+            )
+
+    for abbreviation in ("RNE", "APE"):
+        if re.search(rf"\b{abbreviation}\b", extracted, re.IGNORECASE):
+            raise RuntimeError(
+                "Le PDF réintroduit une information interdite "
+                f"({abbreviation}) : {destination}"
+            )
+
+    required_tokens = []
+    if source.name != "suppression-compte-v1.0.0.md":
+        required_tokens.append("{{LEGAL_OPERATOR_NAME}}")
+    if source.name == "mentions-legales-v1.0.0.md":
+        required_tokens.extend(
+            [
+                "{{PRIMARY_HOST_NAME}}",
+                "{{PRIMARY_HOST_ADDRESS}}",
+                "{{PRIMARY_HOST_PHONE}}",
+                "{{PRIMARY_HOST_URL}}",
+                "{{OBJECT_HOST_NAME}}",
+                "{{OBJECT_HOST_ADDRESS}}",
+                "{{OBJECT_HOST_URL}}",
+            ]
+        )
+        if "à titre non professionnel" not in extracted:
+            raise RuntimeError(
+                f"Le statut non professionnel est absent du PDF : {destination}"
+            )
+
+    for token in required_tokens:
+        expected = normalized_text(resolved_values[token])
+        if expected not in extracted:
+            raise RuntimeError(
+                f"Le PDF ne contient pas la valeur attendue pour {token} : "
+                f"{destination}"
+            )
+
+
 def build_pdf(source: Path, destination: Path) -> None:
-    markdown, draft = resolve_tokens(source.read_text(encoding="utf-8"))
+    markdown, draft, resolved_values = resolve_tokens(
+        source.read_text(encoding="utf-8")
+    )
     if draft and os.environ.get("LEGAL_RELEASE_READY") == "true":
         raise RuntimeError(
             "Publication PDF bloquée : des coordonnées juridiques sont manquantes."
@@ -131,6 +197,7 @@ def build_pdf(source: Path, destination: Path) -> None:
         textColor=colors.HexColor("#151515"),
         spaceBefore=4 * mm,
         spaceAfter=2 * mm,
+        keepWithNext=True,
     )
     bullet = ParagraphStyle(
         "TodamBullet",
@@ -196,11 +263,23 @@ def build_pdf(source: Path, destination: Path) -> None:
             )
         )
     paragraph_lines: list[str] = []
+    paragraph_is_bullet = False
 
     def flush_paragraph() -> None:
+        nonlocal paragraph_is_bullet
         if paragraph_lines:
-            story.append(Paragraph(inline_markup(" ".join(paragraph_lines)), body))
+            if paragraph_is_bullet:
+                story.append(
+                    Paragraph(
+                        inline_markup(" ".join(paragraph_lines)),
+                        bullet,
+                        bulletText="•",
+                    )
+                )
+            else:
+                story.append(Paragraph(inline_markup(" ".join(paragraph_lines)), body))
             paragraph_lines.clear()
+            paragraph_is_bullet = False
 
     for raw_line in markdown.splitlines():
         line = raw_line.strip()
@@ -214,9 +293,8 @@ def build_pdf(source: Path, destination: Path) -> None:
             story.append(Paragraph(inline_markup(line[3:]), heading))
         elif line.startswith("- "):
             flush_paragraph()
-            story.append(
-                Paragraph(inline_markup(line[2:]), bullet, bulletText="•")
-            )
+            paragraph_is_bullet = True
+            paragraph_lines.append(line[2:])
         else:
             paragraph_lines.append(line)
     flush_paragraph()
@@ -224,6 +302,7 @@ def build_pdf(source: Path, destination: Path) -> None:
 
     if destination.stat().st_size < 5_000:
         raise RuntimeError(f"Le PDF généré semble incomplet : {destination}")
+    verify_pdf(source, destination, resolved_values)
 
 
 def main() -> None:

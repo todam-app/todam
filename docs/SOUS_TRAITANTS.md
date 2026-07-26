@@ -4,7 +4,7 @@
 | ------------- | ------------------------------------------------------ | ----------------------------- | ------------------------------------------------------------- |
 | OVHcloud      | VPS : Web, API, PostgreSQL et sauvegarde de la machine | France                        | DPA, datacenter réel, sous-traitants ultérieurs, restauration |
 | Cloudflare R2 | Affiches et sauvegardes logiques externalisées         | Union européenne si configuré | DPA, localisation, cache, rétention, restauration             |
-| Brevo         | E-mails transactionnels                                | Union européenne si configuré | DPA, domaine authentifié, rétention, rebonds                  |
+| Brevo         | E-mails transactionnels et rapports agrégés            | Union européenne si configuré | DPA, domaine authentifié, rétention, rebonds                  |
 | Sentry        | Diagnostic d'erreurs                                   | Région UE                     | DPA, région du projet, scrubbing, échantillon réel            |
 | Google Play   | Distribution Android                                   | Selon Google                  | conditions développeur, Data Safety, transferts               |
 

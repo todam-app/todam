@@ -11,6 +11,7 @@
   ],
   "scripts": {
     "build": "pnpm --recursive --if-present build",
+    "accounts:report": "pnpm --filter @todam/jobs accounts:report",
     "accounts:purge-unverified": "pnpm --filter @todam/jobs accounts:purge-unverified",
     "catalog:discover:openagenda": "pnpm --filter @todam/jobs catalog:discover:openagenda",
     "catalog:import": "pnpm --filter @todam/jobs catalog:import",

@@ -1,4 +1,9 @@
 import { expect, test, type Page } from "@playwright/test";
+import {
+  CURRENT_PRIVACY_NOTICE_VERSION,
+  CURRENT_TERMS_VERSION,
+  LEGAL_EFFECTIVE_DATE,
+} from "@todam/contracts";
 
 async function expectFooterBelowViewport(page: Page) {
   const footer = page.getByTestId("site-footer");
@@ -41,6 +46,25 @@ test("l'accueil présente Todam simplement et ouvre l'inscription", async ({ pag
 test("l'inscription présente l'âge et les documents sans checkbox", async ({
   page,
 }) => {
+  await page.route("**/v1/legal/current", async (route) => {
+    await route.fulfill({
+      contentType: "application/json",
+      body: JSON.stringify({
+        terms: {
+          version: CURRENT_TERMS_VERSION,
+          effectiveDate: LEGAL_EFFECTIVE_DATE,
+          url: "https://todam.fr/conditions-utilisation",
+          pdfUrl: "https://todam.fr/legal/cgu-todam-v1.0.0.pdf",
+        },
+        privacyNotice: {
+          version: CURRENT_PRIVACY_NOTICE_VERSION,
+          effectiveDate: LEGAL_EFFECTIVE_DATE,
+          url: "https://todam.fr/confidentialite",
+          pdfUrl: "https://todam.fr/legal/confidentialite-todam-v1.0.0.pdf",
+        },
+      }),
+    });
+  });
   await page.goto("/sign-up");
   await page.getByLabel("Nom d'utilisateur").fill("spectatrice-test");
   await page.getByLabel("E-mail").fill("spectatrice@example.test");
@@ -74,7 +98,7 @@ test("l'inscription présente l'âge et les documents sans checkbox", async ({
       name: "Conditions d'utilisation",
     }),
   ).toHaveCount(0);
-  await expect(legalPage.getByText(/Date d'effet : 25 juillet 2026/)).toBeVisible();
+  await expect(legalPage.getByText(/Date d'effet : 26 juillet 2026/)).toBeVisible();
   await expect(legalPage.getByText("Votre journal de spectacles.")).toBeVisible();
   await expectFooterBelowViewport(legalPage);
   await expect(
@@ -157,6 +181,18 @@ test("les pages publiques Web utilisent uniquement l'en-tête Todam", async ({
       page.getByRole("heading", { exact: true, name: item.stackTitle }),
     ).toHaveCount(0);
     if (item.path === "/mentions-legales") {
+      const legalText = await page.locator("body").innerText();
+      expect(legalText).toContain("Nom éditeur test");
+      expect(legalText).toContain("projet personnel gratuit");
+      expect(legalText).toContain("à titre non professionnel");
+      expect(legalText).toContain("OVH SAS");
+      expect(legalText).toContain("2 rue Kellermann, 59100 Roubaix, France");
+      expect(legalText).toContain("numéro contractuel test");
+      expect(legalText).toContain("Cloudflare, Inc.");
+      expect(legalText).not.toMatch(
+        /entrepreneur individuel|SIREN|SIRET|RNE|code APE|forme juridique|activité principale/i,
+      );
+      expect(legalText).not.toMatch(/Adresse\s*:|Téléphone\s*:/i);
       await expect(page.getByText(/médiateur|médiation/i)).toHaveCount(0);
     }
   }

@@ -1,12 +1,11 @@
 # Conditions générales d'utilisation de Todam
 
-Version 1.0.0 — Date d'effet : 25 juillet 2026
+Version 1.0.0 — Date d'effet : 26 juillet 2026
 
 ## 1. Éditeur et objet
 
-Todam est édité par {{LEGAL_OPERATOR_NAME}}, entrepreneur individuel exerçant sous le
-nom commercial « Todam », SIREN {{LEGAL_SIREN}}, domicilié {{LEGAL_ADDRESS}}. Contact :
-[contact@todam.fr](mailto:contact@todam.fr).
+Todam est un projet personnel gratuit édité à titre non professionnel par
+{{LEGAL_OPERATOR_NAME}}. Contact : [contact@todam.fr](mailto:contact@todam.fr).
 
 Les présentes conditions encadrent l'accès gratuit au site todam.fr, à l'application
 Android Todam et à leurs fonctionnalités. Todam permet de découvrir des spectacles
@@ -71,15 +70,15 @@ service.
 
 ## 7. Disponibilité et responsabilité
 
-Todam met en œuvre des moyens raisonnables pour assurer la sécurité et la continuité du
-service, sans garantir une disponibilité permanente ni l'exhaustivité du catalogue. Les
-informations de programmation doivent être vérifiées auprès du lieu ou de l'organisateur
-avant tout déplacement.
+L'éditeur met en œuvre des moyens raisonnables pour assurer la sécurité et la continuité
+du service, sans garantir une disponibilité permanente ni l'exhaustivité du catalogue.
+Les informations de programmation doivent être vérifiées auprès du lieu ou de
+l'organisateur avant tout déplacement.
 
-Dans les limites permises par la loi, Todam ne répond pas des dommages indirects, des
-contenus publiés par les utilisateurs ou d'une indisponibilité temporaire. Cette clause
-ne limite aucun droit impératif du consommateur ni la responsabilité qui ne peut
-légalement être exclue.
+Dans les limites permises par la loi, l'éditeur ne répond pas des dommages indirects,
+des contenus publiés par les utilisateurs ou d'une indisponibilité temporaire. Cette
+clause ne limite aucun droit impératif de l'utilisateur ni la responsabilité qui ne peut
+être légalement exclue.
 
 ## 8. Export, fermeture et suppression
 
@@ -107,7 +106,7 @@ présente version demeure strictement inchangée.
 
 ## 10. Droit applicable et réclamation
 
-Le droit français s'applique, sans priver le consommateur des protections impératives de
+Le droit français s'applique, sans priver l'utilisateur des protections impératives de
 son pays de résidence. Toute réclamation peut être adressée à
 [contact@todam.fr](mailto:contact@todam.fr).
 

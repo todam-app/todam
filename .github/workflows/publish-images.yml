@@ -105,17 +105,9 @@ jobs:
       EXPO_PUBLIC_WEB_URL: https://todam.fr
       EXPO_PUBLIC_API_URL: https://api.todam.fr
       LEGAL_OPERATOR_NAME: ${{ secrets.LEGAL_OPERATOR_NAME }}
-      LEGAL_SIREN: ${{ secrets.LEGAL_SIREN }}
-      LEGAL_SIRET: ${{ secrets.LEGAL_SIRET }}
-      LEGAL_RNE_REGISTRATION_DATE: ${{ secrets.LEGAL_RNE_REGISTRATION_DATE }}
-      LEGAL_ACTIVITY_START_DATE: ${{ secrets.LEGAL_ACTIVITY_START_DATE }}
-      LEGAL_LEGAL_FORM: ${{ secrets.LEGAL_LEGAL_FORM }}
-      LEGAL_ACTIVITY: ${{ secrets.LEGAL_ACTIVITY }}
-      LEGAL_APE: ${{ secrets.LEGAL_APE }}
-      LEGAL_ADDRESS: ${{ secrets.LEGAL_ADDRESS }}
-      LEGAL_PHONE: ${{ secrets.LEGAL_PHONE }}
       PRIMARY_HOST_NAME: OVH SAS
       PRIMARY_HOST_ADDRESS: 2 rue Kellermann, 59100 Roubaix, France
+      PRIMARY_HOST_PHONE: ${{ secrets.PRIMARY_HOST_PHONE }}
       PRIMARY_HOST_URL: https://www.ovhcloud.com
       OBJECT_HOST_NAME: Cloudflare, Inc.
       OBJECT_HOST_ADDRESS: ${{ secrets.OBJECT_HOST_ADDRESS }}
@@ -123,18 +115,9 @@ jobs:
       BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
       EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
       EXPO_PUBLIC_LEGAL_OPERATOR_NAME: ${{ secrets.LEGAL_OPERATOR_NAME }}
-      EXPO_PUBLIC_LEGAL_SIREN: ${{ secrets.LEGAL_SIREN }}
-      EXPO_PUBLIC_LEGAL_SIRET: ${{ secrets.LEGAL_SIRET }}
-      EXPO_PUBLIC_LEGAL_RNE_REGISTRATION_DATE:
-        ${{ secrets.LEGAL_RNE_REGISTRATION_DATE }}
-      EXPO_PUBLIC_LEGAL_ACTIVITY_START_DATE: ${{ secrets.LEGAL_ACTIVITY_START_DATE }}
-      EXPO_PUBLIC_LEGAL_LEGAL_FORM: ${{ secrets.LEGAL_LEGAL_FORM }}
-      EXPO_PUBLIC_LEGAL_ACTIVITY: ${{ secrets.LEGAL_ACTIVITY }}
-      EXPO_PUBLIC_LEGAL_APE: ${{ secrets.LEGAL_APE }}
-      EXPO_PUBLIC_LEGAL_ADDRESS: ${{ secrets.LEGAL_ADDRESS }}
-      EXPO_PUBLIC_LEGAL_PHONE: ${{ secrets.LEGAL_PHONE }}
       EXPO_PUBLIC_PRIMARY_HOST_NAME: OVH SAS
       EXPO_PUBLIC_PRIMARY_HOST_ADDRESS: 2 rue Kellermann, 59100 Roubaix, France
+      EXPO_PUBLIC_PRIMARY_HOST_PHONE: ${{ secrets.PRIMARY_HOST_PHONE }}
       EXPO_PUBLIC_PRIMARY_HOST_URL: https://www.ovhcloud.com
       EXPO_PUBLIC_OBJECT_HOST_NAME: Cloudflare, Inc.
       EXPO_PUBLIC_OBJECT_HOST_ADDRESS: ${{ secrets.OBJECT_HOST_ADDRESS }}
@@ -156,7 +139,7 @@ jobs:
       - name: Installer les dépendances
         run: pnpm install --frozen-lockfile
       - name: Installer le générateur PDF
-        run: python -m pip install reportlab==5.0.0
+        run: python -m pip install reportlab==5.0.0 pypdf==6.10.0
       - name: Générer et vérifier les documents juridiques
         run: |
           pnpm legal:generate
@@ -188,17 +171,9 @@ jobs:
             EXPO_PUBLIC_API_URL=https://api.todam.fr
             EXPO_PUBLIC_WEB_URL=https://todam.fr
             EXPO_PUBLIC_LEGAL_OPERATOR_NAME=${{ secrets.LEGAL_OPERATOR_NAME }}
-            EXPO_PUBLIC_LEGAL_SIREN=${{ secrets.LEGAL_SIREN }}
-            EXPO_PUBLIC_LEGAL_SIRET=${{ secrets.LEGAL_SIRET }}
-            EXPO_PUBLIC_LEGAL_RNE_REGISTRATION_DATE=${{ secrets.LEGAL_RNE_REGISTRATION_DATE }}
-            EXPO_PUBLIC_LEGAL_ACTIVITY_START_DATE=${{ secrets.LEGAL_ACTIVITY_START_DATE }}
-            EXPO_PUBLIC_LEGAL_LEGAL_FORM=${{ secrets.LEGAL_LEGAL_FORM }}
-            EXPO_PUBLIC_LEGAL_ACTIVITY=${{ secrets.LEGAL_ACTIVITY }}
-            EXPO_PUBLIC_LEGAL_APE=${{ secrets.LEGAL_APE }}
-            EXPO_PUBLIC_LEGAL_ADDRESS=${{ secrets.LEGAL_ADDRESS }}
-            EXPO_PUBLIC_LEGAL_PHONE=${{ secrets.LEGAL_PHONE }}
             EXPO_PUBLIC_PRIMARY_HOST_NAME=OVH SAS
             EXPO_PUBLIC_PRIMARY_HOST_ADDRESS=2 rue Kellermann, 59100 Roubaix, France
+            EXPO_PUBLIC_PRIMARY_HOST_PHONE=${{ secrets.PRIMARY_HOST_PHONE }}
             EXPO_PUBLIC_PRIMARY_HOST_URL=https://www.ovhcloud.com
             EXPO_PUBLIC_OBJECT_HOST_NAME=Cloudflare, Inc.
             EXPO_PUBLIC_OBJECT_HOST_ADDRESS=${{ secrets.OBJECT_HOST_ADDRESS }}

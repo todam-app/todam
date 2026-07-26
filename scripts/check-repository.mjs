@@ -97,6 +97,35 @@ if (legalRobotsHeaderCount !== 2) {
   );
 }
 
+const publicLegalPipelineFiles = [
+  ".env.example",
+  ".github/workflows/publish-images.yml",
+  "Dockerfile.web",
+  "apps/todam/lib/legal-documents.ts",
+  "scripts/generate-legal-pdfs.py",
+];
+const retiredPublisherVariables = [
+  "LEGAL_SIREN",
+  "LEGAL_SIRET",
+  "LEGAL_RNE_REGISTRATION_DATE",
+  "LEGAL_ACTIVITY_START_DATE",
+  "LEGAL_LEGAL_FORM",
+  "LEGAL_ACTIVITY",
+  "LEGAL_APE",
+  "LEGAL_ADDRESS",
+  "LEGAL_PHONE",
+];
+for (const file of publicLegalPipelineFiles) {
+  const content = readFileSync(file, "utf8");
+  for (const variable of retiredPublisherVariables) {
+    if (content.includes(variable)) {
+      errors.push(
+        `${file} réintroduit la variable d'éditeur professionnel retirée : ${variable}`,
+      );
+    }
+  }
+}
+
 if (errors.length > 0) {
   console.error(errors.join("\n"));
   process.exit(1);

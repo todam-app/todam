@@ -16,4 +16,14 @@ La purge quotidienne des comptes jamais vérifiés depuis sept jours s'exécute 
 pnpm accounts:purge-unverified
 ```
 
+Le rapport hebdomadaire du nombre de comptes s'envoie avec :
+
+```bash
+pnpm accounts:report
+```
+
+Cette commande exige `DATABASE_URL`, `BREVO_API_KEY`, `EMAIL_FROM` et
+`TODAM_OPERATIONS_EMAIL`. Le rapport ne contient que des nombres agrégés. Il déclenche
+un avertissement à partir de 900 comptes et signale le seuil maximal à 1 000 comptes.
+
 Licence : AGPL-3.0-only.

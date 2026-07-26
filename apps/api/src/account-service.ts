@@ -9,9 +9,9 @@ import {
   watchlistEntries,
   type TodamDatabase,
 } from "@todam/database";
+import type { EmailSender } from "@todam/domain";
 import { and, eq, gt } from "drizzle-orm";
 
-import type { EmailSender } from "./email.js";
 import { HttpProblem } from "./errors.js";
 import { publicWebUrl } from "./legal.js";
 

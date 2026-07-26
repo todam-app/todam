@@ -48,11 +48,13 @@ class BrevoEmailSender implements EmailSender {
   }
 }
 
-export function createEmailSenderFromEnvironment(): EmailSender {
-  const apiKey = process.env.BREVO_API_KEY;
-  const from = process.env.EMAIL_FROM;
+export function createEmailSenderFromEnvironment(
+  environment: NodeJS.ProcessEnv = process.env,
+): EmailSender {
+  const apiKey = environment.BREVO_API_KEY;
+  const from = environment.EMAIL_FROM;
   if (!apiKey || !from) {
     return new UnconfiguredEmailSender();
   }
-  return new BrevoEmailSender(apiKey, from, process.env.EMAIL_FROM_NAME ?? "Todam");
+  return new BrevoEmailSender(apiKey, from, environment.EMAIL_FROM_NAME ?? "Todam");
 }

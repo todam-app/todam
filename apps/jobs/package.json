@@ -7,6 +7,7 @@
   "type": "module",
   "scripts": {
     "build": "tsup --config tsup.config.ts",
+    "accounts:report": "tsx src/account-report.ts",
     "accounts:purge-unverified": "tsx src/purge-unverified-users.ts",
     "catalog:discover:openagenda": "tsx src/catalog-discover-openagenda.ts",
     "catalog:coverage": "tsx src/catalog-import.ts --coverage",

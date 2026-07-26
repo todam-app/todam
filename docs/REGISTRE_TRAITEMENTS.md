@@ -1,7 +1,7 @@
 # Registre des traitements Todam
 
-Responsable du registre : l'entrepreneur individuel éditant Todam. Ce modèle doit être
-complété avec l'identité réelle hors Git avant l'ouverture.
+Responsable du registre : la personne physique éditant Todam à titre non professionnel.
+Son nom est injecté hors Git avec `LEGAL_OPERATOR_NAME` avant l'ouverture.
 
 ## Gestion des comptes
 
@@ -34,6 +34,15 @@ complété avec l'identité réelle hors Git avant l'ouverture.
 - Destinataire : Brevo.
 - Durée : vérifier la durée contractuelle des journaux Brevo et la réduire au minimum
   nécessaire.
+
+## Pilotage du nombre de comptes
+
+- Données : nombres agrégés de comptes totaux, vérifiés et créés sur sept jours.
+- Finalité : anticiper le passage de Todam en exploitation professionnelle.
+- Base : intérêt légitime à piloter et mettre en conformité le service.
+- Destinataires : l'éditeur, via Brevo et l'adresse `TODAM_OPERATIONS_EMAIL`.
+- Durée : conservation minimale nécessaire au suivi des seuils ; aucun e-mail,
+  pseudonyme ou identifiant d'utilisateur n'est inclus dans le rapport.
 
 ## Sécurité et erreurs
 

@@ -12,12 +12,12 @@ import {
   user,
   venues,
 } from "@todam/database";
+import type { EmailSender, TransactionalEmail } from "@todam/domain";
 import { eq } from "drizzle-orm";
 import type { FastifyInstance } from "fastify";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
 import { buildServer } from "../../src/server.js";
-import type { EmailSender, TransactionalEmail } from "../../src/email.js";
 
 const { db, pool } = createDatabase();
 let app: FastifyInstance;

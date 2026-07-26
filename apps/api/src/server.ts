@@ -2,6 +2,7 @@ import cors from "@fastify/cors";
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
 import type { TodamDatabase } from "@todam/database";
+import { createEmailSenderFromEnvironment, type EmailSender } from "@todam/domain";
 import Fastify, { type FastifyError } from "fastify";
 import {
   hasZodFastifySchemaValidationErrors,
@@ -13,7 +14,6 @@ import {
 import { createAuth } from "./auth.js";
 import { createAccountService } from "./account-service.js";
 import { createCatalogService } from "./catalog-service.js";
-import { createEmailSenderFromEnvironment, type EmailSender } from "./email.js";
 import { HttpProblem, problemDocument } from "./errors.js";
 import { registerRoutes } from "./routes.js";
 import { assertProductionConfiguration } from "./production-config.js";

@@ -12,12 +12,12 @@ import {
   verification,
   type TodamDatabase,
 } from "@todam/database";
+import type { EmailSender } from "@todam/domain";
 import { betterAuth } from "better-auth";
 import { username } from "better-auth/plugins";
 import { eq } from "drizzle-orm";
 import type { FastifyReply, FastifyRequest } from "fastify";
 
-import type { EmailSender } from "./email.js";
 import { HttpProblem } from "./errors.js";
 import { currentLegalDocuments } from "./legal.js";
 

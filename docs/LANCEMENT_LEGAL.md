@@ -19,23 +19,25 @@ validés par un avocat.
 - demande publique de suppression par lien valable 24 heures ;
 - suppression en cascade du journal, des notes et de la liste « À voir » ;
 - purge des comptes jamais vérifiés après 7 jours ;
+- rapport hebdomadaire agrégé du nombre de comptes avec alerte à 900 et 1 000 ;
 - limitation des tentatives sensibles par instance API ;
 - pages Web et Android issues des mêmes sources Markdown ;
 - archives PDF générées depuis ces sources, pages juridiques `noindex` et en-têtes
   `X-Robots-Tag` sur les pages et PDF juridiques ;
 
+Les directives `noindex`, `X-Robots-Tag` et `no-store` réduisent l'indexation et la mise
+en cache. Elles n'empêchent ni l'accès direct ni la copie d'une page publique.
+
 ## Actions externes bloquant l'ouverture publique
 
 - [ ] réserver `todam.fr`, activer le renouvellement automatique, la 2FA et DNSSEC ;
-- [ ] mettre à jour le nom commercial et l'activité de l'entreprise via le guichet
-      compétent ;
-- [ ] ouvrir le compte ou sous-compte bancaire dédié et le suivi analytique ;
 - [ ] créer `contact@`, `donnees@`, `signalement@` et `securite@todam.fr` avec SPF, DKIM
       et DMARC ;
-- [ ] renseigner l'identité, le SIREN, l'adresse et le téléphone dans les secrets de
-      déploiement ;
+- [ ] renseigner le nom de l'éditeur dans `LEGAL_OPERATOR_NAME`, sans adresse ni
+      téléphone personnels et sans donnée d'entreprise ;
 - [ ] vérifier que le contrat est conclu avec OVH SAS, 2 rue Kellermann, 59100 Roubaix,
-      France, et confirmer l'entité contractuelle Cloudflare ;
+      France, confirmer son numéro de téléphone contractuel et l'entité contractuelle
+      Cloudflare ;
 - [ ] signer ou accepter les accords de sous-traitance et garanties de transfert ;
 - [ ] configurer Brevo et tester vérification, réinitialisation, reçu juridique et
       suppression ;
@@ -51,12 +53,18 @@ validés par un avocat.
       de CPU, RAM et disque ;
 - [ ] surveiller `/health/live` et `/health/ready` depuis un service extérieur au VPS ;
 - [ ] configurer Sentry en région UE après audit de filtrage des données personnelles ;
-- [ ] créer et vérifier le compte Google Play professionnel de l'entreprise individuelle
-      ;
+- [ ] créer et vérifier un compte développeur Google Play personnel non marchand ;
+- [ ] vérifier dans Play Console que l'adresse fournie à Google pour la vérification
+      reste privée et que seul l'e-mail développeur attendu est affiché publiquement ;
 - [ ] compléter la fiche Data Safety après audit du binaire Android final ;
 - [ ] fournir `https://todam.fr/suppression-compte` dans Play Console ;
-- [ ] générer les PDF définitifs avec les vraies coordonnées hors Git ;
+- [ ] générer les PDF définitifs avec le nom de l'éditeur et les coordonnées confirmées
+      des hébergeurs, hors Git ;
 - [ ] exécuter les contrôles techniques et juridiques de la section suivante.
+
+Cette phase personnelle ne nécessite ni compte bancaire professionnel, ni mise à jour
+RNE, ni compte Play professionnel. Elle s'arrête avant toute activité commerciale ou
+avant le dépassement de 1 000 comptes, selon la première échéance.
 
 ## Publication des documents
 
@@ -80,6 +88,8 @@ Les PDF contenant les coordonnées réelles sont ignorés par Git. L'archive pub
 ## Exploitation
 
 - Planifier `pnpm accounts:purge-unverified` au moins une fois par jour.
+- Planifier `pnpm accounts:report` chaque lundi dans Coolify et vérifier sa réception à
+  `TODAM_OPERATIONS_EMAIL`.
 - Construire les images de production dans GitHub Actions ; Coolify télécharge les
   images GHCR déjà construites et ne compile jamais le monorepo sur le VPS.
 - Conserver au moins 15 Go de disque libres et nettoyer les anciennes images Docker.
@@ -91,9 +101,11 @@ Les PDF contenant les coordonnées réelles sont ignorés par Git. L'archive pub
   mots de passe et corps de requêtes.
 - Tester trimestriellement l'export, la suppression, la restauration PostgreSQL depuis
   R2 et la restauration de la configuration Coolify.
-- À 1 000 comptes, réévaluer la domiciliation, la RC Pro et la couverture cyber.
-- Préparer la SASU à 7 500 comptes et terminer le transfert avant 10 000 comptes, ou
-  plus tôt en cas de monétisation, associé, investisseur ou incident.
+- Dès 900 comptes, préparer les nouveaux textes, les secrets de l'entreprise
+  individuelle et les informations Play Console nécessaires au passage professionnel.
+- Terminer le passage professionnel avant toute publicité, paiement, commission,
+  billetterie ou partenariat commercial, ou au plus tard avant de dépasser 1 000
+  comptes.
 
 ## Évolutions contractuelles
 
@@ -106,8 +118,9 @@ réduction des droits ou changement important de responsabilité imposent une no
 version, une information active et une nouvelle preuve d'acceptation. Export et
 suppression restent accessibles en cas de refus.
 
-Avant toute publicité, fonctionnalité payante, commission, billetterie ou autre
-monétisation, réévaluer l'obligation de médiation de la consommation. Si elle devient
-applicable, choisir un médiateur, adhérer à son dispositif, publier ses coordonnées dans
-les CGU et les mentions légales, rétablir les contrôles de publication correspondants et
-demander une nouvelle acceptation des CGU avant l'activation.
+Avant toute publicité, fonctionnalité payante, commission, billetterie, partenariat
+commercial ou autre monétisation, passer Todam en exploitation professionnelle et
+réévaluer l'obligation de médiation de la consommation. Si elle devient applicable,
+choisir un médiateur, adhérer à son dispositif, publier ses coordonnées dans les CGU et
+les mentions légales, rétablir les contrôles de publication correspondants et demander
+une nouvelle acceptation des CGU avant l'activation.
