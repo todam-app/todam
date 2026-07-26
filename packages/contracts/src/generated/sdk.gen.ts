@@ -40,6 +40,9 @@ import type {
   GetV1ProductionsBySlugData,
   GetV1ProductionsBySlugErrors,
   GetV1ProductionsBySlugResponses,
+  GetV1PublicStatsData,
+  GetV1PublicStatsErrors,
+  GetV1PublicStatsResponses,
   GetV1SearchData,
   GetV1SearchErrors,
   GetV1SearchResponses,
@@ -94,6 +97,18 @@ export const getV1LegalCurrent = <ThrowOnError extends boolean = false>(
     url: "/v1/legal/current",
     ...options,
   });
+
+/**
+ * Retourne les chiffres publics de Todam
+ */
+export const getV1PublicStats = <ThrowOnError extends boolean = false>(
+  options?: Options<GetV1PublicStatsData, ThrowOnError>,
+): RequestResult<GetV1PublicStatsResponses, GetV1PublicStatsErrors, ThrowOnError> =>
+  (options?.client ?? client).get<
+    GetV1PublicStatsResponses,
+    GetV1PublicStatsErrors,
+    ThrowOnError
+  >({ url: "/v1/public/stats", ...options });
 
 /**
  * Crée un compte avec les versions juridiques présentées

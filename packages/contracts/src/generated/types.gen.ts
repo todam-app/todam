@@ -34,6 +34,100 @@ export type GetV1LegalCurrentResponses = {
 export type GetV1LegalCurrentResponse =
   GetV1LegalCurrentResponses[keyof GetV1LegalCurrentResponses];
 
+export type GetV1PublicStatsData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: "/v1/public/stats";
+};
+
+export type GetV1PublicStatsErrors = {
+  /**
+   * Default Response
+   */
+  400: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  401: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  404: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+};
+
+export type GetV1PublicStatsError =
+  GetV1PublicStatsErrors[keyof GetV1PublicStatsErrors];
+
+export type GetV1PublicStatsResponses = {
+  /**
+   * Default Response
+   */
+  200: {
+    verifiedUsers: number;
+    activeProductions: number;
+    upcomingPerformances: number;
+    generatedAt: string;
+  };
+};
+
+export type GetV1PublicStatsResponse =
+  GetV1PublicStatsResponses[keyof GetV1PublicStatsResponses];
+
 export type PostV1AuthSignUpEmailData = {
   body: {
     name: string;

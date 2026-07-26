@@ -130,3 +130,11 @@ export const MutationResponseSchema = z.object({
 export const HealthResponseSchema = z.object({
   status: z.enum(["ok", "unavailable"]),
 });
+
+export const PublicStatsSchema = z.object({
+  verifiedUsers: z.number().int().nonnegative(),
+  activeProductions: z.number().int().nonnegative(),
+  upcomingPerformances: z.number().int().nonnegative(),
+  generatedAt: z.string().datetime({ offset: true }),
+});
+export type PublicStats = z.infer<typeof PublicStatsSchema>;

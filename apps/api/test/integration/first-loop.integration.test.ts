@@ -23,6 +23,7 @@ const { db, pool } = createDatabase();
 let app: FastifyInstance;
 let productionId: string;
 let performanceId: string;
+let venueId: string;
 const sentEmails: TransactionalEmail[] = [];
 const emailSender: EmailSender = {
   async send(message) {
@@ -73,6 +74,7 @@ async function seedCatalog() {
       coordinates: null,
     })
     .returning({ id: venues.id });
+  venueId = venue!.id;
   const [production] = await db
     .insert(productions)
     .values({
@@ -506,5 +508,90 @@ describe("première boucle API sur PostgreSQL/PostGIS", () => {
       headers: { cookie },
     });
     expect(revoked.statusCode).toBe(401);
+  });
+
+  it("publie uniquement les comptes vérifiés et le catalogue actif à venir", async () => {
+    await signUp("verifiee@example.test", "compte-verifie");
+    await db.insert(user).values({
+      id: "compte-non-verifie",
+      name: "Compte non vérifié",
+      email: "non-verifie@example.test",
+      emailVerified: false,
+      pseudonym: "compte-non-verifie",
+      ageConfirmedAt: new Date(),
+      age15OrOlder: true,
+      termsVersion: CURRENT_TERMS_VERSION,
+      termsAcceptedAt: new Date(),
+      privacyNoticeVersion: CURRENT_PRIVACY_NOTICE_VERSION,
+      registrationChannel: "web",
+    });
+
+    const [activeProduction, inactiveProduction] = await db
+      .insert(productions)
+      .values([
+        {
+          slug: "spectacle-actif-statistiques",
+          title: "Spectacle actif",
+          discipline: "theatre",
+          audience: "general",
+        },
+        {
+          slug: "spectacle-inactif-statistiques",
+          title: "Spectacle inactif",
+          discipline: "theatre",
+          audience: "general",
+          isActive: false,
+        },
+      ])
+      .returning({ id: productions.id, isActive: productions.isActive });
+    const activeProductionId = activeProduction!.isActive
+      ? activeProduction!.id
+      : inactiveProduction!.id;
+    const inactiveProductionId = activeProduction!.isActive
+      ? inactiveProduction!.id
+      : activeProduction!.id;
+
+    await db.insert(performances).values([
+      {
+        productionId: activeProductionId,
+        venueId,
+        startsAt: new Date("2030-01-10T19:00:00.000Z"),
+        status: "scheduled",
+      },
+      {
+        productionId: activeProductionId,
+        venueId,
+        startsAt: new Date("2030-01-11T19:00:00.000Z"),
+        status: "cancelled",
+      },
+      {
+        productionId: activeProductionId,
+        venueId,
+        startsAt: new Date("2020-01-10T19:00:00.000Z"),
+        status: "scheduled",
+      },
+      {
+        productionId: inactiveProductionId,
+        venueId,
+        startsAt: new Date("2030-01-12T19:00:00.000Z"),
+        status: "scheduled",
+      },
+    ]);
+
+    const response = await app.inject({
+      method: "GET",
+      url: "/v1/public/stats",
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.headers["cache-control"]).toBe(
+      "public, max-age=60, stale-while-revalidate=300",
+    );
+    expect(response.json()).toMatchObject({
+      verifiedUsers: 1,
+      activeProductions: 2,
+      upcomingPerformances: 1,
+    });
+    expect(new Date(response.json().generatedAt).toString()).not.toBe("Invalid Date");
   });
 });

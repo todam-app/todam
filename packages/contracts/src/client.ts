@@ -4,11 +4,13 @@ import {
   ProblemDetailsSchema,
   ProductionDiaryResponseSchema,
   ProductionResponseSchema,
+  PublicStatsSchema,
   SearchResponseSchema,
   ViewerProductionStateSchema,
   type Dashboard,
   type DiarySession,
   type ProblemDetails,
+  type PublicStats,
   type SearchResponse,
   type ViewerProductionState,
 } from "./api.js";
@@ -44,6 +46,7 @@ export interface MarkSeenInput {
 
 export interface TodamApiClient {
   getCurrentLegalDocuments(): Promise<LegalCurrentResponse>;
+  getPublicStats(): Promise<PublicStats>;
   search(query: string): Promise<SearchResponse>;
   getProduction(slug: string): Promise<ProductionDetail>;
   getProductionState(productionId: string): Promise<ViewerProductionState>;
@@ -88,6 +91,7 @@ export function createTodamApiClient(options: TodamApiClientOptions): TodamApiCl
   return {
     getCurrentLegalDocuments: () =>
       request("/v1/legal/current", LegalCurrentResponseSchema),
+    getPublicStats: () => request("/v1/public/stats", PublicStatsSchema),
     search: (query) =>
       request(`/v1/search?q=${encodeURIComponent(query)}`, SearchResponseSchema),
     getProduction: (slug) =>

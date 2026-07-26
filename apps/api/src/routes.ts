@@ -16,6 +16,7 @@ import {
   ProductionIdParamsSchema,
   ProductionParamsSchema,
   ProductionResponseSchema,
+  PublicStatsSchema,
   RatingBodySchema,
   SearchQuerySchema,
   SearchResponseSchema,
@@ -31,6 +32,7 @@ import type { TodamAuth } from "./auth.js";
 import { getRequiredUserId, handleAuthRequest } from "./auth.js";
 import type { CatalogService } from "./catalog-service.js";
 import { currentLegalDocuments } from "./legal.js";
+import type { PublicStatsService } from "./public-stats-service.js";
 import { InMemoryRateLimiter } from "./rate-limit.js";
 
 const problemResponses = {
@@ -46,6 +48,7 @@ export interface RouteDependencies {
   account: AccountService;
   auth: TodamAuth;
   catalog: CatalogService;
+  publicStats: PublicStatsService;
 }
 
 export async function registerRoutes(
@@ -53,7 +56,7 @@ export async function registerRoutes(
   dependencies: RouteDependencies,
 ) {
   const app = baseApp.withTypeProvider<ZodTypeProvider>();
-  const { account, auth, catalog } = dependencies;
+  const { account, auth, catalog, publicStats } = dependencies;
   const rateLimiter = new InMemoryRateLimiter();
   const guardAuth = (scope: string, ip: string) =>
     rateLimiter.assertAllowed(`auth:${scope}:${ip}`, 10, 15 * 60_000);
@@ -70,6 +73,24 @@ export async function registerRoutes(
       },
     },
     async () => currentLegalDocuments(),
+  );
+
+  app.get(
+    "/v1/public/stats",
+    {
+      schema: {
+        tags: ["Transparence"],
+        summary: "Retourne les chiffres publics de Todam",
+        response: {
+          200: PublicStatsSchema,
+          ...problemResponses,
+        },
+      },
+    },
+    async (_request, reply) =>
+      reply
+        .header("cache-control", "public, max-age=60, stale-while-revalidate=300")
+        .send(await publicStats.getStats()),
   );
 
   app.post(

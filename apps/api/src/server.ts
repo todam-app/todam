@@ -15,8 +15,9 @@ import { createAuth } from "./auth.js";
 import { createAccountService } from "./account-service.js";
 import { createCatalogService } from "./catalog-service.js";
 import { HttpProblem, problemDocument } from "./errors.js";
-import { registerRoutes } from "./routes.js";
 import { assertProductionConfiguration } from "./production-config.js";
+import { createPublicStatsService } from "./public-stats-service.js";
+import { registerRoutes } from "./routes.js";
 
 export interface BuildServerOptions {
   database: TodamDatabase;
@@ -114,7 +115,8 @@ export async function buildServer(options: BuildServerOptions) {
   const auth = createAuth(options.database, emailSender);
   const account = createAccountService(options.database, emailSender);
   const catalog = createCatalogService(options.database);
-  await registerRoutes(app, { account, auth, catalog });
+  const publicStats = createPublicStatsService(options.database);
+  await registerRoutes(app, { account, auth, catalog, publicStats });
 
   app.setNotFoundHandler((request, reply) =>
     reply

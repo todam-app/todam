@@ -142,16 +142,13 @@ Le lancement assume un serveur unique : une panne du VPS interrompt le Web, l'AP
 PostgreSQL. Coolify peut néanmoins partager ce VPS sans charge de compilation, car il ne
 fait que télécharger et démarrer les images préparées par GitHub Actions.
 
-Estimation au 25 juillet 2026 :
+Coût fixe constaté au 25 juillet 2026 :
 
-| Ressource | Configuration de lancement | Coût indicatif |
+| Ressource | Configuration de lancement | Coût TTC |
 |---|---|---:|
-| OVHcloud VPS-2 | 4 vCores, 8 Go RAM, 75 Go NVMe | 8,65 € TTC/mois |
-| Coolify autohébergé | panneau et déploiements sur le VPS | 0 € |
-| Expo Web, API, tâches et PostGIS | conteneurs sur le VPS | inclus |
-| R2 pour 50 000 affiches | environ 50 à 125 Go | 0,65–1,85 € TTC/mois |
-| Sauvegardes logiques R2 | faible volume initial | moins de 0,20 € TTC/mois |
-| Total infrastructure | hors domaine, messagerie et stores | **environ 9,30–10,60 € TTC/mois** |
+| OVHcloud VPS-2 | 4 vCores, 8 Go RAM, 75 Go NVMe et sauvegarde automatisée | 10,19 €/mois |
+| Domaine `todam.fr` | enregistrement pour trois ans | 18,70 €, soit environ 0,52 €/mois |
+| Total fixe équivalent | VPS, sauvegarde et domaine | **10,71 €/mois** |
 
 Le stockage R2 reste séparé du disque du VPS. PostgreSQL ne conserve que la clé de
 l'objet, ses dimensions, son crédit, sa licence et sa provenance. Les originaux et les
