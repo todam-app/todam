@@ -63,11 +63,21 @@ echo Demarrage de PostgreSQL et PostGIS...
 call pnpm dev:db
 if errorlevel 1 goto :failed
 
-call :wait_for_postgres
-if errorlevel 1 (
+set /a POSTGRES_ATTEMPT=0
+:wait_for_postgres_loop
+set "POSTGRES_HEALTH="
+for /f "delims=" %%H in ('docker inspect --format "{{.State.Health.Status}}" todam-postgres 2^>nul') do set "POSTGRES_HEALTH=%%H"
+if "!POSTGRES_HEALTH!"=="healthy" goto :postgres_ready
+set /a POSTGRES_ATTEMPT+=1
+if !POSTGRES_ATTEMPT! geq 30 (
   echo [ERREUR] PostgreSQL n'est pas devenu operationnel.
   goto :failed
 )
+timeout /t 2 /nobreak >nul
+goto :wait_for_postgres_loop
+
+:postgres_ready
+echo PostgreSQL est pret.
 
 echo.
 echo Application des migrations...
@@ -176,20 +186,6 @@ set /a DOCKER_ATTEMPT+=1
 if !DOCKER_ATTEMPT! geq 60 exit /b 1
 timeout /t 2 /nobreak >nul
 goto :wait_for_docker_loop
-
-:wait_for_postgres
-set /a POSTGRES_ATTEMPT=0
-:wait_for_postgres_loop
-set "POSTGRES_HEALTH="
-for /f "delims=" %%H in ('docker inspect --format "{{.State.Health.Status}}" todam-postgres 2^>nul') do set "POSTGRES_HEALTH=%%H"
-if "!POSTGRES_HEALTH!"=="healthy" (
-  echo PostgreSQL est pret.
-  exit /b 0
-)
-set /a POSTGRES_ATTEMPT+=1
-if !POSTGRES_ATTEMPT! geq 30 exit /b 1
-timeout /t 2 /nobreak >nul
-goto :wait_for_postgres_loop
 
 :failed
 echo.
