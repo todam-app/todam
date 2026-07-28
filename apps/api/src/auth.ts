@@ -3,6 +3,7 @@ import { expo } from "@better-auth/expo";
 import {
   CURRENT_PRIVACY_NOTICE_VERSION,
   CURRENT_TERMS_VERSION,
+  UsernameSchema,
 } from "@todam/contracts";
 import {
   account,
@@ -209,11 +210,11 @@ export function createAuth(database: TodamDatabase, emailSender: EmailSender) {
           before: async (candidate) => {
             const usernameValue =
               typeof candidate.username === "string" ? candidate.username.trim() : "";
-            if (usernameValue.length < 3 || usernameValue.length > 30) {
+            if (!UsernameSchema.safeParse(usernameValue).success) {
               throw new HttpProblem(
                 400,
                 "INVALID_PSEUDONYM",
-                "Le nom d'utilisateur doit contenir entre 3 et 30 caractères.",
+                "Le pseudonyme doit contenir 3 à 30 lettres, chiffres, points, tirets ou underscores.",
               );
             }
             if (candidate.age15OrOlder !== true) {
@@ -265,6 +266,9 @@ export function createAuth(database: TodamDatabase, emailSender: EmailSender) {
       username({
         minUsernameLength: 3,
         maxUsernameLength: 30,
+        // Les nouveaux pseudonymes sont contrôlés par le hook ci-dessus.
+        // Ce validateur reste permissif afin de ne pas bloquer la connexion
+        // d’un éventuel compte historique avec un ancien format.
         usernameValidator: () => true,
         usernameNormalization: (value) => value.trim(),
         displayUsernameNormalization: (value) => value.trim(),
@@ -315,17 +319,25 @@ export async function getRequiredUserId(
   auth: TodamAuth,
   request: FastifyRequest,
 ): Promise<string> {
-  const current = await auth.api.getSession({
-    headers: toWebHeaders(request),
-  });
-  if (!current?.user.id) {
+  const userId = await getOptionalUserId(auth, request);
+  if (!userId) {
     throw new HttpProblem(
       401,
       "AUTHENTICATION_REQUIRED",
       "Connecte-toi pour effectuer cette action.",
     );
   }
-  return current.user.id;
+  return userId;
+}
+
+export async function getOptionalUserId(
+  auth: TodamAuth,
+  request: FastifyRequest,
+): Promise<string | null> {
+  const current = await auth.api.getSession({
+    headers: toWebHeaders(request),
+  });
+  return current?.user.id ?? null;
 }
 
 export async function handleAuthRequest(

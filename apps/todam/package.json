@@ -6,7 +6,7 @@
   "description": "Application universelle Expo Web, iOS et Android de Todam.",
   "main": "expo-router/entry",
   "scripts": {
-    "build": "expo export --platform web",
+    "build": "tsx scripts/generate-sitemap.ts && expo export --platform web",
     "dev": "expo start --web",
     "lint": "eslint .",
     "start": "expo start",
@@ -18,6 +18,8 @@
   "dependencies": {
     "@better-auth/expo": "1.6.25",
     "@expo/vector-icons": "^15.0.2",
+    "@fontsource/inter": "5.2.8",
+    "@fontsource/source-serif-4": "5.2.8",
     "@hookform/resolvers": "5.4.0",
     "@tanstack/react-query": "5.101.4",
     "@todam/contracts": "workspace:*",

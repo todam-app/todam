@@ -17,6 +17,8 @@ import { createCatalogService } from "./catalog-service.js";
 import { HttpProblem, problemDocument } from "./errors.js";
 import { assertProductionConfiguration } from "./production-config.js";
 import { createPublicStatsService } from "./public-stats-service.js";
+import { createMemberService } from "./member-service.js";
+import { createProfessionalService } from "./professional-service.js";
 import { registerRoutes } from "./routes.js";
 
 export interface BuildServerOptions {
@@ -91,7 +93,7 @@ export async function buildServer(options: BuildServerOptions) {
   await app.register(cors, {
     origin: corsOrigins(),
     credentials: true,
-    methods: ["GET", "HEAD", "POST", "PUT", "DELETE"],
+    methods: ["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE"],
   });
   await app.register(swagger, {
     openapi: {
@@ -122,8 +124,17 @@ export async function buildServer(options: BuildServerOptions) {
   const auth = createAuth(options.database, emailSender);
   const account = createAccountService(options.database, emailSender);
   const catalog = createCatalogService(options.database);
+  const member = createMemberService(options.database);
+  const professional = createProfessionalService(options.database);
   const publicStats = createPublicStatsService(options.database);
-  await registerRoutes(app, { account, auth, catalog, publicStats });
+  await registerRoutes(app, {
+    account,
+    auth,
+    catalog,
+    member,
+    professional,
+    publicStats,
+  });
 
   app.setNotFoundHandler((request, reply) =>
     reply

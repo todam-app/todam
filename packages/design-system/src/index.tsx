@@ -1,6 +1,13 @@
-import { useState, type ReactNode } from "react";
+import {
+  createElement,
+  useId,
+  useState,
+  type CSSProperties,
+  type ReactNode,
+} from "react";
 import {
   ActivityIndicator,
+  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -27,14 +34,31 @@ export function Button({
   loading = false,
   variant = "primary",
   disabled,
+  accessibilityState,
   style,
+  onBlur,
+  onFocus,
   ...props
 }: ButtonProps) {
+  const [focused, setFocused] = useState(false);
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={label}
+      accessibilityState={{
+        ...accessibilityState,
+        busy: loading || accessibilityState?.busy,
+        disabled: Boolean(disabled || loading),
+      }}
       disabled={disabled || loading}
+      onBlur={(event) => {
+        setFocused(false);
+        onBlur?.(event);
+      }}
+      onFocus={(event) => {
+        setFocused(true);
+        onFocus?.(event);
+      }}
       style={(state) => [
         styles.button,
         variant === "primary" && styles.buttonPrimary,
@@ -42,6 +66,7 @@ export function Button({
         variant === "ghost" && styles.buttonGhost,
         variant === "danger" && styles.buttonDanger,
         state.pressed && styles.buttonPressed,
+        focused && styles.buttonFocused,
         (disabled || loading) && styles.disabled,
         typeof style === "function" ? style(state) : style,
       ]}
@@ -51,9 +76,11 @@ export function Button({
         <ActivityIndicator
           accessibilityLabel="Chargement"
           color={
-            variant === "primary" || variant === "danger"
-              ? tokens.color.surface
-              : tokens.color.ink
+            disabled || loading
+              ? tokens.color.muted
+              : variant === "primary" || variant === "danger"
+                ? tokens.color.surface
+                : tokens.color.ink
           }
         />
       ) : (
@@ -62,6 +89,7 @@ export function Button({
             styles.buttonLabel,
             (variant === "primary" || variant === "danger") &&
               styles.buttonLabelPrimary,
+            disabled && styles.buttonLabelDisabled,
           ]}
         >
           {label}
@@ -74,48 +102,131 @@ export function Button({
 export interface TextFieldProps extends TextInputProps {
   label: string;
   error?: string | undefined;
+  required?: boolean | undefined;
+  webAutoComplete?: string | undefined;
+  webName?: string | undefined;
+  trailingAction?:
+    | {
+        accessibilityLabel: string;
+        label: string;
+        onPress: () => void;
+      }
+    | undefined;
 }
 
 export function TextField({
   label,
   error,
+  required = false,
+  webAutoComplete,
+  webName,
+  trailingAction,
   style,
   onBlur,
   onFocus,
+  nativeID,
   ...props
 }: TextFieldProps) {
   const [focused, setFocused] = useState(false);
+  const generatedId = useId().replace(/:/g, "");
+  const inputId = nativeID ?? `todam-field-${generatedId}`;
+  const labelId = `${inputId}-label`;
+  const errorId = `${inputId}-error`;
+  const webFormProps =
+    Platform.OS === "web"
+      ? ({
+          name: webName,
+          required,
+          "aria-required": required,
+          ...(error
+            ? {
+                "aria-describedby": errorId,
+                "aria-invalid": true,
+              }
+            : {}),
+          ...(webAutoComplete ? { autoComplete: webAutoComplete } : {}),
+        } as unknown as TextInputProps)
+      : {};
 
   return (
     <View style={styles.field}>
-      <Text style={styles.fieldLabel}>{label}</Text>
-      <TextInput
-        accessibilityLabel={label}
-        accessibilityHint={error}
-        onBlur={(event) => {
-          setFocused(false);
-          onBlur?.(event);
-        }}
-        onFocus={(event) => {
-          setFocused(true);
-          onFocus?.(event);
-        }}
-        placeholderTextColor={tokens.color.muted}
-        style={[
-          styles.input,
-          style,
-          focused && styles.inputFocused,
-          error && styles.inputError,
-          error && focused && styles.inputErrorFocused,
-        ]}
-        {...props}
-      />
+      {Platform.OS === "web" ? (
+        createElement(
+          "label",
+          {
+            htmlFor: inputId,
+            id: labelId,
+            style: styles.fieldLabel as CSSProperties,
+          },
+          label,
+          required ? " *" : "",
+        )
+      ) : (
+        <Text nativeID={labelId} style={styles.fieldLabel}>
+          {label}
+          {required ? " *" : ""}
+        </Text>
+      )}
+      <View style={styles.inputFrame}>
+        <TextInput
+          accessibilityHint={error}
+          accessibilityLabelledBy={labelId}
+          nativeID={inputId}
+          onBlur={(event) => {
+            setFocused(false);
+            onBlur?.(event);
+          }}
+          onFocus={(event) => {
+            setFocused(true);
+            onFocus?.(event);
+          }}
+          placeholderTextColor={tokens.color.muted}
+          style={[
+            styles.input,
+            trailingAction && styles.inputWithTrailingAction,
+            style,
+            focused && styles.inputFocused,
+            error && styles.inputError,
+            error && focused && styles.inputErrorFocused,
+          ]}
+          {...props}
+          {...webFormProps}
+        />
+        {trailingAction ? (
+          <Pressable
+            accessibilityLabel={trailingAction.accessibilityLabel}
+            accessibilityRole="button"
+            hitSlop={6}
+            onPress={trailingAction.onPress}
+            style={styles.trailingAction}
+          >
+            <Text style={styles.trailingActionLabel}>{trailingAction.label}</Text>
+          </Pressable>
+        ) : null}
+      </View>
       {error ? (
-        <Text accessibilityRole="alert" style={styles.errorText}>
+        <Text accessibilityRole="alert" nativeID={errorId} style={styles.errorText}>
           {error}
         </Text>
       ) : null}
     </View>
+  );
+}
+
+export function PasswordField(props: Omit<TextFieldProps, "secureTextEntry">) {
+  const [visible, setVisible] = useState(false);
+  return (
+    <TextField
+      {...props}
+      secureTextEntry={!visible}
+      trailingAction={{
+        accessibilityLabel: visible
+          ? "Masquer le mot de passe"
+          : "Afficher le mot de passe",
+        label: visible ? "Masquer" : "Afficher",
+        onPress: () => setVisible((value) => !value),
+      }}
+    />
   );
 }
 
@@ -142,8 +253,11 @@ export function PosterPlaceholder({
       style={[styles.poster, compact && styles.posterCompact]}
     >
       <Text style={styles.posterMark}>T</Text>
-      <Text numberOfLines={2} style={styles.posterTitle}>
-        {title}
+      <Text
+        numberOfLines={compact ? 3 : 2}
+        style={[styles.posterTitle, compact && styles.posterTitleCompact]}
+      >
+        Visuel non publié
       </Text>
       <Text style={styles.posterDiscipline}>{disciplineLabels[discipline]}</Text>
     </View>
@@ -181,14 +295,16 @@ export function StatCard({ label, value, onPress }: StatCardProps) {
 export function SectionTitle({
   children,
   eyebrow,
+  level = 2,
 }: {
   children: ReactNode;
   eyebrow?: string;
+  level?: 1 | 2 | 3;
 }) {
   return (
     <View style={styles.sectionTitle}>
       {eyebrow ? <Text style={styles.eyebrow}>{eyebrow}</Text> : null}
-      <Text accessibilityRole="header" style={styles.heading}>
+      <Text aria-level={level} accessibilityRole="header" style={styles.heading}>
         {children}
       </Text>
     </View>
@@ -199,7 +315,9 @@ const styles = StyleSheet.create({
   button: {
     alignItems: "center",
     borderRadius: tokens.radius.medium,
+    flexShrink: 1,
     justifyContent: "center",
+    maxWidth: "100%",
     minHeight: tokens.minimumTouchTarget,
     paddingHorizontal: tokens.space.md,
     paddingVertical: 10,
@@ -212,25 +330,37 @@ const styles = StyleSheet.create({
   },
   buttonLabel: {
     color: tokens.color.ink,
+    flexShrink: 1,
     fontSize: 16,
     fontWeight: "700",
+    textAlign: "center",
   },
   buttonLabelPrimary: {
     color: tokens.color.surface,
   },
+  buttonLabelDisabled: {
+    color: tokens.color.muted,
+  },
   buttonPressed: {
-    opacity: 0.75,
+    transform: [{ translateY: 1 }],
+  },
+  buttonFocused: {
+    outlineColor: tokens.color.accent,
+    outlineOffset: 2,
+    outlineStyle: "solid",
+    outlineWidth: 3,
   },
   buttonPrimary: {
     backgroundColor: tokens.color.accent,
   },
   buttonSecondary: {
     backgroundColor: tokens.color.surface,
-    borderColor: tokens.color.border,
+    borderColor: tokens.color.controlBorder,
     borderWidth: 1,
   },
   disabled: {
-    opacity: 0.5,
+    backgroundColor: tokens.color.disabled,
+    borderColor: tokens.color.controlBorder,
   },
   errorText: {
     color: tokens.color.error,
@@ -246,7 +376,7 @@ const styles = StyleSheet.create({
   },
   heading: {
     color: tokens.color.ink,
-    fontFamily: "serif",
+    fontFamily: Platform.select({ web: "Source Serif 4", default: "serif" }),
     fontSize: 28,
     fontWeight: "700",
     lineHeight: 34,
@@ -260,7 +390,7 @@ const styles = StyleSheet.create({
   },
   input: {
     backgroundColor: tokens.color.surface,
-    borderColor: tokens.color.border,
+    borderColor: tokens.color.controlBorder,
     borderRadius: tokens.radius.medium,
     borderWidth: 1,
     color: tokens.color.ink,
@@ -269,6 +399,9 @@ const styles = StyleSheet.create({
     outlineWidth: 0,
     paddingHorizontal: 14,
     paddingVertical: 10,
+  },
+  inputFrame: {
+    position: "relative",
   },
   inputFocused: {
     borderColor: tokens.color.accent,
@@ -283,21 +416,39 @@ const styles = StyleSheet.create({
   inputErrorFocused: {
     outlineColor: "rgba(161, 38, 26, 0.14)",
   },
+  inputWithTrailingAction: {
+    paddingRight: 92,
+  },
+  trailingAction: {
+    alignItems: "center",
+    bottom: 0,
+    justifyContent: "center",
+    minHeight: 44,
+    paddingHorizontal: tokens.space.sm,
+    position: "absolute",
+    right: 4,
+    top: 0,
+  },
+  trailingActionLabel: {
+    color: tokens.color.accent,
+    fontSize: 13,
+    fontWeight: "700",
+  },
   poster: {
     alignItems: "flex-start",
     aspectRatio: 2 / 3,
-    backgroundColor: "#E6D8C8",
+    backgroundColor: "#EEE7DC",
     borderRadius: tokens.radius.medium,
     justifyContent: "space-between",
-    maxWidth: 220,
     minWidth: 150,
     overflow: "hidden",
     padding: tokens.space.md,
     width: "100%",
   },
   posterCompact: {
-    minWidth: 84,
-    width: 84,
+    minWidth: 64,
+    padding: tokens.space.sm,
+    width: 64,
   },
   posterDiscipline: {
     color: tokens.color.muted,
@@ -307,15 +458,20 @@ const styles = StyleSheet.create({
   },
   posterMark: {
     color: tokens.color.accent,
-    fontFamily: "serif",
+    fontFamily: Platform.select({ web: "Source Serif 4", default: "serif" }),
     fontSize: 32,
     fontWeight: "900",
   },
   posterTitle: {
     color: tokens.color.ink,
-    fontFamily: "serif",
-    fontSize: 18,
+    fontFamily: "Inter",
+    fontSize: 15,
     fontWeight: "700",
+    lineHeight: 20,
+  },
+  posterTitleCompact: {
+    fontSize: 11,
+    lineHeight: 14,
   },
   sectionTitle: {
     gap: tokens.space.xs,

@@ -230,6 +230,9 @@ export async function pullOpenAgenda(
     const longitude = Number(
       location?.longitude ?? asRecord(location?.coordinates)?.lng,
     );
+    const venueOfficialUrl = absoluteUrl(
+      location?.website ?? location?.url ?? location?.canonicalUrl ?? location?.links,
+    );
     venues.set(venueKey, {
       externalKey: venueKey,
       sourceDocumentKey: documentKey,
@@ -242,6 +245,7 @@ export async function pullOpenAgenda(
       locality,
       countryCode: localizedText(location?.countryCode ?? location?.country) ?? "FR",
       timezone: localizedText(location?.timezone) ?? "Europe/Paris",
+      officialUrl: venueOfficialUrl,
       latitude: Number.isFinite(latitude) ? latitude : null,
       longitude: Number.isFinite(longitude) ? longitude : null,
     });

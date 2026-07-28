@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-test("la page transparence expose les chiffres, les coûts et le code source", async ({
+test("la page Les coulisses expose les chiffres, les coûts et le code source", async ({
   page,
 }) => {
   let releaseStats: (() => void) | undefined;
@@ -19,12 +19,11 @@ test("la page transparence expose les chiffres, les coûts et le code source", a
       }),
     });
   });
-  await page.goto("/");
-  await page.getByRole("link", { name: "Transparence & open source" }).press("Enter");
+  await page.goto("/les-coulisses");
 
-  await expect(page).toHaveURL("/transparence");
+  await expect(page).toHaveURL("/les-coulisses");
   await expect(page).toHaveTitle(
-    "Todam, projet open source - Chiffres et transparence",
+    "Les coulisses de Todam | Coût, code et fonctionnement",
   );
   await expect(page.getByLabel("Comptes vérifiés : …")).toBeVisible();
   releaseStats?.();
@@ -71,7 +70,7 @@ test("la page transparence expose les chiffres, les coûts et le code source", a
   }
 });
 
-test("la page transparence ne transforme pas une panne API en zéro", async ({
+test("la page Les coulisses ne transforme pas une panne API en zéro", async ({
   page,
 }) => {
   await page.route("**/v1/public/stats", async (route) => {
@@ -86,7 +85,7 @@ test("la page transparence ne transforme pas une panne API en zéro", async ({
       }),
     });
   });
-  await page.goto("/transparence");
+  await page.goto("/les-coulisses");
 
   await expect(
     page.getByText("Les chiffres sont temporairement indisponibles."),

@@ -46,8 +46,22 @@
       "locality": "Monaco",
       "countryCode": "MC",
       "timezone": "Europe/Monaco",
+      "officialUrl": "https://example.invalid/todam-fixture/theatre-des-muses",
       "latitude": 43.7316,
       "longitude": 7.4136
+    }
+  ],
+  "companies": [
+    {
+      "externalKey": "company.compagnie-des-lumieres",
+      "sourceDocumentKey": "fixture.document",
+      "name": "Compagnie des Lumières",
+      "slug": "compagnie-des-lumieres",
+      "shortDescription": "Compagnie synthétique utilisée pour valider le pipeline d’import Todam.",
+      "description": "Cette présentation est entièrement fictive et placée sous la même licence que la fixture.",
+      "officialUrl": "https://example.invalid/todam-fixture/compagnie-des-lumieres",
+      "locality": "Monaco",
+      "countryCode": "MC"
     }
   ],
   "artists": [
@@ -67,8 +81,16 @@
       "slug": "les-lumieres-jeanne-exemple-2025",
       "discipline": "theatre",
       "audience": "general",
+      "minimumAge": null,
       "durationMinutes": 90,
       "language": "français",
+      "companies": [
+        {
+          "companyExternalKey": "company.compagnie-des-lumieres",
+          "isPrimary": true,
+          "position": 0
+        }
+      ],
       "credits": [
         {
           "artistExternalKey": "artist.jeanne-exemple",
@@ -86,9 +108,67 @@
       "slug": "le-petit-nuage-fixture-2026",
       "discipline": "theatre",
       "audience": "children",
+      "minimumAge": 5,
       "durationMinutes": 50,
       "language": "français",
+      "companies": [
+        {
+          "companyExternalKey": "company.compagnie-des-lumieres",
+          "isPrimary": true,
+          "position": 0
+        }
+      ],
       "credits": []
+    }
+  ],
+  "descriptions": [
+    {
+      "externalKey": "description.les-lumieres.short.fr",
+      "sourceDocumentKey": "fixture.document",
+      "productionExternalKey": "production.les-lumieres",
+      "locale": "fr",
+      "kind": "short",
+      "body": "Une création théâtrale fictive conçue pour vérifier le catalogue Todam.",
+      "sourceUrl": "https://example.invalid/todam-fixture/programme",
+      "rightsStatus": "open_license",
+      "license": "CC0-1.0",
+      "lastVerifiedAt": "2026-07-23T12:00:00+02:00"
+    },
+    {
+      "externalKey": "description.les-lumieres.full.fr",
+      "sourceDocumentKey": "fixture.document",
+      "productionExternalKey": "production.les-lumieres",
+      "locale": "fr",
+      "kind": "full",
+      "body": "Les Lumières est un spectacle entièrement synthétique. Son texte permet de contrôler l’import, la provenance et les droits des descriptions sans reprendre un contenu tiers.",
+      "sourceUrl": "https://example.invalid/todam-fixture/programme",
+      "rightsStatus": "open_license",
+      "license": "CC0-1.0",
+      "lastVerifiedAt": "2026-07-23T12:00:00+02:00"
+    },
+    {
+      "externalKey": "description.le-petit-nuage.short.fr",
+      "sourceDocumentKey": "fixture.document",
+      "productionExternalKey": "production.le-petit-nuage",
+      "locale": "fr",
+      "kind": "short",
+      "body": "Un spectacle jeunesse fictif pour valider les descriptions structurées.",
+      "sourceUrl": "https://example.invalid/todam-fixture/programme",
+      "rightsStatus": "open_license",
+      "license": "CC0-1.0",
+      "lastVerifiedAt": "2026-07-23T12:00:00+02:00"
+    },
+    {
+      "externalKey": "description.le-petit-nuage.full.fr",
+      "sourceDocumentKey": "fixture.document",
+      "productionExternalKey": "production.le-petit-nuage",
+      "locale": "fr",
+      "kind": "full",
+      "body": "Le Petit Nuage est une seconde production synthétique. Elle sert uniquement à vérifier qu’un même flux peut relier plusieurs spectacles à une compagnie et à des descriptions documentées.",
+      "sourceUrl": "https://example.invalid/todam-fixture/programme",
+      "rightsStatus": "open_license",
+      "license": "CC0-1.0",
+      "lastVerifiedAt": "2026-07-23T12:00:00+02:00"
     }
   ],
   "performances": [

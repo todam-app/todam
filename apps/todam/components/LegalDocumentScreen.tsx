@@ -27,7 +27,7 @@ function inlineText(text: string): ReactNode[] {
       return address ? (
         <Text
           accessibilityRole="link"
-          className="font-semibold text-accent"
+          className="text-base font-semibold text-accent"
           key={`${part}-${index}`}
           onPress={() => void Linking.openURL(`mailto:${address}`)}
         >
@@ -99,8 +99,9 @@ export function LegalDocumentScreen({
               if (block.kind === "title") {
                 return (
                   <Text
+                    aria-level={1}
                     accessibilityRole="header"
-                    className="font-serif text-4xl font-black leading-tight text-ink"
+                    className="font-serif text-4xl font-bold leading-tight text-ink"
                     key={`${block.kind}-${index}`}
                   >
                     {block.text}
@@ -110,6 +111,7 @@ export function LegalDocumentScreen({
               if (block.kind === "section") {
                 return (
                   <Text
+                    aria-level={2}
                     accessibilityRole="header"
                     className="mt-5 font-serif text-2xl font-bold text-ink"
                     key={`${block.kind}-${index}`}
@@ -133,7 +135,7 @@ export function LegalDocumentScreen({
           {children}
           <Text
             accessibilityRole="link"
-            className="min-h-11 py-3 font-semibold text-accent"
+            className="min-h-11 py-3 text-base font-semibold text-accent"
             onPress={() => void Linking.openURL(legalPdfUrl(documentId))}
           >
             Télécharger la version PDF archivée

@@ -128,6 +128,12 @@ export async function pullDatatourisme(
     const longitude = Number(
       geo?.schema_longitude ?? geo?.longitude ?? geo?.lon ?? geo?.lng,
     );
+    const venueOfficialUrl = absoluteUrl(
+      location?.["foaf:homepage"] ??
+        location?.["schema:url"] ??
+        location?.url ??
+        location?.sameAs,
+    );
     venues.set(venueKey, {
       externalKey: venueKey,
       sourceDocumentKey: documentKey,
@@ -143,6 +149,7 @@ export async function pullDatatourisme(
         localizedText(address?.schema_addressCountry ?? address?.addressCountry) ??
         "FR",
       timezone: "Europe/Paris",
+      officialUrl: venueOfficialUrl,
       latitude: Number.isFinite(latitude) ? latitude : null,
       longitude: Number.isFinite(longitude) ? longitude : null,
     });

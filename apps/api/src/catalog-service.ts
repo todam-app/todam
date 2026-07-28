@@ -1,6 +1,8 @@
 import type {
   CityOption,
   CitySelection,
+  CompanyDetail,
+  CompanySummary,
   Dashboard,
   DiarySession,
   HomeDiscoveryItem,
@@ -9,21 +11,30 @@ import type {
   ProductionCard,
   ProductionDetail,
   SearchResponse,
+  VenueDetail,
+  VenueSummary,
   ViewerProductionState,
 } from "@todam/contracts";
 import {
   artists,
+  companies,
+  companySources,
   diaryEntries,
+  lists,
   mediaAssets,
   productionMedia,
   performances,
+  productionCompanies,
   productionCredits,
+  productionDescriptions,
   productionSources,
   productions,
   ratings,
+  reviews,
   sourceDocuments,
   user,
   venues,
+  venueSources,
   watchlistEntries,
   works,
   type TodamDatabase,
@@ -31,6 +42,7 @@ import {
 import { planRating, planSeen } from "@todam/domain";
 import { and, asc, count, desc, eq, inArray, notInArray, sql } from "drizzle-orm";
 
+import { currentFrenchCalendarDate } from "./calendar.js";
 import { HttpProblem } from "./errors.js";
 
 type PosterWithStorage = Poster & { storageKey: string | null };
@@ -68,12 +80,13 @@ function decodeCursor(cursor: string | null | undefined): number {
   return value;
 }
 
-const cardFields = {
+export const cardFields = {
   id: productions.id,
   slug: productions.slug,
   title: productions.title,
   discipline: productions.discipline,
   audience: productions.audience,
+  minimumAge: productions.minimumAge,
   workTitle: works.title,
   primaryCredit: sql<string | null>`(
     select ${artists.name}
@@ -89,6 +102,23 @@ const cardFields = {
       ${productionCredits.position}
     limit 1
   )`,
+  company: sql<CompanySummary | null>`(
+    select json_build_object(
+      'id', ${companies.id},
+      'slug', ${companies.slug},
+      'name', ${companies.name},
+      'officialUrl', ${companies.officialUrl}
+    )
+    from ${productionCompanies}
+    join ${companies} on ${companies.id} = ${productionCompanies.companyId}
+    where ${productionCompanies.productionId} = ${productions.id}
+      and ${companies.publicationStatus} = 'published'
+    order by
+      ${productionCompanies.isPrimary} desc,
+      ${productionCompanies.position},
+      ${companies.name}
+    limit 1
+  )`,
   venueNames: sql<string[]>`coalesce(array(
     select distinct ${venues.name}
     from ${performances}
@@ -102,6 +132,24 @@ const cardFields = {
     where ${performances.productionId} = ${productions.id}
       and ${performances.status} = 'scheduled'
       and ${performances.startsAt} >= now()
+  )`,
+  nextVenue: sql<VenueSummary | null>`(
+    select json_build_object(
+      'id', ${venues.id},
+      'slug', ${venues.slug},
+      'name', ${venues.name},
+      'locality', ${venues.locality},
+      'countryCode', ${venues.countryCode},
+      'timezone', ${venues.timezone},
+      'officialUrl', ${venues.officialUrl}
+    )
+    from ${performances}
+    join ${venues} on ${venues.id} = ${performances.venueId}
+    where ${performances.productionId} = ${productions.id}
+      and ${performances.status} = 'scheduled'
+      and ${performances.startsAt} >= now()
+    order by ${performances.startsAt}, ${performances.id}
+    limit 1
   )`,
   poster: sql<PosterWithStorage | null>`(
     select json_build_object(
@@ -128,7 +176,8 @@ const cardFields = {
         'permission_granted',
         'open_license',
         'contractual_display',
-        'hotlink_only'
+        'hotlink_only',
+        'todam_original'
       )
       and (${mediaAssets.validFrom} is null or ${mediaAssets.validFrom} <= now())
       and (${mediaAssets.validUntil} is null or ${mediaAssets.validUntil} > now())
@@ -145,16 +194,19 @@ const cardFields = {
   )`,
 };
 
-interface CardRow {
+export interface CardRow {
   id: string;
   slug: string;
   title: string;
   discipline: "theatre" | "opera" | "ballet";
   audience: "general" | "family" | "children";
+  minimumAge: number | null;
   workTitle: string | null;
   primaryCredit: string | null;
+  company: CompanySummary | null;
   venueNames: string[];
   nextPerformance: Date | string | null;
+  nextVenue: VenueSummary | null;
   poster: PosterWithStorage | null;
 }
 
@@ -166,15 +218,17 @@ interface HomeHighlightRow extends Record<string, unknown> {
   distance_km: number | string | null;
 }
 
-function mapCard(row: CardRow): ProductionCard {
+export function mapCard(row: CardRow): ProductionCard {
   return {
     id: row.id,
     slug: row.slug,
     title: row.title,
     discipline: row.discipline,
     audience: row.audience,
+    minimumAge: row.minimumAge,
     workTitle: row.workTitle,
     primaryCredit: row.primaryCredit,
+    company: row.company,
     venueNames: row.venueNames,
     nextPerformance:
       row.nextPerformance instanceof Date
@@ -182,12 +236,21 @@ function mapCard(row: CardRow): ProductionCard {
         : row.nextPerformance
           ? new Date(row.nextPerformance).toISOString()
           : null,
+    nextVenue: row.nextVenue,
     poster: row.poster ? mapPoster(row.poster) : null,
   };
 }
 
 export interface SearchInput {
   q: string;
+  type: "productions" | "venues" | "companies" | "members";
+  discipline?: "theatre" | "opera" | "ballet" | undefined;
+  locality?: string | undefined;
+  radiusKm?: number | undefined;
+  from?: string | undefined;
+  to?: string | undefined;
+  temporal: "upcoming" | "past" | "all";
+  sort: "relevance" | "date" | "proximity" | "popularity";
   cursor?: string | null | undefined;
   limit: number;
 }
@@ -218,7 +281,13 @@ export function createCatalogService(database: TodamDatabase) {
     const rows = await database
       .select({ id: productions.id })
       .from(productions)
-      .where(eq(productions.id, productionId))
+      .where(
+        and(
+          eq(productions.id, productionId),
+          eq(productions.isActive, true),
+          eq(productions.publicationStatus, "published"),
+        ),
+      )
       .limit(1);
     if (!rows[0]) {
       throw new HttpProblem(
@@ -236,7 +305,11 @@ export function createCatalogService(database: TodamDatabase) {
       .from(productions)
       .leftJoin(works, eq(works.id, productions.workId))
       .where(
-        and(eq(productions.isActive, true), inArray(productions.id, productionIds)),
+        and(
+          eq(productions.isActive, true),
+          eq(productions.publicationStatus, "published"),
+          inArray(productions.id, productionIds),
+        ),
       );
     const cardsById = new Map(rows.map((row) => [row.id, mapCard(row as CardRow)]));
     return productionIds.flatMap((id) => {
@@ -286,6 +359,7 @@ export function createCatalogService(database: TodamDatabase) {
         join ${venues} on ${venues.id} = ${performances.venueId}
         join ${productions} on ${productions.id} = ${performances.productionId}
         where ${productions.isActive} = true
+          and ${productions.publicationStatus} = 'published'
           and ${performances.status} = 'scheduled'
           and ${performances.startsAt} >= now()
       )
@@ -345,6 +419,7 @@ export function createCatalogService(database: TodamDatabase) {
         join ${productions} on ${productions.id} = ${performances.productionId}
         cross join city_center
         where ${productions.isActive} = true
+          and ${productions.publicationStatus} = 'published'
           and ${performances.status} = 'scheduled'
           and ${performances.startsAt} >= now()
           and (
@@ -378,7 +453,7 @@ export function createCatalogService(database: TodamDatabase) {
     productionId: string,
   ): Promise<ViewerProductionState> {
     await assertProduction(productionId);
-    const [diary, rating, watchlist] = await Promise.all([
+    const [diary, rating, watchlist, review] = await Promise.all([
       database
         .select({ total: count() })
         .from(diaryEntries)
@@ -402,6 +477,17 @@ export function createCatalogService(database: TodamDatabase) {
             eq(watchlistEntries.productionId, productionId),
           ),
         ),
+      database
+        .select({
+          id: reviews.id,
+          body: reviews.body,
+          containsSpoiler: reviews.containsSpoiler,
+          visibility: reviews.visibility,
+          status: reviews.status,
+        })
+        .from(reviews)
+        .where(and(eq(reviews.userId, userId), eq(reviews.productionId, productionId)))
+        .limit(1),
     ]);
 
     return {
@@ -409,6 +495,7 @@ export function createCatalogService(database: TodamDatabase) {
       seen: Number(diary[0]?.total ?? 0) > 0,
       rating: rating[0]?.value ?? null,
       watchlisted: Number(watchlist[0]?.total ?? 0) > 0,
+      review: review[0] ?? null,
     };
   }
 
@@ -508,6 +595,7 @@ export function createCatalogService(database: TodamDatabase) {
             pseudonym: user.pseudonym,
             homeLocality: user.homeLocality,
             homeCountryCode: user.homeCountryCode,
+            homeOnboardingCompleted: user.homeOnboardingCompleted,
           })
           .from(user)
           .where(eq(user.id, userId))
@@ -563,6 +651,7 @@ export function createCatalogService(database: TodamDatabase) {
         .where(
           and(
             eq(productions.isActive, true),
+            eq(productions.publicationStatus, "published"),
             excludedIds.length > 0
               ? notInArray(productions.id, excludedIds)
               : undefined,
@@ -571,6 +660,13 @@ export function createCatalogService(database: TodamDatabase) {
         .orderBy(desc(productions.createdAt), asc(productions.id))
         .limit(HOME_DISCOVERY_LIMIT);
       const progress = Number(progressResult.rows[0]?.total ?? 0);
+      const onboardingCompleted = profile.homeOnboardingCompleted || progress >= 5;
+      if (onboardingCompleted && !profile.homeOnboardingCompleted) {
+        await database
+          .update(user)
+          .set({ homeOnboardingCompleted: true, updatedAt: new Date() })
+          .where(eq(user.id, userId));
+      }
 
       return {
         profile: { pseudonym: profile.pseudonym },
@@ -578,7 +674,7 @@ export function createCatalogService(database: TodamDatabase) {
         progress: {
           current: progress,
           target: 5,
-          completed: progress >= 5,
+          completed: onboardingCompleted,
         },
         radiusKm: HOME_DISCOVERY_RADIUS_KM,
         nearby,
@@ -592,16 +688,259 @@ export function createCatalogService(database: TodamDatabase) {
 
     async search(input: SearchInput): Promise<SearchResponse> {
       const offset = decodeCursor(input.cursor);
-      const pattern = `%${input.q}%`;
-      const normalized = input.q.toLocaleLowerCase("fr");
-      const rows = await database
-        .select(cardFields)
-        .from(productions)
-        .leftJoin(works, eq(works.id, productions.workId))
-        .where(
-          and(
-            eq(productions.isActive, true),
-            sql<boolean>`
+      const trimmedQuery = input.q.trim();
+      const pattern = `%${trimmedQuery}%`;
+      const normalized = trimmedQuery.toLocaleLowerCase("fr");
+
+      if (input.type === "venues") {
+        const condition = and(
+          trimmedQuery
+            ? sql<boolean>`(
+                unaccent(${venues.name}) ilike unaccent(${pattern})
+                or unaccent(${venues.locality}) ilike unaccent(${pattern})
+              )`
+            : undefined,
+          input.locality
+            ? sql<boolean>`unaccent(${venues.locality}) ilike unaccent(${`%${input.locality}%`})`
+            : undefined,
+          sql<boolean>`exists (
+            select 1
+            from ${performances}
+            join ${productions} on ${productions.id} = ${performances.productionId}
+            where ${performances.venueId} = ${venues.id}
+              and ${productions.isActive} = true
+              and ${productions.publicationStatus} = 'published'
+          )`,
+        );
+        const [rows, totalRows] = await Promise.all([
+          database
+            .select({
+              id: venues.id,
+              slug: venues.slug,
+              name: venues.name,
+              locality: venues.locality,
+              countryCode: venues.countryCode,
+              timezone: venues.timezone,
+              officialUrl: venues.officialUrl,
+            })
+            .from(venues)
+            .where(condition)
+            .orderBy(asc(venues.name), asc(venues.id))
+            .limit(input.limit + 1)
+            .offset(offset),
+          database.select({ total: count() }).from(venues).where(condition),
+        ]);
+        const hasMore = rows.length > input.limit;
+        const suggestion =
+          trimmedQuery && Number(totalRows[0]?.total ?? 0) === 0
+            ? ((
+                await database
+                  .select({ value: venues.name })
+                  .from(venues)
+                  .where(
+                    and(
+                      sql<boolean>`similarity(unaccent(${venues.name}), unaccent(${trimmedQuery})) > 0.15`,
+                      sql<boolean>`exists (
+                        select 1
+                        from ${performances}
+                        join ${productions} on ${productions.id} = ${performances.productionId}
+                        where ${performances.venueId} = ${venues.id}
+                          and ${productions.isActive} = true
+                          and ${productions.publicationStatus} = 'published'
+                      )`,
+                    ),
+                  )
+                  .orderBy(
+                    sql`similarity(unaccent(${venues.name}), unaccent(${trimmedQuery})) desc`,
+                  )
+                  .limit(1)
+              )[0]?.value ?? null)
+            : null;
+        return {
+          type: input.type,
+          total: Number(totalRows[0]?.total ?? 0),
+          productions: [],
+          venues: rows.slice(0, input.limit),
+          companies: [],
+          members: [],
+          nextCursor: hasMore ? encodeCursor(offset + input.limit) : null,
+          suggestion,
+        };
+      }
+
+      if (input.type === "companies") {
+        const condition = and(
+          eq(companies.publicationStatus, "published"),
+          trimmedQuery
+            ? sql<boolean>`(
+                unaccent(${companies.name}) ilike unaccent(${pattern})
+                or unaccent(coalesce(${companies.description}, '')) ilike unaccent(${pattern})
+              )`
+            : undefined,
+          input.locality
+            ? sql<boolean>`unaccent(coalesce(${companies.locality}, '')) ilike unaccent(${`%${input.locality}%`})`
+            : undefined,
+        );
+        const [rows, totalRows] = await Promise.all([
+          database
+            .select({
+              id: companies.id,
+              slug: companies.slug,
+              name: companies.name,
+              officialUrl: companies.officialUrl,
+            })
+            .from(companies)
+            .where(condition)
+            .orderBy(asc(companies.name), asc(companies.id))
+            .limit(input.limit + 1)
+            .offset(offset),
+          database.select({ total: count() }).from(companies).where(condition),
+        ]);
+        const hasMore = rows.length > input.limit;
+        const suggestion =
+          trimmedQuery && Number(totalRows[0]?.total ?? 0) === 0
+            ? ((
+                await database
+                  .select({ value: companies.name })
+                  .from(companies)
+                  .where(
+                    and(
+                      eq(companies.publicationStatus, "published"),
+                      sql<boolean>`similarity(unaccent(${companies.name}), unaccent(${trimmedQuery})) > 0.15`,
+                    ),
+                  )
+                  .orderBy(
+                    sql`similarity(unaccent(${companies.name}), unaccent(${trimmedQuery})) desc`,
+                  )
+                  .limit(1)
+              )[0]?.value ?? null)
+            : null;
+        return {
+          type: input.type,
+          total: Number(totalRows[0]?.total ?? 0),
+          productions: [],
+          venues: [],
+          companies: rows.slice(0, input.limit),
+          members: [],
+          nextCursor: hasMore ? encodeCursor(offset + input.limit) : null,
+          suggestion,
+        };
+      }
+
+      if (input.type === "members") {
+        const condition = and(
+          eq(user.profileVisibility, "public"),
+          trimmedQuery
+            ? sql<boolean>`(
+                unaccent(${user.pseudonym}::text) ilike unaccent(${pattern})
+                or unaccent(coalesce(${user.bio}, '')) ilike unaccent(${pattern})
+              )`
+            : undefined,
+        );
+        const [rows, totalRows] = await Promise.all([
+          database
+            .select({ username: user.pseudonym, bio: user.bio })
+            .from(user)
+            .where(condition)
+            .orderBy(asc(user.pseudonym), asc(user.id))
+            .limit(input.limit + 1)
+            .offset(offset),
+          database.select({ total: count() }).from(user).where(condition),
+        ]);
+        const hasMore = rows.length > input.limit;
+        const suggestion =
+          trimmedQuery && Number(totalRows[0]?.total ?? 0) === 0
+            ? ((
+                await database
+                  .select({ value: user.pseudonym })
+                  .from(user)
+                  .where(
+                    and(
+                      eq(user.profileVisibility, "public"),
+                      sql<boolean>`similarity(unaccent(${user.pseudonym}::text), unaccent(${trimmedQuery})) > 0.15`,
+                    ),
+                  )
+                  .orderBy(
+                    sql`similarity(unaccent(${user.pseudonym}::text), unaccent(${trimmedQuery})) desc`,
+                  )
+                  .limit(1)
+              )[0]?.value ?? null)
+            : null;
+        return {
+          type: input.type,
+          total: Number(totalRows[0]?.total ?? 0),
+          productions: [],
+          venues: [],
+          companies: [],
+          members: rows.slice(0, input.limit),
+          nextCursor: hasMore ? encodeCursor(offset + input.limit) : null,
+          suggestion,
+        };
+      }
+
+      const performanceFilter = sql<boolean>`exists (
+        select 1
+        from ${performances}
+        join ${venues} on ${venues.id} = ${performances.venueId}
+        where ${performances.productionId} = ${productions.id}
+          and (
+            (
+              ${input.temporal} = 'all'
+              and ${performances.status} <> 'cancelled'
+            )
+            or (
+              ${input.temporal} = 'upcoming'
+              and ${performances.startsAt} >= now()
+              and ${performances.status} = 'scheduled'
+            )
+            or (
+              ${input.temporal} = 'past'
+              and ${performances.startsAt} < now()
+              and ${performances.status} <> 'cancelled'
+            )
+          )
+          and (${input.from ?? null}::date is null or ${performances.startsAt} >= ${input.from ?? null}::date)
+          and (${input.to ?? null}::date is null or ${performances.startsAt} < (${input.to ?? null}::date + interval '1 day'))
+          and (
+            ${input.locality ?? null}::text is null
+            or (
+              ${input.radiusKm ?? null}::integer is null
+              and unaccent(${venues.locality}) ilike unaccent(${input.locality ? `%${input.locality}%` : ""})
+            )
+            or (
+              ${input.radiusKm ?? null}::integer is not null
+              and (
+                unaccent(${venues.locality}) ilike unaccent(${input.locality ? `%${input.locality}%` : ""})
+                or (
+                  ${venues.coordinates} is not null
+                  and st_dwithin(
+                    ${venues.coordinates}::geography,
+                    (
+                      select st_centroid(st_collect(center_venue.coordinates))::geography
+                      from ${venues} center_venue
+                      where unaccent(center_venue.locality) ilike unaccent(${input.locality ? `%${input.locality}%` : ""})
+                        and center_venue.coordinates is not null
+                    ),
+                    (${input.radiusKm ?? 0} * 1000)
+                  )
+                )
+              )
+            )
+          )
+      )`;
+      const condition = and(
+        eq(productions.isActive, true),
+        eq(productions.publicationStatus, "published"),
+        input.discipline ? eq(productions.discipline, input.discipline) : undefined,
+        input.temporal !== "all" ||
+          input.from ||
+          input.to ||
+          input.locality ||
+          input.radiusKm
+          ? performanceFilter
+          : undefined,
+        trimmedQuery
+          ? sql<boolean>`(
               unaccent(${productions.title}) ilike unaccent(${pattern})
               or unaccent(coalesce(${works.title}, '')) ilike unaccent(${pattern})
               or exists (
@@ -613,36 +952,565 @@ export function createCatalogService(database: TodamDatabase) {
               )
               or exists (
                 select 1
+                from ${productionCompanies}
+                join ${companies} on ${companies.id} = ${productionCompanies.companyId}
+                where ${productionCompanies.productionId} = ${productions.id}
+                  and unaccent(${companies.name}) ilike unaccent(${pattern})
+              )
+              or exists (
+                select 1
                 from ${performances}
                 join ${venues} on ${venues.id} = ${performances.venueId}
                 where ${performances.productionId} = ${productions.id}
                   and unaccent(${venues.name}) ilike unaccent(${pattern})
               )
-            `,
-          ),
+            )`
+          : undefined,
+      );
+      const relevanceOrder = sql`
+        case
+          when lower(unaccent(${productions.title})) = unaccent(${normalized}) then 0
+          when lower(unaccent(${productions.title})) like unaccent(${`${normalized}%`}) then 1
+          else 2
+        end
+      `;
+      const nextScheduledDateOrder = sql`(
+        select min(search_performance.starts_at)
+        from performances search_performance
+        where search_performance.production_id = ${productions.id}
+          and search_performance.starts_at >= now()
+          and search_performance.status = 'scheduled'
+      ) asc nulls last`;
+      const latestPastDateOrder = sql`(
+        select max(search_performance.starts_at)
+        from performances search_performance
+        where search_performance.production_id = ${productions.id}
+          and search_performance.starts_at < now()
+          and search_performance.status <> 'cancelled'
+      ) desc nulls last`;
+      const dateOrders =
+        input.temporal === "past"
+          ? [latestPastDateOrder]
+          : input.temporal === "upcoming"
+            ? [nextScheduledDateOrder]
+            : [
+                sql`case when exists (
+                  select 1
+                  from performances search_performance
+                  where search_performance.production_id = ${productions.id}
+                    and search_performance.starts_at >= now()
+                    and search_performance.status = 'scheduled'
+                ) then 0 else 1 end asc`,
+                nextScheduledDateOrder,
+                latestPastDateOrder,
+              ];
+      const proximityOrder = sql`(
+        select min(
+          st_distance(
+            search_venue.coordinates::geography,
+            city_center.coordinates::geography
+          )
         )
-        .orderBy(
-          sql`
-            case
-              when lower(unaccent(${productions.title})) = unaccent(${normalized}) then 0
-              when lower(unaccent(${productions.title})) like unaccent(${`${normalized}%`}) then 1
-              else 2
-            end
-          `,
-          asc(productions.title),
-          asc(productions.id),
-        )
-        .limit(input.limit + 1)
-        .offset(offset);
+        from performances search_performance
+        join venues search_venue
+          on search_venue.id = search_performance.venue_id
+        cross join lateral (
+          select st_centroid(st_collect(center_venue.coordinates)) as coordinates
+          from venues center_venue
+          where unaccent(center_venue.locality) ilike
+            unaccent(${input.locality ? `%${input.locality}%` : ""})
+            and center_venue.coordinates is not null
+        ) city_center
+        where search_performance.production_id = ${productions.id}
+          and (
+            (
+              ${input.temporal} = 'all'
+              and search_performance.status <> 'cancelled'
+            )
+            or (
+              ${input.temporal} = 'upcoming'
+              and search_performance.starts_at >= now()
+              and search_performance.status = 'scheduled'
+            )
+            or (
+              ${input.temporal} = 'past'
+              and search_performance.starts_at < now()
+              and search_performance.status <> 'cancelled'
+            )
+          )
+          and (${input.from ?? null}::date is null or search_performance.starts_at >= ${input.from ?? null}::date)
+          and (${input.to ?? null}::date is null or search_performance.starts_at < (${input.to ?? null}::date + interval '1 day'))
+          and search_venue.coordinates is not null
+          and city_center.coordinates is not null
+      ) asc nulls last`;
+      const popularityOrder = sql`(
+        select count(*) from ${ratings}
+        where ${ratings.productionId} = ${productions.id}
+      ) desc`;
+      const firstOrders =
+        input.sort === "proximity" && input.locality
+          ? [proximityOrder, ...dateOrders]
+          : input.sort === "date" || input.sort === "proximity"
+            ? dateOrders
+            : input.sort === "popularity"
+              ? [popularityOrder]
+              : [relevanceOrder];
+      const [rows, totalRows] = await Promise.all([
+        database
+          .select(cardFields)
+          .from(productions)
+          .leftJoin(works, eq(works.id, productions.workId))
+          .where(condition)
+          .orderBy(...firstOrders, asc(productions.title), asc(productions.id))
+          .limit(input.limit + 1)
+          .offset(offset),
+        database
+          .select({ total: count() })
+          .from(productions)
+          .leftJoin(works, eq(works.id, productions.workId))
+          .where(condition),
+      ]);
 
       const hasMore = rows.length > input.limit;
+      let suggestion: string | null = null;
+      if (trimmedQuery && Number(totalRows[0]?.total ?? 0) === 0) {
+        const suggestionRows = await database
+          .select({ title: productions.title })
+          .from(productions)
+          .where(
+            and(
+              eq(productions.isActive, true),
+              eq(productions.publicationStatus, "published"),
+              sql<boolean>`similarity(unaccent(${productions.title}), unaccent(${trimmedQuery})) > 0.15`,
+            ),
+          )
+          .orderBy(
+            sql`similarity(unaccent(${productions.title}), unaccent(${trimmedQuery})) desc`,
+          )
+          .limit(1);
+        suggestion = suggestionRows[0]?.title ?? null;
+      }
       return {
-        items: rows.slice(0, input.limit).map((row) => mapCard(row as CardRow)),
+        type: input.type,
+        total: Number(totalRows[0]?.total ?? 0),
+        productions: rows.slice(0, input.limit).map((row) => mapCard(row as CardRow)),
+        venues: [],
+        companies: [],
+        members: [],
         nextCursor: hasMore ? encodeCursor(offset + input.limit) : null,
+        suggestion,
       };
     },
 
-    async getProduction(slug: string): Promise<ProductionDetail> {
+    async getVenue(slug: string): Promise<VenueDetail> {
+      const venueRows = await database
+        .select({
+          id: venues.id,
+          slug: venues.slug,
+          name: venues.name,
+          addressLine1: venues.addressLine1,
+          postalCode: venues.postalCode,
+          locality: venues.locality,
+          countryCode: venues.countryCode,
+          timezone: venues.timezone,
+          officialUrl: venues.officialUrl,
+          coordinates: venues.coordinates,
+        })
+        .from(venues)
+        .where(
+          and(
+            eq(venues.slug, slug),
+            sql<boolean>`exists (
+              select 1
+              from ${performances}
+              join ${productions}
+                on ${productions.id} = ${performances.productionId}
+              where ${performances.venueId} = ${venues.id}
+                and ${productions.isActive} = true
+                and ${productions.publicationStatus} = 'published'
+            )`,
+          ),
+        )
+        .limit(1);
+      const venue = venueRows[0];
+      if (!venue) {
+        throw new HttpProblem(
+          404,
+          "VENUE_NOT_FOUND",
+          "Ce lieu n’existe pas dans Todam.",
+        );
+      }
+
+      const publishedAtVenue = and(
+        eq(productions.isActive, true),
+        eq(productions.publicationStatus, "published"),
+        sql<boolean>`exists (
+          select 1 from ${performances}
+          where ${performances.productionId} = ${productions.id}
+            and ${performances.venueId} = ${venue.id}
+        )`,
+      );
+      const [upcomingRows, archiveRows, venuePerformanceRows, sourceRows] =
+        await Promise.all([
+          database
+            .select(cardFields)
+            .from(productions)
+            .leftJoin(works, eq(works.id, productions.workId))
+            .where(
+              and(
+                publishedAtVenue,
+                sql<boolean>`exists (
+                select 1 from ${performances}
+                where ${performances.productionId} = ${productions.id}
+                  and ${performances.venueId} = ${venue.id}
+                  and ${performances.status} = 'scheduled'
+                  and ${performances.startsAt} >= now()
+              )`,
+              ),
+            )
+            .orderBy(
+              sql`(
+              select min(venue_performance.starts_at)
+              from performances venue_performance
+              where venue_performance.production_id = ${productions.id}
+                and venue_performance.venue_id = ${venue.id}
+                and venue_performance.starts_at >= now()
+                and venue_performance.status = 'scheduled'
+            )`,
+              asc(productions.title),
+            ),
+          database
+            .select(cardFields)
+            .from(productions)
+            .leftJoin(works, eq(works.id, productions.workId))
+            .where(
+              and(
+                publishedAtVenue,
+                sql<boolean>`exists (
+                select 1 from ${performances}
+                where ${performances.productionId} = ${productions.id}
+                  and ${performances.venueId} = ${venue.id}
+                  and ${performances.startsAt} < now()
+              )`,
+              ),
+            )
+            .orderBy(desc(productions.updatedAt), asc(productions.title)),
+          database
+            .select({
+              productionId: performances.productionId,
+              id: performances.id,
+              startsAt: performances.startsAt,
+              endsAt: performances.endsAt,
+              status: performances.status,
+              officialUrl: performances.officialUrl,
+            })
+            .from(performances)
+            .innerJoin(productions, eq(productions.id, performances.productionId))
+            .where(
+              and(
+                eq(performances.venueId, venue.id),
+                eq(productions.isActive, true),
+                eq(productions.publicationStatus, "published"),
+              ),
+            )
+            .orderBy(asc(performances.startsAt), asc(performances.id)),
+          database
+            .selectDistinct({
+              title: sourceDocuments.title,
+              url: sourceDocuments.url,
+              retrievedAt: sourceDocuments.retrievedAt,
+              rightsStatus: sourceDocuments.rightsStatus,
+              license: sourceDocuments.license,
+            })
+            .from(venueSources)
+            .innerJoin(sourceDocuments, eq(sourceDocuments.id, venueSources.documentId))
+            .where(eq(venueSources.entityId, venue.id)),
+        ]);
+      const now = Date.now();
+      const programPerformances = new Map<
+        string,
+        VenueDetail["upcoming"][number]["venuePerformances"]
+      >();
+      for (const performance of venuePerformanceRows) {
+        const mapped = {
+          id: performance.id,
+          startsAt: performance.startsAt.toISOString(),
+          endsAt: performance.endsAt?.toISOString() ?? null,
+          status: performance.status,
+          officialUrl: performance.officialUrl,
+          venue: {
+            id: venue.id,
+            slug: venue.slug,
+            name: venue.name,
+            locality: venue.locality,
+            countryCode: venue.countryCode,
+            timezone: venue.timezone,
+            officialUrl: venue.officialUrl,
+          },
+        };
+        programPerformances.set(performance.productionId, [
+          ...(programPerformances.get(performance.productionId) ?? []),
+          mapped,
+        ]);
+      }
+      const upcoming = upcomingRows.map((row) => {
+        const card = mapCard(row as CardRow);
+        return {
+          ...card,
+          venuePerformances: (programPerformances.get(card.id) ?? []).filter(
+            (performance) =>
+              performance.status === "scheduled" &&
+              new Date(performance.startsAt).getTime() >= now,
+          ),
+        };
+      });
+      const archives = archiveRows.map((row) => {
+        const card = mapCard(row as CardRow);
+        return {
+          ...card,
+          venuePerformances: (programPerformances.get(card.id) ?? []).filter(
+            (performance) => new Date(performance.startsAt).getTime() < now,
+          ),
+        };
+      });
+      const disciplines = Array.from(
+        new Set([...upcoming, ...archives].map((production) => production.discipline)),
+      );
+
+      return {
+        id: venue.id,
+        slug: venue.slug,
+        name: venue.name,
+        addressLine1: venue.addressLine1,
+        postalCode: venue.postalCode,
+        locality: venue.locality,
+        countryCode: venue.countryCode,
+        timezone: venue.timezone,
+        officialUrl: venue.officialUrl,
+        coordinates: venue.coordinates
+          ? {
+              longitude: venue.coordinates.x,
+              latitude: venue.coordinates.y,
+            }
+          : null,
+        upcoming,
+        archives,
+        disciplines,
+        sources: sourceRows.map((source) => ({
+          ...source,
+          retrievedAt: source.retrievedAt.toISOString(),
+        })),
+        lastVerifiedAt:
+          sourceRows.length > 0
+            ? new Date(
+                Math.max(...sourceRows.map((source) => source.retrievedAt.getTime())),
+              ).toISOString()
+            : null,
+      };
+    },
+
+    async getCompany(slug: string): Promise<CompanyDetail> {
+      const companyRows = await database
+        .select()
+        .from(companies)
+        .where(
+          and(eq(companies.slug, slug), eq(companies.publicationStatus, "published")),
+        )
+        .limit(1);
+      const company = companyRows[0];
+      if (!company) {
+        throw new HttpProblem(
+          404,
+          "COMPANY_NOT_FOUND",
+          "Cette compagnie n’existe pas dans Todam.",
+        );
+      }
+
+      const belongsToCompany = sql<boolean>`exists (
+        select 1 from ${productionCompanies}
+        where ${productionCompanies.productionId} = ${productions.id}
+          and ${productionCompanies.companyId} = ${company.id}
+      )`;
+      const [currentRows, archiveRows, touringRows, artistRows, sourceRows] =
+        await Promise.all([
+          database
+            .select(cardFields)
+            .from(productions)
+            .leftJoin(works, eq(works.id, productions.workId))
+            .where(
+              and(
+                eq(productions.isActive, true),
+                eq(productions.publicationStatus, "published"),
+                belongsToCompany,
+                sql<boolean>`exists (
+                  select 1 from ${performances}
+                  where ${performances.productionId} = ${productions.id}
+                    and ${performances.status} = 'scheduled'
+                    and ${performances.startsAt} >= now()
+                )`,
+              ),
+            )
+            .orderBy(asc(productions.title)),
+          database
+            .select(cardFields)
+            .from(productions)
+            .leftJoin(works, eq(works.id, productions.workId))
+            .where(
+              and(
+                eq(productions.isActive, true),
+                eq(productions.publicationStatus, "published"),
+                belongsToCompany,
+                sql<boolean>`not exists (
+                  select 1 from ${performances}
+                  where ${performances.productionId} = ${productions.id}
+                    and ${performances.status} = 'scheduled'
+                    and ${performances.startsAt} >= now()
+                )`,
+                sql<boolean>`exists (
+                  select 1 from ${performances}
+                  where ${performances.productionId} = ${productions.id}
+                    and ${performances.status} <> 'cancelled'
+                    and ${performances.startsAt} < now()
+                )`,
+              ),
+            )
+            .orderBy(desc(productions.updatedAt), asc(productions.title)),
+          database
+            .select({
+              id: performances.id,
+              startsAt: performances.startsAt,
+              endsAt: performances.endsAt,
+              status: performances.status,
+              officialUrl: performances.officialUrl,
+              productionId: productions.id,
+              productionSlug: productions.slug,
+              productionTitle: productions.title,
+              productionDiscipline: productions.discipline,
+              venueId: venues.id,
+              venueSlug: venues.slug,
+              venueName: venues.name,
+              locality: venues.locality,
+              countryCode: venues.countryCode,
+              timezone: venues.timezone,
+              venueOfficialUrl: venues.officialUrl,
+            })
+            .from(performances)
+            .innerJoin(productions, eq(productions.id, performances.productionId))
+            .innerJoin(
+              productionCompanies,
+              eq(productionCompanies.productionId, productions.id),
+            )
+            .innerJoin(venues, eq(venues.id, performances.venueId))
+            .where(
+              and(
+                eq(productionCompanies.companyId, company.id),
+                eq(productions.isActive, true),
+                eq(productions.publicationStatus, "published"),
+                eq(performances.status, "scheduled"),
+                sql<boolean>`${performances.startsAt} >= now()`,
+              ),
+            )
+            .orderBy(asc(performances.startsAt), asc(performances.id)),
+          database
+            .select({
+              id: artists.id,
+              slug: artists.slug,
+              name: artists.name,
+              roles: sql<
+                (
+                  | "author"
+                  | "director"
+                  | "performer"
+                  | "choreographer"
+                  | "composer"
+                  | "musical_director"
+                  | "designer"
+                  | "other"
+                )[]
+              >`array_agg(distinct ${productionCredits.role})`,
+            })
+            .from(productionCredits)
+            .innerJoin(artists, eq(artists.id, productionCredits.artistId))
+            .innerJoin(
+              productionCompanies,
+              eq(productionCompanies.productionId, productionCredits.productionId),
+            )
+            .innerJoin(productions, eq(productions.id, productionCredits.productionId))
+            .where(
+              and(
+                eq(productionCompanies.companyId, company.id),
+                eq(productions.publicationStatus, "published"),
+              ),
+            )
+            .groupBy(artists.id, artists.slug, artists.name)
+            .orderBy(asc(artists.name)),
+          database
+            .selectDistinct({
+              title: sourceDocuments.title,
+              url: sourceDocuments.url,
+              retrievedAt: sourceDocuments.retrievedAt,
+              rightsStatus: sourceDocuments.rightsStatus,
+              license: sourceDocuments.license,
+            })
+            .from(companySources)
+            .innerJoin(
+              sourceDocuments,
+              eq(sourceDocuments.id, companySources.documentId),
+            )
+            .where(eq(companySources.entityId, company.id)),
+        ]);
+
+      return {
+        id: company.id,
+        slug: company.slug,
+        name: company.name,
+        officialUrl: company.officialUrl,
+        shortDescription: company.shortDescription,
+        description: company.description,
+        locality: company.locality,
+        countryCode: company.countryCode,
+        currentProductions: currentRows.map((row) => mapCard(row as CardRow)),
+        touringDates: touringRows.map((performance) => ({
+          id: performance.id,
+          startsAt: performance.startsAt.toISOString(),
+          endsAt: performance.endsAt?.toISOString() ?? null,
+          status: performance.status,
+          officialUrl: performance.officialUrl,
+          production: {
+            id: performance.productionId,
+            slug: performance.productionSlug,
+            title: performance.productionTitle,
+            discipline: performance.productionDiscipline,
+          },
+          venue: {
+            id: performance.venueId,
+            slug: performance.venueSlug,
+            name: performance.venueName,
+            locality: performance.locality,
+            countryCode: performance.countryCode,
+            timezone: performance.timezone,
+            officialUrl: performance.venueOfficialUrl,
+          },
+        })),
+        archives: archiveRows.map((row) => mapCard(row as CardRow)),
+        principalArtists: artistRows,
+        sources: sourceRows.map((source) => ({
+          ...source,
+          retrievedAt: source.retrievedAt.toISOString(),
+        })),
+        lastVerifiedAt:
+          sourceRows.length > 0
+            ? new Date(
+                Math.max(...sourceRows.map((source) => source.retrievedAt.getTime())),
+              ).toISOString()
+            : null,
+      };
+    },
+
+    async getProduction(
+      slug: string,
+      options: { includeUnpublished?: boolean } = {},
+    ): Promise<ProductionDetail> {
       const baseRows = await database
         .select({
           id: productions.id,
@@ -650,6 +1518,7 @@ export function createCatalogService(database: TodamDatabase) {
           title: productions.title,
           discipline: productions.discipline,
           audience: productions.audience,
+          minimumAge: productions.minimumAge,
           durationMinutes: productions.durationMinutes,
           language: productions.language,
           officialUrl: productions.officialUrl,
@@ -659,7 +1528,15 @@ export function createCatalogService(database: TodamDatabase) {
         })
         .from(productions)
         .leftJoin(works, eq(works.id, productions.workId))
-        .where(eq(productions.slug, slug))
+        .where(
+          and(
+            eq(productions.slug, slug),
+            eq(productions.isActive, true),
+            options.includeUnpublished
+              ? undefined
+              : eq(productions.publicationStatus, "published"),
+          ),
+        )
         .limit(1);
       const base = baseRows[0];
       if (!base) {
@@ -670,7 +1547,74 @@ export function createCatalogService(database: TodamDatabase) {
         );
       }
 
-      const [creditRows, performanceRows, sourceRows, posterRows] = await Promise.all([
+      const [
+        companyRows,
+        descriptionRows,
+        creditRows,
+        performanceRows,
+        sourceRows,
+        posterRows,
+        ratingRows,
+        reviewRows,
+        relatedRows,
+      ] = await Promise.all([
+        database
+          .select({
+            id: companies.id,
+            slug: companies.slug,
+            name: companies.name,
+            officialUrl: companies.officialUrl,
+          })
+          .from(productionCompanies)
+          .innerJoin(companies, eq(companies.id, productionCompanies.companyId))
+          .where(
+            and(
+              eq(productionCompanies.productionId, base.id),
+              eq(companies.publicationStatus, "published"),
+            ),
+          )
+          .orderBy(
+            desc(productionCompanies.isPrimary),
+            asc(productionCompanies.position),
+            asc(companies.name),
+          )
+          .limit(1),
+        database
+          .select({
+            id: productionDescriptions.id,
+            locale: productionDescriptions.locale,
+            kind: productionDescriptions.kind,
+            body: productionDescriptions.body,
+            rightsStatus: productionDescriptions.rightsStatus,
+            license: productionDescriptions.license,
+            sourceUrl: sql<string | null>`coalesce(
+              ${sourceDocuments.url},
+              ${productionDescriptions.sourceUrl}
+            )`,
+            sourceTitle: sourceDocuments.title,
+            retrievedAt: sourceDocuments.retrievedAt,
+            lastVerifiedAt: productionDescriptions.lastVerifiedAt,
+          })
+          .from(productionDescriptions)
+          .leftJoin(
+            sourceDocuments,
+            eq(sourceDocuments.id, productionDescriptions.sourceDocumentId),
+          )
+          .where(
+            and(
+              eq(productionDescriptions.productionId, base.id),
+              sql<boolean>`${productionDescriptions.rightsStatus} in (
+                'permission_granted',
+                'open_license',
+                'contractual_display',
+                'todam_original'
+              )`,
+            ),
+          )
+          .orderBy(
+            asc(productionDescriptions.kind),
+            asc(productionDescriptions.locale),
+          ),
         database
           .select({
             artistId: artists.id,
@@ -694,14 +1638,22 @@ export function createCatalogService(database: TodamDatabase) {
             venueSlug: venues.slug,
             venueName: venues.name,
             locality: venues.locality,
+            countryCode: venues.countryCode,
             timezone: venues.timezone,
+            venueOfficialUrl: venues.officialUrl,
           })
           .from(performances)
           .innerJoin(venues, eq(venues.id, performances.venueId))
           .where(eq(performances.productionId, base.id))
           .orderBy(asc(performances.startsAt)),
         database
-          .selectDistinct({ url: sourceDocuments.url })
+          .selectDistinct({
+            title: sourceDocuments.title,
+            url: sourceDocuments.url,
+            retrievedAt: sourceDocuments.retrievedAt,
+            rightsStatus: sourceDocuments.rightsStatus,
+            license: sourceDocuments.license,
+          })
           .from(productionSources)
           .innerJoin(
             sourceDocuments,
@@ -735,7 +1687,8 @@ export function createCatalogService(database: TodamDatabase) {
                 'permission_granted',
                 'open_license',
                 'contractual_display',
-                'hotlink_only'
+                'hotlink_only',
+                'todam_original'
               )`,
               sql<boolean>`(${mediaAssets.validFrom} is null or ${mediaAssets.validFrom} <= now())`,
               sql<boolean>`(${mediaAssets.validUntil} is null or ${mediaAssets.validUntil} > now())`,
@@ -751,7 +1704,67 @@ export function createCatalogService(database: TodamDatabase) {
             asc(productionMedia.position),
             asc(mediaAssets.id),
           ),
+        database
+          .select({
+            average: sql<string | null>`avg(${ratings.value})`,
+            count: count(),
+          })
+          .from(ratings)
+          .where(eq(ratings.productionId, base.id)),
+        database
+          .select({
+            id: reviews.id,
+            username: user.pseudonym,
+            rating: ratings.value,
+            body: reviews.body,
+            containsSpoiler: reviews.containsSpoiler,
+            createdAt: reviews.createdAt,
+            updatedAt: reviews.updatedAt,
+          })
+          .from(reviews)
+          .innerJoin(user, eq(user.id, reviews.userId))
+          .leftJoin(
+            ratings,
+            and(
+              eq(ratings.userId, reviews.userId),
+              eq(ratings.productionId, reviews.productionId),
+            ),
+          )
+          .where(
+            and(
+              eq(reviews.productionId, base.id),
+              eq(reviews.visibility, "public"),
+              eq(reviews.status, "published"),
+              eq(user.profileVisibility, "public"),
+            ),
+          )
+          .orderBy(desc(reviews.createdAt), desc(reviews.id))
+          .limit(20),
+        database
+          .select(cardFields)
+          .from(productions)
+          .leftJoin(works, eq(works.id, productions.workId))
+          .where(
+            and(
+              eq(productions.isActive, true),
+              eq(productions.publicationStatus, "published"),
+              eq(productions.discipline, base.discipline),
+              sql<boolean>`${productions.id} <> ${base.id}`,
+            ),
+          )
+          .orderBy(desc(productions.reviewedAt), asc(productions.title))
+          .limit(4),
       ]);
+      const allVerificationDates = [
+        ...descriptionRows.map((description) => description.lastVerifiedAt),
+        ...sourceRows.map((source) => source.retrievedAt),
+      ];
+      const lastVerifiedAt =
+        allVerificationDates.length > 0
+          ? new Date(
+              Math.max(...allVerificationDates.map((value) => value.getTime())),
+            ).toISOString()
+          : null;
 
       return {
         id: base.id,
@@ -759,10 +1772,19 @@ export function createCatalogService(database: TodamDatabase) {
         title: base.title,
         discipline: base.discipline,
         audience: base.audience,
+        minimumAge: base.minimumAge,
+        company: companyRows[0] ?? null,
         durationMinutes: base.durationMinutes,
         language: base.language,
         officialUrl: base.officialUrl,
         posters: posterRows.map((poster) => mapPoster(poster as PosterWithStorage)),
+        imagePolicyMessage:
+          "Todam ne publie que les visuels dont les droits d’affichage sont confirmés.",
+        descriptions: descriptionRows.map((description) => ({
+          ...description,
+          retrievedAt: description.retrievedAt?.toISOString() ?? null,
+          lastVerifiedAt: description.lastVerifiedAt.toISOString(),
+        })),
         work:
           base.workId && base.workSlug && base.workTitle
             ? {
@@ -783,9 +1805,29 @@ export function createCatalogService(database: TodamDatabase) {
             slug: performance.venueSlug,
             name: performance.venueName,
             locality: performance.locality,
+            countryCode: performance.countryCode,
             timezone: performance.timezone,
+            officialUrl: performance.venueOfficialUrl,
           },
         })),
+        ratingSummary: {
+          average:
+            ratingRows[0]?.average === null || ratingRows[0]?.average === undefined
+              ? null
+              : Math.round(Number(ratingRows[0].average) * 10) / 10,
+          count: Number(ratingRows[0]?.count ?? 0),
+        },
+        reviews: reviewRows.map((review) => ({
+          ...review,
+          createdAt: review.createdAt.toISOString(),
+          updatedAt: review.updatedAt.toISOString(),
+        })),
+        relatedProductions: relatedRows.map((row) => mapCard(row as CardRow)),
+        sources: sourceRows.map((source) => ({
+          ...source,
+          retrievedAt: source.retrievedAt.toISOString(),
+        })),
+        lastVerifiedAt,
         sourceUrls: sourceRows.map((source) => source.url),
       };
     },
@@ -811,7 +1853,9 @@ export function createCatalogService(database: TodamDatabase) {
           venueSlug: venues.slug,
           venueName: venues.name,
           venueLocality: venues.locality,
+          venueCountryCode: venues.countryCode,
           venueTimezone: venues.timezone,
+          venueOfficialUrl: venues.officialUrl,
         })
         .from(diaryEntries)
         .leftJoin(performances, eq(performances.id, diaryEntries.performanceId))
@@ -836,6 +1880,7 @@ export function createCatalogService(database: TodamDatabase) {
           row.venueSlug &&
           row.venueName &&
           row.venueLocality &&
+          row.venueCountryCode &&
           row.venueTimezone
             ? {
                 id: row.performanceId,
@@ -848,7 +1893,9 @@ export function createCatalogService(database: TodamDatabase) {
                   slug: row.venueSlug,
                   name: row.venueName,
                   locality: row.venueLocality,
+                  countryCode: row.venueCountryCode,
                   timezone: row.venueTimezone,
+                  officialUrl: row.venueOfficialUrl,
                 },
               }
             : null,
@@ -857,10 +1904,21 @@ export function createCatalogService(database: TodamDatabase) {
 
     async markSeen(userId: string, input: SeenInput): Promise<ViewerProductionState> {
       await assertProduction(input.productionId);
+      if (input.attendedOn !== null && input.attendedOn > currentFrenchCalendarDate()) {
+        throw new HttpProblem(
+          400,
+          "FUTURE_ATTENDED_DATE",
+          "La date vue ne peut pas être dans le futur.",
+        );
+      }
       await database.transaction(async (transaction) => {
         if (input.performanceId) {
           const performanceRows = await transaction
-            .select({ id: performances.id })
+            .select({
+              id: performances.id,
+              startsAt: performances.startsAt,
+              status: performances.status,
+            })
             .from(performances)
             .where(
               and(
@@ -874,6 +1932,16 @@ export function createCatalogService(database: TodamDatabase) {
               400,
               "PERFORMANCE_MISMATCH",
               "Cette représentation n'appartient pas au spectacle choisi.",
+            );
+          }
+          if (
+            performanceRows[0].startsAt.getTime() > Date.now() ||
+            ["cancelled", "postponed"].includes(performanceRows[0].status)
+          ) {
+            throw new HttpProblem(
+              400,
+              "PERFORMANCE_NOT_ATTENDABLE",
+              "Seule une représentation passée et non annulée peut être ajoutée au journal.",
             );
           }
         }
@@ -1117,6 +2185,7 @@ export function createCatalogService(database: TodamDatabase) {
         seenRows,
         ratingCountRows,
         watchlistCountRows,
+        listCountRows,
         distributionRows,
         recentRows,
         watchlistRows,
@@ -1131,19 +2200,48 @@ export function createCatalogService(database: TodamDatabase) {
             total: sql<number>`count(distinct ${diaryEntries.productionId})`,
           })
           .from(diaryEntries)
-          .where(eq(diaryEntries.userId, userId)),
+          .innerJoin(productions, eq(productions.id, diaryEntries.productionId))
+          .where(
+            and(
+              eq(diaryEntries.userId, userId),
+              eq(productions.isActive, true),
+              eq(productions.publicationStatus, "published"),
+            ),
+          ),
         database
           .select({ total: count() })
           .from(ratings)
-          .where(eq(ratings.userId, userId)),
+          .innerJoin(productions, eq(productions.id, ratings.productionId))
+          .where(
+            and(
+              eq(ratings.userId, userId),
+              eq(productions.isActive, true),
+              eq(productions.publicationStatus, "published"),
+            ),
+          ),
         database
           .select({ total: count() })
           .from(watchlistEntries)
-          .where(eq(watchlistEntries.userId, userId)),
+          .innerJoin(productions, eq(productions.id, watchlistEntries.productionId))
+          .where(
+            and(
+              eq(watchlistEntries.userId, userId),
+              eq(productions.isActive, true),
+              eq(productions.publicationStatus, "published"),
+            ),
+          ),
+        database.select({ total: count() }).from(lists).where(eq(lists.userId, userId)),
         database
           .select({ value: ratings.value, total: count() })
           .from(ratings)
-          .where(eq(ratings.userId, userId))
+          .innerJoin(productions, eq(productions.id, ratings.productionId))
+          .where(
+            and(
+              eq(ratings.userId, userId),
+              eq(productions.isActive, true),
+              eq(productions.publicationStatus, "published"),
+            ),
+          )
           .groupBy(ratings.value),
         database
           .select({
@@ -1156,7 +2254,13 @@ export function createCatalogService(database: TodamDatabase) {
           .from(diaryEntries)
           .innerJoin(productions, eq(productions.id, diaryEntries.productionId))
           .leftJoin(works, eq(works.id, productions.workId))
-          .where(eq(diaryEntries.userId, userId))
+          .where(
+            and(
+              eq(diaryEntries.userId, userId),
+              eq(productions.isActive, true),
+              eq(productions.publicationStatus, "published"),
+            ),
+          )
           .orderBy(desc(diaryEntries.createdAt))
           .limit(10),
         database
@@ -1164,7 +2268,13 @@ export function createCatalogService(database: TodamDatabase) {
           .from(watchlistEntries)
           .innerJoin(productions, eq(productions.id, watchlistEntries.productionId))
           .leftJoin(works, eq(works.id, productions.workId))
-          .where(eq(watchlistEntries.userId, userId))
+          .where(
+            and(
+              eq(watchlistEntries.userId, userId),
+              eq(productions.isActive, true),
+              eq(productions.publicationStatus, "published"),
+            ),
+          )
           .orderBy(desc(watchlistEntries.addedAt))
           .limit(6),
       ]);
@@ -1186,7 +2296,7 @@ export function createCatalogService(database: TodamDatabase) {
           seen: Number(seenRows[0]?.total ?? 0),
           ratings: Number(ratingCountRows[0]?.total ?? 0),
           watchlist: Number(watchlistCountRows[0]?.total ?? 0),
-          lists: 0,
+          lists: Number(listCountRows[0]?.total ?? 0),
         },
         recentDiary: recentRows.map((row) => ({
           id: row.diaryId,

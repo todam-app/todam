@@ -24,10 +24,10 @@ from pypdf import PdfReader
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "apps" / "todam" / "public" / "legal"
 DOCUMENTS = {
-    "conditions-utilisation-v1.0.0.md": "cgu-todam-v1.0.0.pdf",
-    "confidentialite-v1.0.1.md": "confidentialite-todam-v1.0.1.pdf",
+    "conditions-utilisation-v1.0.1.md": "cgu-todam-v1.0.1.pdf",
+    "confidentialite-v1.0.2.md": "confidentialite-todam-v1.0.2.pdf",
     "mentions-legales-v1.0.0.md": "mentions-legales-todam-v1.0.0.pdf",
-    "suppression-compte-v1.0.0.md": "suppression-compte-todam-v1.0.0.pdf",
+    "suppression-compte-v1.0.1.md": "suppression-compte-todam-v1.0.1.pdf",
 }
 TOKENS = {
     "{{LEGAL_OPERATOR_NAME}}": "LEGAL_OPERATOR_NAME",
@@ -121,7 +121,11 @@ def verify_pdf(
     if not reader.pages or len(extracted) < 500:
         raise RuntimeError(f"Le PDF généré semble incomplet : {destination}")
 
-    if "Date d'effet : 26 juillet 2026" not in extracted:
+    source_text = source.read_text(encoding="utf-8")
+    effective_date = re.search(r"Date d'effet\s*:\s*([^\n]+)", source_text)
+    if not effective_date or (
+        f"Date d'effet : {effective_date.group(1).strip()}" not in extracted
+    ):
         raise RuntimeError(f"La date attendue est absente du PDF : {destination}")
 
     forbidden_markers = (
@@ -149,7 +153,7 @@ def verify_pdf(
             )
 
     required_tokens = []
-    if source.name != "suppression-compte-v1.0.0.md":
+    if source.name != "suppression-compte-v1.0.1.md":
         required_tokens.append("{{LEGAL_OPERATOR_NAME}}")
     if source.name == "mentions-legales-v1.0.0.md":
         required_tokens.extend(

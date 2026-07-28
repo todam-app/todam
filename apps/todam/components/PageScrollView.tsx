@@ -54,6 +54,7 @@ export function useWebPageScrolled(): boolean {
 
 export function PageScrollView({
   className,
+  nativeID,
   onScroll,
   scrollEventThrottle,
   ...props
@@ -89,17 +90,26 @@ export function PageScrollView({
       {...props}
       {...(webClassName ? { className: webClassName } : {})}
       {...(scrollHandler ? { onScroll: scrollHandler } : {})}
+      {...(Platform.OS === "web" ? { role: "main" as const } : {})}
+      nativeID={nativeID ?? "contenu-principal"}
       ref={scrollViewRef}
       scrollEventThrottle={scrollEventThrottle ?? 16}
     />
   );
 }
 
-export function PageStaticView({ className, ...props }: ViewProps) {
+export function PageStaticView({ className, nativeID, ...props }: ViewProps) {
   const webClassName =
     Platform.OS === "web"
       ? `todam-web-page-static${className ? ` ${className}` : ""}`
       : className;
 
-  return <View {...props} {...(webClassName ? { className: webClassName } : {})} />;
+  return (
+    <View
+      {...props}
+      {...(webClassName ? { className: webClassName } : {})}
+      {...(Platform.OS === "web" ? { role: "main" as const } : {})}
+      nativeID={nativeID ?? "contenu-principal"}
+    />
+  );
 }

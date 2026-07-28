@@ -13,6 +13,8 @@
     "catalog:coverage": "tsx src/catalog-import.ts --coverage",
     "catalog:import": "tsx src/catalog-import.ts",
     "catalog:media:mirror": "tsx src/catalog-media-mirror.ts",
+    "catalog:quality": "tsx src/catalog-quality.ts",
+    "catalog:seed:hexagone": "tsx src/catalog-seed-hexagone.ts",
     "catalog:status": "tsx src/catalog-status.ts",
     "catalog:sync": "tsx src/catalog-sync.ts",
     "lint": "eslint src test",

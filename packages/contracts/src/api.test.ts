@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   CitySearchQuerySchema,
+  CompanyProductionParamsSchema,
   EmailChangeBodySchema,
   EmailSignInBodySchema,
   HomeCityBodySchema,
@@ -55,8 +56,29 @@ describe("contrats API", () => {
   it("normalise la pagination de recherche", () => {
     expect(SearchQuerySchema.parse({ q: "Muses" })).toEqual({
       q: "Muses",
+      type: "productions",
+      temporal: "all",
+      sort: "relevance",
       limit: 20,
     });
+  });
+
+  it("contraint les identifiants de l’éditeur privé d’une production", () => {
+    expect(
+      CompanyProductionParamsSchema.parse({
+        companyId: "5aecf9f4-b9da-4da0-b8fa-8898e882d99f",
+        productionId: "a902c9b8-7c10-4bef-898d-8037c0501480",
+      }),
+    ).toEqual({
+      companyId: "5aecf9f4-b9da-4da0-b8fa-8898e882d99f",
+      productionId: "a902c9b8-7c10-4bef-898d-8037c0501480",
+    });
+    expect(() =>
+      CompanyProductionParamsSchema.parse({
+        companyId: "compagnie",
+        productionId: "production",
+      }),
+    ).toThrow();
   });
 
   it("contraint la ville à une option canonique du catalogue", () => {
@@ -128,7 +150,9 @@ describe("contrats API", () => {
               slug: "theatre-des-muses",
               name: "Théâtre des Muses",
               locality: "Monaco",
+              countryCode: "MC",
               timezone: "Europe/Monaco",
+              officialUrl: null,
             },
           },
         },
@@ -145,6 +169,7 @@ describe("contrats API", () => {
       title: "Une pièce",
       discipline: "theatre",
       audience: "general",
+      minimumAge: null,
       workTitle: null,
       primaryCredit: null,
       venueNames: ["Scène Exemple"],

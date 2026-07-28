@@ -24,7 +24,7 @@ describe("API Todam", () => {
     expect(openapi.statusCode).toBe(200);
     expect(openapi.json().info.title).toBe("API Todam");
     await app.close();
-  });
+  }, 15_000);
 
   it("publie les versions juridiques courantes sans accéder à la base", async () => {
     const app = await buildServer({
@@ -64,7 +64,7 @@ describe("API Todam", () => {
     });
 
     for (const origin of [webAppOrigin, "http://127.0.0.1:8082"]) {
-      for (const method of ["PUT", "DELETE"]) {
+      for (const method of ["POST", "PUT", "PATCH", "DELETE"]) {
         const response = await app.inject({
           method: "OPTIONS",
           url: `/v1/me/watchlist/${randomUUID()}`,

@@ -1,0 +1,1 @@
+ALTER TABLE "users" ADD COLUMN "home_onboarding_completed" boolean DEFAULT false NOT NULL;

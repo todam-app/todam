@@ -8,12 +8,14 @@ export const tokens = {
     accent: "#C43D28",
     accentPressed: "#9F2E1E",
     border: "#D8D1C6",
+    controlBorder: "#9B9388",
+    disabled: "#E5E0D8",
     success: "#17633A",
     error: "#A1261A",
   },
   radius: {
-    small: 8,
-    medium: 12,
+    small: 2,
+    medium: 6,
     round: 999,
   },
   space: {

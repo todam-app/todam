@@ -48,7 +48,8 @@ try {
             'permission_granted',
             'open_license',
             'contractual_display',
-            'hotlink_only'
+            'hotlink_only',
+            'todam_original'
           )
           and (ma.valid_from is null or ma.valid_from <= now())
           and (ma.valid_until is null or ma.valid_until > now())

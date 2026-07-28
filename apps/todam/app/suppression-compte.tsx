@@ -6,6 +6,10 @@ import { Text, View } from "react-native";
 import { LegalDocumentScreen } from "../components/LegalDocumentScreen";
 import { api } from "../lib/api";
 
+function validEmail(value: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+}
+
 function first(value: string | string[] | undefined): string {
   return Array.isArray(value) ? (value[0] ?? "") : (value ?? "");
 }
@@ -60,22 +64,38 @@ export default function AccountDeletionScreen() {
             <TextField
               autoCapitalize="none"
               autoComplete="email"
+              error={
+                email && !validEmail(email.trim())
+                  ? "Saisis une adresse e-mail valide."
+                  : undefined
+              }
               keyboardType="email-address"
               label="Adresse e-mail du compte"
               onChangeText={setEmail}
+              onSubmitEditing={() => void requestDeletion()}
+              required
+              returnKeyType="go"
               value={email}
+              webName="email"
             />
             <Button
-              disabled={!email.includes("@")}
+              disabled={!validEmail(email.trim())}
               label="Recevoir le lien de suppression"
               loading={pending}
               onPress={() => void requestDeletion()}
             />
           </>
         )}
-        {message ? <Text className="leading-6 text-ink">{message}</Text> : null}
+        {message ? (
+          <Text
+            accessibilityLiveRegion="polite"
+            className="text-base leading-6 text-ink"
+          >
+            {message}
+          </Text>
+        ) : null}
         {error ? (
-          <Text accessibilityRole="alert" className="leading-6 text-[#A1261A]">
+          <Text accessibilityRole="alert" className="text-base leading-6 text-error">
             {error}
           </Text>
         ) : null}

@@ -37,28 +37,28 @@ describe("e-mails d'authentification Todam", () => {
     const email = createWelcomeEmail({
       displayName: "  Léa   du Rideau  ",
       privacyNotice: {
-        pdfUrl: "https://todam.fr/legal/confidentialite-v1.0.1.pdf",
-        version: "1.0.1",
+        pdfUrl: "https://todam.fr/legal/confidentialite-todam-v1.0.2.pdf",
+        version: "1.0.2",
       },
       profileUrl: "https://todam.fr/profile",
       publicWebUrl: "https://todam.fr",
       terms: {
-        acceptedAt: new Date("2026-07-26T14:30:00.000Z"),
-        pdfUrl: "https://todam.fr/legal/cgu-v1.0.0.pdf",
-        version: "1.0.0",
+        acceptedAt: new Date("2026-07-27T14:30:00.000Z"),
+        pdfUrl: "https://todam.fr/legal/cgu-todam-v1.0.1.pdf",
+        version: "1.0.1",
       },
     });
 
     expect(email.subject).toBe("Bienvenue sur Todam, Léa du Rideau !");
     expect(email.text).toContain("Bonjour Léa du Rideau");
-    expect(email.text).toContain("26 juillet 2026");
+    expect(email.text).toContain("27 juillet 2026");
     expect(email.text).toContain("https://todam.fr/profile");
     expect(email.html).toContain("Compte activé");
     expect(email.html).toContain("Bienvenue dans ton journal de spectacles.");
     expect(email.html).toContain("Choisis ta ville");
     expect(email.html).toContain("Ajoute les spectacles");
     expect(email.html).toContain("Tes documents d’inscription");
-    expect(email.html).toContain("CGU version 1.0.0 acceptées le 26 juillet 2026");
+    expect(email.html).toContain("CGU version 1.0.1 acceptées le 27 juillet 2026");
     expect(email.html).toContain('href="https://todam.fr/profile"');
   });
 

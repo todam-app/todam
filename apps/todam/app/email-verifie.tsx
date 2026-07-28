@@ -4,13 +4,40 @@ import { useEffect } from "react";
 import { Text } from "react-native";
 
 import { PageStaticView } from "../components/PageScrollView";
+import { PrivatePageHead } from "../components/PrivatePageHead";
 import { authClient } from "../lib/auth-client";
+import { internalDestination } from "../lib/navigation";
+
+function parameter(value: string | string[] | undefined): string | undefined {
+  return Array.isArray(value) ? value[0] : value;
+}
 
 export default function EmailVerifiedScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ mode?: string | string[] }>();
-  const mode = Array.isArray(params.mode) ? params.mode[0] : params.mode;
+  const params = useLocalSearchParams<{
+    action?: string | string[];
+    mode?: string | string[];
+    rating?: string | string[];
+    returnTo?: string | string[];
+  }>();
+  const mode = parameter(params.mode);
   const emailChanged = mode === "change-email";
+  const destination = internalDestination(parameter(params.returnTo));
+
+  function continueAfterVerification() {
+    if (emailChanged) {
+      router.replace("/parametres-compte");
+      return;
+    }
+    router.replace({
+      pathname: destination.pathname,
+      params: {
+        ...destination.params,
+        ...(params.action ? { resumeAction: parameter(params.action) } : {}),
+        ...(params.rating ? { resumeRating: parameter(params.rating) } : {}),
+      },
+    });
+  }
 
   useEffect(() => {
     if (emailChanged) {
@@ -21,22 +48,32 @@ export default function EmailVerifiedScreen() {
   }, [emailChanged]);
 
   return (
-    <PageStaticView className="mx-auto w-full max-w-lg flex-1 items-center justify-center gap-5 px-5 py-12">
-      <Text
-        accessibilityRole="header"
-        className="text-center font-serif text-4xl font-black text-ink"
-      >
-        {emailChanged ? "Nouvelle adresse confirmée" : "Adresse e-mail vérifiée"}
-      </Text>
-      <Text className="text-center leading-6 text-muted">
-        {emailChanged
-          ? "Ta nouvelle adresse e-mail est maintenant utilisée pour te connecter à Todam."
-          : "Ton compte est maintenant activé. Tu peux ouvrir ton journal."}
-      </Text>
-      <Button
-        label={emailChanged ? "Revenir aux paramètres" : "Ouvrir mon profil"}
-        onPress={() => router.replace(emailChanged ? "/parametres-compte" : "/profile")}
-      />
-    </PageStaticView>
+    <>
+      <PrivatePageHead title="Adresse e-mail vérifiée" />
+      <PageStaticView className="mx-auto w-full max-w-lg flex-1 items-center justify-center gap-5 px-5 py-12">
+        <Text
+          aria-level={1}
+          accessibilityRole="header"
+          className="text-center font-serif text-4xl font-bold text-ink"
+        >
+          {emailChanged ? "Nouvelle adresse confirmée" : "Adresse e-mail vérifiée"}
+        </Text>
+        <Text className="text-center text-base leading-6 text-muted">
+          {emailChanged
+            ? "Ta nouvelle adresse e-mail est maintenant utilisée pour te connecter à Todam."
+            : "Ton compte est maintenant activé. Tu peux ouvrir ton journal."}
+        </Text>
+        <Button
+          label={
+            emailChanged
+              ? "Revenir aux paramètres"
+              : parameter(params.returnTo)
+                ? "Continuer"
+                : "Ouvrir mon profil"
+          }
+          onPress={continueAfterVerification}
+        />
+      </PageStaticView>
+    </>
   );
 }

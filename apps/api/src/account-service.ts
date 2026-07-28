@@ -3,8 +3,16 @@ import { createHash, randomBytes } from "node:crypto";
 import type { AccountExport } from "@todam/contracts";
 import {
   accountDeletionRequests,
+  catalogRevisionChanges,
+  catalogRevisions,
+  companyClaims,
+  companyMemberships,
+  contentReports,
   diaryEntries,
+  listItems,
+  lists,
   ratings,
+  reviews,
   user,
   watchlistEntries,
   type TodamDatabase,
@@ -79,6 +87,57 @@ export function accountExportToCsv(data: AccountExport): string {
       "ajout",
       true,
       entry.addedAt,
+    ]),
+    ...data.reviews.flatMap((review) => [
+      ["avis", review.id, "texte", review.body, review.updatedAt],
+      ["avis", review.id, "visibilite", review.visibility, review.updatedAt],
+    ]),
+    ...data.lists.flatMap((list) => [
+      ["liste", list.id, "nom", list.name, list.updatedAt],
+      ...list.items.map((item) => [
+        "element_liste",
+        list.id,
+        item.productionId,
+        item.position,
+        item.addedAt,
+      ]),
+    ]),
+    ...data.contentReports.map((report) => [
+      "signalement",
+      report.id,
+      `${report.targetType}:${report.targetId}`,
+      report.reason,
+      report.submittedAt,
+    ]),
+    ...data.companyClaims.map((claim) => [
+      "revendication_compagnie",
+      claim.id,
+      claim.companyId,
+      claim.status,
+      claim.submittedAt,
+    ]),
+    ...data.companyMemberships.map((membership) => [
+      "rattachement_compagnie",
+      membership.companyId,
+      "role",
+      membership.role,
+      membership.createdAt,
+    ]),
+    ...data.catalogRevisions.flatMap((revision) => [
+      [
+        "revision_catalogue",
+        revision.id,
+        revision.targetType,
+        revision.status,
+        revision.updatedAt,
+      ],
+      ...revision.changes.map((change) => [
+        "changement_revision",
+        revision.id,
+        change.field,
+        JSON.stringify(change.newValue) ?? null,
+        change.createdAt,
+      ]),
     ]),
   ];
   return `\uFEFF${rows.map((row) => row.map(escapeCsv).join(",")).join("\r\n")}\r\n`;
@@ -165,13 +224,28 @@ export function createAccountService(
     },
 
     async exportAccount(userId: string): Promise<AccountExport> {
-      const [accountRows, diary, ratingRows, watchlist] = await Promise.all([
+      const [
+        accountRows,
+        diary,
+        ratingRows,
+        watchlist,
+        reviewRows,
+        listRows,
+        listItemRows,
+        reportRows,
+        claimRows,
+        membershipRows,
+        revisionRows,
+        revisionChangeRows,
+      ] = await Promise.all([
         database
           .select({
             id: user.id,
             pseudonym: user.pseudonym,
             email: user.email,
             emailVerified: user.emailVerified,
+            profileVisibility: user.profileVisibility,
+            bio: user.bio,
             homeLocality: user.homeLocality,
             homeCountryCode: user.homeCountryCode,
             createdAt: user.createdAt,
@@ -211,6 +285,113 @@ export function createAccountService(
           })
           .from(watchlistEntries)
           .where(eq(watchlistEntries.userId, userId)),
+        database
+          .select({
+            id: reviews.id,
+            productionId: reviews.productionId,
+            body: reviews.body,
+            containsSpoiler: reviews.containsSpoiler,
+            visibility: reviews.visibility,
+            status: reviews.status,
+            createdAt: reviews.createdAt,
+            updatedAt: reviews.updatedAt,
+          })
+          .from(reviews)
+          .where(eq(reviews.userId, userId)),
+        database
+          .select({
+            id: lists.id,
+            slug: lists.slug,
+            name: lists.name,
+            description: lists.description,
+            visibility: lists.visibility,
+            createdAt: lists.createdAt,
+            updatedAt: lists.updatedAt,
+          })
+          .from(lists)
+          .where(eq(lists.userId, userId)),
+        database
+          .select({
+            listId: listItems.listId,
+            productionId: listItems.productionId,
+            position: listItems.position,
+            addedAt: listItems.addedAt,
+          })
+          .from(listItems)
+          .innerJoin(lists, eq(lists.id, listItems.listId))
+          .where(eq(lists.userId, userId)),
+        database
+          .select({
+            id: contentReports.id,
+            targetType: contentReports.targetType,
+            targetId: contentReports.targetId,
+            reason: contentReports.reason,
+            status: contentReports.status,
+            decision: contentReports.decision,
+            submittedAt: contentReports.createdAt,
+            reviewedAt: contentReports.reviewedAt,
+          })
+          .from(contentReports)
+          .where(eq(contentReports.reporterUserId, userId)),
+        database
+          .select({
+            id: companyClaims.id,
+            companyId: companyClaims.companyId,
+            representativeName: companyClaims.representativeName,
+            roleTitle: companyClaims.roleTitle,
+            professionalEmail: companyClaims.professionalEmail,
+            officialWebsiteUrl: companyClaims.officialWebsiteUrl,
+            evidence: companyClaims.evidence,
+            authorityConfirmed: companyClaims.authorityConfirmed,
+            status: companyClaims.status,
+            decisionReason: companyClaims.decisionReason,
+            submittedAt: companyClaims.createdAt,
+            reviewedAt: companyClaims.reviewedAt,
+          })
+          .from(companyClaims)
+          .where(eq(companyClaims.userId, userId)),
+        database
+          .select({
+            companyId: companyMemberships.companyId,
+            role: companyMemberships.role,
+            roleTitle: companyMemberships.roleTitle,
+            createdAt: companyMemberships.createdAt,
+          })
+          .from(companyMemberships)
+          .where(eq(companyMemberships.userId, userId)),
+        database
+          .select({
+            id: catalogRevisions.id,
+            companyId: catalogRevisions.companyId,
+            targetType: catalogRevisions.targetType,
+            targetId: catalogRevisions.targetId,
+            status: catalogRevisions.status,
+            justification: catalogRevisions.justification,
+            decisionReason: catalogRevisions.decisionReason,
+            createdAt: catalogRevisions.createdAt,
+            updatedAt: catalogRevisions.updatedAt,
+            submittedAt: catalogRevisions.submittedAt,
+            reviewedAt: catalogRevisions.reviewedAt,
+          })
+          .from(catalogRevisions)
+          .where(eq(catalogRevisions.authorUserId, userId)),
+        database
+          .select({
+            id: catalogRevisionChanges.id,
+            revisionId: catalogRevisionChanges.revisionId,
+            field: catalogRevisionChanges.field,
+            oldValue: catalogRevisionChanges.oldValue,
+            newValue: catalogRevisionChanges.newValue,
+            provenanceUrl: catalogRevisionChanges.provenanceUrl,
+            rightsStatus: catalogRevisionChanges.rightsStatus,
+            createdAt: catalogRevisionChanges.createdAt,
+          })
+          .from(catalogRevisionChanges)
+          .innerJoin(
+            catalogRevisions,
+            eq(catalogRevisions.id, catalogRevisionChanges.revisionId),
+          )
+          .where(eq(catalogRevisions.authorUserId, userId)),
       ]);
       const profile = accountRows[0];
       if (!profile) {
@@ -229,6 +410,8 @@ export function createAccountService(
           email: profile.email,
           emailVerified: profile.emailVerified,
           createdAt: profile.createdAt.toISOString(),
+          profileVisibility: profile.profileVisibility,
+          bio: profile.bio,
           homeCity:
             profile.homeLocality && profile.homeCountryCode
               ? {
@@ -257,6 +440,56 @@ export function createAccountService(
         watchlist: watchlist.map((entry) => ({
           ...entry,
           addedAt: entry.addedAt.toISOString(),
+        })),
+        reviews: reviewRows.map((review) => ({
+          ...review,
+          createdAt: review.createdAt.toISOString(),
+          updatedAt: review.updatedAt.toISOString(),
+        })),
+        lists: listRows.map((list) => ({
+          ...list,
+          createdAt: list.createdAt.toISOString(),
+          updatedAt: list.updatedAt.toISOString(),
+          items: listItemRows
+            .filter((item) => item.listId === list.id)
+            .sort((left, right) => left.position - right.position)
+            .map((item) => ({
+              productionId: item.productionId,
+              position: item.position,
+              addedAt: item.addedAt.toISOString(),
+            })),
+        })),
+        contentReports: reportRows.map((report) => ({
+          ...report,
+          submittedAt: report.submittedAt.toISOString(),
+          reviewedAt: report.reviewedAt?.toISOString() ?? null,
+        })),
+        companyClaims: claimRows.map((claim) => ({
+          ...claim,
+          submittedAt: claim.submittedAt.toISOString(),
+          reviewedAt: claim.reviewedAt?.toISOString() ?? null,
+        })),
+        companyMemberships: membershipRows.map((membership) => ({
+          ...membership,
+          createdAt: membership.createdAt.toISOString(),
+        })),
+        catalogRevisions: revisionRows.map((revision) => ({
+          ...revision,
+          createdAt: revision.createdAt.toISOString(),
+          updatedAt: revision.updatedAt.toISOString(),
+          submittedAt: revision.submittedAt?.toISOString() ?? null,
+          reviewedAt: revision.reviewedAt?.toISOString() ?? null,
+          changes: revisionChangeRows
+            .filter((change) => change.revisionId === revision.id)
+            .map((change) => ({
+              id: change.id,
+              field: change.field,
+              oldValue: change.oldValue,
+              newValue: change.newValue,
+              provenanceUrl: change.provenanceUrl,
+              rightsStatus: change.rightsStatus,
+              createdAt: change.createdAt.toISOString(),
+            })),
         })),
       };
     },

@@ -143,17 +143,18 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   actionDisabled: {
-    opacity: 0.5,
+    backgroundColor: tokens.color.disabled,
+    borderColor: tokens.color.controlBorder,
   },
   actionPressed: {
-    opacity: 0.76,
+    transform: [{ translateY: 1 }],
   },
   actionPrimary: {
     backgroundColor: tokens.color.accent,
   },
   actionSecondary: {
     backgroundColor: tokens.color.surface,
-    borderColor: tokens.color.border,
+    borderColor: tokens.color.controlBorder,
     borderWidth: 1,
   },
   actionSuccess: {

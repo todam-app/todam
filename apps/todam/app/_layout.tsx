@@ -8,6 +8,7 @@ import { Platform, View } from "react-native";
 import { Providers } from "../components/Providers";
 import { WebPageScrollProvider } from "../components/PageScrollView";
 import { WebNavigation } from "../components/WebNavigation";
+import { PUBLIC_WEB_URL } from "../lib/config";
 
 const DEFAULT_WEB_TITLE = "Todam - Journal de spectacles";
 const TODAM_PAGE_BACKGROUND = "#F7F3EC";
@@ -24,7 +25,37 @@ export default function RootLayout() {
     <Providers>
       <Head>
         <title>{DEFAULT_WEB_TITLE}</title>
-        <link href="/favicon.ico?v=1" rel="icon" />
+        <link href="/favicon.svg?v=2" rel="icon" type="image/svg+xml" />
+        <meta
+          content="Découvrez le théâtre, l’opéra et le ballet, puis gardez la mémoire de chaque spectacle dans votre journal Todam."
+          name="description"
+        />
+        <meta content="Todam — votre journal du spectacle vivant" property="og:title" />
+        <meta
+          content="Découvrez les spectacles, notez ce que vous avez vu et partagez vos listes."
+          property="og:description"
+        />
+        <meta
+          content={`${PUBLIC_WEB_URL}/og/todam-open-graph.png`}
+          property="og:image"
+        />
+        <meta content="1200" property="og:image:width" />
+        <meta content="630" property="og:image:height" />
+        <meta content="fr_FR" property="og:locale" />
+        <meta content="website" property="og:type" />
+        <meta content="summary_large_image" name="twitter:card" />
+        <meta
+          content="Todam — votre journal du spectacle vivant"
+          name="twitter:title"
+        />
+        <meta
+          content="Découvrez les spectacles, notez ce que vous avez vu et partagez vos listes."
+          name="twitter:description"
+        />
+        <meta
+          content={`${PUBLIC_WEB_URL}/og/todam-open-graph.png`}
+          name="twitter:image"
+        />
       </Head>
       <StatusBar style="dark" />
       <ThemeProvider value={TODAM_NAVIGATION_THEME}>
@@ -53,6 +84,14 @@ export default function RootLayout() {
                 <Stack.Screen
                   name="production/[slug]"
                   options={{ headerTitle: "Spectacle" }}
+                />
+                <Stack.Screen
+                  name="les-coulisses"
+                  options={{ headerTitle: "Les coulisses" }}
+                />
+                <Stack.Screen
+                  name="signaler"
+                  options={{ headerTitle: "Signaler une information" }}
                 />
                 <Stack.Screen
                   name="sign-in"

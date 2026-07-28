@@ -1,6 +1,7 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { tokens } from "@todam/design-system";
 import {
+  Platform,
   Pressable,
   StyleSheet,
   TextInput,
@@ -15,6 +16,7 @@ interface SearchBarProps {
   onSubmit: () => void;
   placeholder: string;
   value: string;
+  webName?: string;
 }
 
 export function SearchBar({
@@ -24,6 +26,7 @@ export function SearchBar({
   onSubmit,
   placeholder,
   value,
+  webName = "search",
 }: SearchBarProps) {
   const searchDisabled = value.trim().length < 2;
 
@@ -48,6 +51,9 @@ export function SearchBar({
         returnKeyType="search"
         style={styles.input}
         value={value}
+        {...(Platform.OS === "web"
+          ? ({ name: webName } as unknown as TextInputProps)
+          : {})}
       />
       {value.length > 0 ? (
         <Pressable
@@ -81,7 +87,7 @@ export function SearchBar({
       >
         <Ionicons
           accessibilityElementsHidden
-          color={tokens.color.ink}
+          color={searchDisabled ? tokens.color.muted : tokens.color.ink}
           importantForAccessibility="no"
           name="search"
           size={21}
@@ -99,7 +105,9 @@ const styles = StyleSheet.create({
     width: tokens.minimumTouchTarget,
   },
   actionDisabled: {
-    opacity: 0.4,
+    backgroundColor: tokens.color.disabled,
+    borderLeftColor: tokens.color.controlBorder,
+    borderLeftWidth: 1,
   },
   actionPressed: {
     opacity: 0.65,

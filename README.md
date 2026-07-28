@@ -7,14 +7,23 @@ que l'on a vus ou que l'on souhaite voir. L'objectif est de proposer au théâtr
 l'opéra et au ballet un journal personnel et un catalogue communautaire aussi simple à
 utiliser qu'une application de référence pour le cinéma.
 
-Le Sprint 0 contient une première boucle Web fonctionnelle sur le catalogue du Théâtre
-des Muses : compte, recherche, représentations, statut « Vu », note, liste « À voir » et
-profil.
+La bêta pilote Web comprend un catalogue éditorialisé, une démonstration publique de la
+programmation 2026–2027 de l’Hexagone Scène nationale, des fiches spectacle complètes,
+un journal filtrable, des avis et des listes partageables. Les lieux et les compagnies
+sont lus depuis PostgreSQL par l’API : les routes publiques sont génériques et ne
+contiennent aucune fiche métier codée en dur.
+
+Les salles disposent d’un parcours de vérification et de correction. Une compagnie peut
+revendiquer sa fiche puis préparer une révision dans un brouillon distinct de la version
+publique. La publication, le refus et la restauration restent validés par un rôle Todam
+pendant le pilote.
 
 ## Documentation
 
 - [Fiche produit](docs/FICHE_PRODUIT.md)
 - [Architecture technique](docs/ARCHITECTURE_TECHNIQUE.md)
+- [Approvisionnement et qualité du catalogue](docs/APPROVISIONNEMENT_CATALOGUE.md)
+- [Fonctions sociales et modération](docs/MODERATION_V2.md)
 - [Déploiement OVHcloud avec Coolify](docs/DEPLOIEMENT_OVH_COOLIFY.md)
 - [Préparation du lancement légal](docs/LANCEMENT_LEGAL.md)
 - [Registre des traitements](docs/REGISTRE_TRAITEMENTS.md)
@@ -55,7 +64,8 @@ start-todam.cmd
 
 Le script crée automatiquement le fichier `.env` lors du premier lancement et utilise le
 corpus privé du Théâtre des Muses lorsqu'il est disponible. Sinon, il importe la fixture
-synthétique du dépôt.
+synthétique du dépôt. Ce jeu de développement historique est distinct de la cohorte
+publique du pilote.
 
 Le démarrage manuel reste possible :
 
@@ -65,8 +75,13 @@ pnpm install
 pnpm dev:db
 pnpm db:migrate
 pnpm catalog:import --file data/fixtures/theatre-des-muses.sample.json --apply
+pnpm catalog:seed:hexagone --apply
 pnpm dev
 ```
+
+La commande Hexagone importe des métadonnées factuelles sourcées, des résumés originaux
+Todam et aucun visuel tiers. Elle conserve les entités dans la base et peut être rejouée
+sans transformer les pages React en catalogue codé en dur.
 
 L'application Web répond sur `http://localhost:8081`, l'API sur `http://localhost:3000`
 et sa documentation sur `http://localhost:3000/documentation`.
@@ -113,6 +128,7 @@ Consultez [CONTRIBUTING.md](CONTRIBUTING.md) avant de proposer une modification.
 ## English summary
 
 Todam is an open-source, France-first journal and community catalogue for live
-performances: theatre, opera and ballet. Sprint 0 implements its first end-to-end Web
-loop. Client-side code is licensed under Apache-2.0, server-side code under AGPL-3.0,
-and contributions use the DCO without a CLA.
+performances: theatre, opera and ballet. Its Web pilot includes sourced public catalogue
+pages, member journals and lists, and moderated venue/company workflows. Client-side
+code is licensed under Apache-2.0, server-side code under AGPL-3.0, and contributions
+use the DCO without a CLA.

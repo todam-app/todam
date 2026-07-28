@@ -18,13 +18,32 @@ Son nom est injecté hors Git avec `LEGAL_OPERATOR_NAME` avant l'ouverture.
 
 ## Journal personnel
 
-- Données : spectacles vus, représentations, dates, notes et liste « À voir ».
-- Finalité : fournir le journal culturel personnel et son export.
+- Données : spectacles vus, représentations, dates, notes, critiques, listes, biographie
+  et réglages de visibilité.
+- Finalité : fournir le journal culturel personnel, les fonctions de partage choisies et
+  leur export.
 - Base : exécution du contrat.
 - Destinataires : Todam et OVHcloud.
 - Durée : vie du compte, puis suppression active sous 30 jours et sauvegardes sous 90
   jours.
 - Mesures : contrôle par identifiant utilisateur et tests d'isolation.
+
+## Revendications et contributions professionnelles
+
+- Personnes : représentants de compagnies qui demandent ou obtiennent un rattachement.
+- Données : identité déclarée, rôle, e-mail professionnel, site officiel, preuve ou
+  explication, déclaration d'autorité, décision, rattachement, révisions proposées,
+  provenance et historique de validation.
+- Finalité : vérifier l'autorité du représentant, permettre la correction contrôlée du
+  catalogue et conserver sa traçabilité éditoriale.
+- Base : exécution du service demandé ; intérêt légitime à préserver un catalogue
+  fiable, documenter les droits et protéger les tiers.
+- Destinataires : personnes Todam autorisées et OVHcloud pour l'hébergement.
+- Durée : vie du compte pour les demandes et rattachements ; suppression avec le compte.
+  Les révisions intégrées restent dans l'historique du catalogue, avec suppression du
+  lien vers l'auteur lors de la suppression du compte.
+- Mesures : contrôle d'accès par rôle, brouillon non public, validation manuelle,
+  journal des décisions et autorisations côté serveur.
 
 ## E-mails transactionnels
 
@@ -52,10 +71,14 @@ Son nom est injecté hors Git avec `LEGAL_OPERATOR_NAME` avant l'ouverture.
 - Destinataires : Todam, OVHcloud et Sentry en région UE.
 - Durée : 6 mois maximum, sauf incident documenté.
 
-## Modération V2
+## Signalements et modération
 
 - Données : contenu public, signalement, motif, décision et recours.
 - Finalité : héberger légalement les contenus et protéger les utilisateurs.
 - Base : obligation légale et intérêt légitime.
-- Activation : interdite avant la procédure et le journal décrits dans
-  `MODERATION_V2.md`.
+- Destinataires : personnes Todam autorisées et OVHcloud pour l'hébergement.
+- Durée : temps nécessaire au traitement et à la justification de la décision. Lors de
+  la suppression d'un compte, son lien avec le signalement est retiré ; le signalement
+  et sa décision peuvent rester conservés sans cet identifiant.
+- Mesures : file réservée aux rôles autorisés, motif de décision et procédure décrits
+  dans `MODERATION_V2.md`.

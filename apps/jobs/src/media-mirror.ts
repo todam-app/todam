@@ -164,7 +164,7 @@ export async function mirrorPendingMedia(
         eq(mediaAssets.isActive, true),
         eq(mediaAssets.storagePolicy, "mirror"),
         isNull(mediaAssets.storageKey),
-        sql<boolean>`${mediaAssets.rightsStatus} in ('open_license', 'permission_granted')`,
+        sql<boolean>`${mediaAssets.rightsStatus} in ('open_license', 'permission_granted', 'todam_original')`,
         sql<boolean>`(${mediaAssets.validUntil} is null or ${mediaAssets.validUntil} > now())`,
       ),
     )

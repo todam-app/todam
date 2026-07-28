@@ -32,6 +32,61 @@ const timestamps = {
 export const roleEnum = pgEnum("user_role", ["member", "trusted_contributor", "admin"]);
 export const disciplineEnum = pgEnum("discipline", ["theatre", "opera", "ballet"]);
 export const audienceEnum = pgEnum("audience", ["general", "family", "children"]);
+export const profileVisibilityEnum = pgEnum("profile_visibility", [
+  "public",
+  "private",
+]);
+export const publicationStatusEnum = pgEnum("publication_status", [
+  "draft",
+  "published",
+  "hidden",
+]);
+export const contentVisibilityEnum = pgEnum("content_visibility", [
+  "public",
+  "private",
+]);
+export const descriptionKindEnum = pgEnum("description_kind", ["short", "full"]);
+export const reviewStatusEnum = pgEnum("review_status", [
+  "published",
+  "hidden",
+  "rejected",
+]);
+export const claimStatusEnum = pgEnum("claim_status", [
+  "pending",
+  "approved",
+  "rejected",
+  "revoked",
+]);
+export const companyMembershipRoleEnum = pgEnum("company_membership_role", [
+  "representative",
+  "editor",
+  "manager",
+]);
+export const catalogRevisionStatusEnum = pgEnum("catalog_revision_status", [
+  "draft",
+  "submitted",
+  "approved",
+  "rejected",
+  "superseded",
+]);
+export const catalogRevisionTargetEnum = pgEnum("catalog_revision_target", [
+  "company",
+  "production",
+]);
+export const contentReportTargetEnum = pgEnum("content_report_target", [
+  "production",
+  "venue",
+  "company",
+  "member",
+  "list",
+  "review",
+]);
+export const contentReportStatusEnum = pgEnum("content_report_status", [
+  "open",
+  "reviewing",
+  "resolved",
+  "dismissed",
+]);
 export const performanceStatusEnum = pgEnum("performance_status", [
   "scheduled",
   "completed",
@@ -55,6 +110,7 @@ export const rightsStatusEnum = pgEnum("rights_status", [
   "open_license",
   "contractual_display",
   "hotlink_only",
+  "todam_original",
 ]);
 export const sourceConnectorKindEnum = pgEnum("source_connector_kind", [
   "file",
@@ -109,6 +165,13 @@ export const user = pgTable(
     role: roleEnum("role").default("member").notNull(),
     homeLocality: text("home_locality"),
     homeCountryCode: text("home_country_code"),
+    homeOnboardingCompleted: boolean("home_onboarding_completed")
+      .default(false)
+      .notNull(),
+    profileVisibility: profileVisibilityEnum("profile_visibility")
+      .default("public")
+      .notNull(),
+    bio: text("bio"),
     ...timestamps,
   },
   (table) => [
@@ -338,6 +401,7 @@ export const venues = pgTable(
     locality: text("locality").notNull(),
     countryCode: text("country_code").notNull(),
     timezone: text("timezone").notNull(),
+    officialUrl: text("official_url"),
     coordinates: geometry("coordinates", {
       type: "point",
       mode: "xy",
@@ -349,6 +413,37 @@ export const venues = pgTable(
     uniqueIndex("venues_slug_unique").on(table.slug),
     index("venues_name_trgm_idx").using("gin", sql`${table.name} gin_trgm_ops`),
     index("venues_locality_country_idx").on(table.locality, table.countryCode),
+  ],
+);
+
+export const companies = pgTable(
+  "companies",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    slug: text("slug").notNull(),
+    name: text("name").notNull(),
+    shortDescription: text("short_description"),
+    description: text("description"),
+    officialUrl: text("official_url"),
+    locality: text("locality"),
+    countryCode: text("country_code"),
+    publicationStatus: publicationStatusEnum("publication_status")
+      .default("draft")
+      .notNull(),
+    reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
+    reviewedBy: text("reviewed_by").references(() => user.id, {
+      onDelete: "set null",
+    }),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("companies_slug_unique").on(table.slug),
+    index("companies_name_trgm_idx").using("gin", sql`${table.name} gin_trgm_ops`),
+    index("companies_publication_idx").on(table.publicationStatus, table.name),
+    check(
+      "companies_country_code_format",
+      sql`${table.countryCode} is null or ${table.countryCode} ~ '^[A-Z]{2}$'`,
+    ),
   ],
 );
 
@@ -377,18 +472,96 @@ export const productions = pgTable(
     title: text("title").notNull(),
     discipline: disciplineEnum("discipline").notNull(),
     audience: audienceEnum("audience").default("general").notNull(),
+    minimumAge: integer("minimum_age"),
     durationMinutes: integer("duration_minutes"),
     language: text("language"),
     officialUrl: text("official_url"),
     isActive: boolean("is_active").default(true).notNull(),
+    publicationStatus: publicationStatusEnum("publication_status")
+      .default("draft")
+      .notNull(),
+    reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
+    reviewedBy: text("reviewed_by").references(() => user.id, {
+      onDelete: "set null",
+    }),
     ...timestamps,
   },
   (table) => [
     uniqueIndex("productions_slug_unique").on(table.slug),
     index("productions_title_trgm_idx").using("gin", sql`${table.title} gin_trgm_ops`),
+    index("productions_publication_idx").on(table.publicationStatus, table.discipline),
     check(
       "productions_duration_positive",
       sql`${table.durationMinutes} is null or ${table.durationMinutes} > 0`,
+    ),
+    check(
+      "productions_minimum_age_range",
+      sql`${table.minimumAge} is null or (${table.minimumAge} >= 0 and ${table.minimumAge} <= 99)`,
+    ),
+  ],
+);
+
+export const productionCompanies = pgTable(
+  "production_companies",
+  {
+    productionId: uuid("production_id")
+      .notNull()
+      .references(() => productions.id, { onDelete: "cascade" }),
+    companyId: uuid("company_id")
+      .notNull()
+      .references(() => companies.id, { onDelete: "cascade" }),
+    isPrimary: boolean("is_primary").default(false).notNull(),
+    position: integer("position").default(0).notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.productionId, table.companyId] }),
+    index("production_companies_company_idx").on(table.companyId),
+    uniqueIndex("production_companies_primary_unique")
+      .on(table.productionId)
+      .where(sql`${table.isPrimary} = true`),
+    index("production_companies_order_idx").on(
+      table.productionId,
+      table.isPrimary,
+      table.position,
+    ),
+  ],
+);
+
+export const productionDescriptions = pgTable(
+  "production_descriptions",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    productionId: uuid("production_id")
+      .notNull()
+      .references(() => productions.id, { onDelete: "cascade" }),
+    locale: text("locale").default("fr").notNull(),
+    kind: descriptionKindEnum("kind").notNull(),
+    body: text("body").notNull(),
+    sourceDocumentId: uuid("source_document_id").references(() => sourceDocuments.id, {
+      onDelete: "set null",
+    }),
+    sourceUrl: text("source_url"),
+    rightsStatus: rightsStatusEnum("rights_status").notNull(),
+    license: text("license"),
+    lastVerifiedAt: timestamp("last_verified_at", {
+      withTimezone: true,
+    }).notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("production_descriptions_locale_kind_unique").on(
+      table.productionId,
+      table.locale,
+      table.kind,
+    ),
+    index("production_descriptions_source_idx").on(table.sourceDocumentId),
+    check(
+      "production_descriptions_source_present",
+      sql`${table.sourceDocumentId} is not null or ${table.sourceUrl} is not null or ${table.rightsStatus} = 'todam_original'`,
+    ),
+    check(
+      "production_descriptions_open_license_named",
+      sql`${table.rightsStatus} <> 'open_license' or ${table.license} is not null`,
     ),
   ],
 );
@@ -438,6 +611,10 @@ export const performances = pgTable(
     ),
     index("performances_starts_at_idx").on(table.startsAt),
     index("performances_venue_idx").on(table.venueId),
+    check(
+      "performances_end_after_start",
+      sql`${table.endsAt} is null or ${table.endsAt} > ${table.startsAt}`,
+    ),
   ],
 );
 
@@ -485,7 +662,7 @@ export const mediaAssets = pgTable(
     ),
     check(
       "media_assets_storage_rights",
-      sql`${table.storagePolicy} <> 'mirror' or ${table.rightsStatus} in ('open_license', 'permission_granted')`,
+      sql`${table.storagePolicy} <> 'mirror' or ${table.rightsStatus} in ('open_license', 'permission_granted', 'todam_original')`,
     ),
     check(
       "media_assets_open_license_named",
@@ -494,6 +671,10 @@ export const mediaAssets = pgTable(
     check(
       "media_assets_sha256_format",
       sql`${table.sha256} is null or ${table.sha256} ~ '^[0-9a-f]{64}$'`,
+    ),
+    check(
+      "media_assets_validity_window",
+      sql`${table.validFrom} is null or ${table.validUntil} is null or ${table.validUntil} > ${table.validFrom}`,
     ),
   ],
 );
@@ -512,6 +693,9 @@ export const productionMedia = pgTable(
   },
   (table) => [
     primaryKey({ columns: [table.productionId, table.mediaId] }),
+    uniqueIndex("production_media_primary_unique")
+      .on(table.productionId)
+      .where(sql`${table.isPrimary} = true`),
     index("production_media_order_idx").on(
       table.productionId,
       table.isPrimary,
@@ -573,6 +757,11 @@ export const artistSources = provenanceTable(
   "artist_id",
   () => artists.id,
 );
+export const companySources = provenanceTable(
+  "company_sources",
+  "company_id",
+  () => companies.id,
+);
 export const productionSources = provenanceTable(
   "production_sources",
   "production_id",
@@ -605,6 +794,12 @@ export const diaryEntries = pgTable(
     uniqueIndex("diary_entries_user_performance_unique")
       .on(table.userId, table.performanceId)
       .where(sql`${table.performanceId} is not null`),
+    uniqueIndex("diary_entries_user_production_date_unique")
+      .on(table.userId, table.productionId, table.attendedOn)
+      .where(sql`${table.performanceId} is null and ${table.attendedOn} is not null`),
+    uniqueIndex("diary_entries_user_production_undated_unique")
+      .on(table.userId, table.productionId)
+      .where(sql`${table.performanceId} is null and ${table.attendedOn} is null`),
   ],
 );
 
@@ -643,24 +838,247 @@ export const watchlistEntries = pgTable(
   ],
 );
 
+export const reviews = pgTable(
+  "reviews",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    productionId: uuid("production_id")
+      .notNull()
+      .references(() => productions.id, { onDelete: "cascade" }),
+    body: text("body").notNull(),
+    containsSpoiler: boolean("contains_spoiler").default(false).notNull(),
+    visibility: contentVisibilityEnum("visibility").default("private").notNull(),
+    status: reviewStatusEnum("status").default("published").notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("reviews_user_production_unique").on(table.userId, table.productionId),
+    index("reviews_production_public_idx").on(
+      table.productionId,
+      table.status,
+      table.createdAt,
+    ),
+    check(
+      "reviews_body_not_blank",
+      sql`length(btrim(${table.body})) between 20 and 5000`,
+    ),
+  ],
+);
+
+export const lists = pgTable(
+  "lists",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    slug: text("slug").notNull(),
+    name: text("name").notNull(),
+    description: text("description"),
+    visibility: contentVisibilityEnum("visibility").default("private").notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("lists_user_slug_unique").on(table.userId, table.slug),
+    index("lists_user_updated_idx").on(table.userId, table.updatedAt),
+    check("lists_name_not_blank", sql`length(btrim(${table.name})) between 1 and 80`),
+  ],
+);
+
+export const listItems = pgTable(
+  "list_items",
+  {
+    listId: uuid("list_id")
+      .notNull()
+      .references(() => lists.id, { onDelete: "cascade" }),
+    productionId: uuid("production_id")
+      .notNull()
+      .references(() => productions.id, { onDelete: "cascade" }),
+    position: integer("position").default(0).notNull(),
+    addedAt: timestamp("added_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.listId, table.productionId] }),
+    index("list_items_order_idx").on(table.listId, table.position, table.addedAt),
+    check("list_items_position_non_negative", sql`${table.position} >= 0`),
+  ],
+);
+
+export const contentReports = pgTable(
+  "content_reports",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    reporterUserId: text("reporter_user_id").references(() => user.id, {
+      onDelete: "set null",
+    }),
+    targetType: contentReportTargetEnum("target_type").notNull(),
+    targetId: text("target_id").notNull(),
+    reason: text("reason").notNull(),
+    status: contentReportStatusEnum("status").default("open").notNull(),
+    decision: text("decision"),
+    reviewedBy: text("reviewed_by").references(() => user.id, {
+      onDelete: "set null",
+    }),
+    reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
+    ...timestamps,
+  },
+  (table) => [
+    index("content_reports_queue_idx").on(table.status, table.createdAt),
+    index("content_reports_target_idx").on(table.targetType, table.targetId),
+    check(
+      "content_reports_reason_not_blank",
+      sql`length(btrim(${table.reason})) between 10 and 2000`,
+    ),
+  ],
+);
+
+export const companyClaims = pgTable(
+  "company_claims",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    companyId: uuid("company_id")
+      .notNull()
+      .references(() => companies.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    representativeName: text("representative_name").notNull(),
+    roleTitle: text("role_title").notNull(),
+    professionalEmail: citext("professional_email").notNull(),
+    officialWebsiteUrl: text("official_website_url").notNull(),
+    evidence: text("evidence").notNull(),
+    authorityConfirmed: boolean("authority_confirmed").notNull(),
+    status: claimStatusEnum("status").default("pending").notNull(),
+    reviewedBy: text("reviewed_by").references(() => user.id, {
+      onDelete: "set null",
+    }),
+    reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
+    decisionReason: text("decision_reason"),
+    ...timestamps,
+  },
+  (table) => [
+    index("company_claims_queue_idx").on(table.status, table.createdAt),
+    index("company_claims_company_user_idx").on(table.companyId, table.userId),
+    uniqueIndex("company_claims_user_active_unique")
+      .on(table.userId)
+      .where(sql`${table.status} in ('pending', 'approved')`),
+    check(
+      "company_claims_authority_confirmed",
+      sql`${table.authorityConfirmed} = true`,
+    ),
+  ],
+);
+
+export const companyMemberships = pgTable(
+  "company_memberships",
+  {
+    companyId: uuid("company_id")
+      .notNull()
+      .references(() => companies.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    role: companyMembershipRoleEnum("role").default("representative").notNull(),
+    roleTitle: text("role_title").notNull(),
+    createdBy: text("created_by").references(() => user.id, {
+      onDelete: "set null",
+    }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.companyId, table.userId] }),
+    uniqueIndex("company_memberships_user_unique").on(table.userId),
+  ],
+);
+
+export const catalogRevisions = pgTable(
+  "catalog_revisions",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    companyId: uuid("company_id")
+      .notNull()
+      .references(() => companies.id, { onDelete: "cascade" }),
+    authorUserId: text("author_user_id").references(() => user.id, {
+      onDelete: "set null",
+    }),
+    targetType: catalogRevisionTargetEnum("target_type").notNull(),
+    targetId: uuid("target_id").notNull(),
+    status: catalogRevisionStatusEnum("status").default("draft").notNull(),
+    justification: text("justification"),
+    submittedAt: timestamp("submitted_at", { withTimezone: true }),
+    reviewedBy: text("reviewed_by").references(() => user.id, {
+      onDelete: "set null",
+    }),
+    reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
+    decisionReason: text("decision_reason"),
+    ...timestamps,
+  },
+  (table) => [
+    index("catalog_revisions_company_idx").on(
+      table.companyId,
+      table.status,
+      table.updatedAt,
+    ),
+    index("catalog_revisions_target_idx").on(table.targetType, table.targetId),
+  ],
+);
+
+export const catalogRevisionChanges = pgTable(
+  "catalog_revision_changes",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    revisionId: uuid("revision_id")
+      .notNull()
+      .references(() => catalogRevisions.id, { onDelete: "cascade" }),
+    field: text("field").notNull(),
+    oldValue: jsonb("old_value").$type<unknown>(),
+    newValue: jsonb("new_value").$type<unknown>(),
+    provenanceUrl: text("provenance_url"),
+    rightsStatus: rightsStatusEnum("rights_status"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex("catalog_revision_changes_field_unique").on(
+      table.revisionId,
+      table.field,
+    ),
+    index("catalog_revision_changes_revision_idx").on(table.revisionId),
+  ],
+);
+
 export const schema = {
   account,
   accountDeletionRequests,
   artistSources,
   artists,
+  catalogRevisionChanges,
+  catalogRevisions,
   catalogSources,
+  companies,
+  companyClaims,
+  companyMemberships,
+  companySources,
+  contentReports,
   diaryEntries,
   importBatches,
   legalAcceptances,
+  listItems,
+  lists,
   mediaAssets,
   performanceSources,
   performanceMedia,
   performances,
+  productionCompanies,
   productionCredits,
+  productionDescriptions,
   productionMedia,
   productionSources,
   productions,
   ratings,
+  reviews,
   session,
   sourceDocuments,
   sourceSyncRuns,

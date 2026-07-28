@@ -33,7 +33,7 @@ export function HomeCitySelector({ city }: { city: CityOption | null }) {
         testID="home-city-selector"
       >
         <View className="min-w-0 flex-1 gap-1">
-          <Text className="text-xs font-extrabold uppercase tracking-[1.5px] text-accent">
+          <Text className="text-xs font-bold uppercase tracking-[1.5px] text-accent">
             Votre ville
           </Text>
           <Text className="text-xl font-semibold text-ink">{city.label}</Text>
@@ -65,16 +65,19 @@ export function HomeCitySelector({ city }: { city: CityOption | null }) {
     >
       <View className="gap-1">
         <Text className="text-lg font-semibold text-ink">Choisissez votre ville</Text>
-        <Text className="leading-5 text-muted">
+        <Text className="text-base leading-5 text-muted">
           Todam affichera les spectacles programmés dans un rayon de 50 km.
         </Text>
       </View>
       <TextField
         autoCapitalize="words"
+        autoComplete="off"
         label="Ville"
         onChangeText={setInput}
         placeholder="Ex. Monaco"
         value={input}
+        webAutoComplete="address-level2"
+        webName="home-city"
       />
       {input.trim().length === 0 ? (
         <Text className="text-sm text-muted">
@@ -112,15 +115,17 @@ export function HomeCitySelector({ city }: { city: CityOption | null }) {
           {"La ville n'a pas été enregistrée. Réessayez."}
         </Text>
       ) : null}
-      <Text className="text-sm leading-5 text-muted">
-        Cette ville facultative sera enregistrée dans votre compte. Vous pourrez la
-        modifier ou la supprimer à tout moment.{" "}
+      <View className="flex-row flex-wrap items-center gap-x-1">
+        <Text className="text-sm leading-5 text-muted">
+          Cette ville facultative sera enregistrée dans votre compte. Vous pourrez la
+          modifier ou la supprimer à tout moment.
+        </Text>
         <Link href="/confidentialite" asChild>
-          <Pressable accessibilityRole="link">
-            <Text className="font-semibold text-accent">En savoir plus</Text>
+          <Pressable accessibilityRole="link" className="min-h-11 justify-center">
+            <Text className="text-base font-semibold text-accent">En savoir plus</Text>
           </Pressable>
         </Link>
-      </Text>
+      </View>
       {city ? (
         <View className="self-start">
           <Button

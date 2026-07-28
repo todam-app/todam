@@ -56,7 +56,7 @@ contesté. La revendication ultérieure de la fiche par une compagnie ou un thé
 de confirmer ou de remplacer l'affiche, mais elle n'est pas nécessaire pour contribuer.
 
 Todam ne génère pas de fausse affiche pour combler une absence. Une production sans
-visuel reste publiable et affiche explicitement « Affiche non disponible ».
+visuel reste publiable et affiche explicitement « Visuel non publié ».
 
 L'ajout en masse accepte à terme :
 
@@ -276,7 +276,29 @@ minimum :
 2. une couverture géographique et temporelle ;
 3. un document source et sa licence ;
 4. des identifiants externes stables ;
-5. pour chaque image, un crédit et une politique de stockage explicites.
+5. les compagnies comme entités distinctes, puis leurs liens ordonnés avec chaque
+   production et, le cas échéant, une seule compagnie principale ;
+6. les descriptions courtes et longues séparées, avec langue, provenance, statut de
+   droits, licence éventuelle et date de dernière vérification ;
+7. pour chaque image, un crédit et une politique de stockage explicites.
+
+Les présentations de compagnie issues de sources factuelles sont reformulées par Todam.
+Un texte promotionnel tiers n’est importé que si son droit de republication est
+documenté. Les crédits artistiques conservent eux aussi un document source lié à la
+production et à chaque identité d’artiste importée.
+
+Les lieux, compagnies, œuvres, artistes, productions, descriptions, représentations et
+visuels ne sont jamais définis dans les écrans de l’application. Ils sont importés dans
+la base puis servis par les routes génériques à partir de leur identifiant et de leur
+`slug`. L’Hexagone est un lot pilote reproductible de cette même chaîne d’import, pas
+une page de données codées en dur.
+
+Une modification d’une compagnie, d’une description ou de son document source replace la
+production publiée concernée en `draft`. Une suppression dans un flux déclaré complet
+retire la description de cette source et déclenche le même contrôle éditorial. La
+republication exige de nouveau une compagnie principale publiée, des descriptions
+françaises courte et longue publiables, et une provenance documentée des lieux et des
+représentations.
 
 Les tests doivent prouver la pagination, l'idempotence, les annulations, la disparition
 d'une image et le refus d'une copie sans droit. Le connecteur reste désactivé tant que

@@ -1,11 +1,34 @@
 import { z } from "zod";
 
 import {
+  CompanyDetailSchema,
+  CompanySummarySchema,
+  ContentVisibilitySchema,
+  DisciplineSchema,
   PerformanceSchema,
   ProductionCardSchema,
   ProductionDetailSchema,
   UuidSchema,
+  VenueDetailSchema,
+  VenueSummarySchema,
 } from "./catalog.js";
+import {
+  MemberJournalResponseSchema,
+  OwnReviewsResponseSchema,
+  ProfileSettingsSchema,
+  PublicMemberSchema,
+  UserListDetailSchema,
+  UserListSummarySchema,
+  WatchlistResponseSchema,
+} from "./member.js";
+import {
+  CatalogRevisionSchema,
+  CompanyClaimSchema,
+  CompanyMembershipSchema,
+  EditableProductionDetailSchema,
+  EditableProductionSummarySchema,
+} from "./professional.js";
+import { UsernameSchema } from "./identity.js";
 
 export const ProblemDetailsSchema = z.object({
   type: z.string(),
@@ -30,11 +53,11 @@ export const UsernameSignInBodySchema = z.object({
 });
 
 export const UpdateUsernameBodySchema = z.object({
-  username: z.string().trim().min(3).max(30),
+  username: UsernameSchema,
 });
 
 export const UpdateUsernameResponseSchema = z.object({
-  username: z.string().min(3).max(30),
+  username: UsernameSchema,
 });
 
 export const EmailChangeBodySchema = z.object({
@@ -56,15 +79,49 @@ export const PasswordChangeResponseSchema = z.object({
   changed: z.literal(true),
 });
 
-export const SearchQuerySchema = z.object({
-  q: z.string().trim().min(2).max(100),
-  cursor: z.string().nullable().optional(),
-  limit: z.coerce.number().int().min(1).max(50).default(20),
-});
+export const SearchQuerySchema = z
+  .object({
+    q: z.string().trim().max(100).default(""),
+    type: z
+      .enum(["productions", "venues", "companies", "members"])
+      .default("productions"),
+    discipline: DisciplineSchema.optional(),
+    locality: z.string().trim().min(1).max(120).optional(),
+    radiusKm: z.coerce.number().int().min(1).max(300).optional(),
+    from: z.string().date().optional(),
+    to: z.string().date().optional(),
+    temporal: z.enum(["upcoming", "past", "all"]).default("all"),
+    sort: z.enum(["relevance", "date", "proximity", "popularity"]).default("relevance"),
+    cursor: z.string().nullable().optional(),
+    limit: z.coerce.number().int().min(1).max(50).default(20),
+  })
+  .refine((value) => !value.from || !value.to || value.from <= value.to, {
+    message: "La date de début doit précéder la date de fin.",
+    path: ["to"],
+  })
+  .refine((value) => value.radiusKm === undefined || Boolean(value.locality), {
+    message: "Une ville est obligatoire pour appliquer un rayon.",
+    path: ["locality"],
+  })
+  .refine((value) => value.sort !== "proximity" || Boolean(value.locality), {
+    message: "Une ville est obligatoire pour trier par proximité.",
+    path: ["locality"],
+  });
 
 export const SearchResponseSchema = z.object({
-  items: z.array(ProductionCardSchema),
+  type: z.enum(["productions", "venues", "companies", "members"]),
+  total: z.number().int().nonnegative(),
+  productions: z.array(ProductionCardSchema),
+  venues: z.array(VenueSummarySchema),
+  companies: z.array(CompanySummarySchema),
+  members: z.array(
+    z.object({
+      username: z.string(),
+      bio: z.string().nullable(),
+    }),
+  ),
   nextCursor: z.string().nullable(),
+  suggestion: z.string().nullable(),
 });
 export type SearchResponse = z.infer<typeof SearchResponseSchema>;
 
@@ -100,6 +157,50 @@ export const ProductionParamsSchema = z.object({
   slug: z.string().min(1).max(240),
 });
 
+export const VenueParamsSchema = z.object({
+  slug: z.string().min(1).max(240),
+});
+
+export const CompanyParamsSchema = z.object({
+  slug: z.string().min(1).max(240),
+});
+
+export const MemberParamsSchema = z.object({
+  username: z.string().trim().min(3).max(30),
+});
+
+export const MemberListParamsSchema = MemberParamsSchema.extend({
+  slug: z.string().min(1).max(120),
+});
+
+export const ListIdParamsSchema = z.object({
+  listId: UuidSchema,
+});
+
+export const ListItemParamsSchema = ListIdParamsSchema.extend({
+  productionId: UuidSchema,
+});
+
+export const ReviewProductionParamsSchema = z.object({
+  productionId: UuidSchema,
+});
+
+export const CompanyIdParamsSchema = z.object({
+  companyId: UuidSchema,
+});
+
+export const CompanyProductionParamsSchema = CompanyIdParamsSchema.extend({
+  productionId: UuidSchema,
+});
+
+export const CompanyClaimIdParamsSchema = z.object({
+  claimId: UuidSchema,
+});
+
+export const CatalogRevisionIdParamsSchema = z.object({
+  revisionId: UuidSchema,
+});
+
 export const ProductionIdParamsSchema = z.object({
   id: UuidSchema,
 });
@@ -108,13 +209,61 @@ export const DiaryEntryIdParamsSchema = z.object({
   entryId: UuidSchema,
 });
 
+export const ContentReportBodySchema = z
+  .object({
+    targetType: z.enum(["production", "venue", "company", "member", "list", "review"]),
+    targetId: z.string().trim().min(1).max(240),
+    reason: z.string().trim().min(10).max(2000),
+  })
+  .superRefine((value, context) => {
+    if (
+      value.targetType !== "member" &&
+      !UuidSchema.safeParse(value.targetId).success
+    ) {
+      context.addIssue({
+        code: "custom",
+        message: "La référence du contenu est invalide.",
+        path: ["targetId"],
+      });
+    }
+  });
+export type ContentReportBody = z.infer<typeof ContentReportBodySchema>;
+
+export const ContentReportResponseSchema = z.object({
+  id: UuidSchema,
+  status: z.literal("open"),
+});
+export type ContentReportResponse = z.infer<typeof ContentReportResponseSchema>;
+
 export const ProductionResponseSchema = ProductionDetailSchema;
+export const VenueResponseSchema = VenueDetailSchema;
+export const CompanyResponseSchema = CompanyDetailSchema;
+export const MemberResponseSchema = PublicMemberSchema;
+export const MemberJournalPageSchema = MemberJournalResponseSchema;
+export const MemberListResponseSchema = UserListDetailSchema;
+export const ProfileSettingsResponseSchema = ProfileSettingsSchema;
+export const ListsResponseSchema = z.object({
+  items: z.array(UserListSummarySchema),
+});
+export const WatchlistPageSchema = WatchlistResponseSchema;
+export const OwnReviewsPageSchema = OwnReviewsResponseSchema;
+export const ListResponseSchema = UserListDetailSchema;
+export const EmptyResponseSchema = z.object({ ok: z.literal(true) });
 
 export const ViewerProductionStateSchema = z.object({
   productionId: UuidSchema,
   seen: z.boolean(),
   rating: z.number().int().min(1).max(10).nullable(),
   watchlisted: z.boolean(),
+  review: z
+    .object({
+      id: UuidSchema,
+      body: z.string(),
+      containsSpoiler: z.boolean(),
+      visibility: ContentVisibilitySchema,
+      status: z.enum(["published", "hidden", "rejected"]),
+    })
+    .nullable(),
 });
 export type ViewerProductionState = z.infer<typeof ViewerProductionStateSchema>;
 
@@ -170,7 +319,7 @@ export const DashboardSchema = z.object({
     seen: z.number().int().nonnegative(),
     ratings: z.number().int().nonnegative(),
     watchlist: z.number().int().nonnegative(),
-    lists: z.literal(0),
+    lists: z.number().int().nonnegative(),
   }),
   recentDiary: z.array(DiaryEntrySchema),
   ratingDistribution: RatingDistributionSchema,
@@ -223,3 +372,17 @@ export const PublicStatsSchema = z.object({
   generatedAt: z.string().datetime({ offset: true }),
 });
 export type PublicStats = z.infer<typeof PublicStatsSchema>;
+
+export const CompanyClaimResponseSchema = CompanyClaimSchema;
+export const CompanyClaimsResponseSchema = z.object({
+  items: z.array(CompanyClaimSchema),
+});
+export const CompanyMembershipsResponseSchema = z.object({
+  items: z.array(CompanyMembershipSchema),
+});
+export const CatalogRevisionResponseSchema = CatalogRevisionSchema;
+export const CatalogRevisionsResponseSchema = z.object({
+  items: z.array(CatalogRevisionSchema),
+});
+export const EditableProductionResponseSchema = EditableProductionSummarySchema;
+export const EditableProductionDetailResponseSchema = EditableProductionDetailSchema;

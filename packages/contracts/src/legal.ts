@@ -1,8 +1,11 @@
 import { z } from "zod";
 
-export const CURRENT_TERMS_VERSION = "1.0.0";
-export const CURRENT_PRIVACY_NOTICE_VERSION = "1.0.1";
-export const LEGAL_EFFECTIVE_DATE = "2026-07-26";
+import { UsernameSchema } from "./identity.js";
+import { RightsStatusSchema } from "./rights.js";
+
+export const CURRENT_TERMS_VERSION = "1.0.1";
+export const CURRENT_PRIVACY_NOTICE_VERSION = "1.0.2";
+export const LEGAL_EFFECTIVE_DATE = "2026-07-27";
 
 export const RegistrationChannelSchema = z.enum(["web", "android"]);
 export type RegistrationChannel = z.infer<typeof RegistrationChannelSchema>;
@@ -21,9 +24,9 @@ export const LegalCurrentResponseSchema = z.object({
 export type LegalCurrentResponse = z.infer<typeof LegalCurrentResponseSchema>;
 
 export const SignUpBodySchema = z.object({
-  name: z.string().trim().min(3).max(30),
-  username: z.string().trim().min(3).max(30),
-  displayUsername: z.string().trim().min(3).max(30),
+  name: UsernameSchema,
+  username: UsernameSchema,
+  displayUsername: UsernameSchema,
   email: z.string().email(),
   password: z.string().min(8),
   age15OrOlder: z.literal(true),
@@ -46,6 +49,8 @@ export const AccountExportSchema = z.object({
     email: z.string().email(),
     emailVerified: z.boolean(),
     createdAt: z.string().datetime({ offset: true }),
+    profileVisibility: z.enum(["public", "private"]),
+    bio: z.string().nullable(),
     homeCity: z
       .object({
         locality: z.string(),
@@ -82,6 +87,105 @@ export const AccountExportSchema = z.object({
     z.object({
       productionId: z.string().uuid(),
       addedAt: z.string().datetime({ offset: true }),
+    }),
+  ),
+  reviews: z.array(
+    z.object({
+      id: z.string().uuid(),
+      productionId: z.string().uuid(),
+      body: z.string(),
+      containsSpoiler: z.boolean(),
+      visibility: z.enum(["public", "private"]),
+      status: z.enum(["published", "hidden", "rejected"]),
+      createdAt: z.string().datetime({ offset: true }),
+      updatedAt: z.string().datetime({ offset: true }),
+    }),
+  ),
+  lists: z.array(
+    z.object({
+      id: z.string().uuid(),
+      slug: z.string(),
+      name: z.string(),
+      description: z.string().nullable(),
+      visibility: z.enum(["public", "private"]),
+      createdAt: z.string().datetime({ offset: true }),
+      updatedAt: z.string().datetime({ offset: true }),
+      items: z.array(
+        z.object({
+          productionId: z.string().uuid(),
+          position: z.number().int().nonnegative(),
+          addedAt: z.string().datetime({ offset: true }),
+        }),
+      ),
+    }),
+  ),
+  contentReports: z.array(
+    z.object({
+      id: z.string().uuid(),
+      targetType: z.enum([
+        "production",
+        "venue",
+        "company",
+        "member",
+        "list",
+        "review",
+      ]),
+      targetId: z.string(),
+      reason: z.string(),
+      status: z.enum(["open", "reviewing", "resolved", "dismissed"]),
+      decision: z.string().nullable(),
+      submittedAt: z.string().datetime({ offset: true }),
+      reviewedAt: z.string().datetime({ offset: true }).nullable(),
+    }),
+  ),
+  companyClaims: z.array(
+    z.object({
+      id: z.string().uuid(),
+      companyId: z.string().uuid(),
+      representativeName: z.string(),
+      roleTitle: z.string(),
+      professionalEmail: z.string().email(),
+      officialWebsiteUrl: z.string().url(),
+      evidence: z.string(),
+      authorityConfirmed: z.boolean(),
+      status: z.enum(["pending", "approved", "rejected", "revoked"]),
+      decisionReason: z.string().nullable(),
+      submittedAt: z.string().datetime({ offset: true }),
+      reviewedAt: z.string().datetime({ offset: true }).nullable(),
+    }),
+  ),
+  companyMemberships: z.array(
+    z.object({
+      companyId: z.string().uuid(),
+      role: z.enum(["representative", "editor", "manager"]),
+      roleTitle: z.string(),
+      createdAt: z.string().datetime({ offset: true }),
+    }),
+  ),
+  catalogRevisions: z.array(
+    z.object({
+      id: z.string().uuid(),
+      companyId: z.string().uuid(),
+      targetType: z.enum(["company", "production"]),
+      targetId: z.string().uuid(),
+      status: z.enum(["draft", "submitted", "approved", "rejected", "superseded"]),
+      justification: z.string().nullable(),
+      decisionReason: z.string().nullable(),
+      createdAt: z.string().datetime({ offset: true }),
+      updatedAt: z.string().datetime({ offset: true }),
+      submittedAt: z.string().datetime({ offset: true }).nullable(),
+      reviewedAt: z.string().datetime({ offset: true }).nullable(),
+      changes: z.array(
+        z.object({
+          id: z.string().uuid(),
+          field: z.string(),
+          oldValue: z.unknown(),
+          newValue: z.unknown(),
+          provenanceUrl: z.string().url().nullable(),
+          rightsStatus: RightsStatusSchema.nullable(),
+          createdAt: z.string().datetime({ offset: true }),
+        }),
+      ),
     }),
   ),
 });

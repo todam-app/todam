@@ -4,13 +4,18 @@ import {
 } from "@todam/contracts";
 import {
   catalogSources,
+  catalogRevisions,
+  companies,
   createDatabase,
   legalAcceptances,
+  lists,
   performances,
   productions,
+  productionCompanies,
   sourceDocuments,
   user,
   venues,
+  venueSources,
 } from "@todam/database";
 import type { EmailSender, TransactionalEmail } from "@todam/domain";
 import { eq } from "drizzle-orm";
@@ -65,15 +70,18 @@ async function seedCatalog() {
       homepageUrl: "https://www.letheatredesmuses.com/",
     })
     .returning({ id: catalogSources.id });
-  await db.insert(sourceDocuments).values({
-    sourceId: source!.id,
-    externalKey: "test.production",
-    title: "Fiche officielle",
-    url: "https://www.letheatredesmuses.com/programme-adulte/",
-    retrievedAt: new Date(),
-    rightsStatus: "factual_metadata_only",
-    license: null,
-  });
+  const [document] = await db
+    .insert(sourceDocuments)
+    .values({
+      sourceId: source!.id,
+      externalKey: "test.production",
+      title: "Fiche officielle",
+      url: "https://www.letheatredesmuses.com/programme-adulte/",
+      retrievedAt: new Date(),
+      rightsStatus: "factual_metadata_only",
+      license: null,
+    })
+    .returning({ id: sourceDocuments.id });
   const [venue] = await db
     .insert(venues)
     .values({
@@ -85,8 +93,14 @@ async function seedCatalog() {
       countryCode: "MC",
       timezone: "Europe/Monaco",
       coordinates: null,
+      officialUrl: "https://www.letheatredesmuses.com/",
     })
     .returning({ id: venues.id });
+  await db.insert(venueSources).values({
+    entityId: venue!.id,
+    documentId: document!.id,
+    externalKey: "test.venue",
+  });
   venueId = venue!.id;
   const [production] = await db
     .insert(productions)
@@ -95,6 +109,8 @@ async function seedCatalog() {
       title: "Le Rêve d'Élodie",
       discipline: "theatre",
       audience: "family",
+      publicationStatus: "published",
+      reviewedAt: new Date(),
       language: "français",
     })
     .returning({ id: productions.id });
@@ -203,9 +219,94 @@ describe("première boucle API sur PostgreSQL/PostGIS", () => {
     expect(privateDiary.statusCode).toBe(401);
     expect(privateDiaryRemoval.statusCode).toBe(401);
     expect(searchResponse.statusCode).toBe(200);
-    expect(searchResponse.json().items[0].title).toBe("Le Rêve d'Élodie");
+    expect(searchResponse.json().productions[0].title).toBe("Le Rêve d'Élodie");
     expect(accentedSearchResponse.statusCode).toBe(200);
-    expect(accentedSearchResponse.json().items[0].title).toBe("Le Rêve d'Élodie");
+    expect(accentedSearchResponse.json().productions[0].title).toBe("Le Rêve d'Élodie");
+  });
+
+  it("construit la programmation publique d'un lieu depuis les données publiées", async () => {
+    const [futureProduction, draftProduction] = await db
+      .insert(productions)
+      .values([
+        {
+          slug: "creation-future-muses",
+          title: "Création future",
+          discipline: "theatre",
+          audience: "general",
+          publicationStatus: "published",
+          reviewedAt: new Date(),
+          language: "français",
+        },
+        {
+          slug: "creation-brouillon-muses",
+          title: "Création en brouillon",
+          discipline: "theatre",
+          audience: "general",
+          publicationStatus: "draft",
+          language: "français",
+        },
+      ])
+      .returning({ id: productions.id });
+    const [futurePerformance] = await db
+      .insert(performances)
+      .values([
+        {
+          productionId: futureProduction!.id,
+          venueId,
+          startsAt: new Date("2099-03-18T19:30:00.000Z"),
+          status: "scheduled",
+          officialUrl: "https://billetterie.example.test/creation-future",
+        },
+        {
+          productionId: draftProduction!.id,
+          venueId,
+          startsAt: new Date("2099-04-12T19:30:00.000Z"),
+          status: "scheduled",
+        },
+      ])
+      .returning({ id: performances.id });
+
+    const response = await app.inject({
+      method: "GET",
+      url: "/v1/venues/theatre-des-muses-monaco",
+    });
+
+    expect(response.statusCode, response.body).toBe(200);
+    expect(response.json()).toMatchObject({
+      slug: "theatre-des-muses-monaco",
+      name: "Théâtre des Muses",
+    });
+    expect(response.json().upcoming).toEqual([
+      expect.objectContaining({
+        id: futureProduction!.id,
+        venuePerformances: [
+          expect.objectContaining({
+            id: futurePerformance!.id,
+            status: "scheduled",
+            venue: expect.objectContaining({
+              id: venueId,
+              slug: "theatre-des-muses-monaco",
+            }),
+          }),
+        ],
+      }),
+    ]);
+    expect(response.json().archives).toEqual([
+      expect.objectContaining({
+        id: productionId,
+        venuePerformances: [
+          expect.objectContaining({
+            id: performanceId,
+            status: "completed",
+          }),
+        ],
+      }),
+    ]);
+    expect(
+      [...response.json().upcoming, ...response.json().archives].some(
+        (production: { id: string }) => production.id === draftProduction!.id,
+      ),
+    ).toBe(false);
   });
 
   it("personnalise l'accueil par ville dans un rayon de 50 km", async () => {
@@ -248,12 +349,16 @@ describe("première boucle API sur PostgreSQL/PostGIS", () => {
           title: "Spectacle proche",
           discipline: "theatre",
           audience: "general",
+          publicationStatus: "published",
+          reviewedAt: new Date(),
         },
         {
           slug: "spectacle-lointain-accueil",
           title: "Spectacle lointain",
           discipline: "opera",
           audience: "general",
+          publicationStatus: "published",
+          reviewedAt: new Date(),
         },
       ])
       .returning({ id: productions.id });
@@ -347,6 +452,8 @@ describe("première boucle API sur PostgreSQL/PostGIS", () => {
           title: `Progression accueil ${index}`,
           discipline: "theatre" as const,
           audience: "general" as const,
+          publicationStatus: "published" as const,
+          reviewedAt: new Date(),
         })),
       )
       .returning({ id: productions.id });
@@ -365,6 +472,23 @@ describe("première boucle API sur PostgreSQL/PostGIS", () => {
     });
     expect(completedHome.json().progress).toEqual({
       current: 5,
+      target: 5,
+      completed: true,
+    });
+    for (const production of additionalProductions) {
+      await app.inject({
+        method: "DELETE",
+        url: `/v1/me/watchlist/${production.id}`,
+        headers: { cookie },
+      });
+    }
+    const permanentlyCompletedHome = await app.inject({
+      method: "GET",
+      url: "/v1/me/home",
+      headers: { cookie },
+    });
+    expect(permanentlyCompletedHome.json().progress).toEqual({
+      current: 1,
       target: 5,
       completed: true,
     });
@@ -938,6 +1062,91 @@ describe("première boucle API sur PostgreSQL/PostGIS", () => {
   it("exporte les données puis supprime le compte par lien public", async () => {
     const email = "suppression@example.test";
     const cookie = await signUp(email, "compte-suppression");
+    const profile = await db
+      .select({ id: user.id })
+      .from(user)
+      .where(eq(user.email, email))
+      .limit(1);
+    const [claimedCompany] = await db
+      .insert(companies)
+      .values({
+        slug: "compagnie-suppression",
+        name: "Compagnie Suppression",
+        publicationStatus: "published",
+        reviewedAt: new Date(),
+      })
+      .returning({ id: companies.id });
+    const [revision] = await db
+      .insert(catalogRevisions)
+      .values({
+        companyId: claimedCompany!.id,
+        authorUserId: profile[0]!.id,
+        targetType: "company",
+        targetId: claimedCompany!.id,
+        status: "draft",
+        justification: "Révision à conserver sous une forme anonymisée.",
+      })
+      .returning({ id: catalogRevisions.id });
+    await app.inject({
+      method: "POST",
+      url: "/v1/me/diary",
+      headers: { cookie },
+      payload: {
+        productionId,
+        performanceId,
+        attendedOn: null,
+      },
+    });
+    await app.inject({
+      method: "PUT",
+      url: `/v1/me/reviews/${productionId}`,
+      headers: { cookie },
+      payload: {
+        body: "Un avis suffisamment détaillé pour vérifier l’export du compte.",
+        containsSpoiler: false,
+        visibility: "private",
+      },
+    });
+    const list = await app.inject({
+      method: "POST",
+      url: "/v1/me/lists",
+      headers: { cookie },
+      payload: {
+        name: "Avant suppression",
+        description: "Liste exportée avant la suppression du compte.",
+        visibility: "private",
+      },
+    });
+    await app.inject({
+      method: "POST",
+      url: `/v1/me/lists/${list.json().id}/items`,
+      headers: { cookie },
+      payload: { productionId },
+    });
+    await app.inject({
+      method: "POST",
+      url: "/v1/content-reports",
+      headers: { cookie },
+      payload: {
+        targetType: "production",
+        targetId: productionId,
+        reason: "Ce signalement personnel doit apparaître dans l’export du compte.",
+      },
+    });
+    await app.inject({
+      method: "POST",
+      url: `/v1/me/company-claims/${claimedCompany!.id}`,
+      headers: { cookie },
+      payload: {
+        representativeName: "Camille Suppression",
+        roleTitle: "Responsable",
+        professionalEmail: "camille@compagnie-suppression.example.test",
+        officialWebsiteUrl: "https://compagnie-suppression.example.test",
+        evidence:
+          "Le domaine professionnel et la page équipe permettent de vérifier cette demande.",
+        authorityConfirmed: true,
+      },
+    });
     await app.inject({
       method: "PUT",
       url: `/v1/me/watchlist/${productionId}`,
@@ -964,9 +1173,15 @@ describe("première boucle API sur PostgreSQL/PostGIS", () => {
       },
     });
     expect(jsonExport.json().watchlist).toHaveLength(1);
+    expect(jsonExport.json().reviews).toHaveLength(1);
+    expect(jsonExport.json().lists[0].items).toHaveLength(1);
+    expect(jsonExport.json().contentReports).toHaveLength(1);
+    expect(jsonExport.json().companyClaims).toHaveLength(1);
+    expect(jsonExport.json().catalogRevisions).toHaveLength(1);
     expect(csvExport.statusCode).toBe(200);
     expect(csvExport.headers["content-type"]).toContain("text/csv");
     expect(csvExport.body).toContain("version_cgu");
+    expect(csvExport.body).toContain("revision_catalogue");
 
     sentEmails.length = 0;
     const request = await app.inject({
@@ -989,6 +1204,12 @@ describe("première boucle API sur PostgreSQL/PostGIS", () => {
       payload: { token },
     });
     expect(confirmation.statusCode).toBe(200);
+    const anonymizedRevision = await db
+      .select({ authorUserId: catalogRevisions.authorUserId })
+      .from(catalogRevisions)
+      .where(eq(catalogRevisions.id, revision!.id))
+      .limit(1);
+    expect(anonymizedRevision[0]?.authorUserId).toBeNull();
 
     const revoked = await app.inject({
       method: "GET",
@@ -1022,6 +1243,8 @@ describe("première boucle API sur PostgreSQL/PostGIS", () => {
           title: "Spectacle actif",
           discipline: "theatre",
           audience: "general",
+          publicationStatus: "published",
+          reviewedAt: new Date(),
         },
         {
           slug: "spectacle-inactif-statistiques",
@@ -1029,6 +1252,8 @@ describe("première boucle API sur PostgreSQL/PostGIS", () => {
           discipline: "theatre",
           audience: "general",
           isActive: false,
+          publicationStatus: "published",
+          reviewedAt: new Date(),
         },
       ])
       .returning({ id: productions.id, isActive: productions.isActive });
@@ -1082,4 +1307,657 @@ describe("première boucle API sur PostgreSQL/PostGIS", () => {
     });
     expect(new Date(response.json().generatedAt).toString()).not.toBe("Invalid Date");
   });
+
+  it("gère le journal public, les avis et les listes personnalisées", async () => {
+    const cookie = await signUp(
+      "journal-public@example.test",
+      "journal-public",
+      "127.0.0.61",
+    );
+    const diary = await app.inject({
+      method: "POST",
+      url: "/v1/me/diary",
+      headers: { cookie },
+      payload: {
+        productionId,
+        performanceId,
+        attendedOn: null,
+      },
+    });
+    expect(diary.statusCode, diary.body).toBe(200);
+    const rating = await app.inject({
+      method: "PUT",
+      url: `/v1/me/productions/${productionId}/rating`,
+      headers: { cookie },
+      payload: { value: 9 },
+    });
+    expect(rating.statusCode, rating.body).toBe(200);
+
+    const review = await app.inject({
+      method: "PUT",
+      url: `/v1/me/reviews/${productionId}`,
+      headers: { cookie },
+      payload: {
+        body: "Une proposition sensible, précise et vraiment mémorable.",
+        containsSpoiler: false,
+        visibility: "public",
+      },
+    });
+    expect(review.statusCode, review.body).toBe(200);
+
+    const createdList = await app.inject({
+      method: "POST",
+      url: "/v1/me/lists",
+      headers: { cookie },
+      payload: {
+        name: "Mes découvertes",
+        description: "Les spectacles à faire connaître.",
+        visibility: "public",
+      },
+    });
+    expect(createdList.statusCode, createdList.body).toBe(200);
+    const listId = createdList.json().id as string;
+    const listSlug = createdList.json().slug as string;
+    const addItem = await app.inject({
+      method: "POST",
+      url: `/v1/me/lists/${listId}/items`,
+      headers: { cookie },
+      payload: { productionId },
+    });
+    expect(addItem.statusCode, addItem.body).toBe(200);
+
+    const publicProfile = await app.inject({
+      method: "GET",
+      url: "/v1/members/journal-public",
+    });
+    expect(publicProfile.statusCode, publicProfile.body).toBe(200);
+    expect(publicProfile.json().counts).toMatchObject({
+      seen: 1,
+      lists: 1,
+      reviews: 1,
+    });
+    expect(publicProfile.json().recentReviews[0]).toMatchObject({
+      rating: 9,
+      body: "Une proposition sensible, précise et vraiment mémorable.",
+      production: {
+        id: productionId,
+        slug: "reve-elodie-muses-2025",
+      },
+    });
+    const publicJournal = await app.inject({
+      method: "GET",
+      url: "/v1/members/journal-public/journal?rating=9&hasReview=true",
+    });
+    expect(publicJournal.statusCode, publicJournal.body).toBe(200);
+    expect(publicJournal.json().items[0]).toMatchObject({
+      attendedOn: "2025-11-08",
+      rating: 9,
+      hasReview: true,
+    });
+
+    const privateProfile = await app.inject({
+      method: "PATCH",
+      url: "/v1/me/profile",
+      headers: { cookie },
+      payload: { profileVisibility: "private" },
+    });
+    expect(privateProfile.statusCode, privateProfile.body).toBe(200);
+    const hiddenJournal = await app.inject({
+      method: "GET",
+      url: "/v1/members/journal-public/journal",
+    });
+    expect(hiddenJournal.statusCode).toBe(404);
+    const stillPublicList = await app.inject({
+      method: "GET",
+      url: `/v1/members/journal-public/lists/${listSlug}`,
+    });
+    expect(stillPublicList.statusCode, stillPublicList.body).toBe(200);
+    expect(stillPublicList.json().items).toHaveLength(1);
+  });
+
+  it("enregistre un signalement public sans exposer de données personnelles", async () => {
+    const report = await app.inject({
+      method: "POST",
+      url: "/v1/content-reports",
+      payload: {
+        targetType: "production",
+        targetId: productionId,
+        reason:
+          "La date indiquée semble incorrecte par rapport à la billetterie officielle.",
+      },
+    });
+    expect(report.statusCode, report.body).toBe(200);
+    expect(report.json()).toMatchObject({ status: "open" });
+
+    const invalid = await app.inject({
+      method: "POST",
+      url: "/v1/content-reports",
+      payload: {
+        targetType: "production",
+        targetId: productionId,
+        reason: "Erreur",
+      },
+    });
+    expect(invalid.statusCode).toBe(400);
+
+    const missingTarget = await app.inject({
+      method: "POST",
+      url: "/v1/content-reports",
+      payload: {
+        targetType: "production",
+        targetId: "00000000-0000-4000-8000-000000000099",
+        reason:
+          "Cette fiche n’existe plus et ne devrait pas accepter de nouveau signalement.",
+      },
+    });
+    expect(missingTarget.statusCode).toBe(404);
+    expect(missingTarget.json().code).toBe("CONTENT_REPORT_TARGET_NOT_FOUND");
+
+    const ownerCookie = await signUp(
+      "private-report@example.test",
+      "private-report-owner",
+      "127.0.0.69",
+    );
+    const [owner] = await db
+      .select({ id: user.id })
+      .from(user)
+      .where(eq(user.pseudonym, "private-report-owner"))
+      .limit(1);
+    const [privateList] = await db
+      .insert(lists)
+      .values({
+        userId: owner!.id,
+        slug: "liste-privee-a-signaler",
+        name: "Liste privée à signaler",
+        visibility: "private",
+      })
+      .returning({ id: lists.id });
+    const anonymousPrivateReport = await app.inject({
+      method: "POST",
+      url: "/v1/content-reports",
+      payload: {
+        targetType: "list",
+        targetId: privateList!.id,
+        reason:
+          "Un visiteur anonyme ne doit pas pouvoir confirmer l’existence de cette liste privée.",
+      },
+    });
+    expect(anonymousPrivateReport.statusCode).toBe(404);
+    const ownerPrivateReport = await app.inject({
+      method: "POST",
+      url: "/v1/content-reports",
+      headers: { cookie: ownerCookie },
+      payload: {
+        targetType: "list",
+        targetId: privateList!.id,
+        reason: "Le propriétaire peut signaler un problème sur sa propre liste privée.",
+      },
+    });
+    expect(ownerPrivateReport.statusCode, ownerPrivateReport.body).toBe(200);
+  });
+
+  it("traite chaque correction dans une file éditoriale motivée", async () => {
+    const report = await app.inject({
+      method: "POST",
+      url: "/v1/content-reports",
+      payload: {
+        targetType: "production",
+        targetId: productionId,
+        reason:
+          "Le lien officiel doit être revérifié avant la prochaine démonstration publique.",
+      },
+    });
+    expect(report.statusCode, report.body).toBe(200);
+
+    const moderatorCookie = await signUp(
+      "corrections@example.test",
+      "corrections-todam",
+      "127.0.0.70",
+    );
+    await db
+      .update(user)
+      .set({ role: "trusted_contributor" })
+      .where(eq(user.pseudonym, "corrections-todam"));
+
+    const queue = await app.inject({
+      method: "GET",
+      url: "/v1/admin/content-reports?status=open",
+      headers: { cookie: moderatorCookie },
+    });
+    expect(queue.statusCode, queue.body).toBe(200);
+    expect(queue.json().items).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: report.json().id,
+          targetId: productionId,
+          status: "open",
+        }),
+      ]),
+    );
+
+    const reviewing = await app.inject({
+      method: "POST",
+      url: `/v1/admin/content-reports/${report.json().id}/reviewing`,
+      headers: { cookie: moderatorCookie },
+      payload: {
+        decision: "Vérification engagée auprès de la source officielle indiquée.",
+      },
+    });
+    expect(reviewing.statusCode, reviewing.body).toBe(200);
+    expect(reviewing.json()).toMatchObject({
+      status: "reviewing",
+      reviewedAt: null,
+    });
+
+    const resolved = await app.inject({
+      method: "POST",
+      url: `/v1/admin/content-reports/${report.json().id}/resolved`,
+      headers: { cookie: moderatorCookie },
+      payload: {
+        decision:
+          "Le lien officiel a été contrôlé et la fiche publique a été confirmée.",
+      },
+    });
+    expect(resolved.statusCode, resolved.body).toBe(200);
+    expect(resolved.json().status).toBe("resolved");
+    expect(resolved.json().reviewedAt).not.toBeNull();
+
+    const duplicateDecision = await app.inject({
+      method: "POST",
+      url: `/v1/admin/content-reports/${report.json().id}/dismissed`,
+      headers: { cookie: moderatorCookie },
+      payload: {
+        decision: "Tentative de modifier une décision déjà définitive.",
+      },
+    });
+    expect(duplicateDecision.statusCode).toBe(409);
+    expect(duplicateDecision.json().code).toBe("CONTENT_REPORT_ALREADY_CLOSED");
+  });
+
+  it("valide une revendication et publie une révision de compagnie", async () => {
+    const [company] = await db
+      .insert(companies)
+      .values({
+        slug: "compagnie-pilote",
+        name: "Compagnie Pilote",
+        shortDescription: "Une compagnie pilote engagée dans la création théâtrale.",
+        description: "Version publique initiale.",
+        officialUrl: "https://compagnie.example.test",
+        publicationStatus: "published",
+        reviewedAt: new Date(),
+      })
+      .returning({ id: companies.id });
+    await db.insert(productionCompanies).values({
+      companyId: company!.id,
+      productionId,
+      isPrimary: true,
+    });
+    const [touringProduction] = await db
+      .insert(productions)
+      .values({
+        slug: "creation-en-tournee",
+        title: "Création en tournée",
+        discipline: "theatre",
+        audience: "general",
+        publicationStatus: "published",
+        reviewedAt: new Date(),
+      })
+      .returning({ id: productions.id });
+    await db.insert(productionCompanies).values({
+      companyId: company!.id,
+      productionId: touringProduction!.id,
+      isPrimary: true,
+    });
+    const [touringPerformance] = await db
+      .insert(performances)
+      .values({
+        productionId: touringProduction!.id,
+        venueId,
+        startsAt: new Date("2099-09-14T18:30:00.000Z"),
+        status: "scheduled",
+      })
+      .returning({ id: performances.id });
+
+    const representativeCookie = await signUp(
+      "direction@compagnie.example.test",
+      "direction-pilote",
+      "127.0.0.71",
+    );
+    const claim = await app.inject({
+      method: "POST",
+      url: `/v1/me/company-claims/${company!.id}`,
+      headers: { cookie: representativeCookie },
+      payload: {
+        representativeName: "Camille Martin",
+        roleTitle: "Directrice artistique",
+        professionalEmail: "direction@compagnie.example.test",
+        officialWebsiteUrl: "https://compagnie.example.test",
+        evidence:
+          "Je dirige la compagnie et peux confirmer cette demande depuis le domaine officiel.",
+        authorityConfirmed: true,
+      },
+    });
+    expect(claim.statusCode, claim.body).toBe(200);
+
+    const adminCookie = await signUp(
+      "moderation@example.test",
+      "moderation-todam",
+      "127.0.0.72",
+    );
+    await db
+      .update(user)
+      .set({ role: "admin" })
+      .where(eq(user.pseudonym, "moderation-todam"));
+    const approval = await app.inject({
+      method: "POST",
+      url: `/v1/admin/company-claims/${claim.json().id}/approved`,
+      headers: { cookie: adminCookie },
+      payload: {
+        decisionReason: "Identité et domaine professionnel vérifiés manuellement.",
+        membershipRole: "manager",
+      },
+    });
+    expect(approval.statusCode, approval.body).toBe(200);
+    expect(approval.json().status).toBe("approved");
+
+    const [otherCompany] = await db
+      .insert(companies)
+      .values({
+        slug: "compagnie-seconde",
+        name: "Compagnie Seconde",
+        description: "Une autre compagnie du catalogue pilote.",
+        officialUrl: "https://seconde.example.test",
+        publicationStatus: "published",
+        reviewedAt: new Date(),
+      })
+      .returning({ id: companies.id });
+    const secondClaim = await app.inject({
+      method: "POST",
+      url: `/v1/me/company-claims/${otherCompany!.id}`,
+      headers: { cookie: representativeCookie },
+      payload: {
+        representativeName: "Camille Martin",
+        roleTitle: "Responsable artistique",
+        professionalEmail: "direction@compagnie.example.test",
+        officialWebsiteUrl: "https://seconde.example.test",
+        evidence:
+          "Cette tentative vérifie la limite d’une seule compagnie par compte pendant le pilote.",
+        authorityConfirmed: true,
+      },
+    });
+    expect(secondClaim.statusCode).toBe(409);
+    expect(secondClaim.json().code).toBe("COMPANY_MEMBERSHIP_ALREADY_EXISTS");
+
+    const revision = await app.inject({
+      method: "POST",
+      url: `/v1/me/companies/${company!.id}/revisions`,
+      headers: { cookie: representativeCookie },
+      payload: {
+        targetType: "company",
+        targetId: company!.id,
+        justification: "Mise à jour de la présentation publique.",
+        changes: [
+          {
+            field: "description",
+            newValue: "Version relue et transmise par la compagnie.",
+            provenanceUrl: "https://compagnie.example.test/a-propos",
+            rightsStatus: "permission_granted",
+          },
+        ],
+      },
+    });
+    expect(revision.statusCode, revision.body).toBe(200);
+    expect(revision.json().status).toBe("draft");
+    const submitted = await app.inject({
+      method: "POST",
+      url: `/v1/me/catalog-revisions/${revision.json().id}/submit`,
+      headers: { cookie: representativeCookie },
+    });
+    expect(submitted.statusCode, submitted.body).toBe(200);
+    const beforeApproval = await app.inject({
+      method: "GET",
+      url: "/v1/companies/compagnie-pilote",
+    });
+    expect(beforeApproval.json().description).toBe("Version publique initiale.");
+    expect(beforeApproval.json().touringDates).toEqual([
+      expect.objectContaining({
+        id: touringPerformance!.id,
+        production: {
+          id: touringProduction!.id,
+          slug: "creation-en-tournee",
+          title: "Création en tournée",
+          discipline: "theatre",
+        },
+      }),
+    ]);
+    expect(beforeApproval.json().archives).toEqual([
+      expect.objectContaining({
+        id: productionId,
+        company: expect.objectContaining({
+          id: company!.id,
+          slug: "compagnie-pilote",
+        }),
+      }),
+    ]);
+
+    const revisionApproval = await app.inject({
+      method: "POST",
+      url: `/v1/admin/catalog-revisions/${revision.json().id}/approved`,
+      headers: { cookie: adminCookie },
+      payload: {
+        decisionReason: "Contenu cohérent et provenance professionnelle vérifiée.",
+      },
+    });
+    expect(revisionApproval.statusCode, revisionApproval.body).toBe(200);
+    const afterApproval = await app.inject({
+      method: "GET",
+      url: "/v1/companies/compagnie-pilote",
+    });
+    expect(afterApproval.json().description).toBe(
+      "Version relue et transmise par la compagnie.",
+    );
+
+    const restored = await app.inject({
+      method: "POST",
+      url: `/v1/admin/catalog-revisions/${revision.json().id}/restore`,
+      headers: { cookie: adminCookie },
+      payload: {
+        decisionReason: "Restauration demandée après contrôle éditorial.",
+      },
+    });
+    expect(restored.statusCode, restored.body).toBe(200);
+    const afterRestore = await app.inject({
+      method: "GET",
+      url: "/v1/companies/compagnie-pilote",
+    });
+    expect(afterRestore.json().description).toBe("Version publique initiale.");
+
+    const draftProduction = await app.inject({
+      method: "POST",
+      url: `/v1/me/companies/${company!.id}/productions`,
+      headers: { cookie: representativeCookie },
+      payload: {
+        title: "Création pilote 2027",
+        discipline: "theatre",
+        audience: "general",
+        officialUrl: "https://compagnie.example.test/creation-2027",
+      },
+    });
+    expect(draftProduction.statusCode, draftProduction.body).toBe(200);
+    expect(draftProduction.json().publicationStatus).toBe("draft");
+
+    const editableProductions = await app.inject({
+      method: "GET",
+      url: `/v1/me/companies/${company!.id}/productions`,
+      headers: { cookie: representativeCookie },
+    });
+    expect(editableProductions.statusCode, editableProductions.body).toBe(200);
+    expect(editableProductions.json().items).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ id: draftProduction.json().id }),
+      ]),
+    );
+
+    const privateDraftWithoutSession = await app.inject({
+      method: "GET",
+      url: `/v1/me/companies/${company!.id}/productions/${draftProduction.json().id}`,
+    });
+    expect(privateDraftWithoutSession.statusCode).toBe(401);
+    const editableDraftDetail = await app.inject({
+      method: "GET",
+      url: `/v1/me/companies/${company!.id}/productions/${draftProduction.json().id}`,
+      headers: { cookie: representativeCookie },
+    });
+    expect(editableDraftDetail.statusCode, editableDraftDetail.body).toBe(200);
+    expect(editableDraftDetail.json()).toMatchObject({
+      id: draftProduction.json().id,
+      title: "Création pilote 2027",
+      discipline: "theatre",
+    });
+
+    const hiddenDraft = await app.inject({
+      method: "GET",
+      url: `/v1/productions/${draftProduction.json().slug}`,
+    });
+    expect(hiddenDraft.statusCode).toBe(404);
+
+    const incompleteRightsRevision = await app.inject({
+      method: "POST",
+      url: `/v1/me/companies/${company!.id}/revisions`,
+      headers: { cookie: representativeCookie },
+      payload: {
+        targetType: "production",
+        targetId: draftProduction.json().id,
+        changes: [
+          {
+            field: "description.full",
+            newValue: {
+              body: "Texte annoncé sous licence ouverte sans nom de licence.",
+              locale: "fr",
+              sourceUrl: "https://compagnie.example.test/creation-2027",
+            },
+            provenanceUrl: "https://compagnie.example.test/creation-2027",
+            rightsStatus: "open_license",
+          },
+        ],
+      },
+    });
+    expect(incompleteRightsRevision.statusCode).toBe(400);
+    expect(incompleteRightsRevision.json().code).toBe("DESCRIPTION_LICENSE_REQUIRED");
+
+    const productionRevision = await app.inject({
+      method: "POST",
+      url: `/v1/me/companies/${company!.id}/revisions`,
+      headers: { cookie: representativeCookie },
+      payload: {
+        targetType: "production",
+        targetId: draftProduction.json().id,
+        justification: "Création complète transmise par la compagnie.",
+        changes: [
+          {
+            field: "title",
+            newValue: "Création pilote 2027",
+            provenanceUrl: "https://compagnie.example.test/creation-2027",
+            rightsStatus: null,
+          },
+          {
+            field: "discipline",
+            newValue: "ballet",
+            provenanceUrl: "https://compagnie.example.test/creation-2027",
+            rightsStatus: null,
+          },
+          {
+            field: "durationMinutes",
+            newValue: 65,
+            provenanceUrl: "https://compagnie.example.test/creation-2027",
+            rightsStatus: null,
+          },
+          {
+            field: "language",
+            newValue: "fr",
+            provenanceUrl: "https://compagnie.example.test/creation-2027",
+            rightsStatus: null,
+          },
+          {
+            field: "description.short",
+            newValue: {
+              body: "Une création originale de la compagnie pour la saison 2027.",
+              locale: "fr",
+            },
+            provenanceUrl: "https://compagnie.example.test/creation-2027",
+            rightsStatus: "permission_granted",
+          },
+          {
+            field: "description.full",
+            newValue: {
+              body: "Cette création chorégraphique originale organise un dialogue précis entre mouvement, espace et lumière.",
+              locale: "fr",
+            },
+            provenanceUrl: "https://compagnie.example.test/creation-2027",
+            rightsStatus: "permission_granted",
+          },
+          {
+            field: "credits",
+            newValue: [
+              {
+                artistId: null,
+                name: "Camille Martin",
+                role: "choreographer",
+                label: null,
+              },
+            ],
+            provenanceUrl: "https://compagnie.example.test/creation-2027",
+            rightsStatus: null,
+          },
+          {
+            field: "performances",
+            newValue: [
+              {
+                venueId,
+                startsAt: "2099-10-12T19:00:00.000Z",
+                endsAt: "2099-10-12T20:05:00.000Z",
+                status: "scheduled",
+                officialUrl: "https://compagnie.example.test/creation-2027#billetterie",
+              },
+            ],
+            provenanceUrl: "https://compagnie.example.test/creation-2027",
+            rightsStatus: null,
+          },
+        ],
+      },
+    });
+    expect(productionRevision.statusCode, productionRevision.body).toBe(200);
+    const productionSubmitted = await app.inject({
+      method: "POST",
+      url: `/v1/me/catalog-revisions/${productionRevision.json().id}/submit`,
+      headers: { cookie: representativeCookie },
+    });
+    expect(productionSubmitted.statusCode, productionSubmitted.body).toBe(200);
+    const productionApproved = await app.inject({
+      method: "POST",
+      url: `/v1/admin/catalog-revisions/${productionRevision.json().id}/approved`,
+      headers: { cookie: adminCookie },
+      payload: {
+        decisionReason:
+          "Création, provenance et texte original contrôlés avant publication.",
+      },
+    });
+    expect(productionApproved.statusCode, productionApproved.body).toBe(200);
+
+    const nowPublic = await app.inject({
+      method: "GET",
+      url: `/v1/productions/${draftProduction.json().slug}`,
+    });
+    expect(nowPublic.statusCode, nowPublic.body).toBe(200);
+    expect(nowPublic.json().title).toBe("Création pilote 2027");
+    expect(nowPublic.json().discipline).toBe("ballet");
+
+    const moderationHistory = await app.inject({
+      method: "GET",
+      url: "/v1/admin/catalog-revisions?status=all",
+      headers: { cookie: adminCookie },
+    });
+    expect(moderationHistory.statusCode, moderationHistory.body).toBe(200);
+    expect(moderationHistory.json().items.length).toBeGreaterThanOrEqual(2);
+  }, 20_000);
 });

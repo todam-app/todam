@@ -15,7 +15,12 @@ export function createPublicStatsService(database: TodamDatabase) {
           database
             .select({ total: count() })
             .from(productions)
-            .where(eq(productions.isActive, true)),
+            .where(
+              and(
+                eq(productions.isActive, true),
+                eq(productions.publicationStatus, "published"),
+              ),
+            ),
           database
             .select({ total: count() })
             .from(performances)
@@ -23,6 +28,7 @@ export function createPublicStatsService(database: TodamDatabase) {
             .where(
               and(
                 eq(productions.isActive, true),
+                eq(productions.publicationStatus, "published"),
                 eq(performances.status, "scheduled"),
                 gte(performances.startsAt, generatedAt),
               ),
