@@ -21,7 +21,8 @@ import { tokens } from "./tokens.js";
 
 export { tokens } from "./tokens.js";
 
-type ButtonVariant = "primary" | "secondary" | "ghost" | "danger";
+type ButtonVariant =
+  "primary" | "secondary" | "quiet" | "ghost" | "dangerGhost" | "danger";
 
 export interface ButtonProps extends Omit<PressableProps, "children"> {
   label: string;
@@ -41,6 +42,32 @@ export function Button({
   ...props
 }: ButtonProps) {
   const [focused, setFocused] = useState(false);
+  const standardWebButton =
+    Platform.OS === "web" && (variant === "primary" || variant === "secondary");
+  const quietWebButton = Platform.OS === "web" && variant === "quiet";
+  const textAction = variant === "ghost" || variant === "dangerGhost";
+  const webInteraction =
+    Platform.OS !== "web"
+      ? undefined
+      : standardWebButton
+        ? "standard"
+        : quietWebButton
+          ? "quiet"
+          : variant === "ghost"
+            ? "action-link"
+            : variant === "dangerGhost"
+              ? "danger-link"
+              : variant === "danger"
+                ? "danger"
+                : undefined;
+  const webInteractionProps = webInteraction
+    ? ({
+        dataSet: {
+          todamCta: webInteraction,
+        },
+      } as unknown as PressableProps)
+    : {};
+
   return (
     <Pressable
       accessibilityRole="button"
@@ -61,33 +88,55 @@ export function Button({
       }}
       style={(state) => [
         styles.button,
-        variant === "primary" && styles.buttonPrimary,
-        variant === "secondary" && styles.buttonSecondary,
+        standardWebButton && styles.buttonStandardWeb,
+        quietWebButton && styles.buttonQuietWeb,
+        !standardWebButton && variant === "primary" && styles.buttonPrimary,
+        !standardWebButton &&
+          !quietWebButton &&
+          variant === "secondary" &&
+          styles.buttonSecondary,
+        Platform.OS !== "web" && variant === "quiet" && styles.buttonSecondary,
         variant === "ghost" && styles.buttonGhost,
+        variant === "dangerGhost" && styles.buttonGhost,
         variant === "danger" && styles.buttonDanger,
-        state.pressed && styles.buttonPressed,
+        state.pressed && (textAction ? styles.textActionPressed : styles.buttonPressed),
         focused && styles.buttonFocused,
-        (disabled || loading) && styles.disabled,
+        (disabled || loading) &&
+          (textAction ? styles.textActionDisabled : styles.disabled),
         typeof style === "function" ? style(state) : style,
       ]}
       {...props}
+      {...webInteractionProps}
     >
       {loading ? (
         <ActivityIndicator
           accessibilityLabel="Chargement"
           color={
-            disabled || loading
+            disabled
               ? tokens.color.muted
-              : variant === "primary" || variant === "danger"
-                ? tokens.color.surface
-                : tokens.color.ink
+              : standardWebButton
+                ? tokens.button.standard.text
+                : quietWebButton
+                  ? tokens.button.quiet.text
+                  : variant === "danger"
+                    ? tokens.color.surface
+                    : variant === "dangerGhost"
+                      ? tokens.color.error
+                      : variant === "ghost"
+                        ? tokens.color.accent
+                        : tokens.color.ink
           }
         />
       ) : (
         <Text
           style={[
             styles.buttonLabel,
-            (variant === "primary" || variant === "danger") &&
+            standardWebButton && styles.buttonLabelStandardWeb,
+            quietWebButton && styles.buttonLabelQuietWeb,
+            variant === "ghost" && styles.buttonLabelGhost,
+            variant === "dangerGhost" && styles.buttonLabelDangerGhost,
+            !standardWebButton &&
+              (variant === "primary" || variant === "danger") &&
               styles.buttonLabelPrimary,
             disabled && styles.buttonLabelDisabled,
           ]}
@@ -338,8 +387,24 @@ const styles = StyleSheet.create({
   buttonLabelPrimary: {
     color: tokens.color.surface,
   },
+  buttonLabelStandardWeb: {
+    color: tokens.button.standard.text,
+    fontFamily: tokens.button.standard.fontFamily,
+    fontWeight: tokens.button.standard.fontWeight,
+  },
   buttonLabelDisabled: {
     color: tokens.color.muted,
+  },
+  buttonLabelDangerGhost: {
+    color: tokens.color.error,
+  },
+  buttonLabelGhost: {
+    color: tokens.color.accent,
+  },
+  buttonLabelQuietWeb: {
+    color: tokens.button.quiet.text,
+    fontFamily: tokens.button.quiet.fontFamily,
+    fontWeight: tokens.button.quiet.fontWeight,
   },
   buttonPressed: {
     transform: [{ translateY: 1 }],
@@ -353,14 +418,34 @@ const styles = StyleSheet.create({
   buttonPrimary: {
     backgroundColor: tokens.color.accent,
   },
+  buttonQuietWeb: {
+    backgroundColor: tokens.button.quiet.background,
+    borderColor: tokens.button.quiet.border,
+    borderRadius: tokens.button.quiet.radius,
+    borderWidth: tokens.button.quiet.borderWidth,
+    boxSizing: "border-box",
+  },
   buttonSecondary: {
     backgroundColor: tokens.color.surface,
     borderColor: tokens.color.controlBorder,
     borderWidth: 1,
   },
+  buttonStandardWeb: {
+    backgroundColor: tokens.button.standard.background,
+    borderColor: tokens.button.standard.border,
+    borderRadius: tokens.button.standard.radius,
+    borderWidth: tokens.button.standard.borderWidth,
+    boxSizing: "border-box",
+  },
   disabled: {
     backgroundColor: tokens.color.disabled,
     borderColor: tokens.color.controlBorder,
+  },
+  textActionDisabled: {
+    backgroundColor: "transparent",
+  },
+  textActionPressed: {
+    opacity: 0.72,
   },
   errorText: {
     color: tokens.color.error,
@@ -376,7 +461,7 @@ const styles = StyleSheet.create({
   },
   heading: {
     color: tokens.color.ink,
-    fontFamily: Platform.select({ web: "Source Serif 4", default: "serif" }),
+    fontFamily: Platform.select({ web: "Playfair Display", default: "serif" }),
     fontSize: 28,
     fontWeight: "700",
     lineHeight: 34,
@@ -437,7 +522,7 @@ const styles = StyleSheet.create({
   poster: {
     alignItems: "flex-start",
     aspectRatio: 2 / 3,
-    backgroundColor: "#EEE7DC",
+    backgroundColor: tokens.color.placeholder,
     borderRadius: tokens.radius.medium,
     justifyContent: "space-between",
     minWidth: 150,
@@ -458,13 +543,13 @@ const styles = StyleSheet.create({
   },
   posterMark: {
     color: tokens.color.accent,
-    fontFamily: Platform.select({ web: "Source Serif 4", default: "serif" }),
+    fontFamily: Platform.select({ web: "Playfair Display", default: "serif" }),
     fontSize: 32,
     fontWeight: "900",
   },
   posterTitle: {
     color: tokens.color.ink,
-    fontFamily: "Inter",
+    fontFamily: Platform.select({ web: "Work Sans", default: "Inter" }),
     fontSize: 15,
     fontWeight: "700",
     lineHeight: 20,

@@ -261,8 +261,8 @@ Tokens provisoires :
 - Texte principal : encre `#151515`
 - Texte secondaire : `#6F6B64`
 - Accent accessible : vermillon `#C43D28`
-- Titres : Source Serif 4
-- Interface et données : Inter
+- Titres Web : Playfair Display
+- Paragraphes, navigation, formulaires, libellés et boutons Web : Work Sans
 - Affiches : ratio 2:3
 - Grille : multiples de 8 px
 - Coins : 12 px par défaut, sans surutilisation

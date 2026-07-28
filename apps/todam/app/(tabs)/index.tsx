@@ -394,7 +394,7 @@ function MarketingHome({
               <Link href="/pour-les-salles" asChild>
                 <Pressable
                   accessibilityRole="link"
-                  className="min-h-48 flex-1 justify-center gap-3 border border-control bg-paper p-6"
+                  className="todam-interactive-card min-h-48 flex-1 justify-center gap-3 border border-control bg-paper p-6"
                 >
                   <Text className="font-serif text-2xl font-semibold text-ink">
                     Vous programmez un lieu{"\u00A0"}?
@@ -410,7 +410,7 @@ function MarketingHome({
               <Link href="/pour-les-compagnies" asChild>
                 <Pressable
                   accessibilityRole="link"
-                  className="min-h-48 flex-1 justify-center gap-3 border border-control bg-paper p-6"
+                  className="todam-interactive-card min-h-48 flex-1 justify-center gap-3 border border-control bg-paper p-6"
                 >
                   <Text className="font-serif text-2xl font-semibold text-ink">
                     Vous portez un spectacle{"\u00A0"}?
@@ -542,7 +542,7 @@ function ConnectedHome() {
                 <Link href="/journal" asChild>
                   <Pressable
                     accessibilityRole="link"
-                    className="min-h-24 min-w-56 flex-1 justify-center border border-control bg-paper px-5"
+                    className="todam-interactive-card min-h-24 min-w-56 flex-1 justify-center border border-control bg-paper px-5"
                   >
                     <Text className="font-serif text-xl font-semibold text-ink">
                       Ouvrir mes spectacles
@@ -555,7 +555,7 @@ function ConnectedHome() {
                 <Link href="/journal/listes" asChild>
                   <Pressable
                     accessibilityRole="link"
-                    className="min-h-24 min-w-56 flex-1 justify-center border border-control bg-paper px-5"
+                    className="todam-interactive-card min-h-24 min-w-56 flex-1 justify-center border border-control bg-paper px-5"
                   >
                     <Text className="font-serif text-xl font-semibold text-ink">
                       Gérer mes listes

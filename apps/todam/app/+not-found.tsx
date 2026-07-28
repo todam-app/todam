@@ -37,7 +37,7 @@ export default function NotFoundPage() {
               <Button
                 accessibilityRole="link"
                 label="Revenir à l’accueil"
-                variant="secondary"
+                variant="quiet"
               />
             </Link>
           </View>

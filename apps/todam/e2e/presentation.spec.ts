@@ -701,9 +701,13 @@ async function mockPresentationApi(page: Page, role: PresentationRole) {
     id: "900234d9-6224-4372-bca3-5d430ac5d9f0",
     targetType: "production",
     targetId: primaryCard.id,
+    category: "schedule",
     targetLabel: primaryCard.title,
     targetPath: `/production/${primaryCard.slug}`,
     canHide: true,
+    canHideMedia: false,
+    media: null,
+    contribution: null,
     reason:
       "La date annoncée sur la fiche ne correspond pas à la billetterie officielle.",
     status: "open",
@@ -1051,6 +1055,102 @@ const routes = [
     role: false,
   },
 ] as const;
+
+test("les CTA compagnies reprennent exactement le bouton Todam 01", async ({
+  page,
+}) => {
+  await mockPresentationApi(page, false);
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/pour-les-compagnies");
+  await expect(
+    page.getByRole("heading", {
+      level: 1,
+      name: "Une fiche fiable pour vos productions et leurs dates de tournée.",
+    }),
+  ).toBeVisible();
+  await page.evaluate(() => document.fonts.ready);
+
+  const companyLink = page.getByRole("link", {
+    exact: true,
+    name: "Trouver ma compagnie",
+  });
+  const contactButton = page.getByRole("button", {
+    exact: true,
+    name: "Nous contacter",
+  });
+
+  const styles = await Promise.all(
+    [companyLink, contactButton].map((control) =>
+      control.evaluate((element) => {
+        const controlStyle = getComputedStyle(element);
+        const labelStyle = getComputedStyle(element.firstElementChild ?? element);
+        return {
+          backgroundColor: controlStyle.backgroundColor,
+          borderColor: controlStyle.borderTopColor,
+          borderRadius: controlStyle.borderRadius,
+          borderWidth: controlStyle.borderTopWidth,
+          boxSizing: controlStyle.boxSizing,
+          fontFamily: labelStyle.fontFamily.replaceAll('"', ""),
+          fontWeight: labelStyle.fontWeight,
+        };
+      }),
+    ),
+  );
+
+  expect(styles[0]).toEqual({
+    backgroundColor: "rgb(255, 253, 248)",
+    borderColor: "rgb(196, 61, 40)",
+    borderRadius: "4px",
+    borderWidth: "1px",
+    boxSizing: "border-box",
+    fontFamily: "Work Sans",
+    fontWeight: "500",
+  });
+  expect(styles[1]).toEqual(styles[0]);
+  await expect(companyLink).toHaveAttribute("data-todam-cta", "standard");
+
+  await companyLink.hover();
+  await expect(companyLink).toHaveCSS("background-color", "rgb(196, 61, 40)");
+  await expect(companyLink).toHaveCSS("border-color", "rgb(196, 61, 40)");
+  await expect(companyLink).toHaveCSS("filter", "none");
+  await expect(companyLink).toHaveCSS("opacity", "1");
+  await expect(companyLink.locator(":scope > *").first()).toHaveCSS(
+    "color",
+    "rgb(255, 253, 248)",
+  );
+
+  await companyLink.focus();
+  await expect(companyLink).toHaveCSS("outline-width", "3px");
+});
+
+test("les actions de service et destructives annoncent clairement leur rôle", async ({
+  page,
+}) => {
+  await mockPresentationApi(page, "member");
+  await page.setViewportSize({ width: 1024, height: 900 });
+  await page.goto("/parametres-compte");
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Paramètres du compte" }),
+  ).toBeVisible();
+
+  const exportButton = page.getByRole("button", {
+    exact: true,
+    name: "Exporter en JSON",
+  });
+  const deleteButton = page.getByRole("button", {
+    exact: true,
+    name: "Supprimer mon compte",
+  });
+
+  await expect(exportButton).toHaveAttribute("data-todam-cta", "quiet");
+  await expect(exportButton).toHaveCSS("background-color", "rgb(255, 253, 248)");
+  await expect(exportButton).toHaveCSS("border-color", "rgb(151, 143, 132)");
+  await exportButton.hover();
+  await expect(exportButton).toHaveCSS("background-color", "rgb(252, 248, 242)");
+
+  await expect(deleteButton).toHaveAttribute("data-todam-cta", "danger");
+  await expect(deleteButton).toHaveCSS("background-color", "rgb(161, 38, 26)");
+});
 
 for (const route of routes) {
   for (const viewport of viewports) {

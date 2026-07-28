@@ -10,18 +10,18 @@ export default function Root({ children }: PropsWithChildren) {
           content="width=device-width, initial-scale=1, viewport-fit=cover"
           name="viewport"
         />
-        <meta content="#F7F3EC" name="theme-color" />
+        <meta content="#FCF8F2" name="theme-color" />
         <link
           as="font"
           crossOrigin="anonymous"
-          href="/fonts/inter-latin-400-normal.woff2"
+          href="/fonts/work-sans-latin-400-normal.woff2"
           rel="preload"
           type="font/woff2"
         />
         <link
           as="font"
           crossOrigin="anonymous"
-          href="/fonts/source-serif-4-latin-600-normal.woff2"
+          href="/fonts/playfair-display-latin-600-normal.woff2"
           rel="preload"
           type="font/woff2"
         />

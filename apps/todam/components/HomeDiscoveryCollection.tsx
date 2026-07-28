@@ -35,7 +35,7 @@ function DiscoveryCard({ item, width }: { item: HomeDiscoveryItem; width: number
         accessibilityHint="Ouvre la fiche du spectacle"
         accessibilityLabel={production.title}
         accessibilityRole="link"
-        className="overflow-hidden rounded-todam border border-line bg-paper active:opacity-70"
+        className="todam-interactive-card overflow-hidden rounded-todam border border-line bg-paper"
         style={{ width }}
       >
         <ProductionPoster
@@ -43,7 +43,7 @@ function DiscoveryCard({ item, width }: { item: HomeDiscoveryItem; width: number
           poster={production.poster}
           title={production.title}
         />
-        <View className="min-h-36 gap-1 p-3">
+        <View className="min-h-36 gap-1 bg-paper p-3">
           <Text className="font-serif text-lg font-semibold leading-6 text-ink">
             {production.title}
           </Text>
@@ -110,7 +110,7 @@ export function HomeDiscoveryCollection({
             accessibilityLabel="Faire défiler vers la gauche"
             accessibilityRole="button"
             accessibilityState={{ disabled: offset <= 0 }}
-            className={`h-11 w-11 items-center justify-center border border-control ${
+            className={`todam-icon-button h-11 w-11 items-center justify-center rounded-todam border border-control ${
               offset <= 0 ? "bg-disabled" : "bg-paper"
             }`}
             disabled={offset <= 0}
@@ -131,7 +131,7 @@ export function HomeDiscoveryCollection({
             accessibilityLabel="Faire défiler vers la droite"
             accessibilityRole="button"
             accessibilityState={{ disabled: atEnd }}
-            className={`h-11 w-11 items-center justify-center border border-control ${
+            className={`todam-icon-button h-11 w-11 items-center justify-center rounded-todam border border-control ${
               atEnd ? "bg-disabled" : "bg-paper"
             }`}
             disabled={atEnd}

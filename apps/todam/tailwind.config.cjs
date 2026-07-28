@@ -10,15 +10,17 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        canvas: "#F7F3EC",
-        gutter: "#F0EAE1",
+        canvas: "#FCF8F2",
+        gutter: "#FAF3E8",
         paper: "#FFFDF8",
+        placeholder: "#F0E9DF",
         ink: "#151515",
         muted: "#6F6B64",
         accent: "#C43D28",
         line: "#D8D1C6",
         control: "#9B9388",
         disabled: "#E5E0D8",
+        selected: "#FCEFEA",
         success: "#17633A",
         error: "#A1261A",
         danger: "#A1261A",

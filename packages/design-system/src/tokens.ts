@@ -1,8 +1,29 @@
 export const tokens = {
   minimumTouchTarget: 44,
+  button: {
+    quiet: {
+      background: "#FFFDF8",
+      border: "#978F84",
+      borderWidth: 1,
+      fontFamily: "Work Sans",
+      fontWeight: "500",
+      radius: 4,
+      text: "#171412",
+    },
+    standard: {
+      background: "#FFFDF8",
+      border: "#C43D28",
+      borderWidth: 1,
+      fontFamily: "Work Sans",
+      fontWeight: "500",
+      radius: 4,
+      text: "#171412",
+    },
+  },
   color: {
-    background: "#F7F3EC",
+    background: "#FCF8F2",
     surface: "#FFFDF8",
+    placeholder: "#F0E9DF",
     ink: "#151515",
     muted: "#6F6B64",
     accent: "#C43D28",
@@ -10,6 +31,7 @@ export const tokens = {
     border: "#D8D1C6",
     controlBorder: "#9B9388",
     disabled: "#E5E0D8",
+    selectedSurface: "#FCEFEA",
     success: "#17633A",
     error: "#A1261A",
   },

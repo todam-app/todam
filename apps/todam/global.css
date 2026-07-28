@@ -1,41 +1,65 @@
 @font-face {
   font-display: swap;
-  font-family: "Inter";
+  font-family: "Work Sans";
   font-style: normal;
   font-weight: 400;
-  src: url("/fonts/inter-latin-400-normal.woff2") format("woff2");
+  src: url("/fonts/work-sans-latin-400-normal.woff2") format("woff2");
 }
 
 @font-face {
   font-display: swap;
-  font-family: "Inter";
+  font-family: "Work Sans";
+  font-style: normal;
+  font-weight: 500;
+  src: url("/fonts/work-sans-latin-500-normal.woff2") format("woff2");
+}
+
+@font-face {
+  font-display: swap;
+  font-family: "Work Sans";
   font-style: normal;
   font-weight: 600;
-  src: url("/fonts/inter-latin-600-normal.woff2") format("woff2");
+  src: url("/fonts/work-sans-latin-600-normal.woff2") format("woff2");
 }
 
 @font-face {
   font-display: swap;
-  font-family: "Inter";
+  font-family: "Work Sans";
   font-style: normal;
   font-weight: 700;
-  src: url("/fonts/inter-latin-700-normal.woff2") format("woff2");
+  src: url("/fonts/work-sans-latin-700-normal.woff2") format("woff2");
 }
 
 @font-face {
   font-display: swap;
-  font-family: "Source Serif 4";
+  font-family: "Work Sans";
+  font-style: normal;
+  font-weight: 800;
+  src: url("/fonts/work-sans-latin-800-normal.woff2") format("woff2");
+}
+
+@font-face {
+  font-display: swap;
+  font-family: "Playfair Display";
   font-style: normal;
   font-weight: 600;
-  src: url("/fonts/source-serif-4-latin-600-normal.woff2") format("woff2");
+  src: url("/fonts/playfair-display-latin-600-normal.woff2") format("woff2");
 }
 
 @font-face {
   font-display: swap;
-  font-family: "Source Serif 4";
+  font-family: "Playfair Display";
   font-style: normal;
   font-weight: 700;
-  src: url("/fonts/source-serif-4-latin-700-normal.woff2") format("woff2");
+  src: url("/fonts/playfair-display-latin-700-normal.woff2") format("woff2");
+}
+
+@font-face {
+  font-display: swap;
+  font-family: "Playfair Display";
+  font-style: normal;
+  font-weight: 900;
+  src: url("/fonts/playfair-display-latin-900-normal.woff2") format("woff2");
 }
 
 @tailwind base;
@@ -43,8 +67,8 @@
 @tailwind utilities;
 
 :root {
-  --todam-color-canvas: #f7f3ec;
-  --todam-color-gutter: #f0eae1;
+  --todam-color-canvas: #fcf8f2;
+  --todam-color-gutter: #faf3e8;
   --todam-color-page: var(--todam-color-canvas);
   --todam-web-content-width: 1120px;
   --todam-web-header-height: 70px;
@@ -68,7 +92,7 @@ html {
     var(--todam-color-gutter) calc(50% + 560px),
     var(--todam-color-gutter) 100%
   );
-  font-family: "Inter", system-ui, sans-serif;
+  font-family: "Work Sans", Arial, Helvetica, sans-serif;
 }
 
 body {
@@ -143,8 +167,17 @@ body {
   word-break: break-word !important;
 }
 
+.font-sans {
+  font-family: "Work Sans", Arial, Helvetica, sans-serif;
+}
+
 .font-serif {
-  font-family: "Source Serif 4", Georgia, serif;
+  font-family: "Playfair Display", Georgia, "Times New Roman", serif;
+}
+
+.todam-interactive-card,
+.todam-icon-button {
+  cursor: pointer;
 }
 
 a,
@@ -186,13 +219,88 @@ textarea:focus-visible,
       transform 140ms ease;
   }
 
-  a:hover,
-  [role="link"]:hover {
+  .todam-cta-standard,
+  [data-todam-cta],
+  .todam-cta-standard *,
+  [data-todam-cta] *,
+  .todam-interactive-card,
+  .todam-icon-button,
+  .todam-icon-button * {
+    transition:
+      background-color 140ms ease,
+      border-color 140ms ease,
+      color 140ms ease,
+      filter 140ms ease,
+      transform 140ms ease;
+  }
+
+  a:not(.todam-cta-standard):not([data-todam-cta]):not(.todam-interactive-card):not(
+      .todam-icon-button
+    ):hover,
+  [role="link"]:not(.todam-cta-standard):not([data-todam-cta]):not(
+      .todam-interactive-card
+    ):not(.todam-icon-button):hover {
     opacity: 0.82;
   }
 
-  button:not(:disabled):hover,
-  [role="button"]:not([aria-disabled="true"]):hover,
+  .todam-cta-standard:not([aria-disabled="true"]):hover,
+  [data-todam-cta="standard"]:not([aria-disabled="true"]):hover {
+    background-color: #c43d28 !important;
+    border-color: #c43d28 !important;
+    filter: none;
+  }
+
+  .todam-cta-standard:not([aria-disabled="true"]):hover *,
+  [data-todam-cta="standard"]:not([aria-disabled="true"]):hover * {
+    color: #fffdf8 !important;
+  }
+
+  [data-todam-cta="quiet"]:not([aria-disabled="true"]):hover {
+    background-color: #fcf8f2 !important;
+    border-color: #151515 !important;
+    filter: none;
+  }
+
+  [data-todam-cta="action-link"]:not([aria-disabled="true"]):hover,
+  [data-todam-cta="danger-link"]:not([aria-disabled="true"]):hover {
+    filter: none;
+    opacity: 1;
+  }
+
+  [data-todam-cta="action-link"]:not([aria-disabled="true"]):hover *,
+  [data-todam-cta="danger-link"]:not([aria-disabled="true"]):hover * {
+    text-decoration-line: underline !important;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 4px;
+  }
+
+  [data-todam-cta="danger"]:not([aria-disabled="true"]):hover {
+    background-color: #851c13 !important;
+    filter: none;
+  }
+
+  .todam-interactive-card:not([aria-disabled="true"]):hover {
+    border-color: #c43d28 !important;
+    opacity: 1;
+    transform: translateY(-1px);
+  }
+
+  .todam-icon-button:not([aria-disabled="true"]):hover {
+    background-color: #fcefea !important;
+    border-color: #c43d28 !important;
+    filter: none;
+  }
+
+  .todam-icon-button:not([aria-disabled="true"]):hover * {
+    color: #c43d28 !important;
+  }
+
+  button:not(:disabled):not(.todam-cta-standard):not([data-todam-cta]):not(
+      .todam-icon-button
+    ):hover,
+  [role="button"]:not([aria-disabled="true"]):not(.todam-cta-standard):not(
+      [data-todam-cta]
+    ):not(.todam-icon-button):hover,
   [role="tab"]:not([aria-disabled="true"]):hover,
   [role="radio"]:not([aria-disabled="true"]):hover,
   [role="checkbox"]:not([aria-disabled="true"]):hover {
@@ -200,8 +308,19 @@ textarea:focus-visible,
   }
 }
 
-button:not(:disabled):active,
-[role="button"]:not([aria-disabled="true"]):active,
+.todam-cta-standard:not([aria-disabled="true"]):active,
+[data-todam-cta="standard"]:not([aria-disabled="true"]):active,
+[data-todam-cta="quiet"]:not([aria-disabled="true"]):active,
+[data-todam-cta="danger"]:not([aria-disabled="true"]):active,
+.todam-interactive-card:not([aria-disabled="true"]):active,
+.todam-icon-button:not([aria-disabled="true"]):active {
+  transform: translateY(1px);
+}
+
+button:not(:disabled):not([data-todam-cta]):not(.todam-icon-button):active,
+[role="button"]:not([aria-disabled="true"]):not([data-todam-cta]):not(
+    .todam-icon-button
+  ):active,
 [role="tab"]:not([aria-disabled="true"]):active,
 [role="radio"]:not([aria-disabled="true"]):active,
 [role="checkbox"]:not([aria-disabled="true"]):active {

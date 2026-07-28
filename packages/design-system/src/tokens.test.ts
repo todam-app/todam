@@ -31,4 +31,67 @@ describe("tokens accessibles", () => {
   it("garde le libellé du bouton destructif au niveau WCAG AA", () => {
     expect(contrast(tokens.color.surface, tokens.color.error)).toBeGreaterThan(4.5);
   });
+
+  it("centralise les surfaces neutres selon leur rôle", () => {
+    expect({
+      background: tokens.color.background,
+      surface: tokens.color.surface,
+      placeholder: tokens.color.placeholder,
+      disabled: tokens.color.disabled,
+      border: tokens.color.border,
+      selectedSurface: tokens.color.selectedSurface,
+    }).toEqual({
+      background: "#FCF8F2",
+      surface: "#FFFDF8",
+      placeholder: "#F0E9DF",
+      disabled: "#E5E0D8",
+      border: "#D8D1C6",
+      selectedSurface: "#FCEFEA",
+    });
+  });
+
+  it("conserve exactement la direction visuelle du bouton standard", () => {
+    expect(tokens.button.standard).toEqual({
+      background: "#FFFDF8",
+      border: "#C43D28",
+      borderWidth: 1,
+      fontFamily: "Work Sans",
+      fontWeight: "500",
+      radius: 4,
+      text: "#171412",
+    });
+  });
+
+  it("centralise le bouton de service neutre", () => {
+    expect(tokens.button.quiet).toEqual({
+      background: "#FFFDF8",
+      border: "#978F84",
+      borderWidth: 1,
+      fontFamily: "Work Sans",
+      fontWeight: "500",
+      radius: 4,
+      text: "#171412",
+    });
+  });
+
+  it("garde le bouton standard lisible et sa bordure perceptible", () => {
+    expect(
+      contrast(tokens.button.standard.text, tokens.button.standard.background),
+    ).toBeCloseTo(18.04, 2);
+    expect(
+      contrast(tokens.button.standard.border, tokens.button.standard.background),
+    ).toBeCloseTo(5.11, 2);
+    expect(
+      contrast(tokens.button.standard.border, tokens.color.background),
+    ).toBeCloseTo(4.91, 2);
+  });
+
+  it("garde la bordure du bouton neutre perceptible sur les fonds Web", () => {
+    expect(
+      contrast(tokens.button.quiet.border, tokens.button.quiet.background),
+    ).toBeGreaterThanOrEqual(3);
+    expect(
+      contrast(tokens.button.quiet.border, tokens.color.background),
+    ).toBeGreaterThanOrEqual(3);
+  });
 });

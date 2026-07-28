@@ -2,7 +2,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { Tabs } from "expo-router";
 import { Platform, View } from "react-native";
 
-const PAGE_BACKGROUND = "#F7F3EC";
+const PAGE_BACKGROUND = "#FCF8F2";
 
 const icons = {
   index: "home-outline",

@@ -11,7 +11,7 @@ import { WebNavigation } from "../components/WebNavigation";
 import { PUBLIC_WEB_URL } from "../lib/config";
 
 const DEFAULT_WEB_TITLE = "Todam - Journal de spectacles";
-const TODAM_PAGE_BACKGROUND = "#F7F3EC";
+const TODAM_PAGE_BACKGROUND = "#FCF8F2";
 const TODAM_NAVIGATION_THEME = {
   ...DefaultTheme,
   colors: {
@@ -92,6 +92,14 @@ export default function RootLayout() {
                 <Stack.Screen
                   name="signaler"
                   options={{ headerTitle: "Signaler une information" }}
+                />
+                <Stack.Screen
+                  name="ajouter-un-spectacle"
+                  options={{ headerTitle: "Ajouter un spectacle" }}
+                />
+                <Stack.Screen
+                  name="politique-editoriale"
+                  options={{ headerTitle: "Politique éditoriale" }}
                 />
                 <Stack.Screen
                   name="sign-in"

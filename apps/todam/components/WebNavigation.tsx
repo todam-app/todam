@@ -1,4 +1,5 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { tokens } from "@todam/design-system";
 import {
   Link,
   type Href,
@@ -204,12 +205,17 @@ export function WebNavigation() {
                 <Pressable
                   accessibilityLabel={session.data ? "Mon profil" : "Se connecter"}
                   accessibilityRole="link"
-                  className="ml-1 h-11 min-w-11 items-center justify-center rounded-full border border-control px-3"
+                  className={`ml-1 h-11 min-w-11 items-center justify-center border px-3 ${
+                    session.data
+                      ? "todam-icon-button rounded-full border-control"
+                      : "todam-cta-standard"
+                  }`}
+                  style={session.data ? undefined : styles.standardButton}
                 >
                   {session.data ? (
                     <Ionicons color="#151515" name="person-outline" size={20} />
                   ) : (
-                    <Text className="text-base font-semibold text-ink">Connexion</Text>
+                    <Text style={styles.standardButtonLabel}>Se connecter</Text>
                   )}
                 </Pressable>
               </Link>
@@ -234,7 +240,7 @@ export function WebNavigation() {
             <Pressable
               accessibilityLabel="Retour"
               accessibilityRole="button"
-              className="h-11 w-11 items-center justify-center"
+              className="todam-icon-button h-11 w-11 items-center justify-center rounded-todam border border-control bg-paper"
               onPress={() => {
                 if (router.canGoBack()) {
                   router.back();
@@ -324,5 +330,18 @@ const styles = StyleSheet.create({
   search: {
     flex: 1,
     minWidth: 180,
+  },
+  standardButton: {
+    backgroundColor: tokens.button.standard.background,
+    borderColor: tokens.button.standard.border,
+    borderRadius: tokens.button.standard.radius,
+    borderWidth: tokens.button.standard.borderWidth,
+    boxSizing: "border-box",
+  },
+  standardButtonLabel: {
+    color: tokens.button.standard.text,
+    fontFamily: tokens.button.standard.fontFamily,
+    fontSize: 16,
+    fontWeight: tokens.button.standard.fontWeight,
   },
 });

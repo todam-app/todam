@@ -22,7 +22,7 @@ SVG sont les sources de production à utiliser en priorité.
 - Les fichiers suffixés `-source.png` conservent les maquettes raster validées
   avant vectorisation.
 
-La palette est composée de l’encre `#151515`, de l’ivoire `#F7F3EC` et du
+La palette est composée de l’encre `#151515`, de l’ivoire `#FCF8F2` et du
 vermillon `#C43D28`. Le symbole et le mot-symbole sont des créations originales
 réalisées pour Todam. Le symbole correspond à la piste 3 validée le
 24 juillet 2026.
