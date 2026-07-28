@@ -786,6 +786,10 @@ async function attachViewportSlices(page: Page, testInfo: TestInfo, prefix: stri
         { intervals: [50, 100, 200], timeout: 5_000 },
       )
       .toBeLessThanOrEqual(1);
+    if (position === "bas" && (await page.getByTestId("site-footer").count()) > 0) {
+      await page.getByTestId("site-footer").scrollIntoViewIfNeeded();
+      await page.waitForTimeout(100);
+    }
     const screenshot = await page.screenshot({ animations: "disabled" });
     await mkdir(reviewScreenshotDirectory, { recursive: true });
     await writeFile(
@@ -822,7 +826,7 @@ const routes = [
   {
     name: "accueil-connecte",
     path: "/",
-    heading: "Bonjour, spectatrice-grenoble",
+    heading: "À l’affiche près de Grenoble, France",
     role: "member",
   },
   {
@@ -1121,6 +1125,182 @@ test("les CTA compagnies reprennent exactement le bouton Todam 01", async ({
 
   await companyLink.focus();
   await expect(companyLink).toHaveCSS("outline-width", "3px");
+});
+
+test("la découverte vivante expose son CTA vedette, sa grille et ses filtres avancés", async ({
+  page,
+}) => {
+  await mockPresentationApi(page, false);
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/");
+  await expect(
+    page.getByRole("heading", {
+      level: 1,
+      name: "Les spectacles passent. Votre journal reste.",
+    }),
+  ).toBeVisible();
+
+  const featuredLink = page.getByRole("link", {
+    exact: true,
+    name: "Créer mon journal",
+  });
+  await expect(featuredLink).toHaveAttribute("data-todam-cta", "featured");
+  await expect(featuredLink).toHaveCSS("background-color", "rgb(21, 21, 21)");
+  await expect(featuredLink).toHaveCSS("border-radius", "4px");
+  await featuredLink.hover();
+  await expect(featuredLink).toHaveCSS("background-color", "rgb(196, 61, 40)");
+  await featuredLink.focus();
+  await expect(featuredLink).toHaveCSS("outline-width", "3px");
+
+  const header = page.locator(".todam-web-header").first();
+  await expect(header).toHaveCSS("backdrop-filter", "blur(16px)");
+  await page
+    .locator(".todam-web-page-scroll")
+    .evaluate((element) => (element.scrollTop = 120));
+  await expect(header).toHaveClass(/todam-web-header--scrolled/);
+  await expect(header).not.toHaveCSS("box-shadow", "none");
+
+  await page.goto("/decouvrir");
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Découvrir les spectacles" }),
+  ).toBeVisible();
+  const filters = page.getByRole("button", { name: "Filtres (0)" });
+  await expect(filters).toHaveAttribute("aria-expanded", "false");
+  await expect(page.getByTestId("discover-advanced-filters-panel")).toHaveCount(0);
+  await filters.focus();
+  await filters.press("Enter");
+  await expect(filters).toHaveAttribute("aria-expanded", "true");
+  await page.getByLabel("Ville ou proximité").fill("Grenoble");
+  await expect(page.getByRole("button", { name: "Filtres (1)" })).toBeVisible();
+
+  const productionGrid = page.locator(".todam-production-grid").first();
+  await expect(productionGrid.locator(".todam-production-card")).toHaveCount(
+    venueCards.length,
+  );
+  const gridColumns = await productionGrid.evaluate((element) =>
+    getComputedStyle(element).gridTemplateColumns.split(" ").filter(Boolean),
+  );
+  expect(gridColumns).toHaveLength(4);
+  await expect(productionGrid.locator(".todam-production-card").first()).toContainText(
+    "Visuel non publié",
+  );
+  const filterBar = page.locator(".todam-discover-filter-bar");
+  await expect(filterBar).toHaveCSS("position", "sticky");
+  await page
+    .locator(".todam-web-page-scroll")
+    .evaluate((element) => (element.scrollTop = 1_000));
+  await expect
+    .poll(async () => (await filterBar.boundingBox())?.y ?? Number.POSITIVE_INFINITY)
+    .toBeLessThanOrEqual(72);
+});
+
+test("la fiche spectacle traite son hero et sa prochaine date comme un billet", async ({
+  page,
+}) => {
+  await mockPresentationApi(page, false);
+  await page.setViewportSize({ width: 1024, height: 768 });
+  await page.goto("/production/jetais-partie-pardon-mind-the-gap");
+  await expect(
+    page.getByRole("heading", { level: 1, name: primaryCard.title }),
+  ).toBeVisible();
+  await expect(page.locator(".todam-production-hero--theatre")).toBeVisible();
+  await expect(page.locator(".todam-ticket")).toContainText("Prochaine représentation");
+});
+
+test("les affiches publiées restent affichées et la fiche gère l’absence de prochaine date", async ({
+  page,
+}) => {
+  await mockPresentationApi(page, false);
+  await page.unroute("**/v1/productions/jetais-partie-pardon-mind-the-gap");
+  await page.route("**/v1/productions/jetais-partie-pardon-mind-the-gap", (route) =>
+    fulfillJson(route, {
+      ...productionDetail,
+      posters: [
+        {
+          id: "900234d9-6224-4372-bca3-5d430ac5d9f0",
+          url: "http://localhost:8081/brand/todam-open-graph.png",
+          kind: "poster",
+          alt: `Affiche du spectacle ${primaryCard.title}`,
+          credit: "Création originale Todam",
+          copyrightHolder: "Todam",
+          license: null,
+          rightsStatus: "todam_original",
+          sourceUrl: "https://todam.fr/",
+          width: 1200,
+          height: 1800,
+        },
+      ],
+      performances: [],
+    }),
+  );
+  await page.goto("/production/jetais-partie-pardon-mind-the-gap");
+  await expect(
+    page.getByRole("img", {
+      name: `Affiche du spectacle ${primaryCard.title}`,
+    }),
+  ).toBeVisible();
+  await expect(page.locator(".todam-ticket")).toHaveCount(0);
+  await expect(
+    page.getByText("Aucune prochaine représentation n’est confirmée."),
+  ).toBeVisible();
+});
+
+test("la pagination de la grille ajoute les résultats sans perdre les filtres", async ({
+  page,
+}) => {
+  await mockPresentationApi(page, false);
+  await page.unroute("**/v1/search**");
+  await page.route("**/v1/search**", (route) => {
+    const url = new URL(route.request().url());
+    const cursor = url.searchParams.get("cursor");
+    return fulfillJson(route, {
+      type: "productions",
+      total: 3,
+      productions: cursor ? [venueCards[2]] : venueCards.slice(0, 2),
+      venues: [],
+      companies: [],
+      members: [],
+      nextCursor: cursor ? null : "page-2",
+      suggestion: null,
+    });
+  });
+  await page.goto("/decouvrir");
+  await expect(
+    page.locator(".todam-production-grid .todam-production-card"),
+  ).toHaveCount(2);
+  await page.getByRole("button", { name: "Afficher plus de résultats" }).click();
+  await expect(
+    page.locator(".todam-production-grid .todam-production-card"),
+  ).toHaveCount(3);
+  await expect(page.getByRole("button", { name: "Filtres (0)" })).toBeVisible();
+});
+
+test("le footer de l’accueil reste atteignable au scroll maximal", async ({ page }) => {
+  await mockPresentationApi(page, false);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/");
+  await expect(
+    page.getByRole("heading", {
+      level: 1,
+      name: "Les spectacles passent. Votre journal reste.",
+    }),
+  ).toBeVisible();
+  await expect
+    .poll(
+      () =>
+        page.locator(".todam-web-page-scroll").evaluate((element) => {
+          element.scrollTop = element.scrollHeight;
+          const footer = document.querySelector('[data-testid="site-footer"]');
+          const footerBounds = footer?.getBoundingClientRect();
+          return Boolean(
+            footerBounds &&
+            footerBounds.top < element.clientHeight &&
+            footerBounds.bottom > 0,
+          );
+        }),
+      { intervals: [100, 200, 400], timeout: 15_000 },
+    )
+    .toBe(true);
 });
 
 test("les actions de service et destructives annoncent clairement leur rôle", async ({

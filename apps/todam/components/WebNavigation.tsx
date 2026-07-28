@@ -275,12 +275,15 @@ export function WebNavigation() {
             return (
               <Link href={item.href} key={item.href} asChild>
                 <Pressable
+                  accessibilityLabel={item.label}
                   accessibilityRole="link"
                   aria-current={active ? "page" : undefined}
                   className="min-h-16 flex-1 items-center justify-center gap-1 px-0.5"
                 >
                   <Ionicons
+                    accessibilityElementsHidden
                     color={active ? "#C43D28" : "#6F6B64"}
+                    importantForAccessibility="no"
                     name={item.icon}
                     size={21}
                   />

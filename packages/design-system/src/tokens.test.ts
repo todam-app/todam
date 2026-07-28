@@ -74,6 +74,45 @@ describe("tokens accessibles", () => {
     });
   });
 
+  it("centralise le CTA vedette et conserve son contraste", () => {
+    expect(tokens.button.featured).toEqual({
+      background: "#151515",
+      backgroundHover: "#C43D28",
+      border: "#151515",
+      borderWidth: 1,
+      fontFamily: "Work Sans",
+      fontWeight: "600",
+      radius: 4,
+      text: "#FFFDF8",
+    });
+    expect(
+      contrast(tokens.button.featured.text, tokens.button.featured.background),
+    ).toBeGreaterThan(4.5);
+    expect(
+      contrast(tokens.button.featured.text, tokens.button.featured.backgroundHover),
+    ).toBeGreaterThan(4.5);
+  });
+
+  it("expose les accents éditoriaux, rayons et surfaces Web", () => {
+    expect({
+      coral: tokens.color.coral,
+      lilac: tokens.color.lilac,
+      aqua: tokens.color.aqua,
+      panel: tokens.radius.panel,
+      media: tokens.radius.media,
+      glass: tokens.surface.glass,
+      shadow: tokens.shadow.light,
+    }).toEqual({
+      coral: "#F3A995",
+      lilac: "#C8B8F0",
+      aqua: "#9FD8D0",
+      panel: 12,
+      media: 16,
+      glass: "rgba(255, 253, 248, 0.82)",
+      shadow: "0 10px 30px rgba(43, 34, 27, 0.10)",
+    });
+  });
+
   it("garde le bouton standard lisible et sa bordure perceptible", () => {
     expect(
       contrast(tokens.button.standard.text, tokens.button.standard.background),

@@ -9,6 +9,12 @@ async function expectFooterBelowViewport(page: Page) {
   const footer = page.getByTestId("site-footer");
   const pageScroller = page.locator(".todam-web-page-scroll");
   await expect(footer).toHaveCount(1);
+  await pageScroller.evaluate((element) => {
+    element.scrollTop = 0;
+  });
+  await expect
+    .poll(() => pageScroller.evaluate((element) => element.scrollTop))
+    .toBe(0);
 
   const [footerTop, viewportHeight, scrollMetrics] = await Promise.all([
     footer.evaluate((element) => element.getBoundingClientRect().top),
@@ -201,9 +207,9 @@ test("l'accueil présente Todam simplement et ouvre l'inscription", async ({ pag
   await page.goto("/");
 
   await expect(page).toHaveTitle("Todam — votre journal de spectacles");
-  await expect(page.locator('link[rel="icon"][href="/favicon.ico?v=1"]')).toHaveCount(
-    1,
-  );
+  await expect(
+    page.locator('link[rel="icon"][href="/favicon.svg?v=2"][type="image/svg+xml"]'),
+  ).toHaveCount(1);
   await expect(
     page.getByRole("link", { name: "Todam, accueil" }).first(),
   ).toBeVisible();
@@ -219,7 +225,7 @@ test("l'accueil présente Todam simplement et ouvre l'inscription", async ({ pag
   ).toBeVisible();
   await expectFooterBelowViewport(page);
 
-  await page.getByRole("button", { name: "Créer mon journal" }).press("Enter");
+  await page.getByRole("link", { name: "Créer mon journal" }).press("Enter");
   await expect(page.getByRole("heading", { name: "Créer ton journal" })).toBeVisible();
   await expect(
     page.getByRole("heading", { exact: true, name: "Créer un compte" }),
@@ -229,7 +235,7 @@ test("l'accueil présente Todam simplement et ouvre l'inscription", async ({ pag
   ).toBeVisible();
 });
 
-test("l'accueil connecté salue l'utilisateur et remplace le discours marketing", async ({
+test("l'accueil connecté place la découverte locale au premier écran", async ({
   page,
 }) => {
   await mockAuthenticatedProfile(page);
@@ -237,13 +243,15 @@ test("l'accueil connecté salue l'utilisateur et remplace le discours marketing"
   await page.goto("/");
 
   await expect(
-    page.getByRole("heading", { exact: true, name: "Bonjour, spectatrice-test" }),
-  ).toBeVisible();
-  await expect(page.getByText("Construisez votre journal · 0/5")).toBeVisible();
-  await expect(page.getByRole("button", { name: "Créer mon journal" })).toHaveCount(0);
-  await expect(page.getByText("Choisissez votre ville")).toBeVisible();
-  await expect(
     page.getByRole("heading", { exact: true, name: "À l’affiche en ce moment" }),
+  ).toBeVisible();
+  await expect(page.getByText("Journal en cours · 0/5")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Créer mon journal" })).toHaveCount(0);
+  await expect(
+    page.getByText("Choisir une ville pour personnaliser l’affiche →"),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("link", { exact: true, name: "Ajouter un spectacle" }),
   ).toBeVisible();
   await expect(page.getByRole("link", { name: "Une pièce" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Ouvrir mes spectacles" })).toBeVisible();
@@ -258,11 +266,42 @@ test("l'accueil connecté salue l'utilisateur et remplace le discours marketing"
   expect(journalBox!.y).toBeCloseTo(listsBox!.y, 0);
 
   await page.setViewportSize({ width: 375, height: 800 });
-  await expect(page.getByText("Construisez votre journal · 0/5")).toBeVisible();
+  await expect(page.getByText("Journal en cours · 0/5")).toBeVisible();
   const hasHorizontalOverflow = await page.evaluate(
     () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
   );
   expect(hasHorizontalOverflow).toBe(false);
+});
+
+test("l'accueil masque la progression terminée et les listes vides restent explicites", async ({
+  page,
+}) => {
+  await mockAuthenticatedProfile(page);
+  await page.unroute("**/v1/me/home");
+  await page.route("**/v1/me/home", async (route) => {
+    await route.fulfill({
+      contentType: "application/json",
+      body: JSON.stringify({
+        profile: { pseudonym: "spectatrice-test" },
+        homeCity: null,
+        progress: { current: 5, target: 5, completed: true },
+        radiusKm: 50,
+        nearby: [],
+        nationalUpcoming: [],
+        recentlyAdded: [],
+      }),
+    });
+  });
+  await page.goto("/");
+  await expect(
+    page.getByRole("heading", { exact: true, name: "À l’affiche en ce moment" }),
+  ).toBeVisible();
+  await expect(page.getByText(/Journal en cours/)).toHaveCount(0);
+
+  await page.goto("/journal/listes");
+  await expect(
+    page.getByText("Vous n’avez encore créé aucune liste.", { exact: true }),
+  ).toBeVisible();
 });
 
 test("le contenu reste centré et le scroll Web utilise le viewport", async ({
@@ -276,6 +315,9 @@ test("le contenu reste centré et le scroll Web utilise le viewport", async ({
   const headerFrame = page.getByTestId("web-header-frame");
   const navigation = page.getByTestId("web-primary-navigation");
   const header = page.locator(".todam-web-header");
+  await expect(frame).toBeVisible();
+  await expect(headerFrame).toBeVisible();
+  await expect(navigation).toBeVisible();
   const [frameBox, headerBox, navigationBox, webBackground] = await Promise.all([
     frame.evaluate((element) => {
       const rect = element.getBoundingClientRect();
@@ -316,8 +358,8 @@ test("le contenu reste centré et le scroll Web utilise le viewport", async ({
   expect(headerBox.width).toBeCloseTo(1120, 0);
   expect(headerBox.right - navigationBox.right).toBeGreaterThanOrEqual(24);
   expect(headerBox.right - navigationBox.right).toBeLessThanOrEqual(33);
-  expect(webBackground.color).toBe("rgb(247, 243, 236)");
-  expect(webBackground.image).toBe("none");
+  expect(webBackground.color).toBe("rgb(250, 243, 232)");
+  expect(webBackground.image).toContain("linear-gradient");
   await expect(page.locator("body")).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
   await expect(page.locator("#root")).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
   await expect(rootFrame).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
@@ -355,17 +397,23 @@ test("le contenu reste centré et le scroll Web utilise le viewport", async ({
 
   await page.setViewportSize({ width: 375, height: 800 });
   await page.goto("/");
-  await expect(headerFrame.getByRole("link", { name: "Todam, accueil" })).toBeVisible();
-  await expect(headerFrame.getByRole("link", { name: "Rechercher" })).toBeVisible();
-  await expect(navigation.getByText("Accueil", { exact: true })).toHaveCount(0);
-  await expect(navigation.getByText("Profil", { exact: true })).toHaveCount(0);
+  await expect(headerFrame).toHaveCount(0);
+  const mobileNavigation = page.getByTestId("web-mobile-navigation");
+  await expect(mobileNavigation).toBeVisible();
+  await expect(mobileNavigation.getByRole("link")).toHaveCount(4);
+  await expect(
+    mobileNavigation.getByRole("link", { exact: true, name: "Accueil" }),
+  ).toBeVisible();
+  await expect(
+    mobileNavigation.getByRole("link", { exact: true, name: "Profil" }),
+  ).toBeVisible();
   const hasHorizontalOverflow = await page.evaluate(
     () => document.documentElement.scrollWidth > window.innerWidth,
   );
   expect(hasHorizontalOverflow).toBe(false);
   await expect(page.locator("html")).toHaveCSS(
     "background-color",
-    "rgb(247, 243, 236)",
+    "rgb(252, 248, 242)",
   );
 });
 
@@ -425,7 +473,7 @@ test("l'inscription présente l'âge et les documents sans checkbox", async ({
       name: "Conditions d'utilisation",
     }),
   ).toHaveCount(0);
-  await expect(legalPage.getByText(/Date d'effet : 26 juillet 2026/)).toBeVisible();
+  await expect(legalPage.getByText(/Date d'effet : 28 juillet 2026/)).toBeVisible();
   await expectFooterBelowViewport(legalPage);
   await expect(
     legalPage
@@ -453,7 +501,7 @@ test("l'inscription présente l'âge et les documents sans checkbox", async ({
 test("le footer commence sous le premier écran des pages courtes", async ({ page }) => {
   const pages = [
     { path: "/search", heading: "Rechercher dans Todam" },
-    { path: "/profile", heading: "Votre journal vous attend" },
+    { path: "/page-qui-n-existe-pas", heading: "Cette page n’est pas à l’affiche." },
   ];
 
   for (const item of pages) {
@@ -480,7 +528,11 @@ test("les pages juridiques utilisent le fond Web commun", async ({ page }) => {
         let ancestor: HTMLElement | null = element;
         while (ancestor && ancestor !== document.body) {
           const color = window.getComputedStyle(ancestor).backgroundColor;
-          if (color !== "rgba(0, 0, 0, 0)" && color !== "rgb(247, 243, 236)") {
+          if (
+            color !== "rgba(0, 0, 0, 0)" &&
+            color !== "rgb(250, 243, 232)" &&
+            color !== "rgb(252, 248, 242)"
+          ) {
             unexpectedColors.push(color);
           }
           ancestor = ancestor.parentElement;
@@ -489,7 +541,8 @@ test("les pages juridiques utilisent le fond Web commun", async ({ page }) => {
       }),
     )
     .toEqual([]);
-  await expect(pageScroller).toHaveCSS("background-color", "rgb(247, 243, 236)");
+  await expect(pageScroller).toHaveCSS("background-color", "rgb(250, 243, 232)");
+  await expect(pageScroller).toHaveCSS("background-image", /linear-gradient/);
   await expect(page.locator("body")).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
   const htmlBackground = await page.locator("html").evaluate((element) => {
     const style = window.getComputedStyle(element);
@@ -498,8 +551,8 @@ test("les pages juridiques utilisent le fond Web commun", async ({ page }) => {
       image: style.backgroundImage,
     };
   });
-  expect(htmlBackground.color).toBe("rgb(247, 243, 236)");
-  expect(htmlBackground.image).toBe("none");
+  expect(htmlBackground.color).toBe("rgb(250, 243, 232)");
+  expect(htmlBackground.image).toContain("linear-gradient");
 });
 
 test("le profil sépare les informations, statistiques et paramètres du compte", async ({
@@ -703,6 +756,7 @@ test("l'export des paramètres affiche ses états de chargement, succès et erre
         reviews: [],
         lists: [],
         contentReports: [],
+        communitySubmissions: [],
         companyClaims: [],
         companyMemberships: [],
         catalogRevisions: [],
@@ -717,7 +771,7 @@ test("l'export des paramètres affiche ses états de chargement, succès et erre
   await expect(exportButton).toBeDisabled();
   await expect(page.getByLabel("Chargement")).toBeVisible();
   releaseExport?.();
-  await expect(page.getByText("L'export a été préparé.")).toBeVisible();
+  await expect(page.getByText("L'export JSON a été préparé.")).toBeVisible();
 
   await page.unroute("**/v1/me/export?format=json");
   await page.route("**/v1/me/export?format=json", async (route) => {
@@ -938,11 +992,16 @@ test("les paramètres exposent les bons champs et confirment les modifications",
   await currentPasswords.nth(1).fill("Todam-test-2026");
   await newPasswords.nth(0).fill("Todam-test-2027");
   await newPasswords.nth(1).fill("Todam-test-2028");
-  await page.getByRole("button", { name: "Modifier le mot de passe" }).click();
   await expect(
     page.getByText("La confirmation ne correspond pas au nouveau mot de passe."),
   ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Modifier le mot de passe" }),
+  ).toBeDisabled();
   await newPasswords.nth(1).fill("Todam-test-2027");
+  await expect(
+    page.getByRole("button", { name: "Modifier le mot de passe" }),
+  ).toBeEnabled();
   await page.getByRole("button", { name: "Modifier le mot de passe" }).click();
   await expect(
     page.getByText(

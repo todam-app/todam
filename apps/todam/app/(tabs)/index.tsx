@@ -15,11 +15,12 @@ import { AsyncState } from "../../components/AsyncState";
 import { HomeDiscoveryCollection } from "../../components/HomeDiscoveryCollection";
 import { LegalFooter } from "../../components/LegalFooter";
 import { PageScrollView } from "../../components/PageScrollView";
+import { ProductionDiscoveryCard } from "../../components/ProductionDiscoveryCard";
 import { api } from "../../lib/api";
 import { authClient } from "../../lib/auth-client";
 import { API_URL, PUBLIC_WEB_URL } from "../../lib/config";
 import { serializeJsonLd } from "../../lib/json-ld";
-import { getHomeGreeting, getHomeProgressPercentage } from "../../lib/home";
+import { getHomeProgressPercentage } from "../../lib/home";
 import { loadOptionalStaticData } from "../../lib/static-catalog-params";
 
 const INITIAL_DATA_UPDATED_AT = Date.now();
@@ -184,8 +185,8 @@ function MarketingHome({
       </Head>
       <Page>
         <View className="todam-page-before-footer mx-auto w-full max-w-content flex-1 gap-16 px-5 py-10 md:px-8 md:py-16">
-          <View className="gap-8 border-b border-line pb-14 md:flex-row md:items-center md:justify-between">
-            <View className="max-w-3xl gap-6">
+          <View className="todam-public-hero gap-8 p-6 md:p-9 lg:p-11">
+            <View className="max-w-3xl justify-center gap-6">
               <Text className="text-xs font-bold uppercase tracking-[2px] text-accent">
                 Votre mémoire du spectacle vivant
               </Text>
@@ -202,87 +203,43 @@ function MarketingHome({
                 vous avez vu, notez vos expériences et partagez vos listes.
               </Text>
               <View className="flex-row flex-wrap gap-3">
-                <Link href="/decouvrir" asChild>
-                  <Button accessibilityRole="link" label="Découvrir les spectacles" />
-                </Link>
                 <Link href="/sign-up" asChild>
                   <Button
                     accessibilityRole="link"
                     label="Créer mon journal"
+                    variant="featured"
+                  />
+                </Link>
+                <Link href="/decouvrir" asChild>
+                  <Button
+                    accessibilityRole="link"
+                    label="Découvrir les spectacles"
                     variant="secondary"
                   />
                 </Link>
               </View>
             </View>
-            <View className="w-full max-w-sm border-y border-line py-5">
-              <Text className="mb-4 text-xs font-bold uppercase tracking-widest text-muted">
-                {showcase.data ? "Un vrai journal public" : "Aperçu d’un journal"}
-              </Text>
-              {showcase.data ? (
-                <Link href={`/membre/${showcase.data.username}`} asChild>
-                  <Pressable
-                    accessibilityRole="link"
-                    className="min-h-11 self-start justify-center"
-                  >
-                    <Text className="font-serif text-2xl font-semibold text-ink">
-                      @{showcase.data.username}
-                    </Text>
-                    <Text className="mt-1 text-sm font-semibold text-accent">
-                      Voir le profil et ses listes →
-                    </Text>
-                  </Pressable>
-                </Link>
-              ) : (
-                <>
-                  <Text className="font-serif text-2xl font-semibold text-ink">
-                    Votre journal
+            <View
+              accessibilityLabel="Sélection de spectacles à découvrir"
+              className="todam-hero-collage"
+            >
+              {(catalog.data?.productions ?? []).slice(0, 2).map((production) => (
+                <ProductionDiscoveryCard
+                  key={production.id}
+                  priority
+                  production={production}
+                />
+              ))}
+              {!catalog.isPending && (catalog.data?.productions.length ?? 0) === 0 ? (
+                <View className="min-h-72 justify-end rounded-media bg-lilac p-5">
+                  <Text className="text-xs font-bold uppercase tracking-widest text-ink">
+                    Prochainement
                   </Text>
-                  <Text className="mt-1 text-sm leading-5 text-muted">
-                    Le pseudonyme et les contenus choisis sont partageables ; l’e-mail
-                    reste privé.
+                  <Text className="mt-2 font-serif text-2xl font-semibold text-ink">
+                    Les spectacles du pilote arrivent ici.
                   </Text>
-                </>
-              )}
-              {journalPreview.length > 0 ? (
-                journalPreview.map((entry) => (
-                  <Link
-                    href={`/production/${entry.production.slug}`}
-                    key={entry.id}
-                    asChild
-                  >
-                    <Pressable
-                      accessibilityRole="link"
-                      className="min-h-16 justify-center gap-1 border-t border-line py-3"
-                    >
-                      <Text className="font-serif text-lg font-semibold text-ink">
-                        {entry.production.title}
-                      </Text>
-                      <Text className="text-sm text-muted">
-                        {entry.attendedOn
-                          ? `Vu le ${new Intl.DateTimeFormat("fr-FR").format(
-                              new Date(`${entry.attendedOn}T12:00:00Z`),
-                            )}`
-                          : `Ajouté le ${new Intl.DateTimeFormat("fr-FR").format(
-                              new Date(entry.addedAt),
-                            )}`}
-                        {entry.rating ? ` · ${entry.rating}/10` : ""}
-                      </Text>
-                    </Pressable>
-                  </Link>
-                ))
-              ) : (
-                <View className="mt-3 gap-2 border-t border-line py-4">
-                  {[
-                    "Date vue et date d’ajout séparées",
-                    "Note personnelle sur 10",
-                    "Avis et listes partageables",
-                  ].map((feature) => (
-                    <Text className="text-sm text-muted" key={feature}>
-                      {feature}
-                    </Text>
-                  ))}
                 </View>
-              )}
+              ) : null}
             </View>
           </View>
 
@@ -316,6 +273,70 @@ function MarketingHome({
                 }))}
               />
             </AsyncState>
+          </View>
+
+          <View className="gap-5 rounded-panel border border-line bg-paper p-6 shadow-soft md:flex-row md:items-start md:p-8">
+            <View className="min-w-0 flex-1 gap-2">
+              <Text className="text-xs font-bold uppercase tracking-widest text-accent">
+                {showcase.data ? "Un journal public" : "Votre journal"}
+              </Text>
+              {showcase.data ? (
+                <Link href={`/membre/${showcase.data.username}`} asChild>
+                  <Pressable
+                    accessibilityRole="link"
+                    className="min-h-11 self-start justify-center"
+                  >
+                    <Text className="font-serif text-2xl font-semibold text-ink">
+                      @{showcase.data.username}
+                    </Text>
+                    <Text className="mt-1 text-sm font-semibold text-accent">
+                      Voir le profil et ses listes →
+                    </Text>
+                  </Pressable>
+                </Link>
+              ) : (
+                <Text className="max-w-xl text-base leading-6 text-muted">
+                  Gardez vos dates, vos notes et vos listes au même endroit. Votre
+                  e-mail reste privé.
+                </Text>
+              )}
+            </View>
+            <View className="min-w-0 flex-[1.35] gap-2 border-t border-line pt-4 md:border-l md:border-t-0 md:pl-6 md:pt-0">
+              {journalPreview.length > 0
+                ? journalPreview.map((entry) => (
+                    <Link
+                      href={`/production/${entry.production.slug}`}
+                      key={entry.id}
+                      asChild
+                    >
+                      <Pressable
+                        accessibilityRole="link"
+                        className="min-h-14 justify-center gap-1 border-b border-line py-2"
+                      >
+                        <Text className="font-serif text-lg font-semibold text-ink">
+                          {entry.production.title}
+                        </Text>
+                        <Text className="text-sm text-muted">
+                          {entry.attendedOn
+                            ? `Vu le ${new Intl.DateTimeFormat("fr-FR").format(
+                                new Date(`${entry.attendedOn}T12:00:00Z`),
+                              )}`
+                            : `Ajouté le ${new Intl.DateTimeFormat("fr-FR").format(
+                                new Date(entry.addedAt),
+                              )}`}
+                          {entry.rating ? ` · ${entry.rating}/10` : ""}
+                        </Text>
+                      </Pressable>
+                    </Link>
+                  ))
+                : ["Dates vues", "Notes personnelles", "Listes partageables"].map(
+                    (feature) => (
+                      <Text className="text-sm text-muted" key={feature}>
+                        {feature}
+                      </Text>
+                    ),
+                  )}
+            </View>
           </View>
 
           <View className="gap-7">
@@ -454,25 +475,49 @@ function ConnectedHome() {
         >
           {home.data ? (
             <View className="gap-11">
-              <View className="gap-3">
-                <Text
-                  aria-level={1}
-                  accessibilityRole="header"
-                  className="font-serif text-4xl font-semibold leading-[44px] text-ink md:text-5xl md:leading-[56px]"
-                >
-                  {getHomeGreeting(home.data.profile.pseudonym)}
-                </Text>
-                <Text className="max-w-3xl text-base leading-6 text-muted">
-                  Les prochaines dates publiées et les nouveaux spectacles du catalogue
-                  pilote.
-                </Text>
+              <View className="todam-connected-hero gap-8 p-6 md:p-9">
+                <View className="justify-center gap-5">
+                  <Text className="text-xs font-bold uppercase tracking-[2px] text-accent">
+                    {home.data.profile.pseudonym}
+                  </Text>
+                  <Text
+                    aria-level={1}
+                    accessibilityRole="header"
+                    className="font-serif text-4xl font-semibold leading-[44px] text-ink md:text-5xl md:leading-[56px]"
+                  >
+                    {home.data.homeCity
+                      ? `À l’affiche près de ${home.data.homeCity.label}`
+                      : "À l’affiche en ce moment"}
+                  </Text>
+                  <Text className="max-w-2xl text-base leading-6 text-muted">
+                    Les prochaines dates publiées et les nouveaux spectacles à garder
+                    dans votre journal.
+                  </Text>
+                  <View className="self-start">
+                    <Link href="/ajouter-un-spectacle" asChild>
+                      <Button
+                        accessibilityRole="link"
+                        label="Ajouter un spectacle"
+                        variant="featured"
+                      />
+                    </Link>
+                  </View>
+                </View>
+                <HomeDiscoveryCollection
+                  emptyMessage="Aucune représentation future n’est encore référencée."
+                  items={(home.data.nearby.length > 0
+                    ? home.data.nearby
+                    : home.data.nationalUpcoming
+                  ).slice(0, 2)}
+                  layout="grid"
+                />
               </View>
 
               {!home.data.progress.completed ? (
-                <View className="gap-4 border-l-2 border-accent bg-paper px-5 py-4">
+                <View className="gap-2 rounded-panel border border-line bg-paper px-4 py-3">
                   <View className="flex-row flex-wrap items-center justify-between gap-3">
-                    <Text className="text-base font-semibold text-ink">
-                      Construisez votre journal · {home.data.progress.current}/
+                    <Text className="text-sm font-semibold text-ink">
+                      Journal en cours · {home.data.progress.current}/
                       {home.data.progress.target}
                     </Text>
                     <Link href="/decouvrir" asChild>
@@ -480,8 +525,8 @@ function ConnectedHome() {
                         accessibilityRole="link"
                         className="min-h-11 justify-center"
                       >
-                        <Text className="text-base font-semibold text-accent">
-                          Ajouter un spectacle →
+                        <Text className="text-sm font-semibold text-accent">
+                          Continuer →
                         </Text>
                       </Pressable>
                     </Link>
@@ -503,7 +548,7 @@ function ConnectedHome() {
                         accessibilityRole="link"
                         className="min-h-11 self-start justify-center"
                       >
-                        <Text className="text-base font-semibold text-accent">
+                        <Text className="text-sm font-semibold text-accent">
                           Choisir une ville pour personnaliser l’affiche →
                         </Text>
                       </Pressable>
@@ -511,22 +556,6 @@ function ConnectedHome() {
                   ) : null}
                 </View>
               ) : null}
-
-              <View className="gap-5">
-                <LinkedSectionTitle href="/decouvrir">
-                  {home.data.homeCity
-                    ? `À l’affiche près de ${home.data.homeCity.label}`
-                    : "À l’affiche en ce moment"}
-                </LinkedSectionTitle>
-                <HomeDiscoveryCollection
-                  emptyMessage="Aucune représentation future n’est encore référencée."
-                  items={
-                    home.data.nearby.length > 0
-                      ? home.data.nearby
-                      : home.data.nationalUpcoming
-                  }
-                />
-              </View>
 
               <View className="gap-5">
                 <LinkedSectionTitle href="/decouvrir">

@@ -1,6 +1,16 @@
 export const tokens = {
   minimumTouchTarget: 44,
   button: {
+    featured: {
+      background: "#151515",
+      backgroundHover: "#C43D28",
+      border: "#151515",
+      borderWidth: 1,
+      fontFamily: "Work Sans",
+      fontWeight: "600",
+      radius: 4,
+      text: "#FFFDF8",
+    },
     quiet: {
       background: "#FFFDF8",
       border: "#978F84",
@@ -32,13 +42,24 @@ export const tokens = {
     controlBorder: "#9B9388",
     disabled: "#E5E0D8",
     selectedSurface: "#FCEFEA",
+    coral: "#F3A995",
+    lilac: "#C8B8F0",
+    aqua: "#9FD8D0",
     success: "#17633A",
     error: "#A1261A",
   },
   radius: {
     small: 2,
     medium: 6,
+    panel: 12,
+    media: 16,
     round: 999,
+  },
+  shadow: {
+    light: "0 10px 30px rgba(43, 34, 27, 0.10)",
+  },
+  surface: {
+    glass: "rgba(255, 253, 248, 0.82)",
   },
   space: {
     xs: 4,

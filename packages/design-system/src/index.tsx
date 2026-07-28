@@ -22,7 +22,7 @@ import { tokens } from "./tokens.js";
 export { tokens } from "./tokens.js";
 
 type ButtonVariant =
-  "primary" | "secondary" | "quiet" | "ghost" | "dangerGhost" | "danger";
+  "primary" | "secondary" | "featured" | "quiet" | "ghost" | "dangerGhost" | "danger";
 
 export interface ButtonProps extends Omit<PressableProps, "children"> {
   label: string;
@@ -44,6 +44,7 @@ export function Button({
   const [focused, setFocused] = useState(false);
   const standardWebButton =
     Platform.OS === "web" && (variant === "primary" || variant === "secondary");
+  const featuredButton = variant === "featured";
   const quietWebButton = Platform.OS === "web" && variant === "quiet";
   const textAction = variant === "ghost" || variant === "dangerGhost";
   const webInteraction =
@@ -51,15 +52,17 @@ export function Button({
       ? undefined
       : standardWebButton
         ? "standard"
-        : quietWebButton
-          ? "quiet"
-          : variant === "ghost"
-            ? "action-link"
-            : variant === "dangerGhost"
-              ? "danger-link"
-              : variant === "danger"
-                ? "danger"
-                : undefined;
+        : featuredButton
+          ? "featured"
+          : quietWebButton
+            ? "quiet"
+            : variant === "ghost"
+              ? "action-link"
+              : variant === "dangerGhost"
+                ? "danger-link"
+                : variant === "danger"
+                  ? "danger"
+                  : undefined;
   const webInteractionProps = webInteraction
     ? ({
         dataSet: {
@@ -89,6 +92,7 @@ export function Button({
       style={(state) => [
         styles.button,
         standardWebButton && styles.buttonStandardWeb,
+        featuredButton && styles.buttonFeatured,
         quietWebButton && styles.buttonQuietWeb,
         !standardWebButton && variant === "primary" && styles.buttonPrimary,
         !standardWebButton &&
@@ -116,15 +120,17 @@ export function Button({
               ? tokens.color.muted
               : standardWebButton
                 ? tokens.button.standard.text
-                : quietWebButton
-                  ? tokens.button.quiet.text
-                  : variant === "danger"
-                    ? tokens.color.surface
-                    : variant === "dangerGhost"
-                      ? tokens.color.error
-                      : variant === "ghost"
-                        ? tokens.color.accent
-                        : tokens.color.ink
+                : featuredButton
+                  ? tokens.button.featured.text
+                  : quietWebButton
+                    ? tokens.button.quiet.text
+                    : variant === "danger"
+                      ? tokens.color.surface
+                      : variant === "dangerGhost"
+                        ? tokens.color.error
+                        : variant === "ghost"
+                          ? tokens.color.accent
+                          : tokens.color.ink
           }
         />
       ) : (
@@ -132,6 +138,7 @@ export function Button({
           style={[
             styles.buttonLabel,
             standardWebButton && styles.buttonLabelStandardWeb,
+            featuredButton && styles.buttonLabelFeatured,
             quietWebButton && styles.buttonLabelQuietWeb,
             variant === "ghost" && styles.buttonLabelGhost,
             variant === "dangerGhost" && styles.buttonLabelDangerGhost,
@@ -283,6 +290,7 @@ export interface PosterPlaceholderProps {
   title: string;
   discipline: "theatre" | "opera" | "ballet";
   compact?: boolean;
+  brandSymbol?: ReactNode;
 }
 
 const disciplineLabels = {
@@ -295,20 +303,72 @@ export function PosterPlaceholder({
   title,
   discipline,
   compact = false,
+  brandSymbol,
 }: PosterPlaceholderProps) {
+  const titleSeed = Array.from(title).reduce(
+    (total, character) => (total + character.codePointAt(0)!) % 17,
+    0,
+  );
+  const compositionStyle =
+    discipline === "theatre"
+      ? styles.posterTheatre
+      : discipline === "opera"
+        ? styles.posterOpera
+        : styles.posterBallet;
+
   return (
     <View
       accessibilityLabel={`Affiche indisponible pour ${title}`}
-      style={[styles.poster, compact && styles.posterCompact]}
+      style={[styles.poster, compositionStyle, compact && styles.posterCompact]}
     >
-      <Text style={styles.posterMark}>T</Text>
-      <Text
-        numberOfLines={compact ? 3 : 2}
-        style={[styles.posterTitle, compact && styles.posterTitleCompact]}
-      >
-        Visuel non publié
-      </Text>
-      <Text style={styles.posterDiscipline}>{disciplineLabels[discipline]}</Text>
+      <View
+        style={[
+          styles.posterOrb,
+          discipline === "theatre"
+            ? styles.posterOrbTheatre
+            : discipline === "opera"
+              ? styles.posterOrbOpera
+              : styles.posterOrbBallet,
+          { transform: [{ translateX: titleSeed - 8 }] },
+        ]}
+      />
+      <View
+        style={[
+          styles.posterRibbon,
+          discipline === "theatre"
+            ? styles.posterRibbonTheatre
+            : discipline === "opera"
+              ? styles.posterRibbonOpera
+              : styles.posterRibbonBallet,
+          { transform: [{ rotate: `${titleSeed - 12}deg` }] },
+        ]}
+      />
+      <View style={styles.posterTopline}>
+        <View style={[styles.posterMark, compact && styles.posterMarkCompact]}>
+          {brandSymbol ?? (
+            <Text
+              style={[
+                styles.posterMarkFallback,
+                compact && styles.posterMarkTextCompact,
+              ]}
+            >
+              T
+            </Text>
+          )}
+        </View>
+        {!compact ? (
+          <Text style={styles.posterDiscipline}>{disciplineLabels[discipline]}</Text>
+        ) : null}
+      </View>
+      <View style={styles.posterCaption}>
+        <Text
+          numberOfLines={compact ? 3 : 2}
+          style={[styles.posterTitle, compact && styles.posterTitleCompact]}
+        >
+          Visuel non publié
+        </Text>
+        {!compact ? <View style={styles.posterRule} /> : null}
+      </View>
     </View>
   );
 }
@@ -377,6 +437,12 @@ const styles = StyleSheet.create({
   buttonDanger: {
     backgroundColor: tokens.color.error,
   },
+  buttonFeatured: {
+    backgroundColor: tokens.button.featured.background,
+    borderColor: tokens.button.featured.border,
+    borderRadius: tokens.button.featured.radius,
+    borderWidth: tokens.button.featured.borderWidth,
+  },
   buttonLabel: {
     color: tokens.color.ink,
     flexShrink: 1,
@@ -386,6 +452,11 @@ const styles = StyleSheet.create({
   },
   buttonLabelPrimary: {
     color: tokens.color.surface,
+  },
+  buttonLabelFeatured: {
+    color: tokens.button.featured.text,
+    fontFamily: tokens.button.featured.fontFamily,
+    fontWeight: tokens.button.featured.fontWeight,
   },
   buttonLabelStandardWeb: {
     color: tokens.button.standard.text,
@@ -522,30 +593,107 @@ const styles = StyleSheet.create({
   poster: {
     alignItems: "flex-start",
     aspectRatio: 2 / 3,
-    backgroundColor: tokens.color.placeholder,
-    borderRadius: tokens.radius.medium,
+    borderRadius: tokens.radius.media,
     justifyContent: "space-between",
     minWidth: 150,
     overflow: "hidden",
     padding: tokens.space.md,
+    position: "relative",
     width: "100%",
+  },
+  posterTheatre: {
+    backgroundColor: tokens.color.coral,
+  },
+  posterOpera: {
+    backgroundColor: tokens.color.lilac,
+  },
+  posterBallet: {
+    backgroundColor: tokens.color.aqua,
   },
   posterCompact: {
     minWidth: 64,
     padding: tokens.space.sm,
     width: 64,
   },
+  posterCaption: {
+    gap: tokens.space.sm,
+    width: "100%",
+    zIndex: 2,
+  },
   posterDiscipline: {
-    color: tokens.color.muted,
-    fontSize: 12,
-    fontWeight: "700",
+    color: tokens.color.ink,
+    fontSize: 10,
+    fontWeight: "800",
+    letterSpacing: 1,
     textTransform: "uppercase",
   },
   posterMark: {
-    color: tokens.color.accent,
+    height: 38,
+    width: 38,
+    zIndex: 2,
+  },
+  posterMarkCompact: {
+    height: 24,
+    width: 24,
+  },
+  posterMarkFallback: {
+    color: tokens.color.ink,
     fontFamily: Platform.select({ web: "Playfair Display", default: "serif" }),
-    fontSize: 32,
+    fontSize: 30,
     fontWeight: "900",
+  },
+  posterMarkTextCompact: {
+    fontSize: 20,
+  },
+  posterTopline: {
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+    zIndex: 2,
+  },
+  posterOrb: {
+    borderRadius: tokens.radius.round,
+    height: "48%",
+    opacity: 0.72,
+    position: "absolute",
+    right: "-16%",
+    top: "18%",
+    width: "72%",
+  },
+  posterOrbTheatre: {
+    backgroundColor: tokens.color.lilac,
+  },
+  posterOrbOpera: {
+    backgroundColor: tokens.color.aqua,
+  },
+  posterOrbBallet: {
+    backgroundColor: tokens.color.coral,
+  },
+  posterRibbon: {
+    borderColor: tokens.color.ink,
+    borderRadius: tokens.radius.round,
+    borderWidth: 2,
+    height: "64%",
+    left: "-36%",
+    opacity: 0.76,
+    position: "absolute",
+    top: "4%",
+    width: "112%",
+  },
+  posterRibbonTheatre: {
+    borderBottomColor: "transparent",
+  },
+  posterRibbonOpera: {
+    borderLeftColor: "transparent",
+  },
+  posterRibbonBallet: {
+    borderRightColor: "transparent",
+  },
+  posterRule: {
+    backgroundColor: tokens.color.ink,
+    height: 2,
+    width: 36,
   },
   posterTitle: {
     color: tokens.color.ink,
@@ -553,6 +701,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "700",
     lineHeight: 20,
+    maxWidth: "92%",
   },
   posterTitleCompact: {
     fontSize: 11,

@@ -19,6 +19,23 @@ Ne pas créer de variantes presque identiques de `color.surface`. Une sous-secti
 carte reste sur la même porcelaine et utilise une bordure lorsque sa séparation doit
 être visible.
 
+## Couche éditoriale vivante
+
+Les teintes `color.coral` (`#F3A995`), `color.lilac` (`#C8B8F0`) et `color.aqua`
+(`#9FD8D0`) sont décoratives. Elles structurent les compositions d’affiches absentes,
+les halos et les fonds de hero ; elles ne portent jamais seules une information ou un
+état.
+
+Les panneaux éditoriaux utilisent `radius.panel` (12 px), les affiches `radius.media`
+(16 px) et, sur le Web uniquement, `shadow.light`. La surface `surface.glass` peut être
+associée à un flou de 16 px pour les éléments sticky. Les structures natives conservent
+des surfaces opaques et n’emploient ni flou, ni gradient, ni animation décorative.
+
+Lorsqu’aucune affiche publiable n’existe, `PosterPlaceholder` conserve la mention «
+Visuel non publié ». Sa composition varie de façon déterministe selon la discipline et
+le titre, avec le symbole Todam fourni par l’application. Elle ne doit jamais imiter une
+affiche officielle.
+
 ## Bouton standard Todam
 
 Le bouton **01 — filet brique** est la direction officielle des CTA ordinaires sur le
@@ -46,6 +63,9 @@ les tokens exécutables priment toujours sur les couleurs d’une capture.
 
 ### Exceptions fonctionnelles
 
+- `featured` est réservé au CTA unique qui porte l’action principale d’un hero ou d’un
+  premier écran. Il utilise un fond encre `#151515`, un texte porcelaine, un rayon de 4
+  px et devient vermillon au survol Web ;
 - `danger` reste un bouton rouge rempli avec texte blanc ;
 - `quiet` est réservé aux actions de service secondaires : annuler, modifier, recharger,
   exporter, afficher davantage ou ajouter un champ dans un formulaire ;
@@ -73,7 +93,8 @@ Choisir la variante selon l’effet produit, pas selon la couleur souhaitée :
 
 | Intention                                   | Variante ou composant                  | Exemple de libellé        |
 | ------------------------------------------- | -------------------------------------- | ------------------------- |
-| Continuer un parcours ou créer un objet     | `primary` ou `secondary`               | « Créer mon journal »     |
+| Action principale d’un hero                 | `featured`                             | « Créer mon journal »     |
+| Continuer un parcours ou créer un objet     | `primary` ou `secondary`               | « Enregistrer »           |
 | Action utilitaire réversible                | `quiet`                                | « Modifier mon profil »   |
 | Action connexe ou navigation contextuelle   | `ghost`                                | « Partager ce journal »   |
 | Préparer une suppression                    | `dangerGhost`                          | « Supprimer l’avis »      |

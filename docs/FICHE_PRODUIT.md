@@ -261,11 +261,19 @@ Tokens provisoires :
 - Texte principal : encre `#151515`
 - Texte secondaire : `#6F6B64`
 - Accent accessible : vermillon `#C43D28`
+- Accents décoratifs : corail `#F3A995`, lilas `#C8B8F0` et aqua `#9FD8D0`
 - Titres Web : Playfair Display
 - Paragraphes, navigation, formulaires, libellés et boutons Web : Work Sans
 - Affiches : ratio 2:3
 - Grille : multiples de 8 px
 - Coins : 12 px par défaut, sans surutilisation
+
+Sur le Web, la découverte suit la direction « Todam éditorial vivant » : hero
+asymétrique, collage d’affiches, grilles de une à quatre colonnes, surfaces ivoire
+translucides et gradients décoratifs sobres. Le CTA principal d’un premier écran est
+encre, tandis que le filet brique reste la référence des actions ordinaires. Les
+effets de verre, gradients, ombres relevées et animations sont exclus des structures
+natives.
 
 ### Langage visuel
 
@@ -296,7 +304,9 @@ Tokens provisoires :
 - Aucun spectacle dans la ville : élargir la zone, changer de ville ou suggérer une fiche.
 - Moins de cinq notes publiques : afficher le compteur sans moyenne.
 - Moins de trois notes personnelles par genre : expliquer combien manquent pour débloquer la statistique.
-- Affiche absente : visuel Todam par discipline, jamais une image récupérée arbitrairement.
+- Affiche absente : composition Todam déterministe par discipline et titre, portant
+  explicitement « Visuel non publié », jamais une image récupérée arbitrairement ni
+  une fausse affiche.
 - Suggestion en attente : fiche privée utilisable avec statut détaillé.
 - Contenu retiré : explication et accès à la contestation.
 - Erreur réseau : conserver les saisies et proposer Réessayer.

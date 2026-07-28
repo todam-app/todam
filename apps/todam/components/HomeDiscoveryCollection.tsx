@@ -1,6 +1,5 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import type { HomeDiscoveryItem } from "@todam/contracts";
-import { Link } from "expo-router";
 import { useRef, useState } from "react";
 import {
   Platform,
@@ -11,76 +10,16 @@ import {
   View,
 } from "react-native";
 
-import { ProductionPoster } from "./ProductionPoster";
-
-const dateFormatter = new Intl.DateTimeFormat("fr-FR", {
-  day: "numeric",
-  month: "short",
-  year: "numeric",
-});
-
-function DiscoveryCard({ item, width }: { item: HomeDiscoveryItem; width: number }) {
-  const { production, performance } = item;
-  const startsAt = performance?.startsAt ?? production.nextPerformance;
-  const venue =
-    performance?.venueName ??
-    production.nextVenue?.name ??
-    production.venueNames.slice(0, 2).join(" · ");
-  const locality = performance?.locality ?? production.nextVenue?.locality;
-  const location = [venue, locality].filter(Boolean).join(" · ");
-
-  return (
-    <Link href={`/production/${production.slug}`} asChild>
-      <Pressable
-        accessibilityHint="Ouvre la fiche du spectacle"
-        accessibilityLabel={production.title}
-        accessibilityRole="link"
-        className="todam-interactive-card overflow-hidden rounded-todam border border-line bg-paper"
-        style={{ width }}
-      >
-        <ProductionPoster
-          discipline={production.discipline}
-          poster={production.poster}
-          title={production.title}
-        />
-        <View className="min-h-36 gap-1 bg-paper p-3">
-          <Text className="font-serif text-lg font-semibold leading-6 text-ink">
-            {production.title}
-          </Text>
-          {production.company ? (
-            <Text className="text-sm font-semibold text-ink" numberOfLines={1}>
-              {production.company.name}
-            </Text>
-          ) : production.primaryCredit ? (
-            <Text className="text-sm text-muted" numberOfLines={1}>
-              {production.primaryCredit}
-            </Text>
-          ) : null}
-          {startsAt ? (
-            <Text className="mt-1 text-sm font-semibold text-accent">
-              {dateFormatter.format(new Date(startsAt))}
-            </Text>
-          ) : null}
-          <Text className="text-sm text-muted" numberOfLines={2}>
-            {location || "Lieu à confirmer"}
-          </Text>
-          {performance?.distanceKm !== null && performance?.distanceKm !== undefined ? (
-            <Text className="text-xs text-muted">
-              À {performance.distanceKm.toLocaleString("fr-FR")} km
-            </Text>
-          ) : null}
-        </View>
-      </Pressable>
-    </Link>
-  );
-}
+import { ProductionDiscoveryCard } from "./ProductionDiscoveryCard";
 
 export function HomeDiscoveryCollection({
   emptyMessage,
   items,
+  layout = "carousel",
 }: {
   emptyMessage: string;
   items: HomeDiscoveryItem[];
+  layout?: "carousel" | "grid";
 }) {
   const { width } = useWindowDimensions();
   const scroll = useRef<ScrollView>(null);
@@ -99,6 +38,28 @@ export function HomeDiscoveryCollection({
       <Text className="border-l-2 border-accent py-1 pl-4 text-base leading-6 text-muted">
         {emptyMessage}
       </Text>
+    );
+  }
+
+  if (layout === "grid") {
+    return (
+      <View className="todam-production-grid">
+        {items.map(({ performance, production }, index) => (
+          <ProductionDiscoveryCard
+            distanceKm={performance?.distanceKm}
+            key={production.id}
+            locality={performance?.locality}
+            priority={index < 2}
+            production={production}
+            startsAt={performance?.startsAt ?? production.nextPerformance}
+            venueName={
+              performance?.venueName ??
+              production.nextVenue?.name ??
+              production.venueNames.slice(0, 2).join(" · ")
+            }
+          />
+        ))}
+      </View>
     );
   }
 
@@ -161,8 +122,21 @@ export function HomeDiscoveryCollection({
         scrollEventThrottle={100}
         showsHorizontalScrollIndicator={false}
       >
-        {items.map((item) => (
-          <DiscoveryCard item={item} key={item.production.id} width={cardWidth} />
+        {items.map(({ performance, production }, index) => (
+          <ProductionDiscoveryCard
+            distanceKm={performance?.distanceKm}
+            key={production.id}
+            locality={performance?.locality}
+            priority={index === 0}
+            production={production}
+            startsAt={performance?.startsAt ?? production.nextPerformance}
+            venueName={
+              performance?.venueName ??
+              production.nextVenue?.name ??
+              production.venueNames.slice(0, 2).join(" · ")
+            }
+            width={cardWidth}
+          />
         ))}
       </ScrollView>
       {scrollable ? (

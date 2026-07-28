@@ -3,6 +3,8 @@ import { PosterPlaceholder } from "@todam/design-system";
 import { createElement, useState } from "react";
 import { Image, Platform } from "react-native";
 
+const brandSymbol = require("../assets/brand/todam-symbol.svg");
+
 interface ProductionPosterProps {
   compact?: boolean;
   discipline: Discipline;
@@ -23,14 +25,27 @@ export function ProductionPoster({
 
   if (!poster || failed) {
     return (
-      <PosterPlaceholder compact={compact} discipline={discipline} title={title} />
+      <PosterPlaceholder
+        brandSymbol={
+          <Image
+            accessibilityIgnoresInvertColors
+            accessible={false}
+            resizeMode="contain"
+            source={brandSymbol}
+            style={{ height: "100%", width: "100%" }}
+          />
+        }
+        compact={compact}
+        discipline={discipline}
+        title={title}
+      />
     );
   }
 
   const accessibilityLabel = poster.alt ?? `Affiche du spectacle ${title}`;
   const className = compact
-    ? "h-24 w-16 rounded bg-canvas object-cover"
-    : "aspect-[2/3] w-full rounded-todam bg-canvas object-cover";
+    ? "h-24 w-16 rounded-media bg-canvas object-cover"
+    : "aspect-[2/3] w-full rounded-media bg-canvas object-cover";
 
   if (Platform.OS === "web") {
     const hasDimensions = poster.width !== null && poster.height !== null;

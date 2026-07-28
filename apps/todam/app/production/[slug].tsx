@@ -688,8 +688,10 @@ export default function ProductionScreen() {
                   </Text>
                 </View>
 
-                <View className="gap-7 md:flex-row md:items-start">
-                  <View className="w-[160px] max-w-[240px] md:w-full">
+                <View
+                  className={`todam-production-hero todam-production-hero--${production.data.discipline} gap-7 p-5 md:flex-row md:items-start md:p-8`}
+                >
+                  <View className="w-[190px] max-w-[280px] md:w-[260px]">
                     <ProductionPoster
                       discipline={production.data.discipline}
                       poster={production.data.posters[0] ?? null}
@@ -724,13 +726,19 @@ export default function ProductionScreen() {
 
                   <View className="min-w-0 flex-1 gap-5">
                     <View className="gap-3">
-                      <Text className="text-xs font-bold uppercase tracking-widest text-accent">
-                        {disciplineLabels[production.data.discipline]} ·{" "}
-                        {audienceLabels[production.data.audience]}
-                        {production.data.minimumAge !== null
-                          ? ` · Dès ${production.data.minimumAge} ans`
-                          : ""}
-                      </Text>
+                      <View className="flex-row flex-wrap gap-2">
+                        <Text className="rounded-full bg-ink px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-paper">
+                          {disciplineLabels[production.data.discipline]}
+                        </Text>
+                        <Text className="rounded-full border border-control bg-paper px-3 py-1.5 text-xs font-semibold text-ink">
+                          {audienceLabels[production.data.audience]}
+                        </Text>
+                        {production.data.minimumAge !== null ? (
+                          <Text className="rounded-full border border-control bg-paper px-3 py-1.5 text-xs font-semibold text-ink">
+                            Dès {production.data.minimumAge} ans
+                          </Text>
+                        ) : null}
+                      </View>
                       <Text
                         aria-level={1}
                         accessibilityRole="header"
@@ -761,25 +769,25 @@ export default function ProductionScreen() {
                           <DescriptionProvenance description={shortDescription} />
                         </View>
                       ) : null}
-                      <View className="flex-row flex-wrap gap-x-5 gap-y-1">
+                      <View className="flex-row flex-wrap gap-2">
                         {production.data.durationMinutes ? (
-                          <Text className="text-sm text-muted">
-                            Durée : {production.data.durationMinutes} min
+                          <Text className="rounded-full bg-paper px-3 py-1.5 text-sm text-muted">
+                            {production.data.durationMinutes} min
                           </Text>
                         ) : null}
                         {production.data.language ? (
-                          <Text className="text-sm text-muted">
-                            Langue : {languageLabel(production.data.language)}
+                          <Text className="rounded-full bg-paper px-3 py-1.5 text-sm text-muted">
+                            {languageLabel(production.data.language)}
                           </Text>
                         ) : null}
                         {production.data.minimumAge !== null ? (
-                          <Text className="text-sm text-muted">
+                          <Text className="rounded-full bg-paper px-3 py-1.5 text-sm text-muted">
                             Public conseillé : dès {production.data.minimumAge} ans
                           </Text>
                         ) : null}
                       </View>
                       {nextScheduledPerformance ? (
-                        <View className="gap-2 border-l-2 border-accent bg-paper px-4 py-3">
+                        <View className="todam-ticket gap-2 px-5 py-4">
                           <Text className="text-xs font-bold uppercase tracking-widest text-muted">
                             Prochaine représentation
                           </Text>
@@ -826,7 +834,7 @@ export default function ProductionScreen() {
                       )}
                     </View>
 
-                    <View className="gap-4 border-t border-line pt-5">
+                    <View className="gap-4 rounded-panel border border-line bg-paper/80 p-4">
                       <ProductionActions
                         onSeenPress={() => {
                           if (requireAccount("seen")) seenMutation.mutate();

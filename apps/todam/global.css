@@ -70,6 +70,10 @@
   --todam-color-canvas: #fcf8f2;
   --todam-color-gutter: #faf3e8;
   --todam-color-page: var(--todam-color-canvas);
+  --todam-color-coral: #f3a995;
+  --todam-color-lilac: #c8b8f0;
+  --todam-color-aqua: #9fd8d0;
+  --todam-shadow-soft: 0 10px 30px rgba(43, 34, 27, 0.1);
   --todam-web-content-width: 1120px;
   --todam-web-header-height: 70px;
 }
@@ -107,6 +111,9 @@ body {
 }
 
 .todam-web-header {
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  background-color: rgba(255, 253, 248, 0.82) !important;
   left: 0;
   margin-inline: auto;
   max-width: var(--todam-web-content-width);
@@ -119,7 +126,104 @@ body {
 }
 
 .todam-web-header--scrolled {
-  box-shadow: 0 3px 10px rgba(75, 58, 36, 0.12);
+  box-shadow: 0 8px 24px rgba(43, 34, 27, 0.1);
+}
+
+.todam-production-card {
+  box-shadow: 0 4px 18px rgba(43, 34, 27, 0.06);
+  min-width: 0;
+}
+
+.todam-production-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(0, 1fr);
+  width: 100%;
+}
+
+.todam-public-hero,
+.todam-connected-hero {
+  background:
+    radial-gradient(circle at 88% 14%, rgba(200, 184, 240, 0.72), transparent 32%),
+    radial-gradient(circle at 68% 90%, rgba(159, 216, 208, 0.58), transparent 34%),
+    linear-gradient(135deg, #fffdf8 0%, #fcf8f2 58%, rgba(243, 169, 149, 0.45) 100%);
+  border: 1px solid rgba(216, 209, 198, 0.82);
+  border-radius: 12px;
+  box-shadow: var(--todam-shadow-soft);
+  overflow: hidden;
+}
+
+.todam-hero-collage {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  min-width: 0;
+}
+
+.todam-hero-collage > :nth-child(2) {
+  margin-top: 52px;
+}
+
+.todam-connected-hero .todam-production-grid {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.todam-discover-filter-bar {
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  background-color: rgba(252, 248, 242, 0.9);
+  border: 1px solid rgba(216, 209, 198, 0.9);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(43, 34, 27, 0.07);
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 40;
+}
+
+.todam-filter-panel {
+  background:
+    linear-gradient(rgba(255, 253, 248, 0.94), rgba(255, 253, 248, 0.94)),
+    linear-gradient(110deg, var(--todam-color-lilac), var(--todam-color-aqua));
+  border-radius: 12px;
+}
+
+.todam-result-list-card {
+  border: 1px solid #d8d1c6;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(43, 34, 27, 0.05);
+}
+
+.todam-production-hero {
+  border: 1px solid rgba(216, 209, 198, 0.82);
+  border-radius: 12px;
+  box-shadow: var(--todam-shadow-soft);
+  overflow: hidden;
+}
+
+.todam-production-hero--theatre {
+  background:
+    radial-gradient(circle at 92% 8%, rgba(200, 184, 240, 0.7), transparent 34%),
+    linear-gradient(135deg, rgba(243, 169, 149, 0.72), #fffdf8 62%);
+}
+
+.todam-production-hero--opera {
+  background:
+    radial-gradient(circle at 88% 14%, rgba(159, 216, 208, 0.66), transparent 34%),
+    linear-gradient(135deg, rgba(200, 184, 240, 0.72), #fffdf8 62%);
+}
+
+.todam-production-hero--ballet {
+  background:
+    radial-gradient(circle at 90% 12%, rgba(243, 169, 149, 0.66), transparent 34%),
+    linear-gradient(135deg, rgba(159, 216, 208, 0.72), #fffdf8 62%);
+}
+
+.todam-ticket {
+  background-color: rgba(255, 253, 248, 0.86);
+  border: 1px dashed #9b9388;
+  border-left: 4px solid #c43d28;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(43, 34, 27, 0.07);
 }
 
 .todam-skip-link {
@@ -261,6 +365,16 @@ textarea:focus-visible,
     filter: none;
   }
 
+  [data-todam-cta="featured"]:not([aria-disabled="true"]):hover {
+    background-color: #c43d28 !important;
+    border-color: #c43d28 !important;
+    filter: none;
+  }
+
+  [data-todam-cta="featured"]:not([aria-disabled="true"]):hover * {
+    color: #fffdf8 !important;
+  }
+
   [data-todam-cta="action-link"]:not([aria-disabled="true"]):hover,
   [data-todam-cta="danger-link"]:not([aria-disabled="true"]):hover {
     filter: none;
@@ -281,8 +395,9 @@ textarea:focus-visible,
 
   .todam-interactive-card:not([aria-disabled="true"]):hover {
     border-color: #c43d28 !important;
+    box-shadow: var(--todam-shadow-soft);
     opacity: 1;
-    transform: translateY(-1px);
+    transform: translateY(-4px);
   }
 
   .todam-icon-button:not([aria-disabled="true"]):hover {
@@ -311,6 +426,7 @@ textarea:focus-visible,
 .todam-cta-standard:not([aria-disabled="true"]):active,
 [data-todam-cta="standard"]:not([aria-disabled="true"]):active,
 [data-todam-cta="quiet"]:not([aria-disabled="true"]):active,
+[data-todam-cta="featured"]:not([aria-disabled="true"]):active,
 [data-todam-cta="danger"]:not([aria-disabled="true"]):active,
 .todam-interactive-card:not([aria-disabled="true"]):active,
 .todam-icon-button:not([aria-disabled="true"]):active {
@@ -379,6 +495,59 @@ input:-webkit-autofill:focus {
   .todam-web-page-static--primary-mobile {
     --todam-page-header-offset: 0px;
   }
+
+  .todam-discover-filter-bar {
+    border-left: 0;
+    border-radius: 0;
+    border-right: 0;
+    margin-inline: -20px;
+    top: 0 !important;
+  }
+
+  .todam-hero-collage {
+    display: flex;
+    margin-right: -20px;
+    overflow-x: auto;
+    padding-bottom: 12px;
+    padding-right: 20px;
+    scrollbar-width: none;
+  }
+
+  .todam-hero-collage > * {
+    flex: 0 0 210px;
+  }
+
+  .todam-hero-collage > :nth-child(2) {
+    margin-top: 24px;
+  }
+}
+
+@media (min-width: 360px) {
+  .todam-production-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .todam-connected-hero .todam-production-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 768px) {
+  .todam-production-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .todam-public-hero,
+  .todam-connected-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 3fr) minmax(280px, 2fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .todam-production-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -390,6 +559,23 @@ input:-webkit-autofill:focus {
     transition:
       border-color 120ms ease,
       box-shadow 120ms ease;
+  }
+
+  .todam-production-card,
+  .todam-result-list-card {
+    transition:
+      border-color 160ms ease,
+      box-shadow 160ms ease,
+      transform 160ms ease;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
   }
 }
 
