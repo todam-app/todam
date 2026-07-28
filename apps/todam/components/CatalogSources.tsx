@@ -9,6 +9,7 @@ const rightsLabels: Record<RightsStatus, string> = {
   contractual_display: "Affichage contractuellement autorisé",
   hotlink_only: "Affichage depuis la source uniquement",
   todam_original: "Contenu original Todam",
+  community_submission: "Contribution communautaire",
 };
 
 const dateFormatter = new Intl.DateTimeFormat("fr-FR", {

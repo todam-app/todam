@@ -124,12 +124,15 @@ export const cardFields = {
     from ${performances}
     join ${venues} on ${venues.id} = ${performances.venueId}
     where ${performances.productionId} = ${productions.id}
+      and ${venues.isActive} = true
     order by ${venues.name}
   ), array[]::text[])`,
   nextPerformance: sql<Date | null>`(
     select min(${performances.startsAt})
     from ${performances}
+    join ${venues} on ${venues.id} = ${performances.venueId}
     where ${performances.productionId} = ${productions.id}
+      and ${venues.isActive} = true
       and ${performances.status} = 'scheduled'
       and ${performances.startsAt} >= now()
   )`,
@@ -146,6 +149,7 @@ export const cardFields = {
     from ${performances}
     join ${venues} on ${venues.id} = ${performances.venueId}
     where ${performances.productionId} = ${productions.id}
+      and ${venues.isActive} = true
       and ${performances.status} = 'scheduled'
       and ${performances.startsAt} >= now()
     order by ${performances.startsAt}, ${performances.id}
@@ -177,7 +181,8 @@ export const cardFields = {
         'open_license',
         'contractual_display',
         'hotlink_only',
-        'todam_original'
+        'todam_original',
+        'community_submission'
       )
       and (${mediaAssets.validFrom} is null or ${mediaAssets.validFrom} <= now())
       and (${mediaAssets.validUntil} is null or ${mediaAssets.validUntil} > now())
@@ -513,9 +518,12 @@ export function createCatalogService(database: TodamDatabase) {
         })
         .from(venues)
         .where(
-          pattern
-            ? sql<boolean>`unaccent(${venues.locality}) ilike unaccent(${pattern})`
-            : undefined,
+          and(
+            eq(venues.isActive, true),
+            pattern
+              ? sql<boolean>`unaccent(${venues.locality}) ilike unaccent(${pattern})`
+              : undefined,
+          ),
         )
         .orderBy(asc(venues.locality), asc(venues.countryCode))
         .limit(input.limit);
@@ -555,6 +563,7 @@ export function createCatalogService(database: TodamDatabase) {
         .where(
           and(
             eq(venues.countryCode, requestedCity.countryCode),
+            eq(venues.isActive, true),
             sql<boolean>`lower(unaccent(${venues.locality})) =
               lower(unaccent(${requestedCity.locality}))`,
           ),
@@ -694,6 +703,7 @@ export function createCatalogService(database: TodamDatabase) {
 
       if (input.type === "venues") {
         const condition = and(
+          eq(venues.isActive, true),
           trimmedQuery
             ? sql<boolean>`(
                 unaccent(${venues.name}) ilike unaccent(${pattern})
@@ -739,6 +749,7 @@ export function createCatalogService(database: TodamDatabase) {
                   .from(venues)
                   .where(
                     and(
+                      eq(venues.isActive, true),
                       sql<boolean>`similarity(unaccent(${venues.name}), unaccent(${trimmedQuery})) > 0.15`,
                       sql<boolean>`exists (
                         select 1
@@ -1120,6 +1131,7 @@ export function createCatalogService(database: TodamDatabase) {
         .where(
           and(
             eq(venues.slug, slug),
+            eq(venues.isActive, true),
             sql<boolean>`exists (
               select 1
               from ${performances}
@@ -1406,6 +1418,7 @@ export function createCatalogService(database: TodamDatabase) {
                 eq(productionCompanies.companyId, company.id),
                 eq(productions.isActive, true),
                 eq(productions.publicationStatus, "published"),
+                eq(venues.isActive, true),
                 eq(performances.status, "scheduled"),
                 sql<boolean>`${performances.startsAt} >= now()`,
               ),
@@ -1607,7 +1620,8 @@ export function createCatalogService(database: TodamDatabase) {
                 'permission_granted',
                 'open_license',
                 'contractual_display',
-                'todam_original'
+                'todam_original',
+                'community_submission'
               )`,
             ),
           )
@@ -1644,7 +1658,7 @@ export function createCatalogService(database: TodamDatabase) {
           })
           .from(performances)
           .innerJoin(venues, eq(venues.id, performances.venueId))
-          .where(eq(performances.productionId, base.id))
+          .where(and(eq(performances.productionId, base.id), eq(venues.isActive, true)))
           .orderBy(asc(performances.startsAt)),
         database
           .selectDistinct({
@@ -1688,7 +1702,8 @@ export function createCatalogService(database: TodamDatabase) {
                 'open_license',
                 'contractual_display',
                 'hotlink_only',
-                'todam_original'
+                'todam_original',
+                'community_submission'
               )`,
               sql<boolean>`(${mediaAssets.validFrom} is null or ${mediaAssets.validFrom} <= now())`,
               sql<boolean>`(${mediaAssets.validUntil} is null or ${mediaAssets.validUntil} > now())`,

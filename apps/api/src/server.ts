@@ -1,4 +1,5 @@
 import cors from "@fastify/cors";
+import multipart from "@fastify/multipart";
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
 import type { TodamDatabase } from "@todam/database";
@@ -14,6 +15,8 @@ import {
 import { createAuth } from "./auth.js";
 import { createAccountService } from "./account-service.js";
 import { createCatalogService } from "./catalog-service.js";
+import { createCommunityMediaService } from "./community-media.js";
+import { createCommunityService } from "./community-service.js";
 import { HttpProblem, problemDocument } from "./errors.js";
 import { assertProductionConfiguration } from "./production-config.js";
 import { createPublicStatsService } from "./public-stats-service.js";
@@ -44,8 +47,12 @@ function statusTitle(status: number): string {
       return "Ressource introuvable";
     case 409:
       return "Conflit";
+    case 413:
+      return "Fichier trop volumineux";
     case 429:
       return "Trop de requêtes";
+    case 503:
+      return "Service indisponible";
     default:
       return "Erreur interne";
   }
@@ -95,6 +102,14 @@ export async function buildServer(options: BuildServerOptions) {
     credentials: true,
     methods: ["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE"],
   });
+  await app.register(multipart, {
+    limits: {
+      files: 1,
+      fileSize: 2 * 1024 * 1024,
+      fields: 1,
+      parts: 2,
+    },
+  });
   await app.register(swagger, {
     openapi: {
       info: {
@@ -124,6 +139,8 @@ export async function buildServer(options: BuildServerOptions) {
   const auth = createAuth(options.database, emailSender);
   const account = createAccountService(options.database, emailSender);
   const catalog = createCatalogService(options.database);
+  const communityMedia = createCommunityMediaService();
+  const community = createCommunityService(options.database, communityMedia);
   const member = createMemberService(options.database);
   const professional = createProfessionalService(options.database);
   const publicStats = createPublicStatsService(options.database);
@@ -131,6 +148,7 @@ export async function buildServer(options: BuildServerOptions) {
     account,
     auth,
     catalog,
+    community,
     member,
     professional,
     publicStats,

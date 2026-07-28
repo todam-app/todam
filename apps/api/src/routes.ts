@@ -29,6 +29,8 @@ import {
   ContentReportSchema,
   ContentReportsResponseSchema,
   ContentReportResponseSchema,
+  CommunityProductionCreatedSchema,
+  CreateCommunityProductionBodySchema,
   CreateCatalogRevisionBodySchema,
   CreateCompanyClaimBodySchema,
   CreateCompanyProductionBodySchema,
@@ -95,6 +97,7 @@ import {
 } from "@todam/contracts";
 import type { FastifyInstance } from "fastify";
 import type { ZodTypeProvider } from "fastify-type-provider-zod";
+import { z } from "zod";
 
 import { accountExportToCsv, type AccountService } from "./account-service.js";
 import type { TodamAuth } from "./auth.js";
@@ -106,6 +109,7 @@ import {
   toWebHeaders,
 } from "./auth.js";
 import type { CatalogService } from "./catalog-service.js";
+import type { CommunityService } from "./community-service.js";
 import { HttpProblem } from "./errors.js";
 import { currentLegalDocuments } from "./legal.js";
 import type { MemberService } from "./member-service.js";
@@ -119,7 +123,9 @@ const problemResponses = {
   403: ProblemDetailsSchema,
   404: ProblemDetailsSchema,
   409: ProblemDetailsSchema,
+  413: ProblemDetailsSchema,
   429: ProblemDetailsSchema,
+  503: ProblemDetailsSchema,
   500: ProblemDetailsSchema,
 };
 
@@ -127,6 +133,7 @@ export interface RouteDependencies {
   account: AccountService;
   auth: TodamAuth;
   catalog: CatalogService;
+  community: CommunityService;
   member: MemberService;
   professional: ProfessionalService;
   publicStats: PublicStatsService;
@@ -137,7 +144,8 @@ export async function registerRoutes(
   dependencies: RouteDependencies,
 ) {
   const app = baseApp.withTypeProvider<ZodTypeProvider>();
-  const { account, auth, catalog, member, professional, publicStats } = dependencies;
+  const { account, auth, catalog, community, member, professional, publicStats } =
+    dependencies;
   const rateLimiter = new InMemoryRateLimiter();
   const guardAuth = (scope: string, ip: string) =>
     rateLimiter.assertAllowed(`auth:${scope}:${ip}`, 10, 15 * 60_000);
@@ -145,6 +153,10 @@ export async function registerRoutes(
     rateLimiter.assertAllowed(`delete:${ip}`, 5, 60 * 60_000);
   const guardContentReport = (ip: string) =>
     rateLimiter.assertAllowed(`content-report:${ip}`, 10, 60 * 60_000);
+  const guardCommunityCreation = (userId: string, ip: string) => {
+    rateLimiter.assertAllowed(`community-production:user:${userId}`, 5, 60 * 60_000);
+    rateLimiter.assertAllowed(`community-production:ip:${ip}`, 10, 60 * 60_000);
+  };
   const guardSensitiveAccountChange = (scope: string, userId: string, ip: string) =>
     rateLimiter.assertAllowed(`account:${scope}:${userId}:${ip}`, 5, 60 * 60_000);
 
@@ -212,6 +224,110 @@ export async function registerRoutes(
     },
     async (request) =>
       member.createContentReport(request.body, await getOptionalUserId(auth, request)),
+  );
+
+  app.post(
+    "/v1/community/productions",
+    {
+      schema: {
+        tags: ["Catalogue communautaire"],
+        summary: "Publie immédiatement un spectacle proposé par un membre",
+        description:
+          "Requête multipart/form-data contenant un champ payload JSON et, facultativement, un fichier poster.",
+        consumes: ["multipart/form-data"],
+        body: z.object({
+          payload: z
+            .string()
+            .describe("Objet JSON conforme à CreateCommunityProductionBody."),
+          poster: z.file().optional(),
+        }),
+        response: {
+          201: CommunityProductionCreatedSchema,
+          ...problemResponses,
+        },
+        security: [{ sessionCookie: [] }],
+      },
+      validatorCompiler: () => (value) => ({ value }),
+    },
+    async (request, reply) => {
+      const userId = await getRequiredUserId(auth, request);
+      guardCommunityCreation(userId, request.ip);
+
+      let rawPayload: string | undefined;
+      let poster: { buffer: Buffer; mimeType: string; filename: string } | undefined;
+      try {
+        for await (const part of request.parts()) {
+          if (part.type === "file") {
+            if (part.fieldname !== "poster" || poster) {
+              throw new HttpProblem(
+                400,
+                "INVALID_COMMUNITY_MULTIPART",
+                "Le formulaire d’ajout contient un fichier inattendu.",
+              );
+            }
+            poster = {
+              buffer: await part.toBuffer(),
+              mimeType: part.mimetype,
+              filename: part.filename,
+            };
+          } else if (part.fieldname === "payload" && rawPayload === undefined) {
+            rawPayload =
+              typeof part.value === "string" ? part.value : JSON.stringify(part.value);
+          } else {
+            throw new HttpProblem(
+              400,
+              "INVALID_COMMUNITY_MULTIPART",
+              "Le formulaire d’ajout contient un champ inattendu.",
+            );
+          }
+        }
+      } catch (error) {
+        const code =
+          error && typeof error === "object" && "code" in error
+            ? String(error.code)
+            : null;
+        if (
+          (error instanceof Error && error.name === "RequestFileTooLargeError") ||
+          code === "FST_REQ_FILE_TOO_LARGE"
+        ) {
+          throw new HttpProblem(
+            413,
+            "INVALID_COMMUNITY_POSTER",
+            "Le fichier d’affiche ne respecte pas les formats acceptés. Utilisez une image JPEG, PNG ou WebP de 2 Mo maximum et d’au moins 300 px de large.",
+          );
+        }
+        throw error;
+      }
+      if (!rawPayload) {
+        throw new HttpProblem(
+          400,
+          "MISSING_COMMUNITY_PAYLOAD",
+          "Les informations du spectacle sont manquantes.",
+        );
+      }
+      let decoded: unknown;
+      try {
+        decoded = JSON.parse(rawPayload);
+      } catch {
+        throw new HttpProblem(
+          400,
+          "INVALID_COMMUNITY_PAYLOAD",
+          "Les informations du spectacle sont illisibles.",
+        );
+      }
+      const parsed = CreateCommunityProductionBodySchema.safeParse(decoded);
+      if (!parsed.success) {
+        throw new HttpProblem(
+          400,
+          "INVALID_COMMUNITY_PAYLOAD",
+          parsed.error.issues[0]?.message ??
+            "Les informations du spectacle sont invalides.",
+        );
+      }
+      return reply
+        .status(201)
+        .send(await community.createProduction(userId, parsed.data, poster));
+    },
   );
 
   app.post(

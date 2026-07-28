@@ -87,6 +87,16 @@ export const contentReportStatusEnum = pgEnum("content_report_status", [
   "resolved",
   "dismissed",
 ]);
+export const contentReportCategoryEnum = pgEnum("content_report_category", [
+  "visual_rights",
+  "information",
+  "schedule",
+  "other",
+]);
+export const communitySubmissionStatusEnum = pgEnum("community_submission_status", [
+  "published",
+  "hidden",
+]);
 export const performanceStatusEnum = pgEnum("performance_status", [
   "scheduled",
   "completed",
@@ -111,6 +121,7 @@ export const rightsStatusEnum = pgEnum("rights_status", [
   "contractual_display",
   "hotlink_only",
   "todam_original",
+  "community_submission",
 ]);
 export const sourceConnectorKindEnum = pgEnum("source_connector_kind", [
   "file",
@@ -119,6 +130,7 @@ export const sourceConnectorKindEnum = pgEnum("source_connector_kind", [
   "openagenda",
   "ticketmaster",
   "partner",
+  "community",
 ]);
 export const mediaKindEnum = pgEnum("media_kind", [
   "poster",
@@ -402,6 +414,7 @@ export const venues = pgTable(
     countryCode: text("country_code").notNull(),
     timezone: text("timezone").notNull(),
     officialUrl: text("official_url"),
+    isActive: boolean("is_active").default(true).notNull(),
     coordinates: geometry("coordinates", {
       type: "point",
       mode: "xy",
@@ -636,7 +649,7 @@ export const mediaAssets = pgTable(
     mirroredAt: timestamp("mirrored_at", { withTimezone: true }),
     storagePolicy: mediaStoragePolicyEnum("storage_policy").notNull(),
     alt: text("alt"),
-    credit: text("credit").notNull(),
+    credit: text("credit"),
     copyrightHolder: text("copyright_holder"),
     rightsStatus: rightsStatusEnum("rights_status").notNull(),
     license: text("license"),
@@ -662,7 +675,7 @@ export const mediaAssets = pgTable(
     ),
     check(
       "media_assets_storage_rights",
-      sql`${table.storagePolicy} <> 'mirror' or ${table.rightsStatus} in ('open_license', 'permission_granted', 'todam_original')`,
+      sql`${table.storagePolicy} <> 'mirror' or ${table.rightsStatus}::text in ('open_license', 'permission_granted', 'todam_original', 'community_submission')`,
     ),
     check(
       "media_assets_open_license_named",
@@ -916,6 +929,10 @@ export const contentReports = pgTable(
     }),
     targetType: contentReportTargetEnum("target_type").notNull(),
     targetId: text("target_id").notNull(),
+    category: contentReportCategoryEnum("category").default("other").notNull(),
+    mediaId: uuid("media_id").references(() => mediaAssets.id, {
+      onDelete: "set null",
+    }),
     reason: text("reason").notNull(),
     status: contentReportStatusEnum("status").default("open").notNull(),
     decision: text("decision"),
@@ -932,6 +949,46 @@ export const contentReports = pgTable(
       "content_reports_reason_not_blank",
       sql`length(btrim(${table.reason})) between 10 and 2000`,
     ),
+  ],
+);
+
+export const communitySubmissions = pgTable(
+  "community_submissions",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    authorUserId: text("author_user_id").references(() => user.id, {
+      onDelete: "set null",
+    }),
+    productionId: uuid("production_id")
+      .notNull()
+      .references(() => productions.id, { onDelete: "cascade" }),
+    mediaId: uuid("media_id").references(() => mediaAssets.id, {
+      onDelete: "set null",
+    }),
+    sourceUrl: text("source_url").notNull(),
+    submittedData: jsonb("submitted_data").$type<Record<string, unknown>>().notNull(),
+    status: communitySubmissionStatusEnum("status").default("published").notNull(),
+    moderationHistory: jsonb("moderation_history")
+      .$type<
+        {
+          at: string;
+          by: string | null;
+          action: string;
+          reason: string | null;
+        }[]
+      >()
+      .default(sql`'[]'::jsonb`)
+      .notNull(),
+    reviewedBy: text("reviewed_by").references(() => user.id, {
+      onDelete: "set null",
+    }),
+    reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
+    ...timestamps,
+  },
+  (table) => [
+    index("community_submissions_author_idx").on(table.authorUserId, table.createdAt),
+    index("community_submissions_production_idx").on(table.productionId),
+    index("community_submissions_status_idx").on(table.status, table.createdAt),
   ],
 );
 
@@ -1057,6 +1114,7 @@ export const schema = {
   catalogRevisionChanges,
   catalogRevisions,
   catalogSources,
+  communitySubmissions,
   companies,
   companyClaims,
   companyMemberships,

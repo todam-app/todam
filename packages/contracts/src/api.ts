@@ -213,6 +213,8 @@ export const ContentReportBodySchema = z
   .object({
     targetType: z.enum(["production", "venue", "company", "member", "list", "review"]),
     targetId: z.string().trim().min(1).max(240),
+    category: z.enum(["visual_rights", "information", "schedule", "other"]),
+    mediaId: UuidSchema.nullable().default(null),
     reason: z.string().trim().min(10).max(2000),
   })
   .superRefine((value, context) => {
@@ -224,6 +226,20 @@ export const ContentReportBodySchema = z
         code: "custom",
         message: "La référence du contenu est invalide.",
         path: ["targetId"],
+      });
+    }
+    if (value.category === "visual_rights" && !value.mediaId) {
+      context.addIssue({
+        code: "custom",
+        message: "Sélectionnez l’affiche concernée.",
+        path: ["mediaId"],
+      });
+    }
+    if (value.mediaId && value.targetType !== "production") {
+      context.addIssue({
+        code: "custom",
+        message: "Une affiche ne peut être associée qu’à un spectacle.",
+        path: ["mediaId"],
       });
     }
   });

@@ -100,6 +100,17 @@ export type GetV1PublicStatsErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -112,6 +123,17 @@ export type GetV1PublicStatsErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -143,6 +165,8 @@ export type PostV1ContentReportsData = {
   body: {
     targetType: "production" | "venue" | "company" | "member" | "list" | "review";
     targetId: string;
+    category: "visual_rights" | "information" | "schedule" | "other";
+    mediaId?: string | null;
     reason: string;
   };
   path?: never;
@@ -209,6 +233,17 @@ export type PostV1ContentReportsErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -221,6 +256,17 @@ export type PostV1ContentReportsErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -246,6 +292,139 @@ export type PostV1ContentReportsResponses = {
 export type PostV1ContentReportsResponse =
   PostV1ContentReportsResponses[keyof PostV1ContentReportsResponses];
 
+export type PostV1CommunityProductionsData = {
+  body: {
+    /**
+     * Objet JSON conforme à CreateCommunityProductionBody.
+     */
+    payload: string;
+    poster?: Blob | File;
+  };
+  path?: never;
+  query?: never;
+  url: "/v1/community/productions";
+};
+
+export type PostV1CommunityProductionsErrors = {
+  /**
+   * Default Response
+   */
+  400: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  401: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  404: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+};
+
+export type PostV1CommunityProductionsError =
+  PostV1CommunityProductionsErrors[keyof PostV1CommunityProductionsErrors];
+
+export type PostV1CommunityProductionsResponses = {
+  /**
+   * Default Response
+   */
+  201: {
+    id: string;
+    slug: string;
+    contributionId: string;
+    publicationStatus: "published";
+  };
+};
+
+export type PostV1CommunityProductionsResponse =
+  PostV1CommunityProductionsResponses[keyof PostV1CommunityProductionsResponses];
+
 export type PostV1AuthSignUpEmailData = {
   body: {
     name: string;
@@ -254,8 +433,8 @@ export type PostV1AuthSignUpEmailData = {
     email: string;
     password: string;
     age15OrOlder: true;
-    termsVersion: "1.0.1";
-    privacyNoticeVersion: "1.0.2";
+    termsVersion: "1.0.2";
+    privacyNoticeVersion: "1.0.3";
     channel: "web" | "android";
     callbackURL?: string;
   };
@@ -394,6 +573,17 @@ export type GetV1MeExportErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -406,6 +596,17 @@ export type GetV1MeExportErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -490,11 +691,22 @@ export type GetV1MeExportResponses = {
           id: string;
           targetType: "production" | "venue" | "company" | "member" | "list" | "review";
           targetId: string;
+          category: "visual_rights" | "information" | "schedule" | "other";
+          mediaId: string | null;
           reason: string;
           status: "open" | "reviewing" | "resolved" | "dismissed";
           decision: string | null;
           submittedAt: string;
           reviewedAt: string | null;
+        }>;
+        communitySubmissions: Array<{
+          id: string;
+          productionId: string;
+          sourceUrl: string;
+          submittedData: unknown;
+          status: "published" | "hidden";
+          createdAt: string;
+          updatedAt: string;
         }>;
         companyClaims: Array<{
           id: string;
@@ -541,7 +753,8 @@ export type GetV1MeExportResponses = {
               | "open_license"
               | "contractual_display"
               | "hotlink_only"
-              | "todam_original";
+              | "todam_original"
+              | "community_submission";
             createdAt: string;
           }>;
         }>;
@@ -620,6 +833,17 @@ export type PatchV1MeUsernameErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -632,6 +856,17 @@ export type PatchV1MeUsernameErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -726,6 +961,17 @@ export type PostV1MeEmailChangeErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -738,6 +984,17 @@ export type PostV1MeEmailChangeErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -831,6 +1088,17 @@ export type PostV1MePasswordChangeErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -843,6 +1111,17 @@ export type PostV1MePasswordChangeErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -935,6 +1214,17 @@ export type PostV1AccountDeletionRequestErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -947,6 +1237,17 @@ export type PostV1AccountDeletionRequestErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -1039,6 +1340,17 @@ export type PostV1AccountDeletionConfirmErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -1051,6 +1363,17 @@ export type PostV1AccountDeletionConfirmErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -1174,6 +1497,17 @@ export type GetV1CatalogCitiesErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -1186,6 +1520,17 @@ export type GetV1CatalogCitiesErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -1292,6 +1637,17 @@ export type GetV1SearchErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -1304,6 +1660,17 @@ export type GetV1SearchErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -1353,7 +1720,7 @@ export type GetV1SearchResponses = {
         url: string;
         kind: "poster" | "key_visual" | "photo" | "logo";
         alt: string | null;
-        credit: string;
+        credit: string | null;
         copyrightHolder: string | null;
         license: string | null;
         rightsStatus:
@@ -1361,7 +1728,8 @@ export type GetV1SearchResponses = {
           | "open_license"
           | "contractual_display"
           | "hotlink_only"
-          | "todam_original";
+          | "todam_original"
+          | "community_submission";
         sourceUrl: string;
         width: number | null;
         height: number | null;
@@ -1461,6 +1829,17 @@ export type GetV1ProductionsBySlugErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -1473,6 +1852,17 @@ export type GetV1ProductionsBySlugErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -1515,7 +1905,7 @@ export type GetV1ProductionsBySlugResponses = {
       url: string;
       kind: "poster" | "key_visual" | "photo" | "logo";
       alt: string | null;
-      credit: string;
+      credit: string | null;
       copyrightHolder: string | null;
       license: string | null;
       rightsStatus:
@@ -1523,7 +1913,8 @@ export type GetV1ProductionsBySlugResponses = {
         | "open_license"
         | "contractual_display"
         | "hotlink_only"
-        | "todam_original";
+        | "todam_original"
+        | "community_submission";
       sourceUrl: string;
       width: number | null;
       height: number | null;
@@ -1541,7 +1932,8 @@ export type GetV1ProductionsBySlugResponses = {
         | "open_license"
         | "contractual_display"
         | "hotlink_only"
-        | "todam_original";
+        | "todam_original"
+        | "community_submission";
       license: string | null;
       sourceUrl: string | null;
       sourceTitle: string | null;
@@ -1623,7 +2015,7 @@ export type GetV1ProductionsBySlugResponses = {
         url: string;
         kind: "poster" | "key_visual" | "photo" | "logo";
         alt: string | null;
-        credit: string;
+        credit: string | null;
         copyrightHolder: string | null;
         license: string | null;
         rightsStatus:
@@ -1631,7 +2023,8 @@ export type GetV1ProductionsBySlugResponses = {
           | "open_license"
           | "contractual_display"
           | "hotlink_only"
-          | "todam_original";
+          | "todam_original"
+          | "community_submission";
         sourceUrl: string;
         width: number | null;
         height: number | null;
@@ -1648,7 +2041,8 @@ export type GetV1ProductionsBySlugResponses = {
         | "open_license"
         | "contractual_display"
         | "hotlink_only"
-        | "todam_original";
+        | "todam_original"
+        | "community_submission";
       license: string | null;
     }>;
     lastVerifiedAt: string | null;
@@ -1727,6 +2121,17 @@ export type GetV1VenuesBySlugErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -1739,6 +2144,17 @@ export type GetV1VenuesBySlugErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -1800,7 +2216,7 @@ export type GetV1VenuesBySlugResponses = {
         url: string;
         kind: "poster" | "key_visual" | "photo" | "logo";
         alt: string | null;
-        credit: string;
+        credit: string | null;
         copyrightHolder: string | null;
         license: string | null;
         rightsStatus:
@@ -1808,7 +2224,8 @@ export type GetV1VenuesBySlugResponses = {
           | "open_license"
           | "contractual_display"
           | "hotlink_only"
-          | "todam_original";
+          | "todam_original"
+          | "community_submission";
         sourceUrl: string;
         width: number | null;
         height: number | null;
@@ -1861,7 +2278,7 @@ export type GetV1VenuesBySlugResponses = {
         url: string;
         kind: "poster" | "key_visual" | "photo" | "logo";
         alt: string | null;
-        credit: string;
+        credit: string | null;
         copyrightHolder: string | null;
         license: string | null;
         rightsStatus:
@@ -1869,7 +2286,8 @@ export type GetV1VenuesBySlugResponses = {
           | "open_license"
           | "contractual_display"
           | "hotlink_only"
-          | "todam_original";
+          | "todam_original"
+          | "community_submission";
         sourceUrl: string;
         width: number | null;
         height: number | null;
@@ -1903,7 +2321,8 @@ export type GetV1VenuesBySlugResponses = {
         | "open_license"
         | "contractual_display"
         | "hotlink_only"
-        | "todam_original";
+        | "todam_original"
+        | "community_submission";
       license: string | null;
     }>;
     lastVerifiedAt: string | null;
@@ -1981,6 +2400,17 @@ export type GetV1CompaniesBySlugErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -1993,6 +2423,17 @@ export type GetV1CompaniesBySlugErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -2049,7 +2490,7 @@ export type GetV1CompaniesBySlugResponses = {
         url: string;
         kind: "poster" | "key_visual" | "photo" | "logo";
         alt: string | null;
-        credit: string;
+        credit: string | null;
         copyrightHolder: string | null;
         license: string | null;
         rightsStatus:
@@ -2057,7 +2498,8 @@ export type GetV1CompaniesBySlugResponses = {
           | "open_license"
           | "contractual_display"
           | "hotlink_only"
-          | "todam_original";
+          | "todam_original"
+          | "community_submission";
         sourceUrl: string;
         width: number | null;
         height: number | null;
@@ -2116,7 +2558,7 @@ export type GetV1CompaniesBySlugResponses = {
         url: string;
         kind: "poster" | "key_visual" | "photo" | "logo";
         alt: string | null;
-        credit: string;
+        credit: string | null;
         copyrightHolder: string | null;
         license: string | null;
         rightsStatus:
@@ -2124,7 +2566,8 @@ export type GetV1CompaniesBySlugResponses = {
           | "open_license"
           | "contractual_display"
           | "hotlink_only"
-          | "todam_original";
+          | "todam_original"
+          | "community_submission";
         sourceUrl: string;
         width: number | null;
         height: number | null;
@@ -2156,7 +2599,8 @@ export type GetV1CompaniesBySlugResponses = {
         | "open_license"
         | "contractual_display"
         | "hotlink_only"
-        | "todam_original";
+        | "todam_original"
+        | "community_submission";
       license: string | null;
     }>;
     lastVerifiedAt: string | null;
@@ -2234,6 +2678,17 @@ export type GetV1MembersByUsernameErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -2246,6 +2701,17 @@ export type GetV1MembersByUsernameErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -2304,7 +2770,7 @@ export type GetV1MembersByUsernameResponses = {
           url: string;
           kind: "poster" | "key_visual" | "photo" | "logo";
           alt: string | null;
-          credit: string;
+          credit: string | null;
           copyrightHolder: string | null;
           license: string | null;
           rightsStatus:
@@ -2312,7 +2778,8 @@ export type GetV1MembersByUsernameResponses = {
             | "open_license"
             | "contractual_display"
             | "hotlink_only"
-            | "todam_original";
+            | "todam_original"
+            | "community_submission";
           sourceUrl: string;
           width: number | null;
           height: number | null;
@@ -2367,7 +2834,7 @@ export type GetV1MembersByUsernameResponses = {
           url: string;
           kind: "poster" | "key_visual" | "photo" | "logo";
           alt: string | null;
-          credit: string;
+          credit: string | null;
           copyrightHolder: string | null;
           license: string | null;
           rightsStatus:
@@ -2375,7 +2842,8 @@ export type GetV1MembersByUsernameResponses = {
             | "open_license"
             | "contractual_display"
             | "hotlink_only"
-            | "todam_original";
+            | "todam_original"
+            | "community_submission";
           sourceUrl: string;
           width: number | null;
           height: number | null;
@@ -2471,6 +2939,17 @@ export type GetV1MembersByUsernameJournalErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -2483,6 +2962,17 @@ export type GetV1MembersByUsernameJournalErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -2533,7 +3023,7 @@ export type GetV1MembersByUsernameJournalResponses = {
           url: string;
           kind: "poster" | "key_visual" | "photo" | "logo";
           alt: string | null;
-          credit: string;
+          credit: string | null;
           copyrightHolder: string | null;
           license: string | null;
           rightsStatus:
@@ -2541,7 +3031,8 @@ export type GetV1MembersByUsernameJournalResponses = {
             | "open_license"
             | "contractual_display"
             | "hotlink_only"
-            | "todam_original";
+            | "todam_original"
+            | "community_submission";
           sourceUrl: string;
           width: number | null;
           height: number | null;
@@ -2630,6 +3121,17 @@ export type GetV1MembersByUsernameListsBySlugErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -2642,6 +3144,17 @@ export type GetV1MembersByUsernameListsBySlugErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -2699,7 +3212,7 @@ export type GetV1MembersByUsernameListsBySlugResponses = {
           url: string;
           kind: "poster" | "key_visual" | "photo" | "logo";
           alt: string | null;
-          credit: string;
+          credit: string | null;
           copyrightHolder: string | null;
           license: string | null;
           rightsStatus:
@@ -2707,7 +3220,8 @@ export type GetV1MembersByUsernameListsBySlugResponses = {
             | "open_license"
             | "contractual_display"
             | "hotlink_only"
-            | "todam_original";
+            | "todam_original"
+            | "community_submission";
           sourceUrl: string;
           width: number | null;
           height: number | null;
@@ -2790,6 +3304,17 @@ export type GetV1MeProductionsByIdStateErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -2802,6 +3327,17 @@ export type GetV1MeProductionsByIdStateErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -2904,6 +3440,17 @@ export type GetV1MeProductionsByIdDiaryErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -2916,6 +3463,17 @@ export type GetV1MeProductionsByIdDiaryErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -3026,6 +3584,17 @@ export type GetV1MeHomeErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -3038,6 +3607,17 @@ export type GetV1MeHomeErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -3100,7 +3680,7 @@ export type GetV1MeHomeResponses = {
           url: string;
           kind: "poster" | "key_visual" | "photo" | "logo";
           alt: string | null;
-          credit: string;
+          credit: string | null;
           copyrightHolder: string | null;
           license: string | null;
           rightsStatus:
@@ -3108,7 +3688,8 @@ export type GetV1MeHomeResponses = {
             | "open_license"
             | "contractual_display"
             | "hotlink_only"
-            | "todam_original";
+            | "todam_original"
+            | "community_submission";
           sourceUrl: string;
           width: number | null;
           height: number | null;
@@ -3153,7 +3734,7 @@ export type GetV1MeHomeResponses = {
           url: string;
           kind: "poster" | "key_visual" | "photo" | "logo";
           alt: string | null;
-          credit: string;
+          credit: string | null;
           copyrightHolder: string | null;
           license: string | null;
           rightsStatus:
@@ -3161,7 +3742,8 @@ export type GetV1MeHomeResponses = {
             | "open_license"
             | "contractual_display"
             | "hotlink_only"
-            | "todam_original";
+            | "todam_original"
+            | "community_submission";
           sourceUrl: string;
           width: number | null;
           height: number | null;
@@ -3206,7 +3788,7 @@ export type GetV1MeHomeResponses = {
           url: string;
           kind: "poster" | "key_visual" | "photo" | "logo";
           alt: string | null;
-          credit: string;
+          credit: string | null;
           copyrightHolder: string | null;
           license: string | null;
           rightsStatus:
@@ -3214,7 +3796,8 @@ export type GetV1MeHomeResponses = {
             | "open_license"
             | "contractual_display"
             | "hotlink_only"
-            | "todam_original";
+            | "todam_original"
+            | "community_submission";
           sourceUrl: string;
           width: number | null;
           height: number | null;
@@ -3303,6 +3886,17 @@ export type PutV1MeHomeCityErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -3315,6 +3909,17 @@ export type PutV1MeHomeCityErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -3408,6 +4013,17 @@ export type GetV1MeDashboardErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -3420,6 +4036,17 @@ export type GetV1MeDashboardErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -3480,7 +4107,7 @@ export type GetV1MeDashboardResponses = {
           url: string;
           kind: "poster" | "key_visual" | "photo" | "logo";
           alt: string | null;
-          credit: string;
+          credit: string | null;
           copyrightHolder: string | null;
           license: string | null;
           rightsStatus:
@@ -3488,7 +4115,8 @@ export type GetV1MeDashboardResponses = {
             | "open_license"
             | "contractual_display"
             | "hotlink_only"
-            | "todam_original";
+            | "todam_original"
+            | "community_submission";
           sourceUrl: string;
           width: number | null;
           height: number | null;
@@ -3530,7 +4158,7 @@ export type GetV1MeDashboardResponses = {
           url: string;
           kind: "poster" | "key_visual" | "photo" | "logo";
           alt: string | null;
-          credit: string;
+          credit: string | null;
           copyrightHolder: string | null;
           license: string | null;
           rightsStatus:
@@ -3538,7 +4166,8 @@ export type GetV1MeDashboardResponses = {
             | "open_license"
             | "contractual_display"
             | "hotlink_only"
-            | "todam_original";
+            | "todam_original"
+            | "community_submission";
           sourceUrl: string;
           width: number | null;
           height: number | null;
@@ -3583,7 +4212,7 @@ export type GetV1MeDashboardResponses = {
         url: string;
         kind: "poster" | "key_visual" | "photo" | "logo";
         alt: string | null;
-        credit: string;
+        credit: string | null;
         copyrightHolder: string | null;
         license: string | null;
         rightsStatus:
@@ -3591,7 +4220,8 @@ export type GetV1MeDashboardResponses = {
           | "open_license"
           | "contractual_display"
           | "hotlink_only"
-          | "todam_original";
+          | "todam_original"
+          | "community_submission";
         sourceUrl: string;
         width: number | null;
         height: number | null;
@@ -3682,6 +4312,17 @@ export type GetV1MeShowsErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -3694,6 +4335,17 @@ export type GetV1MeShowsErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -3742,7 +4394,7 @@ export type GetV1MeShowsResponses = {
           url: string;
           kind: "poster" | "key_visual" | "photo" | "logo";
           alt: string | null;
-          credit: string;
+          credit: string | null;
           copyrightHolder: string | null;
           license: string | null;
           rightsStatus:
@@ -3750,7 +4402,8 @@ export type GetV1MeShowsResponses = {
             | "open_license"
             | "contractual_display"
             | "hotlink_only"
-            | "todam_original";
+            | "todam_original"
+            | "community_submission";
           sourceUrl: string;
           width: number | null;
           height: number | null;
@@ -3880,6 +4533,17 @@ export type GetV1MeProfileErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -3892,6 +4556,17 @@ export type GetV1MeProfileErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -3987,6 +4662,17 @@ export type PatchV1MeProfileErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -3999,6 +4685,17 @@ export type PatchV1MeProfileErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -4102,6 +4799,17 @@ export type GetV1MeJournalErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -4114,6 +4822,17 @@ export type GetV1MeJournalErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -4163,7 +4882,7 @@ export type GetV1MeJournalResponses = {
           url: string;
           kind: "poster" | "key_visual" | "photo" | "logo";
           alt: string | null;
-          credit: string;
+          credit: string | null;
           copyrightHolder: string | null;
           license: string | null;
           rightsStatus:
@@ -4171,7 +4890,8 @@ export type GetV1MeJournalResponses = {
             | "open_license"
             | "contractual_display"
             | "hotlink_only"
-            | "todam_original";
+            | "todam_original"
+            | "community_submission";
           sourceUrl: string;
           width: number | null;
           height: number | null;
@@ -4257,6 +4977,17 @@ export type GetV1MeListsErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -4269,6 +5000,17 @@ export type GetV1MeListsErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -4370,6 +5112,17 @@ export type PostV1MeListsErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -4382,6 +5135,17 @@ export type PostV1MeListsErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -4438,7 +5202,7 @@ export type PostV1MeListsResponses = {
           url: string;
           kind: "poster" | "key_visual" | "photo" | "logo";
           alt: string | null;
-          credit: string;
+          credit: string | null;
           copyrightHolder: string | null;
           license: string | null;
           rightsStatus:
@@ -4446,7 +5210,8 @@ export type PostV1MeListsResponses = {
             | "open_license"
             | "contractual_display"
             | "hotlink_only"
-            | "todam_original";
+            | "todam_original"
+            | "community_submission";
           sourceUrl: string;
           width: number | null;
           height: number | null;
@@ -4527,6 +5292,17 @@ export type GetV1MeWatchlistErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -4539,6 +5315,17 @@ export type GetV1MeWatchlistErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -4588,7 +5375,7 @@ export type GetV1MeWatchlistResponses = {
           url: string;
           kind: "poster" | "key_visual" | "photo" | "logo";
           alt: string | null;
-          credit: string;
+          credit: string | null;
           copyrightHolder: string | null;
           license: string | null;
           rightsStatus:
@@ -4596,7 +5383,8 @@ export type GetV1MeWatchlistResponses = {
             | "open_license"
             | "contractual_display"
             | "hotlink_only"
-            | "todam_original";
+            | "todam_original"
+            | "community_submission";
           sourceUrl: string;
           width: number | null;
           height: number | null;
@@ -4676,6 +5464,17 @@ export type GetV1MeReviewsErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -4688,6 +5487,17 @@ export type GetV1MeReviewsErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -4737,7 +5547,7 @@ export type GetV1MeReviewsResponses = {
           url: string;
           kind: "poster" | "key_visual" | "photo" | "logo";
           alt: string | null;
-          credit: string;
+          credit: string | null;
           copyrightHolder: string | null;
           license: string | null;
           rightsStatus:
@@ -4745,7 +5555,8 @@ export type GetV1MeReviewsResponses = {
             | "open_license"
             | "contractual_display"
             | "hotlink_only"
-            | "todam_original";
+            | "todam_original"
+            | "community_submission";
           sourceUrl: string;
           width: number | null;
           height: number | null;
@@ -4832,6 +5643,17 @@ export type DeleteV1MeListsByListIdErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -4844,6 +5666,17 @@ export type DeleteV1MeListsByListIdErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -4936,6 +5769,17 @@ export type GetV1MeListsByListIdErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -4948,6 +5792,17 @@ export type GetV1MeListsByListIdErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -5005,7 +5860,7 @@ export type GetV1MeListsByListIdResponses = {
           url: string;
           kind: "poster" | "key_visual" | "photo" | "logo";
           alt: string | null;
-          credit: string;
+          credit: string | null;
           copyrightHolder: string | null;
           license: string | null;
           rightsStatus:
@@ -5013,7 +5868,8 @@ export type GetV1MeListsByListIdResponses = {
             | "open_license"
             | "contractual_display"
             | "hotlink_only"
-            | "todam_original";
+            | "todam_original"
+            | "community_submission";
           sourceUrl: string;
           width: number | null;
           height: number | null;
@@ -5100,6 +5956,17 @@ export type PatchV1MeListsByListIdErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -5112,6 +5979,17 @@ export type PatchV1MeListsByListIdErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -5169,7 +6047,7 @@ export type PatchV1MeListsByListIdResponses = {
           url: string;
           kind: "poster" | "key_visual" | "photo" | "logo";
           alt: string | null;
-          credit: string;
+          credit: string | null;
           copyrightHolder: string | null;
           license: string | null;
           rightsStatus:
@@ -5177,7 +6055,8 @@ export type PatchV1MeListsByListIdResponses = {
             | "open_license"
             | "contractual_display"
             | "hotlink_only"
-            | "todam_original";
+            | "todam_original"
+            | "community_submission";
           sourceUrl: string;
           width: number | null;
           height: number | null;
@@ -5263,6 +6142,17 @@ export type PostV1MeListsByListIdItemsErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -5275,6 +6165,17 @@ export type PostV1MeListsByListIdItemsErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -5368,6 +6269,17 @@ export type DeleteV1MeListsByListIdItemsByProductionIdErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -5380,6 +6292,17 @@ export type DeleteV1MeListsByListIdItemsByProductionIdErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -5474,6 +6397,17 @@ export type PutV1MeListsByListIdOrderErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -5486,6 +6420,17 @@ export type PutV1MeListsByListIdOrderErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -5578,6 +6523,17 @@ export type DeleteV1MeReviewsByProductionIdErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -5590,6 +6546,17 @@ export type DeleteV1MeReviewsByProductionIdErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -5686,6 +6653,17 @@ export type PutV1MeReviewsByProductionIdErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -5698,6 +6676,17 @@ export type PutV1MeReviewsByProductionIdErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -5792,6 +6781,17 @@ export type PostV1MeDiaryErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -5804,6 +6804,17 @@ export type PostV1MeDiaryErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -5907,6 +6918,17 @@ export type DeleteV1MeDiaryByEntryIdErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -5919,6 +6941,17 @@ export type DeleteV1MeDiaryByEntryIdErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -6026,6 +7059,17 @@ export type PatchV1MeDiaryByEntryIdErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -6038,6 +7082,17 @@ export type PatchV1MeDiaryByEntryIdErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -6130,6 +7185,17 @@ export type DeleteV1MeProductionsByIdRatingErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -6142,6 +7208,17 @@ export type DeleteV1MeProductionsByIdRatingErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -6248,6 +7325,17 @@ export type PutV1MeProductionsByIdRatingErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -6260,6 +7348,17 @@ export type PutV1MeProductionsByIdRatingErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -6364,6 +7463,17 @@ export type DeleteV1MeWatchlistByIdErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -6376,6 +7486,17 @@ export type DeleteV1MeWatchlistByIdErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -6480,6 +7601,17 @@ export type PutV1MeWatchlistByIdErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -6492,6 +7624,17 @@ export type PutV1MeWatchlistByIdErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -6603,6 +7746,17 @@ export type PostV1MeCompanyClaimsByCompanyIdErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -6615,6 +7769,17 @@ export type PostV1MeCompanyClaimsByCompanyIdErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -6718,6 +7883,17 @@ export type GetV1MeCompanyClaimsErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -6730,6 +7906,17 @@ export type GetV1MeCompanyClaimsErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -6835,6 +8022,17 @@ export type GetV1MeCompanyMembershipsErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -6847,6 +8045,17 @@ export type GetV1MeCompanyMembershipsErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -6945,6 +8154,17 @@ export type GetV1MeCompaniesByCompanyIdProductionsErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -6957,6 +8177,17 @@ export type GetV1MeCompaniesByCompanyIdProductionsErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -7063,6 +8294,17 @@ export type PostV1MeCompaniesByCompanyIdProductionsErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -7075,6 +8317,17 @@ export type PostV1MeCompaniesByCompanyIdProductionsErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -7174,6 +8427,17 @@ export type GetV1MeCompaniesByCompanyIdProductionsByProductionIdErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -7186,6 +8450,17 @@ export type GetV1MeCompaniesByCompanyIdProductionsByProductionIdErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -7228,7 +8503,7 @@ export type GetV1MeCompaniesByCompanyIdProductionsByProductionIdResponses = {
       url: string;
       kind: "poster" | "key_visual" | "photo" | "logo";
       alt: string | null;
-      credit: string;
+      credit: string | null;
       copyrightHolder: string | null;
       license: string | null;
       rightsStatus:
@@ -7236,7 +8511,8 @@ export type GetV1MeCompaniesByCompanyIdProductionsByProductionIdResponses = {
         | "open_license"
         | "contractual_display"
         | "hotlink_only"
-        | "todam_original";
+        | "todam_original"
+        | "community_submission";
       sourceUrl: string;
       width: number | null;
       height: number | null;
@@ -7254,7 +8530,8 @@ export type GetV1MeCompaniesByCompanyIdProductionsByProductionIdResponses = {
         | "open_license"
         | "contractual_display"
         | "hotlink_only"
-        | "todam_original";
+        | "todam_original"
+        | "community_submission";
       license: string | null;
       sourceUrl: string | null;
       sourceTitle: string | null;
@@ -7336,7 +8613,7 @@ export type GetV1MeCompaniesByCompanyIdProductionsByProductionIdResponses = {
         url: string;
         kind: "poster" | "key_visual" | "photo" | "logo";
         alt: string | null;
-        credit: string;
+        credit: string | null;
         copyrightHolder: string | null;
         license: string | null;
         rightsStatus:
@@ -7344,7 +8621,8 @@ export type GetV1MeCompaniesByCompanyIdProductionsByProductionIdResponses = {
           | "open_license"
           | "contractual_display"
           | "hotlink_only"
-          | "todam_original";
+          | "todam_original"
+          | "community_submission";
         sourceUrl: string;
         width: number | null;
         height: number | null;
@@ -7361,7 +8639,8 @@ export type GetV1MeCompaniesByCompanyIdProductionsByProductionIdResponses = {
         | "open_license"
         | "contractual_display"
         | "hotlink_only"
-        | "todam_original";
+        | "todam_original"
+        | "community_submission";
       license: string | null;
     }>;
     lastVerifiedAt: string | null;
@@ -7371,14 +8650,15 @@ export type GetV1MeCompaniesByCompanyIdProductionsByProductionIdResponses = {
       remoteUrl: string;
       kind: "poster" | "key_visual" | "photo" | "logo";
       alt: string | null;
-      credit: string;
+      credit: string | null;
       copyrightHolder: string | null;
       rightsStatus:
         | "permission_granted"
         | "open_license"
         | "contractual_display"
         | "hotlink_only"
-        | "todam_original";
+        | "todam_original"
+        | "community_submission";
       storagePolicy: "hotlink" | "mirror";
       termsUrl: string | null;
       license: string | null;
@@ -7408,7 +8688,8 @@ export type PostV1MeCompaniesByCompanyIdRevisionsData = {
         | "open_license"
         | "contractual_display"
         | "hotlink_only"
-        | "todam_original";
+        | "todam_original"
+        | "community_submission";
     }>;
   };
   path: {
@@ -7477,6 +8758,17 @@ export type PostV1MeCompaniesByCompanyIdRevisionsErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -7489,6 +8781,17 @@ export type PostV1MeCompaniesByCompanyIdRevisionsErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -7524,7 +8827,8 @@ export type PostV1MeCompaniesByCompanyIdRevisionsResponses = {
         | "open_license"
         | "contractual_display"
         | "hotlink_only"
-        | "todam_original";
+        | "todam_original"
+        | "community_submission";
       id: string;
       oldValue: unknown;
     }>;
@@ -7604,6 +8908,17 @@ export type GetV1MeCatalogRevisionsErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -7616,6 +8931,17 @@ export type GetV1MeCatalogRevisionsErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -7652,7 +8978,8 @@ export type GetV1MeCatalogRevisionsResponses = {
           | "open_license"
           | "contractual_display"
           | "hotlink_only"
-          | "todam_original";
+          | "todam_original"
+          | "community_submission";
         id: string;
         oldValue: unknown;
       }>;
@@ -7735,6 +9062,17 @@ export type GetV1MeCatalogRevisionsByRevisionIdErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -7747,6 +9085,17 @@ export type GetV1MeCatalogRevisionsByRevisionIdErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -7782,7 +9131,8 @@ export type GetV1MeCatalogRevisionsByRevisionIdResponses = {
         | "open_license"
         | "contractual_display"
         | "hotlink_only"
-        | "todam_original";
+        | "todam_original"
+        | "community_submission";
       id: string;
       oldValue: unknown;
     }>;
@@ -7810,7 +9160,8 @@ export type PatchV1MeCatalogRevisionsByRevisionIdData = {
         | "open_license"
         | "contractual_display"
         | "hotlink_only"
-        | "todam_original";
+        | "todam_original"
+        | "community_submission";
     }>;
   };
   path: {
@@ -7879,6 +9230,17 @@ export type PatchV1MeCatalogRevisionsByRevisionIdErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -7891,6 +9253,17 @@ export type PatchV1MeCatalogRevisionsByRevisionIdErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -7926,7 +9299,8 @@ export type PatchV1MeCatalogRevisionsByRevisionIdResponses = {
         | "open_license"
         | "contractual_display"
         | "hotlink_only"
-        | "todam_original";
+        | "todam_original"
+        | "community_submission";
       id: string;
       oldValue: unknown;
     }>;
@@ -8008,6 +9382,17 @@ export type PostV1MeCatalogRevisionsByRevisionIdSubmitErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -8020,6 +9405,17 @@ export type PostV1MeCatalogRevisionsByRevisionIdSubmitErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -8055,7 +9451,8 @@ export type PostV1MeCatalogRevisionsByRevisionIdSubmitResponses = {
         | "open_license"
         | "contractual_display"
         | "hotlink_only"
-        | "todam_original";
+        | "todam_original"
+        | "community_submission";
       id: string;
       oldValue: unknown;
     }>;
@@ -8139,6 +9536,17 @@ export type GetV1AdminCatalogCandidatesErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -8151,6 +9559,17 @@ export type GetV1AdminCatalogCandidatesErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -8188,7 +9607,8 @@ export type GetV1AdminCatalogCandidatesResponses = {
           | "open_license"
           | "contractual_display"
           | "hotlink_only"
-          | "todam_original";
+          | "todam_original"
+          | "community_submission";
         license: string | null;
       }>;
       updatedAt: string;
@@ -8269,6 +9689,17 @@ export type PostV1AdminCatalogCandidatesByTargetTypeByTargetIdPublishErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -8281,6 +9712,17 @@ export type PostV1AdminCatalogCandidatesByTargetTypeByTargetIdPublishErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -8374,6 +9816,17 @@ export type PostV1AdminCatalogCandidatesByTargetTypeByTargetIdHideErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -8386,6 +9839,17 @@ export type PostV1AdminCatalogCandidatesByTargetTypeByTargetIdHideErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -8479,6 +9943,17 @@ export type PostV1AdminCatalogCandidatesByTargetTypeByTargetIdDraftErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -8491,6 +9966,17 @@ export type PostV1AdminCatalogCandidatesByTargetTypeByTargetIdDraftErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -8583,6 +10069,17 @@ export type GetV1AdminContentReportsErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -8595,6 +10092,17 @@ export type GetV1AdminContentReportsErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -8616,9 +10124,23 @@ export type GetV1AdminContentReportsResponses = {
       id: string;
       targetType: "production" | "venue" | "company" | "member" | "list" | "review";
       targetId: string;
+      category: "visual_rights" | "information" | "schedule" | "other";
       targetLabel: string;
       targetPath: string | null;
       canHide: boolean;
+      canHideMedia: boolean;
+      media: {
+        id: string;
+        url: string;
+        credit: string | null;
+        sourceUrl: string;
+      } | null;
+      contribution: {
+        id: string;
+        status: "published" | "hidden";
+        sourceUrl: string;
+        submittedAt: string;
+      } | null;
       reason: string;
       status: "open" | "reviewing" | "resolved" | "dismissed";
       decision: string | null;
@@ -8634,7 +10156,7 @@ export type GetV1AdminContentReportsResponse =
 export type PostV1AdminContentReportsByReportIdReviewingData = {
   body: {
     decision: string;
-    contentAction?: "none" | "hide";
+    contentAction?: "none" | "hide" | "hide_media";
   };
   path: {
     reportId: string;
@@ -8702,6 +10224,17 @@ export type PostV1AdminContentReportsByReportIdReviewingErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -8714,6 +10247,17 @@ export type PostV1AdminContentReportsByReportIdReviewingErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -8734,9 +10278,23 @@ export type PostV1AdminContentReportsByReportIdReviewingResponses = {
     id: string;
     targetType: "production" | "venue" | "company" | "member" | "list" | "review";
     targetId: string;
+    category: "visual_rights" | "information" | "schedule" | "other";
     targetLabel: string;
     targetPath: string | null;
     canHide: boolean;
+    canHideMedia: boolean;
+    media: {
+      id: string;
+      url: string;
+      credit: string | null;
+      sourceUrl: string;
+    } | null;
+    contribution: {
+      id: string;
+      status: "published" | "hidden";
+      sourceUrl: string;
+      submittedAt: string;
+    } | null;
     reason: string;
     status: "open" | "reviewing" | "resolved" | "dismissed";
     decision: string | null;
@@ -8751,7 +10309,7 @@ export type PostV1AdminContentReportsByReportIdReviewingResponse =
 export type PostV1AdminContentReportsByReportIdResolvedData = {
   body: {
     decision: string;
-    contentAction?: "none" | "hide";
+    contentAction?: "none" | "hide" | "hide_media";
   };
   path: {
     reportId: string;
@@ -8819,6 +10377,17 @@ export type PostV1AdminContentReportsByReportIdResolvedErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -8831,6 +10400,17 @@ export type PostV1AdminContentReportsByReportIdResolvedErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -8851,9 +10431,23 @@ export type PostV1AdminContentReportsByReportIdResolvedResponses = {
     id: string;
     targetType: "production" | "venue" | "company" | "member" | "list" | "review";
     targetId: string;
+    category: "visual_rights" | "information" | "schedule" | "other";
     targetLabel: string;
     targetPath: string | null;
     canHide: boolean;
+    canHideMedia: boolean;
+    media: {
+      id: string;
+      url: string;
+      credit: string | null;
+      sourceUrl: string;
+    } | null;
+    contribution: {
+      id: string;
+      status: "published" | "hidden";
+      sourceUrl: string;
+      submittedAt: string;
+    } | null;
     reason: string;
     status: "open" | "reviewing" | "resolved" | "dismissed";
     decision: string | null;
@@ -8868,7 +10462,7 @@ export type PostV1AdminContentReportsByReportIdResolvedResponse =
 export type PostV1AdminContentReportsByReportIdDismissedData = {
   body: {
     decision: string;
-    contentAction?: "none" | "hide";
+    contentAction?: "none" | "hide" | "hide_media";
   };
   path: {
     reportId: string;
@@ -8936,6 +10530,17 @@ export type PostV1AdminContentReportsByReportIdDismissedErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -8948,6 +10553,17 @@ export type PostV1AdminContentReportsByReportIdDismissedErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -8968,9 +10584,23 @@ export type PostV1AdminContentReportsByReportIdDismissedResponses = {
     id: string;
     targetType: "production" | "venue" | "company" | "member" | "list" | "review";
     targetId: string;
+    category: "visual_rights" | "information" | "schedule" | "other";
     targetLabel: string;
     targetPath: string | null;
     canHide: boolean;
+    canHideMedia: boolean;
+    media: {
+      id: string;
+      url: string;
+      credit: string | null;
+      sourceUrl: string;
+    } | null;
+    contribution: {
+      id: string;
+      status: "published" | "hidden";
+      sourceUrl: string;
+      submittedAt: string;
+    } | null;
     reason: string;
     status: "open" | "reviewing" | "resolved" | "dismissed";
     decision: string | null;
@@ -9050,6 +10680,17 @@ export type GetV1AdminCompanyClaimsErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -9062,6 +10703,17 @@ export type GetV1AdminCompanyClaimsErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -9172,6 +10824,17 @@ export type PostV1AdminCompanyClaimsByClaimIdApprovedErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -9184,6 +10847,17 @@ export type PostV1AdminCompanyClaimsByClaimIdApprovedErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -9292,6 +10966,17 @@ export type PostV1AdminCompanyClaimsByClaimIdRejectedErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -9304,6 +10989,17 @@ export type PostV1AdminCompanyClaimsByClaimIdRejectedErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -9412,6 +11108,17 @@ export type PostV1AdminCompanyClaimsByClaimIdRevokedErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -9424,6 +11131,17 @@ export type PostV1AdminCompanyClaimsByClaimIdRevokedErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -9529,6 +11247,17 @@ export type GetV1AdminCatalogRevisionsErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -9541,6 +11270,17 @@ export type GetV1AdminCatalogRevisionsErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -9577,7 +11317,8 @@ export type GetV1AdminCatalogRevisionsResponses = {
           | "open_license"
           | "contractual_display"
           | "hotlink_only"
-          | "todam_original";
+          | "todam_original"
+          | "community_submission";
         id: string;
         oldValue: unknown;
       }>;
@@ -9662,6 +11403,17 @@ export type PostV1AdminCatalogRevisionsByRevisionIdApprovedErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -9674,6 +11426,17 @@ export type PostV1AdminCatalogRevisionsByRevisionIdApprovedErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -9709,7 +11472,8 @@ export type PostV1AdminCatalogRevisionsByRevisionIdApprovedResponses = {
         | "open_license"
         | "contractual_display"
         | "hotlink_only"
-        | "todam_original";
+        | "todam_original"
+        | "community_submission";
       id: string;
       oldValue: unknown;
     }>;
@@ -9793,6 +11557,17 @@ export type PostV1AdminCatalogRevisionsByRevisionIdRejectedErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -9805,6 +11580,17 @@ export type PostV1AdminCatalogRevisionsByRevisionIdRejectedErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -9840,7 +11626,8 @@ export type PostV1AdminCatalogRevisionsByRevisionIdRejectedResponses = {
         | "open_license"
         | "contractual_display"
         | "hotlink_only"
-        | "todam_original";
+        | "todam_original"
+        | "community_submission";
       id: string;
       oldValue: unknown;
     }>;
@@ -9924,6 +11711,17 @@ export type PostV1AdminCatalogRevisionsByRevisionIdRestoreErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -9936,6 +11734,17 @@ export type PostV1AdminCatalogRevisionsByRevisionIdRestoreErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -9971,7 +11780,8 @@ export type PostV1AdminCatalogRevisionsByRevisionIdRestoreResponses = {
         | "open_license"
         | "contractual_display"
         | "hotlink_only"
-        | "todam_original";
+        | "todam_original"
+        | "community_submission";
       id: string;
       oldValue: unknown;
     }>;

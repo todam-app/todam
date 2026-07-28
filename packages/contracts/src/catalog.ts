@@ -41,7 +41,7 @@ export const PosterSchema = z.object({
   url: z.string().url(),
   kind: z.enum(["poster", "key_visual", "photo", "logo"]),
   alt: z.string().nullable(),
-  credit: z.string(),
+  credit: z.string().nullable(),
   copyrightHolder: z.string().nullable(),
   license: z.string().nullable(),
   rightsStatus: RightsStatusSchema.extract([
@@ -50,6 +50,7 @@ export const PosterSchema = z.object({
     "contractual_display",
     "hotlink_only",
     "todam_original",
+    "community_submission",
   ]),
   sourceUrl: z.string().url(),
   width: z.number().int().positive().nullable(),

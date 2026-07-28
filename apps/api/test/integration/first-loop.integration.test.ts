@@ -5,11 +5,14 @@ import {
 import {
   catalogSources,
   catalogRevisions,
+  communitySubmissions,
   companies,
   createDatabase,
   legalAcceptances,
   lists,
+  mediaAssets,
   performances,
+  productionMedia,
   productions,
   productionCompanies,
   sourceDocuments,
@@ -26,6 +29,7 @@ import { buildServer } from "../../src/server.js";
 
 const { db, pool } = createDatabase();
 let app: FastifyInstance;
+let isolatedDatabase = false;
 let productionId: string;
 let performanceId: string;
 let venueId: string;
@@ -173,9 +177,41 @@ async function signUp(
   return Array.isArray(cookie) ? cookie.join("; ") : cookie!;
 }
 
+function communityMultipart(
+  payload: unknown,
+  file?: { contents: Buffer; filename: string; mimeType: string },
+) {
+  const boundary = `todam-test-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  const chunks: Uint8Array[] = [
+    Buffer.from(
+      `--${boundary}\r\n` +
+        'Content-Disposition: form-data; name="payload"\r\n' +
+        "Content-Type: application/json\r\n\r\n" +
+        `${JSON.stringify(payload)}\r\n`,
+    ),
+  ];
+  if (file) {
+    chunks.push(
+      Buffer.from(
+        `--${boundary}\r\n` +
+          `Content-Disposition: form-data; name="poster"; filename="${file.filename}"\r\n` +
+          `Content-Type: ${file.mimeType}\r\n\r\n`,
+      ),
+      file.contents,
+      Buffer.from("\r\n"),
+    );
+  }
+  chunks.push(Buffer.from(`--${boundary}--\r\n`));
+  return {
+    headers: { "content-type": `multipart/form-data; boundary=${boundary}` },
+    payload: Buffer.concat(chunks),
+  };
+}
+
 describe("première boucle API sur PostgreSQL/PostGIS", () => {
   beforeAll(async () => {
     await assertIsolatedDatabase();
+    isolatedDatabase = true;
     app = await buildServer({ database: db, emailSender, logger: false });
   });
   beforeEach(async () => {
@@ -183,8 +219,10 @@ describe("première boucle API sur PostgreSQL/PostGIS", () => {
     await seedCatalog();
   });
   afterAll(async () => {
-    await app.close();
-    await cleanDatabase();
+    if (isolatedDatabase) {
+      await app.close();
+      await cleanDatabase();
+    }
     await pool.end();
   });
 
@@ -227,6 +265,323 @@ describe("première boucle API sur PostgreSQL/PostGIS", () => {
     expect(searchResponse.json().productions[0].title).toBe("Le Rêve d'Élodie");
     expect(accentedSearchResponse.statusCode).toBe(200);
     expect(accentedSearchResponse.json().productions[0].title).toBe("Le Rêve d'Élodie");
+  });
+
+  it("publie immédiatement une contribution et bloque le doublon titre-compagnie", async () => {
+    const input = {
+      title: "Une pédagogie du conflit",
+      discipline: "theatre",
+      company: {
+        mode: "new",
+        name: "Compagnie du Conflit",
+        officialUrl: "https://compagnie-conflit.example.test",
+      },
+      officialUrl: "https://festival.example.test/spectacles/pedagogie-conflit",
+      performances: [
+        {
+          startsAt: "2026-07-15T18:00:00.000Z",
+          endsAt: "2026-07-15T19:15:00.000Z",
+          officialUrl: null,
+          venue: {
+            mode: "new",
+            name: "Théâtre du Test",
+            addressLine1: "1 place des Tests",
+            postalCode: "84000",
+            locality: "Avignon",
+            countryCode: "FR",
+            timezone: "Europe/Paris",
+            officialUrl: "https://theatre-test.example.test",
+          },
+        },
+      ],
+      audience: "general",
+      minimumAge: null,
+      durationMinutes: 75,
+      language: "fr",
+      description:
+        "Une description promotionnelle déjà publiée sur la page officielle.",
+      poster: null,
+    };
+
+    const anonymous = await app.inject({
+      method: "POST",
+      url: "/v1/community/productions",
+      ...communityMultipart(input),
+    });
+    expect(anonymous.statusCode).toBe(401);
+
+    const cookie = await signUp(
+      "contribution@example.test",
+      "contribution-test",
+      "127.0.0.81",
+    );
+    const createdMultipart = communityMultipart(input);
+    const created = await app.inject({
+      method: "POST",
+      url: "/v1/community/productions",
+      headers: { ...createdMultipart.headers, cookie },
+      payload: createdMultipart.payload,
+      remoteAddress: "127.0.0.81",
+    });
+    expect(created.statusCode, created.body).toBe(201);
+    expect(created.json()).toMatchObject({ publicationStatus: "published" });
+
+    const detail = await app.inject({
+      method: "GET",
+      url: `/v1/productions/${created.json().slug}`,
+    });
+    expect(detail.statusCode, detail.body).toBe(200);
+    expect(detail.json()).toMatchObject({
+      title: input.title,
+      company: { name: "Compagnie du Conflit" },
+      durationMinutes: 75,
+      language: "fr",
+    });
+    expect(detail.json().descriptions[0]).toMatchObject({
+      body: input.description,
+      rightsStatus: "community_submission",
+    });
+    expect(detail.json().performances).toHaveLength(1);
+
+    const submissionRows = await db
+      .select()
+      .from(communitySubmissions)
+      .where(eq(communitySubmissions.id, created.json().contributionId));
+    expect(submissionRows[0]).toMatchObject({
+      productionId: created.json().id,
+      sourceUrl: input.officialUrl,
+      status: "published",
+    });
+    expect(submissionRows[0]?.authorUserId).toBeTruthy();
+
+    const duplicateInput = {
+      ...input,
+      title: "Une pedagogie du conflit !",
+      performances: [
+        {
+          ...input.performances[0],
+          startsAt: "2027-07-15T18:00:00.000Z",
+          endsAt: "2027-07-15T19:15:00.000Z",
+          venue: {
+            ...input.performances[0]!.venue,
+            name: "Un autre théâtre",
+            addressLine1: "2 place des Tests",
+          },
+        },
+      ],
+    };
+    const duplicateMultipart = communityMultipart(duplicateInput);
+    const duplicate = await app.inject({
+      method: "POST",
+      url: "/v1/community/productions",
+      headers: { ...duplicateMultipart.headers, cookie },
+      payload: duplicateMultipart.payload,
+      remoteAddress: "127.0.0.81",
+    });
+    expect(duplicate.statusCode, duplicate.body).toBe(409);
+    expect(duplicate.json().code).toBe("COMMUNITY_PRODUCTION_DUPLICATE");
+
+    const reuseInput = {
+      ...input,
+      title: "Une seconde création",
+      company: { mode: "existing", id: detail.json().company.id },
+      performances: [
+        {
+          startsAt: "2026-07-16T18:00:00.000Z",
+          endsAt: null,
+          officialUrl: null,
+          venue: {
+            mode: "existing",
+            id: detail.json().performances[0].venue.id,
+          },
+        },
+      ],
+      description: null,
+    };
+    const reuseMultipart = communityMultipart(reuseInput);
+    const reused = await app.inject({
+      method: "POST",
+      url: "/v1/community/productions",
+      headers: { ...reuseMultipart.headers, cookie },
+      payload: reuseMultipart.payload,
+      remoteAddress: "127.0.0.81",
+    });
+    expect(reused.statusCode, reused.body).toBe(201);
+    expect(
+      await db
+        .select({ id: companies.id })
+        .from(companies)
+        .where(eq(companies.name, "Compagnie du Conflit")),
+    ).toHaveLength(1);
+    expect(
+      await db
+        .select({ id: venues.id })
+        .from(venues)
+        .where(eq(venues.name, "Théâtre du Test")),
+    ).toHaveLength(1);
+
+    await db.delete(user).where(eq(user.id, submissionRows[0]!.authorUserId!));
+    const dissociated = await db
+      .select({
+        authorUserId: communitySubmissions.authorUserId,
+        productionId: communitySubmissions.productionId,
+      })
+      .from(communitySubmissions)
+      .where(eq(communitySubmissions.id, created.json().contributionId));
+    expect(dissociated[0]).toEqual({
+      authorUserId: null,
+      productionId: created.json().id,
+    });
+    const retainedProduction = await db
+      .select({ id: productions.id })
+      .from(productions)
+      .where(eq(productions.id, created.json().id));
+    expect(retainedProduction).toHaveLength(1);
+  });
+
+  it("refuse les affiches dangereuses ou invalides sans créer de fiche", async () => {
+    const cookie = await signUp(
+      "affiche-communaute@example.test",
+      "affiche-communaute",
+      "127.0.0.82",
+    );
+    const baseInput = {
+      title: "Affiche communautaire test",
+      discipline: "opera",
+      company: { mode: "new", name: "Compagnie Affiche", officialUrl: null },
+      officialUrl: "https://spectacle.example.test/affiche",
+      performances: [
+        {
+          startsAt: "2026-09-10T18:00:00.000Z",
+          endsAt: null,
+          officialUrl: null,
+          venue: { mode: "existing", id: venueId },
+        },
+      ],
+      audience: "general",
+      minimumAge: null,
+      durationMinutes: null,
+      language: null,
+      description: null,
+      poster: { url: "https://127.0.0.1/affiche.jpg", credit: null },
+    };
+    const dangerousMultipart = communityMultipart(baseInput);
+    const dangerous = await app.inject({
+      method: "POST",
+      url: "/v1/community/productions",
+      headers: { ...dangerousMultipart.headers, cookie },
+      payload: dangerousMultipart.payload,
+      remoteAddress: "127.0.0.82",
+    });
+    expect(dangerous.statusCode, dangerous.body).toBe(400);
+    expect(dangerous.json().detail).toBe(
+      "Le fichier d’affiche ne respecte pas les formats acceptés. Utilisez une image JPEG, PNG ou WebP de 2 Mo maximum et d’au moins 300 px de large.",
+    );
+
+    const invalidFileInput = { ...baseInput, poster: null };
+    const invalidFileMultipart = communityMultipart(invalidFileInput, {
+      contents: Buffer.from("ceci n'est pas une image"),
+      filename: "affiche.png",
+      mimeType: "image/png",
+    });
+    const invalidFile = await app.inject({
+      method: "POST",
+      url: "/v1/community/productions",
+      headers: { ...invalidFileMultipart.headers, cookie },
+      payload: invalidFileMultipart.payload,
+      remoteAddress: "127.0.0.82",
+    });
+    expect(invalidFile.statusCode, invalidFile.body).toBe(400);
+
+    const createdRows = await db
+      .select({ id: productions.id })
+      .from(productions)
+      .where(eq(productions.title, baseInput.title));
+    expect(createdRows).toHaveLength(0);
+  });
+
+  it("annule toute la contribution si la transaction échoue", async () => {
+    const cookie = await signUp(
+      "rollback-communaute@example.test",
+      "rollback-communaute",
+      "127.0.0.85",
+    );
+    await pool.query(`
+      create or replace function todam_test_fail_community_submission()
+      returns trigger language plpgsql as $$
+      begin
+        raise exception 'échec forcé après les insertions catalogue';
+      end
+      $$;
+      create trigger todam_test_fail_community_submission_trigger
+      before insert on community_submissions
+      for each row execute function todam_test_fail_community_submission();
+    `);
+    try {
+      const input = {
+        title: "Contribution à annuler",
+        discipline: "ballet",
+        company: { mode: "new", name: "Compagnie Rollback", officialUrl: null },
+        officialUrl: "https://rollback.example.test/spectacle",
+        performances: [
+          {
+            startsAt: "2026-10-01T18:00:00.000Z",
+            endsAt: null,
+            officialUrl: null,
+            venue: {
+              mode: "new",
+              name: "Lieu Rollback",
+              addressLine1: "3 place des Tests",
+              postalCode: "84000",
+              locality: "Avignon",
+              countryCode: "FR",
+              timezone: "Europe/Paris",
+              officialUrl: null,
+            },
+          },
+        ],
+        audience: "general",
+        minimumAge: null,
+        durationMinutes: null,
+        language: null,
+        description: null,
+        poster: null,
+      };
+      const multipart = communityMultipart(input);
+      const response = await app.inject({
+        method: "POST",
+        url: "/v1/community/productions",
+        headers: { ...multipart.headers, cookie },
+        payload: multipart.payload,
+        remoteAddress: "127.0.0.85",
+      });
+      expect(response.statusCode).toBe(500);
+
+      expect(
+        await db
+          .select({ id: productions.id })
+          .from(productions)
+          .where(eq(productions.title, input.title)),
+      ).toHaveLength(0);
+      expect(
+        await db
+          .select({ id: companies.id })
+          .from(companies)
+          .where(eq(companies.name, "Compagnie Rollback")),
+      ).toHaveLength(0);
+      expect(
+        await db
+          .select({ id: venues.id })
+          .from(venues)
+          .where(eq(venues.name, "Lieu Rollback")),
+      ).toHaveLength(0);
+    } finally {
+      await pool.query(`
+        drop trigger if exists todam_test_fail_community_submission_trigger
+          on community_submissions;
+        drop function if exists todam_test_fail_community_submission();
+      `);
+    }
   });
 
   it("construit la programmation publique d'un lieu depuis les données publiées", async () => {
@@ -1286,6 +1641,7 @@ describe("première boucle API sur PostgreSQL/PostGIS", () => {
       payload: {
         targetType: "production",
         targetId: productionId,
+        category: "other",
         reason: "Ce signalement personnel doit apparaître dans l’export du compte.",
       },
     });
@@ -1578,6 +1934,7 @@ describe("première boucle API sur PostgreSQL/PostGIS", () => {
       payload: {
         targetType: "production",
         targetId: productionId,
+        category: "schedule",
         reason:
           "La date indiquée semble incorrecte par rapport à la billetterie officielle.",
       },
@@ -1591,6 +1948,7 @@ describe("première boucle API sur PostgreSQL/PostGIS", () => {
       payload: {
         targetType: "production",
         targetId: productionId,
+        category: "other",
         reason: "Erreur",
       },
     });
@@ -1602,6 +1960,7 @@ describe("première boucle API sur PostgreSQL/PostGIS", () => {
       payload: {
         targetType: "production",
         targetId: "00000000-0000-4000-8000-000000000099",
+        category: "other",
         reason:
           "Cette fiche n’existe plus et ne devrait pas accepter de nouveau signalement.",
       },
@@ -1634,6 +1993,7 @@ describe("première boucle API sur PostgreSQL/PostGIS", () => {
       payload: {
         targetType: "list",
         targetId: privateList!.id,
+        category: "other",
         reason:
           "Un visiteur anonyme ne doit pas pouvoir confirmer l’existence de cette liste privée.",
       },
@@ -1646,6 +2006,7 @@ describe("première boucle API sur PostgreSQL/PostGIS", () => {
       payload: {
         targetType: "list",
         targetId: privateList!.id,
+        category: "other",
         reason: "Le propriétaire peut signaler un problème sur sa propre liste privée.",
       },
     });
@@ -1659,6 +2020,7 @@ describe("première boucle API sur PostgreSQL/PostGIS", () => {
       payload: {
         targetType: "production",
         targetId: productionId,
+        category: "information",
         reason:
           "Le lien officiel doit être revérifié avant la prochaine démonstration publique.",
       },
@@ -1728,6 +2090,208 @@ describe("première boucle API sur PostgreSQL/PostGIS", () => {
     });
     expect(duplicateDecision.statusCode).toBe(409);
     expect(duplicateDecision.json().code).toBe("CONTENT_REPORT_ALREADY_CLOSED");
+  });
+
+  it("associe un signalement à la bonne affiche et masque seulement ce visuel", async () => {
+    const [source] = await db
+      .select({ id: catalogSources.id })
+      .from(catalogSources)
+      .limit(1);
+    const [document] = await db
+      .select({ id: sourceDocuments.id })
+      .from(sourceDocuments)
+      .where(eq(sourceDocuments.sourceId, source!.id))
+      .limit(1);
+    const [media] = await db
+      .insert(mediaAssets)
+      .values({
+        sourceId: source!.id,
+        documentId: document!.id,
+        externalKey: "community-report-poster",
+        kind: "poster",
+        remoteUrl: "https://images.example.test/affiche.webp",
+        storagePolicy: "hotlink",
+        alt: "Affiche à signaler",
+        credit: null,
+        rightsStatus: "permission_granted",
+        width: 600,
+        height: 900,
+        mimeType: "image/webp",
+      })
+      .returning({ id: mediaAssets.id });
+    await db.insert(productionMedia).values({
+      productionId,
+      mediaId: media!.id,
+      isPrimary: true,
+      position: 0,
+    });
+    await db.insert(communitySubmissions).values({
+      productionId,
+      mediaId: media!.id,
+      sourceUrl: "https://www.letheatredesmuses.com/programme-adulte/",
+      submittedData: { poster: "test" },
+      status: "published",
+    });
+
+    const report = await app.inject({
+      method: "POST",
+      url: "/v1/content-reports",
+      remoteAddress: "127.0.0.83",
+      payload: {
+        targetType: "production",
+        targetId: productionId,
+        category: "visual_rights",
+        mediaId: media!.id,
+        reason: "Le titulaire demande le retrait de cette affiche précise.",
+      },
+    });
+    expect(report.statusCode, report.body).toBe(200);
+
+    const moderatorCookie = await signUp(
+      "affiche-moderation@example.test",
+      "affiche-moderation",
+      "127.0.0.84",
+    );
+    await db
+      .update(user)
+      .set({ role: "trusted_contributor" })
+      .where(eq(user.pseudonym, "affiche-moderation"));
+
+    const queue = await app.inject({
+      method: "GET",
+      url: "/v1/admin/content-reports?status=open",
+      headers: { cookie: moderatorCookie },
+    });
+    expect(queue.statusCode, queue.body).toBe(200);
+    expect(queue.json().items[0]).toMatchObject({
+      category: "visual_rights",
+      media: {
+        id: media!.id,
+        sourceUrl: "https://www.letheatredesmuses.com/programme-adulte/",
+      },
+      contribution: { status: "published" },
+      canHideMedia: true,
+    });
+
+    const resolved = await app.inject({
+      method: "POST",
+      url: `/v1/admin/content-reports/${report.json().id}/resolved`,
+      headers: { cookie: moderatorCookie },
+      payload: {
+        decision: "Le visuel précis est retiré après vérification du signalement.",
+        contentAction: "hide_media",
+      },
+    });
+    expect(resolved.statusCode, resolved.body).toBe(200);
+    expect(resolved.json().canHideMedia).toBe(false);
+
+    const detail = await app.inject({
+      method: "GET",
+      url: "/v1/productions/reve-elodie-muses-2025",
+    });
+    expect(detail.statusCode, detail.body).toBe(200);
+    expect(detail.json().posters).toEqual([]);
+  });
+
+  it("masque un lieu communautaire et retire ses représentations publiques", async () => {
+    const [source] = await db
+      .insert(catalogSources)
+      .values({
+        externalKey: "community-venue-moderation",
+        name: "Contribution communautaire de test",
+        homepageUrl: "https://todam.fr/politique-editoriale",
+        connectorKind: "community",
+      })
+      .returning({ id: catalogSources.id });
+    const [document] = await db
+      .insert(sourceDocuments)
+      .values({
+        sourceId: source!.id,
+        externalKey: "community-venue-document",
+        title: "Source officielle du lieu",
+        url: "https://lieu-communautaire.example.test",
+        retrievedAt: new Date(),
+        rightsStatus: "community_submission",
+      })
+      .returning({ id: sourceDocuments.id });
+    const [communityVenue] = await db
+      .insert(venues)
+      .values({
+        slug: "lieu-communautaire-a-masquer",
+        name: "Lieu communautaire à masquer",
+        addressLine1: "3 place des Tests",
+        postalCode: "84000",
+        locality: "Avignon",
+        countryCode: "FR",
+        timezone: "Europe/Paris",
+        officialUrl: "https://lieu-communautaire.example.test",
+      })
+      .returning({ id: venues.id });
+    await db.insert(venueSources).values({
+      entityId: communityVenue!.id,
+      documentId: document!.id,
+      externalKey: "community-venue-source",
+    });
+    await db.insert(performances).values({
+      productionId,
+      venueId: communityVenue!.id,
+      startsAt: new Date("2027-07-15T18:00:00.000Z"),
+      status: "scheduled",
+    });
+
+    const report = await app.inject({
+      method: "POST",
+      url: "/v1/content-reports",
+      remoteAddress: "127.0.0.86",
+      payload: {
+        targetType: "venue",
+        targetId: communityVenue!.id,
+        category: "schedule",
+        reason: "Ce lieu communautaire doit être retiré avec ses représentations.",
+      },
+    });
+    expect(report.statusCode, report.body).toBe(200);
+
+    const moderatorCookie = await signUp(
+      "lieu-moderation@example.test",
+      "lieu-moderation",
+      "127.0.0.87",
+    );
+    await db
+      .update(user)
+      .set({ role: "trusted_contributor" })
+      .where(eq(user.pseudonym, "lieu-moderation"));
+
+    const resolved = await app.inject({
+      method: "POST",
+      url: `/v1/admin/content-reports/${report.json().id}/resolved`,
+      headers: { cookie: moderatorCookie },
+      payload: {
+        decision:
+          "Le lieu communautaire et ses représentations sont retirés du catalogue public.",
+        contentAction: "hide",
+      },
+    });
+    expect(resolved.statusCode, resolved.body).toBe(200);
+
+    const hiddenVenue = await app.inject({
+      method: "GET",
+      url: "/v1/venues/lieu-communautaire-a-masquer",
+    });
+    expect(hiddenVenue.statusCode).toBe(404);
+    const productionDetail = await app.inject({
+      method: "GET",
+      url: "/v1/productions/reve-elodie-muses-2025",
+    });
+    expect(productionDetail.statusCode, productionDetail.body).toBe(200);
+    expect(
+      productionDetail
+        .json()
+        .performances.some(
+          (performance: { venue: { id: string } }) =>
+            performance.venue.id === communityVenue!.id,
+        ),
+    ).toBe(false);
   });
 
   it("valide une revendication et publie une révision de compagnie", async () => {

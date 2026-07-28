@@ -49,6 +49,11 @@ import type {
   ProductionDetail,
   VenueDetail,
 } from "./catalog.js";
+import {
+  CommunityProductionCreatedSchema,
+  type CommunityProductionCreated,
+  type CreateCommunityProductionInput,
+} from "./community.js";
 import type {
   AddListItemBody,
   CreateListBody,
@@ -140,6 +145,9 @@ export interface TodamApiClient {
   searchCatalog(options: CatalogSearchOptions): Promise<SearchResponse>;
   searchCities(query?: string): Promise<CityOption[]>;
   getProduction(slug: string): Promise<ProductionDetail>;
+  createCommunityProduction(
+    input: CreateCommunityProductionInput,
+  ): Promise<CommunityProductionCreated>;
   getVenue(slug: string): Promise<VenueDetail>;
   getCompany(slug: string): Promise<CompanyDetail>;
   getMember(username: string): Promise<PublicMember>;
@@ -301,6 +309,24 @@ export function createTodamApiClient(options: TodamApiClientOptions): TodamApiCl
     return payload;
   }
 
+  async function requestMultipart<T>(
+    path: string,
+    schema: { parse(value: unknown): T },
+    body: FormData,
+  ): Promise<T> {
+    const response = await fetcher(`${baseUrl}${path}`, {
+      method: "POST",
+      credentials: "include",
+      headers: { Accept: "application/json" },
+      body,
+    });
+    const payload = (await response.json()) as unknown;
+    if (!response.ok) {
+      throw new TodamApiError(ProblemDetailsSchema.parse(payload));
+    }
+    return schema.parse(payload);
+  }
+
   function queryString(values: object): string {
     const query = new URLSearchParams();
     for (const [key, value] of Object.entries(values)) {
@@ -329,6 +355,18 @@ export function createTodamApiClient(options: TodamApiClientOptions): TodamApiCl
     },
     getProduction: (slug) =>
       request(`/v1/productions/${encodeURIComponent(slug)}`, ProductionResponseSchema),
+    createCommunityProduction: (input) => {
+      const form = new FormData();
+      form.set("payload", JSON.stringify(input.data));
+      if (input.posterFile) {
+        form.set("poster", input.posterFile, input.posterFilename ?? "affiche");
+      }
+      return requestMultipart(
+        "/v1/community/productions",
+        CommunityProductionCreatedSchema,
+        form,
+      );
+    },
     getVenue: (slug) =>
       request(`/v1/venues/${encodeURIComponent(slug)}`, VenueResponseSchema),
     getCompany: (slug) =>
