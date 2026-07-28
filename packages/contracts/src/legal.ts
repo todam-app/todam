@@ -3,9 +3,9 @@ import { z } from "zod";
 import { UsernameSchema } from "./identity.js";
 import { RightsStatusSchema } from "./rights.js";
 
-export const CURRENT_TERMS_VERSION = "1.0.1";
-export const CURRENT_PRIVACY_NOTICE_VERSION = "1.0.2";
-export const LEGAL_EFFECTIVE_DATE = "2026-07-27";
+export const CURRENT_TERMS_VERSION = "1.0.2";
+export const CURRENT_PRIVACY_NOTICE_VERSION = "1.0.3";
+export const LEGAL_EFFECTIVE_DATE = "2026-07-28";
 
 export const RegistrationChannelSchema = z.enum(["web", "android"]);
 export type RegistrationChannel = z.infer<typeof RegistrationChannelSchema>;
@@ -131,11 +131,24 @@ export const AccountExportSchema = z.object({
         "review",
       ]),
       targetId: z.string(),
+      category: z.enum(["visual_rights", "information", "schedule", "other"]),
+      mediaId: z.string().uuid().nullable(),
       reason: z.string(),
       status: z.enum(["open", "reviewing", "resolved", "dismissed"]),
       decision: z.string().nullable(),
       submittedAt: z.string().datetime({ offset: true }),
       reviewedAt: z.string().datetime({ offset: true }).nullable(),
+    }),
+  ),
+  communitySubmissions: z.array(
+    z.object({
+      id: z.string().uuid(),
+      productionId: z.string().uuid(),
+      sourceUrl: z.string().url(),
+      submittedData: z.unknown(),
+      status: z.enum(["published", "hidden"]),
+      createdAt: z.string().datetime({ offset: true }),
+      updatedAt: z.string().datetime({ offset: true }),
     }),
   ),
   companyClaims: z.array(

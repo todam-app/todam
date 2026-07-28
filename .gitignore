@@ -17,6 +17,7 @@ web-build/
 build/
 coverage/
 apps/todam/test-results/
+apps/todam/artifacts/
 .turbo/
 .cache/
 *.tsbuildinfo

@@ -24,10 +24,10 @@ from pypdf import PdfReader
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "apps" / "todam" / "public" / "legal"
 DOCUMENTS = {
-    "conditions-utilisation-v1.0.1.md": "cgu-todam-v1.0.1.pdf",
-    "confidentialite-v1.0.2.md": "confidentialite-todam-v1.0.2.pdf",
+    "conditions-utilisation-v1.0.2.md": "cgu-todam-v1.0.2.pdf",
+    "confidentialite-v1.0.3.md": "confidentialite-todam-v1.0.3.pdf",
     "mentions-legales-v1.0.0.md": "mentions-legales-todam-v1.0.0.pdf",
-    "suppression-compte-v1.0.1.md": "suppression-compte-todam-v1.0.1.pdf",
+    "suppression-compte-v1.0.2.md": "suppression-compte-todam-v1.0.2.pdf",
 }
 TOKENS = {
     "{{LEGAL_OPERATOR_NAME}}": "LEGAL_OPERATOR_NAME",
@@ -153,7 +153,7 @@ def verify_pdf(
             )
 
     required_tokens = []
-    if source.name != "suppression-compte-v1.0.1.md":
+    if not source.name.startswith("suppression-compte-"):
         required_tokens.append("{{LEGAL_OPERATOR_NAME}}")
     if source.name == "mentions-legales-v1.0.0.md":
         required_tokens.extend(

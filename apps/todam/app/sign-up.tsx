@@ -149,7 +149,7 @@ export default function SignUpScreen() {
             }}
             asChild
           >
-            <Button label="Revenir à la connexion" variant="secondary" />
+            <Button label="Revenir à la connexion" variant="quiet" />
           </Link>
         </PageStaticView>
       </>
@@ -257,7 +257,7 @@ export default function SignUpScreen() {
               <Button
                 label="Réessayer"
                 onPress={() => void legal.refetch()}
-                variant="secondary"
+                variant="quiet"
               />
             </View>
           </View>

@@ -9,6 +9,11 @@ const color = {
   surface: "#FFFDF8",
 } as const;
 
+const emailFont = {
+  sans: "'Work Sans',Arial,Helvetica,sans-serif",
+  serif: "'Playfair Display',Georgia,'Times New Roman',serif",
+} as const;
+
 interface EmailFrame {
   content: string;
   eyebrow: string;
@@ -79,7 +84,7 @@ function renderButton(label: string, url: string): string {
     <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="button-table" style="border-collapse:separate;margin:0;">
       <tr>
         <td align="center" bgcolor="${color.accent}" style="border-radius:12px;background:${color.accent};">
-          <a href="${safeUrl}" class="button-link" style="border:1px solid ${color.accent};border-radius:12px;color:${color.surface};display:inline-block;font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:700;line-height:20px;padding:14px 24px;text-align:center;text-decoration:none;">${safeLabel}</a>
+          <a href="${safeUrl}" class="button-link" style="border:1px solid ${color.accent};border-radius:12px;color:${color.surface};display:inline-block;font-family:${emailFont.sans};font-size:16px;font-weight:700;line-height:20px;padding:14px 24px;text-align:center;text-decoration:none;">${safeLabel}</a>
         </td>
       </tr>
     </table>`;
@@ -96,6 +101,20 @@ function renderEmailFrame({
   const safeLogoUrl = escapeHtml(logoUrl);
   const safePreheader = escapeHtml(preheader);
   const safePublicWebUrl = escapeHtml(publicWebUrl);
+  const fontUrl = {
+    playfairDisplay700: escapeHtml(
+      joinUrl(publicWebUrl, "/fonts/playfair-display-latin-700-normal.woff2"),
+    ),
+    workSans400: escapeHtml(
+      joinUrl(publicWebUrl, "/fonts/work-sans-latin-400-normal.woff2"),
+    ),
+    workSans700: escapeHtml(
+      joinUrl(publicWebUrl, "/fonts/work-sans-latin-700-normal.woff2"),
+    ),
+    workSans800: escapeHtml(
+      joinUrl(publicWebUrl, "/fonts/work-sans-latin-800-normal.woff2"),
+    ),
+  } as const;
 
   return `<!doctype html>
 <html lang="fr">
@@ -106,6 +125,38 @@ function renderEmailFrame({
     <meta name="supported-color-schemes" content="light">
     <title>${escapeHtml(title)}</title>
     <style>
+      @font-face {
+        font-display: swap;
+        font-family: 'Work Sans';
+        font-style: normal;
+        font-weight: 400;
+        mso-font-alt: Arial;
+        src: url('${fontUrl.workSans400}') format('woff2');
+      }
+      @font-face {
+        font-display: swap;
+        font-family: 'Work Sans';
+        font-style: normal;
+        font-weight: 700;
+        mso-font-alt: Arial;
+        src: url('${fontUrl.workSans700}') format('woff2');
+      }
+      @font-face {
+        font-display: swap;
+        font-family: 'Work Sans';
+        font-style: normal;
+        font-weight: 800;
+        mso-font-alt: Arial;
+        src: url('${fontUrl.workSans800}') format('woff2');
+      }
+      @font-face {
+        font-display: swap;
+        font-family: 'Playfair Display';
+        font-style: normal;
+        font-weight: 700;
+        mso-font-alt: Georgia;
+        src: url('${fontUrl.playfairDisplay700}') format('woff2');
+      }
       body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
       table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
       img { -ms-interpolation-mode: bicubic; }
@@ -121,6 +172,14 @@ function renderEmailFrame({
       }
     </style>
     <!--[if mso]>
+      <style type="text/css">
+        body, table, td, a, p, span {
+          font-family: Arial, Helvetica, sans-serif !important;
+        }
+        .email-title, .email-serif {
+          font-family: Georgia, 'Times New Roman', serif !important;
+        }
+      </style>
       <noscript>
         <xml>
           <o:OfficeDocumentSettings>
@@ -130,8 +189,8 @@ function renderEmailFrame({
       </noscript>
     <![endif]-->
   </head>
-  <body style="background:${color.background};margin:0;padding:0;">
-    <div style="display:none;font-size:1px;color:${color.background};line-height:1px;font-family:Arial,Helvetica,sans-serif;max-height:0;max-width:0;opacity:0;overflow:hidden;">${safePreheader}&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;</div>
+  <body style="background:${color.background};font-family:${emailFont.sans};margin:0;padding:0;">
+    <div style="display:none;font-size:1px;color:${color.background};line-height:1px;font-family:${emailFont.sans};max-height:0;max-width:0;opacity:0;overflow:hidden;">${safePreheader}&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;</div>
     <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background:${color.background};width:100%;">
       <tr>
         <td align="center" class="outer-cell" style="padding:28px 12px;">
@@ -142,14 +201,14 @@ function renderEmailFrame({
                   <img src="${safeLogoUrl}" width="152" height="46" alt="Todam" style="border:0;color:${color.ink};display:block;font-family:Georgia,'Times New Roman',serif;font-size:28px;font-weight:700;height:auto;line-height:46px;max-width:152px;outline:none;text-decoration:none;width:152px;">
                 </a>
                 <div style="background:${color.accent};border-radius:999px;height:4px;margin:32px 0 22px;width:46px;"></div>
-                <p style="color:${color.accent};font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:800;letter-spacing:1.4px;line-height:18px;margin:0 0 10px;text-transform:uppercase;">${escapeHtml(eyebrow)}</p>
-                <h1 class="email-title" style="color:${color.ink};font-family:Georgia,'Times New Roman',serif;font-size:38px;font-weight:700;letter-spacing:-0.6px;line-height:44px;margin:0 0 26px;">${escapeHtml(title)}</h1>
+                <p style="color:${color.accent};font-family:${emailFont.sans};font-size:12px;font-weight:800;letter-spacing:1.4px;line-height:18px;margin:0 0 10px;text-transform:uppercase;">${escapeHtml(eyebrow)}</p>
+                <h1 class="email-title" style="color:${color.ink};font-family:${emailFont.serif};font-size:38px;font-weight:700;letter-spacing:-0.6px;line-height:44px;margin:0 0 26px;">${escapeHtml(title)}</h1>
                 ${content}
               </td>
             </tr>
             <tr>
               <td style="border-top:1px solid ${color.border};padding:22px 48px 24px;">
-                <p style="color:${color.muted};font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:19px;margin:0;">
+                <p style="color:${color.muted};font-family:${emailFont.sans};font-size:12px;line-height:19px;margin:0;">
                   <strong style="color:${color.ink};">Todam</strong> — Mon journal de spectacles<br>
                   E-mail transactionnel envoyé par <a href="${safePublicWebUrl}" style="color:${color.accent};text-decoration:underline;">todam.fr</a>
                 </p>
@@ -173,15 +232,15 @@ export function createVerificationEmail(
   const subject = "Confirme ton adresse e-mail — Todam";
 
   const content = `
-    <p style="color:${color.ink};font-family:Arial,Helvetica,sans-serif;font-size:17px;line-height:27px;margin:0 0 14px;">Bonjour <strong>${safeDisplayName}</strong>,</p>
-    <p style="color:${color.ink};font-family:Arial,Helvetica,sans-serif;font-size:17px;line-height:27px;margin:0 0 24px;">Plus qu’une étape pour rejoindre Todam : confirme ton adresse e-mail et commence ton journal de spectacles.</p>
+    <p style="color:${color.ink};font-family:${emailFont.sans};font-size:17px;line-height:27px;margin:0 0 14px;">Bonjour <strong>${safeDisplayName}</strong>,</p>
+    <p style="color:${color.ink};font-family:${emailFont.sans};font-size:17px;line-height:27px;margin:0 0 24px;">Plus qu’une étape pour rejoindre Todam : confirme ton adresse e-mail et commence ton journal de spectacles.</p>
     ${renderButton("Confirmer mon adresse", input.verificationUrl)}
-    <p style="color:${color.muted};font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:21px;margin:16px 0 0;">Ce lien est valable pendant 24 heures.</p>
+    <p style="color:${color.muted};font-family:${emailFont.sans};font-size:13px;line-height:21px;margin:16px 0 0;">Ce lien est valable pendant 24 heures.</p>
     <div style="border-top:1px solid ${color.border};margin:30px 0 0;padding:24px 0 0;">
-      <p style="color:${color.muted};font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:21px;margin:0 0 10px;">Le bouton ne fonctionne pas ? Copie ce lien dans ton navigateur :</p>
-      <p style="font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:19px;margin:0;overflow-wrap:anywhere;word-break:break-all;"><a href="${safeVerificationUrl}" style="color:${color.accent};text-decoration:underline;">${safeVerificationUrl}</a></p>
+      <p style="color:${color.muted};font-family:${emailFont.sans};font-size:13px;line-height:21px;margin:0 0 10px;">Le bouton ne fonctionne pas ? Copie ce lien dans ton navigateur :</p>
+      <p style="font-family:${emailFont.sans};font-size:12px;line-height:19px;margin:0;overflow-wrap:anywhere;word-break:break-all;"><a href="${safeVerificationUrl}" style="color:${color.accent};text-decoration:underline;">${safeVerificationUrl}</a></p>
     </div>
-    <p style="color:${color.muted};font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:21px;margin:24px 0 0;">Tu n’as pas créé de compte Todam ? Tu peux ignorer cet e-mail en toute sécurité.</p>`;
+    <p style="color:${color.muted};font-family:${emailFont.sans};font-size:13px;line-height:21px;margin:24px 0 0;">Tu n’as pas créé de compte Todam ? Tu peux ignorer cet e-mail en toute sécurité.</p>`;
 
   return {
     html: renderEmailFrame({
@@ -211,15 +270,15 @@ export function createEmailChangeVerificationEmail(
     "Confirme cette nouvelle adresse pour l’utiliser sur ton compte Todam.";
 
   const content = `
-    <p style="color:${color.ink};font-family:Arial,Helvetica,sans-serif;font-size:17px;line-height:27px;margin:0 0 14px;">Bonjour <strong>${safeDisplayName}</strong>,</p>
-    <p style="color:${color.ink};font-family:Arial,Helvetica,sans-serif;font-size:17px;line-height:27px;margin:0 0 24px;">Confirme cette adresse pour terminer la modification de ton compte Todam. Ton ancienne adresse reste active jusqu’à cette confirmation.</p>
+    <p style="color:${color.ink};font-family:${emailFont.sans};font-size:17px;line-height:27px;margin:0 0 14px;">Bonjour <strong>${safeDisplayName}</strong>,</p>
+    <p style="color:${color.ink};font-family:${emailFont.sans};font-size:17px;line-height:27px;margin:0 0 24px;">Confirme cette adresse pour terminer la modification de ton compte Todam. Ton ancienne adresse reste active jusqu’à cette confirmation.</p>
     ${renderButton("Confirmer ma nouvelle adresse", input.verificationUrl)}
-    <p style="color:${color.muted};font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:21px;margin:16px 0 0;">Ce lien est valable pendant 24 heures.</p>
+    <p style="color:${color.muted};font-family:${emailFont.sans};font-size:13px;line-height:21px;margin:16px 0 0;">Ce lien est valable pendant 24 heures.</p>
     <div style="border-top:1px solid ${color.border};margin:30px 0 0;padding:24px 0 0;">
-      <p style="color:${color.muted};font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:21px;margin:0 0 10px;">Le bouton ne fonctionne pas ? Copie ce lien dans ton navigateur :</p>
-      <p style="font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:19px;margin:0;overflow-wrap:anywhere;word-break:break-all;"><a href="${safeVerificationUrl}" style="color:${color.accent};text-decoration:underline;">${safeVerificationUrl}</a></p>
+      <p style="color:${color.muted};font-family:${emailFont.sans};font-size:13px;line-height:21px;margin:0 0 10px;">Le bouton ne fonctionne pas ? Copie ce lien dans ton navigateur :</p>
+      <p style="font-family:${emailFont.sans};font-size:12px;line-height:19px;margin:0;overflow-wrap:anywhere;word-break:break-all;"><a href="${safeVerificationUrl}" style="color:${color.accent};text-decoration:underline;">${safeVerificationUrl}</a></p>
     </div>
-    <p style="color:${color.muted};font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:21px;margin:24px 0 0;">Tu n’as pas demandé ce changement ? N’utilise pas ce lien et sécurise ton compte.</p>`;
+    <p style="color:${color.muted};font-family:${emailFont.sans};font-size:13px;line-height:21px;margin:24px 0 0;">Tu n’as pas demandé ce changement ? N’utilise pas ce lien et sécurise ton compte.</p>`;
 
   return {
     html: renderEmailFrame({
@@ -254,30 +313,30 @@ export function createWelcomeEmail(input: WelcomeEmailInput): AuthEmailContent {
     .map(
       ([number, title, description]) => `
         <tr>
-          <td valign="top" style="color:${color.accent};font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:800;line-height:20px;padding:0 14px 16px 0;width:28px;">${number}</td>
+          <td valign="top" style="color:${color.accent};font-family:${emailFont.sans};font-size:12px;font-weight:800;line-height:20px;padding:0 14px 16px 0;width:28px;">${number}</td>
           <td valign="top" style="padding:0 0 16px;">
-            <p style="color:${color.ink};font-family:Arial,Helvetica,sans-serif;font-size:15px;font-weight:700;line-height:21px;margin:0 0 2px;">${title}</p>
-            <p style="color:${color.muted};font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:21px;margin:0;">${description}</p>
+            <p style="color:${color.ink};font-family:${emailFont.sans};font-size:15px;font-weight:700;line-height:21px;margin:0 0 2px;">${title}</p>
+            <p style="color:${color.muted};font-family:${emailFont.sans};font-size:14px;line-height:21px;margin:0;">${description}</p>
           </td>
         </tr>`,
     )
     .join("");
 
   const content = `
-    <p style="color:${color.ink};font-family:Arial,Helvetica,sans-serif;font-size:17px;line-height:27px;margin:0 0 14px;">Bonjour <strong>${safeDisplayName}</strong>,</p>
-    <p style="color:${color.ink};font-family:Arial,Helvetica,sans-serif;font-size:17px;line-height:27px;margin:0 0 24px;">Ton compte est actif. À toi de garder une trace des spectacles vus, de ceux qui t’attendent et de toutes tes envies de scène.</p>
+    <p style="color:${color.ink};font-family:${emailFont.sans};font-size:17px;line-height:27px;margin:0 0 14px;">Bonjour <strong>${safeDisplayName}</strong>,</p>
+    <p style="color:${color.ink};font-family:${emailFont.sans};font-size:17px;line-height:27px;margin:0 0 24px;">Ton compte est actif. À toi de garder une trace des spectacles vus, de ceux qui t’attendent et de toutes tes envies de scène.</p>
     ${renderButton("Ouvrir mon journal", input.profileUrl)}
     <div style="border-top:1px solid ${color.border};margin:34px 0 0;padding:30px 0 8px;">
-      <p style="color:${color.accent};font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:800;letter-spacing:1.4px;line-height:18px;margin:0 0 18px;text-transform:uppercase;">Pour commencer</p>
+      <p style="color:${color.accent};font-family:${emailFont.sans};font-size:12px;font-weight:800;letter-spacing:1.4px;line-height:18px;margin:0 0 18px;text-transform:uppercase;">Pour commencer</p>
       <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="width:100%;">
         ${steps}
       </table>
     </div>
     <div style="background:${color.background};border:1px solid ${color.border};border-radius:12px;margin:24px 0 0;padding:22px;">
-      <p style="color:${color.ink};font-family:Georgia,'Times New Roman',serif;font-size:20px;font-weight:700;line-height:26px;margin:0 0 13px;">Tes documents d’inscription</p>
-      <p style="color:${color.muted};font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:21px;margin:0 0 7px;">CGU version ${escapeHtml(input.terms.version)} acceptées le ${escapeHtml(acceptedAt)}.</p>
-      <p style="color:${color.muted};font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:21px;margin:0 0 14px;">Politique de confidentialité version ${escapeHtml(input.privacyNotice.version)} présentée lors de l’inscription.</p>
-      <p style="font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:21px;margin:0;">
+      <p class="email-serif" style="color:${color.ink};font-family:${emailFont.serif};font-size:20px;font-weight:700;line-height:26px;margin:0 0 13px;">Tes documents d’inscription</p>
+      <p style="color:${color.muted};font-family:${emailFont.sans};font-size:13px;line-height:21px;margin:0 0 7px;">CGU version ${escapeHtml(input.terms.version)} acceptées le ${escapeHtml(acceptedAt)}.</p>
+      <p style="color:${color.muted};font-family:${emailFont.sans};font-size:13px;line-height:21px;margin:0 0 14px;">Politique de confidentialité version ${escapeHtml(input.privacyNotice.version)} présentée lors de l’inscription.</p>
+      <p style="font-family:${emailFont.sans};font-size:13px;line-height:21px;margin:0;">
         <a href="${escapeHtml(input.terms.pdfUrl)}" style="color:${color.accent};font-weight:700;text-decoration:underline;">Télécharger les CGU</a>
         <span style="color:${color.border};padding:0 7px;">•</span>
         <a href="${escapeHtml(input.privacyNotice.pdfUrl)}" style="color:${color.accent};font-weight:700;text-decoration:underline;">Consulter la politique</a>

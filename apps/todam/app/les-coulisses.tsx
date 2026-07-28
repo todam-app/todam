@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { tokens } from "@todam/design-system";
 import Constants from "expo-constants";
 import Head from "expo-router/head";
 import { Linking, Platform, Pressable, StyleSheet, Text, View } from "react-native";
@@ -79,13 +80,15 @@ function ExternalLink({
   return (
     <Pressable
       accessibilityRole="link"
-      className={`min-h-11 items-center justify-center rounded-todam border px-5 py-3 ${
+      className={`todam-cta-standard min-h-11 items-center justify-center rounded-todam border px-5 py-3 ${
         secondary ? "border-control bg-paper" : "border-accent bg-accent"
       }`}
       onPress={() => void Linking.openURL(href)}
+      style={Platform.OS === "web" ? styles.standardButtonWeb : undefined}
     >
       <Text
         className={`text-base font-semibold ${secondary ? "text-ink" : "text-paper"}`}
+        style={Platform.OS === "web" ? styles.standardButtonLabelWeb : undefined}
       >
         {label}
       </Text>
@@ -445,6 +448,18 @@ export default function BehindTheScenesScreen() {
 }
 
 const styles = StyleSheet.create({
+  standardButtonLabelWeb: {
+    color: tokens.button.standard.text,
+    fontFamily: tokens.button.standard.fontFamily,
+    fontWeight: tokens.button.standard.fontWeight,
+  },
+  standardButtonWeb: {
+    backgroundColor: tokens.button.standard.background,
+    borderColor: tokens.button.standard.border,
+    borderRadius: tokens.button.standard.radius,
+    borderWidth: tokens.button.standard.borderWidth,
+    boxSizing: "border-box",
+  },
   stamp: {
     transform: [{ rotate: "-2deg" }],
   },

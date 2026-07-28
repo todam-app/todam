@@ -85,13 +85,27 @@ describe("e-mails d'authentification Todam", () => {
 
     expect(html).toContain('width="600"');
     expect(html).toContain("max-width:600px");
-    expect(html).toContain("Georgia,'Times New Roman',serif");
-    expect(html).toContain("Arial,Helvetica,sans-serif");
+    expect(html).toContain(
+      "font-family:'Playfair Display',Georgia,'Times New Roman',serif",
+    );
+    expect(html).toContain("font-family:'Work Sans',Arial,Helvetica,sans-serif");
+    expect(html).toContain("@font-face");
+    expect(html).toContain("mso-font-alt: Arial");
+    expect(html).toContain("mso-font-alt: Georgia");
+    expect(html).toContain(
+      "https://todam.fr/fonts/playfair-display-latin-700-normal.woff2",
+    );
+    expect(html).toContain("https://todam.fr/fonts/work-sans-latin-400-normal.woff2");
+    expect(html).toContain("https://todam.fr/fonts/work-sans-latin-700-normal.woff2");
+    expect(html).toContain("https://todam.fr/fonts/work-sans-latin-800-normal.woff2");
+    expect(html).toContain("font-family: Arial, Helvetica, sans-serif !important");
+    expect(html).toContain("font-family: Georgia, 'Times New Roman', serif !important");
     expect(html).toContain("#F7F3EC");
     expect(html).toContain("#FFFDF8");
     expect(html).toContain("#C43D28");
     expect(html).toContain("@media screen and (max-width: 620px)");
     expect(html).toContain("width: 100% !important");
     expect(html).not.toContain("https://todam.fr//email/");
+    expect(html).not.toContain("https://todam.fr//fonts/");
   });
 });

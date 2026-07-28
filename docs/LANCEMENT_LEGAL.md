@@ -21,6 +21,10 @@ validés par un avocat.
 - purge des comptes jamais vérifiés après 7 jours ;
 - rapport hebdomadaire agrégé du nombre de comptes avec alerte à 900 et 1 000 ;
 - limitation des tentatives sensibles par instance API ;
+- ajout communautaire Web d'un spectacle avec provenance, publication immédiate,
+  limitation anti-abus et dissociation du contributeur à la suppression du compte ;
+- signalement unique des affiches, informations et représentations, avec retrait ciblé
+  du visuel en modération ;
 - pages Web et Android issues des mêmes sources Markdown ;
 - archives PDF générées depuis ces sources, pages juridiques `noindex` et en-têtes
   `X-Robots-Tag` sur les pages et PDF juridiques ;
@@ -109,9 +113,10 @@ Les PDF contenant les coordonnées réelles sont ignorés par Git. L'archive pub
 
 ## Évolutions contractuelles
 
-Les fonctions sociales déjà décrites dans les CGU 1.0 peuvent être activées sans
-nouvelle acceptation si les CGU restent strictement inchangées. Une information produit
-reste nécessaire et aucun contenu privé ne devient public automatiquement.
+Les CGU 1.0.2 et la politique de confidentialité 1.0.3 couvrent les contributions
+communautaires publiées immédiatement. Elles sont présentées aux futures inscriptions
+sans bloquer les comptes techniques déjà existants. Une information produit reste
+nécessaire et aucun contenu privé ne devient public automatiquement.
 
 Paiement, publicité, nouvelle licence de contenu, nouvelle utilisation des données,
 réduction des droits ou changement important de responsabilité imposent une nouvelle

@@ -34,9 +34,9 @@ ENV EXPO_PUBLIC_OBJECT_HOST_ADDRESS=${EXPO_PUBLIC_OBJECT_HOST_ADDRESS}
 ENV EXPO_PUBLIC_OBJECT_HOST_URL=${EXPO_PUBLIC_OBJECT_HOST_URL}
 ENV TODAM_REQUIRE_STATIC_CATALOG=1
 
-RUN test -f apps/todam/public/legal/cgu-todam-v1.0.1.pdf \
-    && test -f apps/todam/public/legal/confidentialite-todam-v1.0.2.pdf \
-    && test -f apps/todam/public/legal/suppression-compte-todam-v1.0.1.pdf
+RUN test -f apps/todam/public/legal/cgu-todam-v1.0.2.pdf \
+    && test -f apps/todam/public/legal/confidentialite-todam-v1.0.3.pdf \
+    && test -f apps/todam/public/legal/suppression-compte-todam-v1.0.2.pdf
 RUN pnpm legal:generate
 RUN pnpm --filter @todam/todam build
 
