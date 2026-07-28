@@ -7,6 +7,7 @@ import {
   catalogRevisions,
   companyClaims,
   companyMemberships,
+  communitySubmissions,
   contentReports,
   diaryEntries,
   listItems,
@@ -108,6 +109,13 @@ export function accountExportToCsv(data: AccountExport): string {
       `${report.targetType}:${report.targetId}`,
       report.reason,
       report.submittedAt,
+    ]),
+    ...data.communitySubmissions.map((submission) => [
+      "contribution_catalogue",
+      submission.id,
+      submission.productionId,
+      submission.status,
+      submission.createdAt,
     ]),
     ...data.companyClaims.map((claim) => [
       "revendication_compagnie",
@@ -233,6 +241,7 @@ export function createAccountService(
         listRows,
         listItemRows,
         reportRows,
+        submissionRows,
         claimRows,
         membershipRows,
         revisionRows,
@@ -325,6 +334,8 @@ export function createAccountService(
             id: contentReports.id,
             targetType: contentReports.targetType,
             targetId: contentReports.targetId,
+            category: contentReports.category,
+            mediaId: contentReports.mediaId,
             reason: contentReports.reason,
             status: contentReports.status,
             decision: contentReports.decision,
@@ -333,6 +344,18 @@ export function createAccountService(
           })
           .from(contentReports)
           .where(eq(contentReports.reporterUserId, userId)),
+        database
+          .select({
+            id: communitySubmissions.id,
+            productionId: communitySubmissions.productionId,
+            sourceUrl: communitySubmissions.sourceUrl,
+            submittedData: communitySubmissions.submittedData,
+            status: communitySubmissions.status,
+            createdAt: communitySubmissions.createdAt,
+            updatedAt: communitySubmissions.updatedAt,
+          })
+          .from(communitySubmissions)
+          .where(eq(communitySubmissions.authorUserId, userId)),
         database
           .select({
             id: companyClaims.id,
@@ -463,6 +486,11 @@ export function createAccountService(
           ...report,
           submittedAt: report.submittedAt.toISOString(),
           reviewedAt: report.reviewedAt?.toISOString() ?? null,
+        })),
+        communitySubmissions: submissionRows.map((submission) => ({
+          ...submission,
+          createdAt: submission.createdAt.toISOString(),
+          updatedAt: submission.updatedAt.toISOString(),
         })),
         companyClaims: claimRows.map((claim) => ({
           ...claim,

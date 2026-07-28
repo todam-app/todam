@@ -11,10 +11,10 @@ import type {
   MyShowsQuery,
   MyShowsSection,
 } from "@todam/contracts";
-import { Button } from "@todam/design-system";
+import { Button, tokens } from "@todam/design-system";
 import { Link, type Href, useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 
 import { api } from "../lib/api";
 import { authClient } from "../lib/auth-client";
@@ -185,7 +185,7 @@ function ReviewSummary({ item }: { item: MyShowItem }) {
       </Text>
       <View className="flex-row flex-wrap gap-2">
         <Link href={`/production/${item.production.slug}`} asChild>
-          <Button label="Modifier" variant="secondary" />
+          <Button label="Modifier l’entrée" variant="quiet" />
         </Link>
         <Button
           label={review.visibility === "public" ? "Rendre privé" : "Rendre public"}
@@ -204,14 +204,14 @@ function ReviewSummary({ item }: { item: MyShowItem }) {
             <Button
               label="Annuler"
               onPress={() => setConfirming(false)}
-              variant="ghost"
+              variant="quiet"
             />
           </>
         ) : (
           <Button
-            label="Supprimer"
+            label="Supprimer l’avis"
             onPress={() => setConfirming(true)}
-            variant="ghost"
+            variant="dangerGhost"
           />
         )}
       </View>
@@ -383,7 +383,7 @@ export function MyShowsSectionScreen({ section }: { section: MyShowsSection }) {
                   label="Afficher plus"
                   loading={shows.isFetchingNextPage}
                   onPress={() => void shows.fetchNextPage()}
-                  variant="secondary"
+                  variant="quiet"
                 />
               </View>
             ) : null}
@@ -393,9 +393,15 @@ export function MyShowsSectionScreen({ section }: { section: MyShowsSection }) {
           <Link href="/journal/avis" asChild>
             <Pressable
               accessibilityRole="link"
-              className="min-h-12 items-center justify-center rounded-todam border border-control"
+              className="todam-cta-standard min-h-12 items-center justify-center rounded-todam border border-control"
+              style={Platform.OS === "web" ? styles.standardButtonWeb : undefined}
             >
-              <Text className="font-semibold text-accent">
+              <Text
+                className="font-semibold text-accent"
+                style={
+                  Platform.OS === "web" ? styles.standardButtonLabelWeb : undefined
+                }
+              >
                 Voir uniquement mes avis écrits
               </Text>
             </Pressable>
@@ -405,3 +411,18 @@ export function MyShowsSectionScreen({ section }: { section: MyShowsSection }) {
     </>
   );
 }
+
+const styles = StyleSheet.create({
+  standardButtonLabelWeb: {
+    color: tokens.button.standard.text,
+    fontFamily: tokens.button.standard.fontFamily,
+    fontWeight: tokens.button.standard.fontWeight,
+  },
+  standardButtonWeb: {
+    backgroundColor: tokens.button.standard.background,
+    borderColor: tokens.button.standard.border,
+    borderRadius: tokens.button.standard.radius,
+    borderWidth: tokens.button.standard.borderWidth,
+    boxSizing: "border-box",
+  },
+});

@@ -13,6 +13,7 @@ import { LegalFooter } from "./LegalFooter";
 import { PageScrollView } from "./PageScrollView";
 import { ProductionListItem } from "./ProductionListItem";
 import { SearchBar } from "./SearchBar";
+import { SelectionChip } from "./SelectionChip";
 
 type SearchType = "productions" | "venues" | "companies" | "members";
 
@@ -46,27 +47,12 @@ function FilterButton({
   onPress: () => void;
 }) {
   return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityState={{ disabled, selected: active }}
-      className={`min-h-11 justify-center border px-4 ${
-        disabled
-          ? "border-control bg-disabled"
-          : active
-            ? "border-accent bg-accent"
-            : "border-control bg-paper"
-      } rounded-todam`}
+    <SelectionChip
       disabled={disabled}
+      label={label}
       onPress={onPress}
-    >
-      <Text
-        className={`text-base font-semibold ${
-          disabled ? "text-muted" : active ? "text-paper" : "text-ink"
-        }`}
-      >
-        {label}
-      </Text>
-    </Pressable>
+      selected={active}
+    />
   );
 }
 
@@ -405,6 +391,19 @@ export function DiscoverScreen({
                     onPress={() => submit(firstPage.suggestion!)}
                   />
                 ) : null}
+                {Platform.OS === "web" &&
+                type === "productions" &&
+                query.trim().length >= 2 ? (
+                  <Button
+                    label="Ajouter ce spectacle"
+                    onPress={() =>
+                      router.push({
+                        pathname: "/ajouter-un-spectacle",
+                        params: { title: query.trim() },
+                      })
+                    }
+                  />
+                ) : null}
                 <Link href="/decouvrir" asChild>
                   <Button
                     accessibilityRole="link"
@@ -506,7 +505,7 @@ export function DiscoverScreen({
                     label="Afficher plus de résultats"
                     loading={search.isFetchingNextPage}
                     onPress={() => void search.fetchNextPage()}
-                    variant="secondary"
+                    variant="quiet"
                   />
                 </View>
               ) : null}

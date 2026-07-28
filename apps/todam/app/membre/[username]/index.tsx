@@ -131,7 +131,7 @@ export default function PublicMemberPage() {
                     <Button
                       label="Partager ce journal"
                       onPress={() => void share()}
-                      variant="secondary"
+                      variant="ghost"
                     />
                     <Button
                       label="Signaler ce profil"
@@ -215,7 +215,7 @@ export default function PublicMemberPage() {
                           label="Charger la suite"
                           loading={journal.isFetchingNextPage}
                           onPress={() => void journal.fetchNextPage()}
-                          variant="secondary"
+                          variant="quiet"
                         />
                       </View>
                     ) : null}

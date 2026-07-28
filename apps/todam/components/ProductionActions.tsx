@@ -3,6 +3,7 @@ import { tokens } from "@todam/design-system";
 import type { ComponentProps } from "react";
 import {
   ActivityIndicator,
+  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -36,8 +37,11 @@ function ActionButton({
   selected = false,
   tone,
 }: ActionButtonProps) {
-  const foreground =
-    tone === "primary"
+  const standardWebButton =
+    Platform.OS === "web" && (tone === "primary" || tone === "secondary");
+  const foreground = standardWebButton
+    ? tokens.button.standard.text
+    : tone === "primary"
       ? tokens.color.surface
       : tone === "success"
         ? tokens.color.success
@@ -50,10 +54,12 @@ function ActionButton({
       accessibilityState={{ disabled: disabled || loading, selected }}
       disabled={disabled || loading}
       onPress={onPress}
+      {...(standardWebButton ? { className: "todam-cta-standard" } : {})}
       style={({ pressed }) => [
         styles.action,
-        tone === "primary" && styles.actionPrimary,
-        tone === "secondary" && styles.actionSecondary,
+        standardWebButton && styles.actionStandardWeb,
+        !standardWebButton && tone === "primary" && styles.actionPrimary,
+        !standardWebButton && tone === "secondary" && styles.actionSecondary,
         tone === "success" && styles.actionSuccess,
         pressed && styles.actionPressed,
         (disabled || loading) && styles.actionDisabled,
@@ -71,7 +77,15 @@ function ActionButton({
             size={22}
           />
           <View style={styles.copy}>
-            <Text style={[styles.label, { color: foreground }]}>{label}</Text>
+            <Text
+              style={[
+                styles.label,
+                standardWebButton && styles.labelStandardWeb,
+                { color: foreground },
+              ]}
+            >
+              {label}
+            </Text>
           </View>
         </>
       )}
@@ -157,6 +171,13 @@ const styles = StyleSheet.create({
     borderColor: tokens.color.controlBorder,
     borderWidth: 1,
   },
+  actionStandardWeb: {
+    backgroundColor: tokens.button.standard.background,
+    borderColor: tokens.button.standard.border,
+    borderRadius: tokens.button.standard.radius,
+    borderWidth: tokens.button.standard.borderWidth,
+    boxSizing: "border-box",
+  },
   actionSuccess: {
     backgroundColor: tokens.color.surface,
     borderColor: tokens.color.success,
@@ -176,5 +197,9 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     fontWeight: "700",
+  },
+  labelStandardWeb: {
+    fontFamily: tokens.button.standard.fontFamily,
+    fontWeight: tokens.button.standard.fontWeight,
   },
 });

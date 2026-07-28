@@ -23,6 +23,7 @@ import { PageScrollView } from "./PageScrollView";
 import { PrivatePageHead } from "./PrivatePageHead";
 import { PrivateSessionLoading, PrivateSessionRequired } from "./PrivateSessionState";
 import { ProductionListItem } from "./ProductionListItem";
+import { SelectionChip } from "./SelectionChip";
 
 type ReviewFilter = "discipline" | "visibility" | "status" | "sort";
 type ReviewQuery = Partial<Record<ReviewFilter, string>>;
@@ -194,7 +195,7 @@ function Overlay({
             <Pressable
               accessibilityLabel="Fermer"
               accessibilityRole="button"
-              className="h-11 w-11 items-center justify-center"
+              className="todam-icon-button h-11 w-11 items-center justify-center rounded-todam border border-control bg-paper"
               onPress={onClose}
               testID={`review-filter-close-${sidePanel ? "all" : "target"}`}
             >
@@ -222,7 +223,9 @@ function Options({
       <Pressable
         accessibilityRole="radio"
         accessibilityState={{ checked: selected === undefined }}
-        className="min-h-14 flex-row items-center justify-between border-b border-line px-5"
+        className={`min-h-14 flex-row items-center justify-between border-b border-line px-5 ${
+          selected === undefined ? "bg-selected" : ""
+        }`}
         onPress={() => onSelect(undefined)}
       >
         <Text className="text-base font-semibold text-ink">Tous</Text>
@@ -230,25 +233,34 @@ function Options({
           <Ionicons color="#C43D28" name="checkmark" size={21} />
         ) : null}
       </Pressable>
-      {options.map((option) => (
-        <Pressable
-          accessibilityRole="radio"
-          accessibilityState={{ checked: selected === option.value }}
-          className="min-h-14 flex-row items-center justify-between gap-4 border-b border-line px-5"
-          key={option.value}
-          onPress={() => onSelect(option.value)}
-        >
-          <Text className="min-w-0 flex-1 text-base text-ink">{option.label}</Text>
-          <View className="flex-row items-center gap-3">
-            {option.count !== undefined ? (
-              <Text className="text-base text-muted">{option.count}</Text>
-            ) : null}
-            {selected === option.value ? (
-              <Ionicons color="#C43D28" name="checkmark" size={21} />
-            ) : null}
-          </View>
-        </Pressable>
-      ))}
+      {options.map((option) => {
+        const active = selected === option.value;
+        return (
+          <Pressable
+            accessibilityRole="radio"
+            accessibilityState={{ checked: active }}
+            className={`min-h-14 flex-row items-center justify-between gap-4 border-b border-line px-5 ${
+              active ? "bg-selected" : ""
+            }`}
+            key={option.value}
+            onPress={() => onSelect(option.value)}
+          >
+            <Text
+              className={`min-w-0 flex-1 text-base ${
+                active ? "font-bold text-accent" : "text-ink"
+              }`}
+            >
+              {option.label}
+            </Text>
+            <View className="flex-row items-center gap-3">
+              {option.count !== undefined ? (
+                <Text className="text-base text-muted">{option.count}</Text>
+              ) : null}
+              {active ? <Ionicons color="#C43D28" name="checkmark" size={21} /> : null}
+            </View>
+          </Pressable>
+        );
+      })}
     </View>
   );
 }
@@ -296,7 +308,7 @@ function ReviewCard({ review }: { review: OwnReview }) {
       ) : null}
       <View className="flex-row flex-wrap gap-2">
         <Link href={`/production/${review.production.slug}`} asChild>
-          <Button label="Modifier" variant="secondary" />
+          <Button label="Modifier l’avis" variant="quiet" />
         </Link>
         <Button
           label={review.visibility === "public" ? "Rendre privé" : "Rendre public"}
@@ -315,14 +327,14 @@ function ReviewCard({ review }: { review: OwnReview }) {
             <Button
               label="Annuler"
               onPress={() => setConfirming(false)}
-              variant="ghost"
+              variant="quiet"
             />
           </>
         ) : (
           <Button
-            label="Supprimer"
+            label="Supprimer l’avis"
             onPress={() => setConfirming(true)}
-            variant="ghost"
+            variant="dangerGhost"
           />
         )}
       </View>
@@ -455,23 +467,22 @@ export function MyReviewsScreen() {
             const activeLabel =
               key === "sort" && !query.sort ? sortOptions[0] : selected;
             return (
-              <Pressable
-                accessibilityRole="button"
-                className={`min-h-11 flex-row items-center gap-2 rounded-full border px-4 ${
-                  query[key] ? "border-accent bg-accent/10" : "border-control"
-                }`}
+              <SelectionChip
+                indicator="chevron"
                 key={key}
+                label={
+                  query[key]
+                    ? (activeLabel?.label ?? filterLabels[key])
+                    : filterLabels[key]
+                }
                 onPress={() => {
                   lastFilterTrigger.current = key;
                   setActive(key);
                 }}
+                rounded
+                selected={Boolean(query[key])}
                 testID={`review-filter-${key}`}
-              >
-                <Text className="text-sm font-semibold text-ink">
-                  {query[key] ? activeLabel?.label : filterLabels[key]}
-                </Text>
-                <Ionicons color="#6F6B64" name="chevron-down" size={16} />
-              </Pressable>
+              />
             );
           })}
         </ScrollView>
@@ -485,7 +496,7 @@ export function MyReviewsScreen() {
           <Pressable
             accessibilityLabel="Ouvrir tous les filtres"
             accessibilityRole="button"
-            className="h-11 w-11 items-center justify-center border border-control"
+            className="todam-icon-button h-11 w-11 items-center justify-center rounded-todam border border-control bg-paper"
             onPress={() => setAllOpen(true)}
           >
             <Ionicons color="#151515" name="options-outline" size={22} />

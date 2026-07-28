@@ -4,8 +4,9 @@ import { TodamApiError, type ContentReportBody } from "@todam/contracts";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import Head from "expo-router/head";
 import { useMemo, useState } from "react";
-import { Text, View } from "react-native";
+import { Image, Pressable, Text, View } from "react-native";
 
+import { AccessibleChoiceGroup } from "../components/AccessibleChoiceGroup";
 import { LegalFooter } from "../components/LegalFooter";
 import { PageScrollView } from "../components/PageScrollView";
 import { api } from "../lib/api";
@@ -18,6 +19,17 @@ const targetLabels: Record<ContentReportBody["targetType"], string> = {
   list: "cette liste",
   review: "cet avis",
 };
+const categoryOptions = [
+  ["visual_rights", "Affiche ou droits du visuel"],
+  ["information", "Description ou informations du spectacle"],
+  ["schedule", "Dates, horaires ou lieu"],
+  ["other", "Autre"],
+] as const satisfies readonly (readonly [ContentReportBody["category"], string])[];
+
+interface ReportMedia {
+  id: string;
+  url: string;
+}
 
 function isTargetType(
   value: string | undefined,
@@ -26,13 +38,42 @@ function isTargetType(
 }
 
 export default function ContentReportPage() {
-  const params = useLocalSearchParams<{ type?: string; id?: string }>();
+  const params = useLocalSearchParams<{
+    type?: string;
+    id?: string;
+    media?: string;
+    mediaId?: string;
+  }>();
   const router = useRouter();
   const [reason, setReason] = useState("");
+  const [category, setCategory] =
+    useState<ContentReportBody["category"]>("information");
   const targetType = isTargetType(params.type) ? params.type : null;
   const targetId = typeof params.id === "string" ? params.id.trim() : "";
   const validTarget = Boolean(targetType && targetId);
   const trimmedReason = reason.trim();
+  const availableMedia = useMemo<ReportMedia[]>(() => {
+    if (typeof params.media !== "string") return [];
+    try {
+      const value = JSON.parse(params.media) as unknown;
+      if (!Array.isArray(value)) return [];
+      return value.filter((item): item is ReportMedia =>
+        Boolean(
+          item &&
+          typeof item === "object" &&
+          "id" in item &&
+          typeof item.id === "string" &&
+          "url" in item &&
+          typeof item.url === "string",
+        ),
+      );
+    } catch {
+      return [];
+    }
+  }, [params.media]);
+  const [selectedMediaId, setSelectedMediaId] = useState(
+    typeof params.mediaId === "string" ? params.mediaId : "",
+  );
   const targetLabel = useMemo(
     () => (targetType ? targetLabels[targetType] : "ce contenu"),
     [targetType],
@@ -42,6 +83,8 @@ export default function ContentReportPage() {
       api.createContentReport({
         targetType: targetType!,
         targetId,
+        category,
+        mediaId: category === "visual_rights" ? selectedMediaId || null : null,
         reason: trimmedReason,
       }),
   });
@@ -77,7 +120,7 @@ export default function ContentReportPage() {
                 <Button
                   label="Retour à la découverte"
                   onPress={() => router.replace("/decouvrir")}
-                  variant="secondary"
+                  variant="quiet"
                 />
               </View>
             </View>
@@ -97,12 +140,58 @@ export default function ContentReportPage() {
                 <Button
                   label="Revenir à la page précédente"
                   onPress={() => router.back()}
-                  variant="secondary"
+                  variant="quiet"
                 />
               </View>
             </View>
           ) : (
             <View className="gap-5 border border-control bg-paper p-5 md:p-6">
+              <AccessibleChoiceGroup
+                label="Que concerne votre demande ?"
+                onChange={setCategory}
+                options={categoryOptions}
+                testIdPrefix="content-report-category"
+                value={category}
+              />
+              {category === "visual_rights" ? (
+                availableMedia.length > 0 ? (
+                  <View className="gap-3">
+                    <Text className="text-sm font-semibold text-ink">
+                      Affiche concernée
+                    </Text>
+                    <View className="flex-row flex-wrap gap-3">
+                      {availableMedia.map((media) => {
+                        const selected = selectedMediaId === media.id;
+                        return (
+                          <Pressable
+                            accessibilityLabel="Sélectionner cette affiche"
+                            accessibilityRole="radio"
+                            accessibilityState={{ checked: selected }}
+                            className={`border-2 p-1 ${
+                              selected ? "border-accent" : "border-control"
+                            }`}
+                            key={media.id}
+                            onPress={() => setSelectedMediaId(media.id)}
+                          >
+                            <Image
+                              accessibilityIgnoresInvertColors
+                              source={{ uri: media.url }}
+                              style={{ height: 144, width: 96 }}
+                            />
+                          </Pressable>
+                        );
+                      })}
+                    </View>
+                  </View>
+                ) : (
+                  <Text
+                    accessibilityRole="alert"
+                    className="border-l-2 border-error pl-4 text-sm leading-6 text-error"
+                  >
+                    Aucune affiche publiée n’est associée à cette fiche.
+                  </Text>
+                )
+              ) : null}
               <TextField
                 accessibilityHint="Indiquez la donnée concernée, sa valeur correcte et, si possible, une source vérifiable."
                 label="Correction proposée"
@@ -120,7 +209,10 @@ export default function ContentReportPage() {
                 personnelle sensible.
               </Text>
               <Button
-                disabled={trimmedReason.length < 10}
+                disabled={
+                  trimmedReason.length < 10 ||
+                  (category === "visual_rights" && !selectedMediaId)
+                }
                 label="Envoyer la correction"
                 loading={report.isPending}
                 onPress={() => report.mutate()}

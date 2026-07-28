@@ -170,7 +170,7 @@ export function MyListsScreen() {
               <Link href={`/journal/listes/${list.id}`} asChild key={list.id}>
                 <Pressable
                   accessibilityRole="link"
-                  className="min-h-24 flex-row items-center justify-between gap-4 rounded-todam border border-line bg-paper p-5 active:opacity-70"
+                  className="todam-interactive-card min-h-24 flex-row items-center justify-between gap-4 rounded-todam border border-line bg-paper p-5"
                 >
                   <View className="min-w-0 flex-1 gap-1">
                     <Text className="font-serif text-xl font-semibold text-ink">

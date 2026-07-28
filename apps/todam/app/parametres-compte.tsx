@@ -274,7 +274,7 @@ export default function AccountSettingsScreen() {
                 <Button
                   label="Recharger les préférences"
                   onPress={() => void home.refetch()}
-                  variant="secondary"
+                  variant="quiet"
                 />
               }
               emptyMessage="Aucune préférence de découverte n’est disponible."
@@ -467,13 +467,13 @@ export default function AccountSettingsScreen() {
                   label="Exporter en JSON"
                   loading={exportPending}
                   onPress={() => void exportData("json")}
-                  variant="secondary"
+                  variant="quiet"
                 />
                 <Button
                   disabled={exportPending}
                   label="Exporter en CSV"
                   onPress={() => void exportData("csv")}
-                  variant="secondary"
+                  variant="quiet"
                 />
               </View>
               {exportMessage ? (

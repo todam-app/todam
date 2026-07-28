@@ -356,7 +356,7 @@ export default function CompanyPage() {
                       <Button
                         accessibilityRole="link"
                         label="Signaler une information"
-                        variant="secondary"
+                        variant="ghost"
                       />
                     </Link>
                   </View>

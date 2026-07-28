@@ -1,3 +1,4 @@
+import { tokens } from "@todam/design-system";
 import {
   type PressableProps,
   Platform,
@@ -122,8 +123,8 @@ export function AccessibleTabs<Value extends string>({
 
 const styles = StyleSheet.create({
   boxedIdle: {
-    backgroundColor: "#FFFDF8",
-    borderColor: "#9B9388",
+    backgroundColor: tokens.color.surface,
+    borderColor: tokens.color.controlBorder,
   },
   boxedList: {
     columnGap: 8,
@@ -132,8 +133,8 @@ const styles = StyleSheet.create({
     rowGap: 8,
   },
   boxedSelected: {
-    backgroundColor: "#FCEFEA",
-    borderColor: "#C43D28",
+    backgroundColor: tokens.color.selectedSurface,
+    borderColor: tokens.color.accent,
   },
   compactMobileTab: {
     flex: 1,
@@ -141,7 +142,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 5,
   },
   pressed: {
-    opacity: 0.72,
+    transform: [{ translateY: 1 }],
   },
   mobileUnderlineTab: {
     alignItems: "center",
@@ -154,13 +155,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   underlineList: {
-    borderBottomColor: "#D8D1C6",
+    borderBottomColor: tokens.color.border,
     borderBottomWidth: 1,
     flexDirection: "row",
     flexWrap: "wrap",
   },
   underlineSelected: {
-    borderBottomColor: "#C43D28",
+    borderBottomColor: tokens.color.accent,
     borderBottomWidth: 3,
   },
 });

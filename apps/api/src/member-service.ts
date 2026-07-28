@@ -26,7 +26,9 @@ import {
   contentReports,
   listItems,
   lists,
+  mediaAssets,
   performances,
+  productionMedia,
   productions,
   ratings,
   reviews,
@@ -891,12 +893,35 @@ export function createMemberService(database: TodamDatabase) {
           "Le contenu à signaler est introuvable.",
         );
       }
+      if (input.mediaId) {
+        const mediaRows = await database
+          .select({ id: mediaAssets.id })
+          .from(mediaAssets)
+          .innerJoin(productionMedia, eq(productionMedia.mediaId, mediaAssets.id))
+          .where(
+            and(
+              eq(mediaAssets.id, input.mediaId),
+              eq(mediaAssets.isActive, true),
+              eq(productionMedia.productionId, input.targetId),
+            ),
+          )
+          .limit(1);
+        if (!mediaRows[0]) {
+          throw new HttpProblem(
+            404,
+            "CONTENT_REPORT_MEDIA_NOT_FOUND",
+            "L’affiche à signaler est introuvable.",
+          );
+        }
+      }
       const inserted = await database
         .insert(contentReports)
         .values({
           reporterUserId,
           targetType: input.targetType,
           targetId: input.targetId,
+          category: input.category,
+          mediaId: input.mediaId,
           reason: input.reason.trim(),
         })
         .returning({ id: contentReports.id, status: contentReports.status });

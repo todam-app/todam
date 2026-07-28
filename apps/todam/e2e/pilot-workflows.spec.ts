@@ -562,9 +562,13 @@ test("la modération prend en charge puis résout une correction", async ({ page
     id: "900234d9-6224-4372-bca3-5d430ac5d9f0",
     targetType: "production",
     targetId: productionId,
+    category: "schedule",
     targetLabel: production.title,
     targetPath: `/production/${production.slug}`,
     canHide: true,
+    canHideMedia: false,
+    media: null,
+    contribution: null,
     reason:
       "La date annoncée sur la fiche ne correspond pas à la billetterie officielle.",
     status: "open",

@@ -74,9 +74,27 @@ export const ContentReportSchema = z.object({
   id: UuidSchema,
   targetType: z.enum(["production", "venue", "company", "member", "list", "review"]),
   targetId: z.string(),
+  category: z.enum(["visual_rights", "information", "schedule", "other"]),
   targetLabel: z.string(),
   targetPath: z.string().startsWith("/").nullable(),
   canHide: z.boolean(),
+  canHideMedia: z.boolean(),
+  media: z
+    .object({
+      id: UuidSchema,
+      url: z.string().url(),
+      credit: z.string().nullable(),
+      sourceUrl: z.string().url(),
+    })
+    .nullable(),
+  contribution: z
+    .object({
+      id: UuidSchema,
+      status: z.enum(["published", "hidden"]),
+      sourceUrl: z.string().url(),
+      submittedAt: z.string().datetime({ offset: true }),
+    })
+    .nullable(),
   reason: z.string(),
   status: ContentReportStatusSchema,
   decision: z.string().nullable(),
@@ -134,7 +152,7 @@ export const ContentReportIdParamsSchema = z.object({
 
 export const ModerateContentReportBodySchema = z.object({
   decision: z.string().trim().min(10).max(2000),
-  contentAction: z.enum(["none", "hide"]).default("none"),
+  contentAction: z.enum(["none", "hide", "hide_media"]).default("none"),
 });
 export type ModerateContentReportBody = z.infer<typeof ModerateContentReportBodySchema>;
 
@@ -237,7 +255,7 @@ export const EditableMediaAssetSchema = z.object({
   remoteUrl: HttpUrlSchema,
   kind: z.enum(["poster", "key_visual", "photo", "logo"]),
   alt: z.string().nullable(),
-  credit: z.string(),
+  credit: z.string().nullable(),
   copyrightHolder: z.string().nullable(),
   rightsStatus: RightsStatusSchema.extract([
     "permission_granted",
@@ -245,6 +263,7 @@ export const EditableMediaAssetSchema = z.object({
     "contractual_display",
     "hotlink_only",
     "todam_original",
+    "community_submission",
   ]),
   storagePolicy: z.enum(["hotlink", "mirror"]),
   termsUrl: HttpUrlSchema.nullable(),

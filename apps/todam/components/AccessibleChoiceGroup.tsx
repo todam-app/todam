@@ -1,3 +1,4 @@
+import { tokens } from "@todam/design-system";
 import {
   type PressableProps,
   Platform,
@@ -103,8 +104,8 @@ const styles = StyleSheet.create({
     rowGap: 8,
   },
   idle: {
-    backgroundColor: "#FFFDF8",
-    borderColor: "#9B9388",
+    backgroundColor: tokens.color.surface,
+    borderColor: tokens.color.controlBorder,
   },
   option: {
     borderRadius: 6,
@@ -115,10 +116,10 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   pressed: {
-    opacity: 0.72,
+    transform: [{ translateY: 1 }],
   },
   selected: {
-    backgroundColor: "#FCEFEA",
-    borderColor: "#C43D28",
+    backgroundColor: tokens.color.selectedSurface,
+    borderColor: tokens.color.accent,
   },
 });

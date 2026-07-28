@@ -13,7 +13,7 @@ import { Button, SectionTitle, TextField } from "@todam/design-system";
 import { useRouter } from "expo-router";
 import Head from "expo-router/head";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
-import { Image, Pressable, Text, View } from "react-native";
+import { Image, Platform, Pressable, Text, View } from "react-native";
 
 import { AccessibleChoiceGroup } from "../components/AccessibleChoiceGroup";
 import { AsyncState } from "../components/AsyncState";
@@ -316,12 +316,12 @@ function DraftVisualPreview({
               accessibilityLabel={
                 media[0].alt || `Aperçu du visuel de ${productionForm.title}`
               }
-              className="aspect-[2/3] w-full bg-disabled"
+              className="aspect-[2/3] w-full bg-placeholder"
               resizeMode="cover"
               source={{ uri: media[0].remoteUrl }}
             />
           ) : (
-            <View className="aspect-[2/3] justify-between p-4">
+            <View className="aspect-[2/3] justify-between bg-placeholder p-4">
               <Text className="font-serif text-3xl font-bold text-accent">T</Text>
               <Text className="text-base font-semibold leading-5 text-ink">
                 Visuel non publié
@@ -908,7 +908,7 @@ function ProductionFields({
                 },
               ])
             }
-            variant="secondary"
+            variant="quiet"
           />
         </View>
         {credits.length === 0 ? (
@@ -921,11 +921,11 @@ function ProductionFields({
                 Crédit {index + 1}
               </Text>
               <Button
-                label="Retirer"
+                label="Retirer le crédit"
                 onPress={() =>
                   onCreditsChange(credits.filter((item) => item.key !== credit.key))
                 }
-                variant="ghost"
+                variant="dangerGhost"
               />
             </View>
             <TextField
@@ -996,7 +996,7 @@ function ProductionFields({
                 },
               ])
             }
-            variant="secondary"
+            variant="quiet"
           />
         </View>
         {performances.map((performance, index) => (
@@ -1004,13 +1004,13 @@ function ProductionFields({
             <View className="flex-row items-center justify-between gap-3">
               <Text className="text-base font-semibold text-ink">Date {index + 1}</Text>
               <Button
-                label="Retirer"
+                label="Retirer la date"
                 onPress={() =>
                   onPerformancesChange(
                     performances.filter((item) => item.key !== performance.key),
                   )
                 }
-                variant="ghost"
+                variant="dangerGhost"
               />
             </View>
             <VenuePicker
@@ -1144,7 +1144,7 @@ function ProductionFields({
                 },
               ])
             }
-            variant="secondary"
+            variant="quiet"
           />
         </View>
         {media.map((visual, index) => (
@@ -1154,11 +1154,11 @@ function ProductionFields({
                 Visuel {index + 1}
               </Text>
               <Button
-                label="Retirer"
+                label="Retirer le visuel"
                 onPress={() =>
                   onMediaChange(media.filter((item) => item.key !== visual.key))
                 }
-                variant="ghost"
+                variant="dangerGhost"
               />
             </View>
             <TextField
@@ -1495,10 +1495,11 @@ export default function CompanyWorkspacePage() {
         remoteUrl: visual.remoteUrl,
         kind: visual.kind,
         alt: visual.alt ?? "",
-        credit: visual.credit,
+        credit: visual.credit ?? "",
         copyrightHolder: visual.copyrightHolder ?? "",
         rightsStatus:
-          visual.rightsStatus === "todam_original"
+          visual.rightsStatus === "todam_original" ||
+          visual.rightsStatus === "community_submission"
             ? "permission_granted"
             : visual.rightsStatus,
         storagePolicy: visual.storagePolicy,
@@ -1621,10 +1622,11 @@ export default function CompanyWorkspacePage() {
         remoteUrl: visual.remoteUrl,
         kind: visual.kind,
         alt: visual.alt ?? "",
-        credit: visual.credit,
+        credit: visual.credit ?? "",
         copyrightHolder: visual.copyrightHolder ?? "",
         rightsStatus:
-          visual.rightsStatus === "todam_original"
+          visual.rightsStatus === "todam_original" ||
+          visual.rightsStatus === "community_submission"
             ? "permission_granted"
             : visual.rightsStatus,
         storagePolicy: visual.storagePolicy,
@@ -2178,18 +2180,38 @@ export default function CompanyWorkspacePage() {
                     <Text className="text-base font-semibold text-ink">
                       Contenu à modifier
                     </Text>
-                    <Button
-                      label="Fiche de la compagnie"
-                      onPress={() => {
-                        setTargetMode("company");
-                        setProductionId(null);
-                      }}
-                      variant={targetMode === "company" ? "primary" : "secondary"}
-                    />
+                    {Platform.OS === "web" ? (
+                      <Pressable
+                        accessibilityRole="button"
+                        accessibilityState={{ selected: targetMode === "company" }}
+                        className={`min-h-11 justify-center border-l-2 px-3 py-2 ${
+                          targetMode === "company"
+                            ? "border-accent bg-selected"
+                            : "border-line"
+                        }`}
+                        onPress={() => {
+                          setTargetMode("company");
+                          setProductionId(null);
+                        }}
+                      >
+                        <Text className="text-base font-semibold text-ink">
+                          Fiche de la compagnie
+                        </Text>
+                      </Pressable>
+                    ) : (
+                      <Button
+                        label="Fiche de la compagnie"
+                        onPress={() => {
+                          setTargetMode("company");
+                          setProductionId(null);
+                        }}
+                        variant={targetMode === "company" ? "primary" : "secondary"}
+                      />
+                    )}
                     <Button
                       label="Créer un spectacle"
                       onPress={() => setCreatingProduction(true)}
-                      variant="secondary"
+                      variant="quiet"
                     />
                     {availableProductions.map((item) => (
                       <Pressable
@@ -2200,7 +2222,7 @@ export default function CompanyWorkspacePage() {
                         }}
                         className={`min-h-12 justify-center border-l-2 px-3 py-2 ${
                           targetMode === "production" && productionId === item.id
-                            ? "border-accent bg-[#FCEFEA]"
+                            ? "border-accent bg-selected"
                             : "border-line"
                         }`}
                         key={item.id}
@@ -2325,7 +2347,7 @@ export default function CompanyWorkspacePage() {
                       <Button
                         label="Annuler"
                         onPress={() => setCreatingProduction(false)}
-                        variant="secondary"
+                        variant="quiet"
                       />
                     </View>
                     {createProduction.isError ? (

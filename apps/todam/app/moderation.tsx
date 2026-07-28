@@ -10,7 +10,7 @@ import { Button, SectionTitle, TextField } from "@todam/design-system";
 import { type Href, useRouter } from "expo-router";
 import Head from "expo-router/head";
 import { useState } from "react";
-import { Linking, Pressable, Text, View } from "react-native";
+import { Image, Linking, Pressable, Text, View } from "react-native";
 
 import { AsyncState } from "../components/AsyncState";
 import { AccessibleChoiceGroup } from "../components/AccessibleChoiceGroup";
@@ -71,6 +71,15 @@ function reportTargetLabel(targetType: ContentReport["targetType"]): string {
     list: "Liste",
     review: "Avis",
   }[targetType];
+}
+
+function reportCategoryLabel(category: ContentReport["category"]): string {
+  return {
+    visual_rights: "Affiche ou droits du visuel",
+    information: "Description ou informations du spectacle",
+    schedule: "Dates, horaires ou lieu",
+    other: "Autre",
+  }[category];
 }
 
 function fieldLabel(field: string): string {
@@ -223,7 +232,7 @@ function CatalogCandidateCard({
           <Button
             label="Ouvrir la fiche publique"
             onPress={() => router.push(publicPath)}
-            variant="secondary"
+            variant="ghost"
           />
         </View>
       ) : null}
@@ -256,7 +265,7 @@ function CatalogCandidateCard({
             <Button
               label="Annuler"
               onPress={() => setConfirmation(null)}
-              variant="secondary"
+              variant="quiet"
             />
           </View>
         </View>
@@ -280,7 +289,7 @@ function CatalogCandidateCard({
             <Button
               label="Repasser en brouillon"
               onPress={() => setConfirmation("draft")}
-              variant="secondary"
+              variant="quiet"
             />
           ) : null}
         </View>
@@ -424,7 +433,7 @@ function ReportCard({
       contentAction,
       status,
     }: {
-      contentAction: "none" | "hide";
+      contentAction: "none" | "hide" | "hide_media";
       status: "reviewing" | "resolved" | "dismissed";
     }) =>
       api.moderateContentReport(report.id, status, {
@@ -455,14 +464,57 @@ function ReportCard({
         </Text>
       </View>
       <View className="border-l-2 border-line pl-4">
+        <Text className="mb-2 text-sm font-semibold text-accent">
+          {reportCategoryLabel(report.category)}
+        </Text>
         <Text className="text-base leading-7 text-ink">{report.reason}</Text>
       </View>
+      {report.media ? (
+        <View className="gap-3 border border-line p-4 md:flex-row md:items-start">
+          <Image
+            accessibilityIgnoresInvertColors
+            source={{ uri: report.media.url }}
+            style={{ height: 180, width: 120 }}
+          />
+          <View className="min-w-0 flex-1 gap-2">
+            <Text className="text-sm font-semibold text-ink">Affiche signalée</Text>
+            {report.media.credit ? (
+              <Text className="text-sm text-muted">Crédit : {report.media.credit}</Text>
+            ) : null}
+            <Pressable
+              accessibilityRole="link"
+              className="min-h-11 justify-center"
+              onPress={() => void Linking.openURL(report.media!.sourceUrl)}
+            >
+              <Text className="text-sm font-semibold text-accent">
+                Ouvrir la source du visuel ↗
+              </Text>
+            </Pressable>
+            {report.contribution ? (
+              <View className="gap-1">
+                <Text className="text-sm text-muted">
+                  Contribution communautaire · {report.contribution.status}
+                </Text>
+                <Pressable
+                  accessibilityRole="link"
+                  className="min-h-11 justify-center"
+                  onPress={() => void Linking.openURL(report.contribution!.sourceUrl)}
+                >
+                  <Text className="text-sm font-semibold text-accent">
+                    Source officielle de la contribution ↗
+                  </Text>
+                </Pressable>
+              </View>
+            ) : null}
+          </View>
+        </View>
+      ) : null}
       {report.targetPath ? (
         <View className="self-start">
           <Button
             label="Ouvrir le contenu concerné"
             onPress={() => router.push(report.targetPath as Href)}
-            variant="secondary"
+            variant="ghost"
           />
         </View>
       ) : (
@@ -534,6 +586,20 @@ function ReportCard({
                 variant="danger"
               />
             ) : null}
+            {report.canHideMedia ? (
+              <Button
+                disabled={decision.trim().length < 10}
+                label="Masquer cette affiche et résoudre"
+                loading={moderate.isPending}
+                onPress={() =>
+                  moderate.mutate({
+                    contentAction: "hide_media",
+                    status: "resolved",
+                  })
+                }
+                variant="danger"
+              />
+            ) : null}
             <Button
               disabled={decision.trim().length < 10}
               label="Classer sans suite"
@@ -544,7 +610,7 @@ function ReportCard({
                   status: "dismissed",
                 })
               }
-              variant="danger"
+              variant="quiet"
             />
           </View>
         </>
@@ -684,7 +750,7 @@ function RevisionCard({
             label="Restaurer cette version"
             loading={restore.isPending}
             onPress={() => restore.mutate()}
-            variant="secondary"
+            variant="quiet"
           />
         </View>
       ) : null}

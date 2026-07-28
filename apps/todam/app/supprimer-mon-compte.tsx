@@ -69,6 +69,7 @@ export default function DeleteMyAccountScreen() {
           label="Envoyer l'e-mail de confirmation"
           loading={pending}
           onPress={() => void submit()}
+          variant="danger"
         />
         {message ? (
           <Text

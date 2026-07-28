@@ -18,6 +18,7 @@ import {
 } from "react-native";
 
 import { SearchBar } from "./SearchBar";
+import { SelectionChip } from "./SelectionChip";
 
 type FilterKey =
   | "communityRating"
@@ -175,7 +176,9 @@ function FilterOptions({
       <Pressable
         accessibilityRole="radio"
         accessibilityState={{ checked: selected === undefined }}
-        className="min-h-14 flex-row items-center justify-between border-b border-line px-5 py-3"
+        className={`min-h-14 flex-row items-center justify-between border-b border-line px-5 py-3 ${
+          selected === undefined ? "bg-selected" : ""
+        }`}
         onPress={() => onSelect(undefined)}
       >
         <Text className="text-base font-semibold text-ink">Toutes</Text>
@@ -189,7 +192,9 @@ function FilterOptions({
           <Pressable
             accessibilityRole="radio"
             accessibilityState={{ checked: active }}
-            className="min-h-14 flex-row items-center justify-between gap-4 border-b border-line px-5 py-3"
+            className={`min-h-14 flex-row items-center justify-between gap-4 border-b border-line px-5 py-3 ${
+              active ? "bg-selected" : ""
+            }`}
             key={String(option.value)}
             onPress={() => onSelect(option.value)}
           >
@@ -296,7 +301,7 @@ function FilterOverlay({
             <Pressable
               accessibilityLabel="Fermer"
               accessibilityRole="button"
-              className="h-11 w-11 items-center justify-center"
+              className="todam-icon-button h-11 w-11 items-center justify-center rounded-todam border border-control bg-paper"
               onPress={onClose}
               testID={`my-shows-filter-close-${sidePanel ? "all" : "target"}`}
             >
@@ -390,34 +395,21 @@ export function MyShowsFilters({
           const options = optionsFor(key, section, facets);
           const selected = selectedLabel(query, key, options);
           return (
-            <Pressable
+            <SelectionChip
               accessibilityLabel={
                 selected ? `${filterLabels[key]} : ${selected}` : filterLabels[key]
               }
-              accessibilityRole="button"
-              className={`min-h-11 flex-row items-center gap-2 rounded-full border px-4 ${
-                selected ? "border-accent bg-accent/10" : "border-control bg-paper"
-              }`}
+              indicator="chevron"
               key={key}
+              label={selected ?? filterLabels[key]}
               onPress={() => {
                 lastFilterTrigger.current = key;
                 setActiveFilter(key);
               }}
+              rounded
+              selected={Boolean(selected)}
               testID={`my-shows-filter-${key}`}
-            >
-              <Text
-                className={`text-sm font-semibold ${
-                  selected ? "text-accent" : "text-ink"
-                }`}
-              >
-                {selected ?? filterLabels[key]}
-              </Text>
-              <Ionicons
-                color={selected ? "#C43D28" : "#6F6B64"}
-                name="chevron-down"
-                size={16}
-              />
-            </Pressable>
+            />
           );
         })}
       </ScrollView>
@@ -433,7 +425,7 @@ export function MyShowsFilters({
         <Pressable
           accessibilityLabel="Ouvrir tous les filtres"
           accessibilityRole="button"
-          className="h-11 w-11 items-center justify-center border border-control bg-paper"
+          className="todam-icon-button h-11 w-11 items-center justify-center rounded-todam border border-control bg-paper"
           onPress={() => setAllFiltersOpen(true)}
         >
           <Ionicons color="#151515" name="options-outline" size={22} />

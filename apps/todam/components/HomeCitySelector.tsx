@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
 
 import { api } from "../lib/api";
+import { SelectionChip } from "./SelectionChip";
 
 export function HomeCitySelector({ city }: { city: CityOption | null }) {
   const queryClient = useQueryClient();
@@ -43,15 +44,15 @@ export function HomeCitySelector({ city }: { city: CityOption | null }) {
         </View>
         <View className="flex-row flex-wrap gap-2">
           <Button
-            label="Modifier"
+            label="Modifier ma ville"
             onPress={() => setEditing(true)}
-            variant="secondary"
+            variant="quiet"
           />
           <Button
-            label="Supprimer"
+            label="Supprimer ma ville"
             loading={cityMutation.isPending}
             onPress={() => cityMutation.mutate(null)}
-            variant="ghost"
+            variant="dangerGhost"
           />
         </View>
       </View>
@@ -96,7 +97,7 @@ export function HomeCitySelector({ city }: { city: CityOption | null }) {
       ) : (
         <View className="flex-row flex-wrap gap-2">
           {cityQuery.data?.map((option) => (
-            <Button
+            <SelectionChip
               key={`${option.countryCode}-${option.locality}`}
               label={option.label}
               loading={
@@ -105,7 +106,10 @@ export function HomeCitySelector({ city }: { city: CityOption | null }) {
                 option.countryCode === city?.countryCode
               }
               onPress={() => cityMutation.mutate(option)}
-              variant="secondary"
+              selected={
+                option.locality === city?.locality &&
+                option.countryCode === city.countryCode
+              }
             />
           ))}
         </View>
@@ -134,7 +138,7 @@ export function HomeCitySelector({ city }: { city: CityOption | null }) {
               setInput(city.locality);
               setEditing(false);
             }}
-            variant="ghost"
+            variant="quiet"
           />
         </View>
       ) : null}

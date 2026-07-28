@@ -117,6 +117,7 @@ const descriptionRightsLabels = {
   permission_granted: "Texte publié avec autorisation",
   review_required: "Droits en cours de vérification",
   todam_original: "Résumé original Todam",
+  community_submission: "Description officielle ajoutée par la communauté",
 } as const;
 
 function DescriptionProvenance({
@@ -215,6 +216,7 @@ function Schedule({
 
 export default function ProductionScreen() {
   const params = useLocalSearchParams<{
+    created?: string;
     resumeAction?: string;
     resumeRating?: string;
     slug: string;
@@ -655,6 +657,20 @@ export default function ProductionScreen() {
           >
             {production.data ? (
               <View className="gap-10">
+                {parameter(params.created) === "1" ? (
+                  <View
+                    accessibilityLiveRegion="polite"
+                    className="gap-2 border border-success bg-[#EEF7F1] p-5"
+                  >
+                    <Text className="text-base font-semibold text-success">
+                      Le spectacle est publié.
+                    </Text>
+                    <Text className="text-base leading-6 text-ink">
+                      Vous pouvez maintenant l’ajouter à votre journal avec l’action «
+                      Vu », sans ajout automatique.
+                    </Text>
+                  </View>
+                ) : null}
                 <View className="flex-row flex-wrap gap-2">
                   <Link href="/decouvrir" asChild>
                     <Pressable
@@ -682,9 +698,11 @@ export default function ProductionScreen() {
                     />
                     {production.data.posters[0] ? (
                       <View className="mt-2 gap-1">
-                        <Text className="text-xs leading-5 text-muted">
-                          {production.data.posters[0].credit}
-                        </Text>
+                        {production.data.posters[0].credit ? (
+                          <Text className="text-xs leading-5 text-muted">
+                            {production.data.posters[0].credit}
+                          </Text>
+                        ) : null}
                         <Pressable
                           accessibilityRole="link"
                           className="min-h-11 justify-center"
@@ -838,13 +856,13 @@ export default function ProductionScreen() {
                           variant="secondary"
                         />
                         <Button
-                          label="Partager"
+                          label="Partager ce spectacle"
                           onPress={() => void share()}
                           variant="ghost"
                         />
                         {production.data.officialUrl ? (
                           <Button
-                            label="Page officielle"
+                            label="Voir la page officielle ↗"
                             onPress={() =>
                               void Linking.openURL(production.data!.officialUrl!)
                             }
@@ -877,17 +895,17 @@ export default function ProductionScreen() {
                             .map((performance) => (
                               <Button
                                 key={performance.id}
-                                label={formatPerformance(
+                                label={`Choisir — ${formatPerformance(
                                   performance.startsAt,
                                   performance.venue.timezone,
-                                )}
+                                )}`}
                                 onPress={() =>
                                   updateDiaryMutation.mutate({
                                     performanceId: performance.id,
                                     attendedOn: null,
                                   })
                                 }
-                                variant="secondary"
+                                variant="quiet"
                               />
                             ))}
                         </View>
@@ -921,7 +939,7 @@ export default function ProductionScreen() {
                           <Button
                             label="Date inconnue"
                             onPress={() => setShowSeenDetails(false)}
-                            variant="ghost"
+                            variant="quiet"
                           />
                         </View>
                       </View>
@@ -954,7 +972,7 @@ export default function ProductionScreen() {
                             <Button
                               label="Réessayer"
                               onPress={() => void lists.refetch()}
-                              variant="secondary"
+                              variant="quiet"
                             />
                           </View>
                         ) : null}
@@ -967,10 +985,10 @@ export default function ProductionScreen() {
                         {lists.data?.map((list) => (
                           <Button
                             key={list.id}
-                            label={`${list.name} (${list.itemCount})`}
+                            label={`Ajouter à « ${list.name} » (${list.itemCount})`}
                             loading={addListMutation.isPending}
                             onPress={() => addListMutation.mutate(list.id)}
-                            variant="secondary"
+                            variant="quiet"
                           />
                         ))}
                         <TextField
@@ -1080,7 +1098,7 @@ export default function ProductionScreen() {
                             <Button
                               label="Supprimer ma note"
                               onPress={() => deleteRatingMutation.mutate()}
-                              variant="ghost"
+                              variant="dangerGhost"
                             />
                           </View>
                         ) : null}
@@ -1190,7 +1208,7 @@ export default function ProductionScreen() {
                                 <Button
                                   label="Annuler"
                                   onPress={() => setConfirmingReviewDelete(false)}
-                                  variant="secondary"
+                                  variant="quiet"
                                 />
                               </View>
                             </View>
@@ -1199,7 +1217,7 @@ export default function ProductionScreen() {
                               <Button
                                 label="Supprimer mon avis"
                                 onPress={() => setConfirmingReviewDelete(true)}
-                                variant="danger"
+                                variant="dangerGhost"
                               />
                             </View>
                           )}
@@ -1292,10 +1310,17 @@ export default function ProductionScreen() {
                           params: {
                             type: "production",
                             id: production.data!.id,
+                            mediaId: production.data!.posters[0]?.id ?? "",
+                            media: JSON.stringify(
+                              production.data!.posters.map((poster) => ({
+                                id: poster.id,
+                                url: poster.url,
+                              })),
+                            ),
                           },
                         })
                       }
-                      variant="secondary"
+                      variant="ghost"
                     />
                     {production.data.company ? (
                       <Button

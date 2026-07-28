@@ -215,7 +215,7 @@ export function MyListDetailScreen({ listId }: { listId: string }) {
                     <Button
                       label="Partager"
                       onPress={() => void shareList()}
-                      variant="secondary"
+                      variant="quiet"
                     />
                   ) : null}
                 </View>
@@ -265,10 +265,10 @@ export function MyListDetailScreen({ listId }: { listId: string }) {
                           variant="ghost"
                         />
                         <Button
-                          label="Retirer"
+                          label="Retirer de la liste"
                           loading={removeItem.isPending}
                           onPress={() => removeItem.mutate(item.production.id)}
-                          variant="danger"
+                          variant="dangerGhost"
                         />
                       </View>
                     </View>
@@ -293,7 +293,7 @@ export function MyListDetailScreen({ listId }: { listId: string }) {
                     <Button
                       label="Annuler"
                       onPress={() => setConfirmingDelete(false)}
-                      variant="secondary"
+                      variant="quiet"
                     />
                   </View>
                 ) : (

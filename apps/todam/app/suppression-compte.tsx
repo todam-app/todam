@@ -58,6 +58,7 @@ export default function AccountDeletionScreen() {
             label="Confirmer la suppression définitive"
             loading={pending}
             onPress={() => void confirmDeletion()}
+            variant="danger"
           />
         ) : (
           <>
@@ -83,6 +84,7 @@ export default function AccountDeletionScreen() {
               label="Recevoir le lien de suppression"
               loading={pending}
               onPress={() => void requestDeletion()}
+              variant="danger"
             />
           </>
         )}

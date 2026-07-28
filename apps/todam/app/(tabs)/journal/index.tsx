@@ -46,7 +46,7 @@ function PreviewSection({
         accessibilityHint={`Ouvre tous les spectacles ${title.toLocaleLowerCase("fr-FR")}`}
         accessibilityLabel={`${title}, ${count} spectacle${count > 1 ? "s" : ""}`}
         accessibilityRole="link"
-        className="gap-4 rounded-todam border border-line bg-paper p-4 active:opacity-70"
+        className="todam-interactive-card gap-4 rounded-todam border border-line bg-paper p-4"
       >
         <View className="flex-row items-center justify-between gap-3">
           <View className="min-w-0 flex-1 flex-row items-baseline gap-2">

@@ -435,7 +435,7 @@ export default function VenuePage() {
                       <Button
                         accessibilityRole="link"
                         label="Signaler ou corriger une information"
-                        variant="secondary"
+                        variant="ghost"
                       />
                     </Link>
                   </View>

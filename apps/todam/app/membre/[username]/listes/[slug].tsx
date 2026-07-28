@@ -113,7 +113,7 @@ export default function PublicListPage() {
                     <Button
                       label="Partager cette liste"
                       onPress={() => void share()}
-                      variant="secondary"
+                      variant="ghost"
                     />
                     <Button
                       label="Signaler cette liste"

@@ -24,7 +24,7 @@ export function ProductionListItem({
         accessibilityHint="Ouvre la fiche du spectacle"
         accessibilityLabel={production.title}
         accessibilityRole="link"
-        className="min-h-28 flex-row gap-4 border-b border-line bg-transparent py-4 active:opacity-70"
+        className="todam-interactive-card min-h-28 flex-row gap-4 border-b border-line bg-transparent py-4"
       >
         <ProductionPoster
           compact

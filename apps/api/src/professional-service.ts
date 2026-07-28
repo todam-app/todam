@@ -27,6 +27,7 @@ import {
   companyClaims,
   companyMemberships,
   companySources,
+  communitySubmissions,
   contentReports,
   lists,
   mediaAssets,
@@ -88,12 +89,15 @@ function safeSlug(value: string): string {
 }
 
 function editableMediaRightsStatus(status: string): EditableMediaAsset["rightsStatus"] {
-  if (status === "todam_original") return "permission_granted";
+  if (status === "todam_original" || status === "community_submission") {
+    return "permission_granted";
+  }
   if (
     status === "permission_granted" ||
     status === "open_license" ||
     status === "contractual_display" ||
-    status === "hotlink_only"
+    status === "hotlink_only" ||
+    status === "community_submission"
   ) {
     return status;
   }
@@ -1832,16 +1836,33 @@ export function createProfessionalService(database: TodamDatabase) {
           };
     }
     if (targetType === "venue") {
-      const rows = await database
-        .select({ name: venues.name, slug: venues.slug })
-        .from(venues)
-        .where(eq(venues.id, targetId))
-        .limit(1);
+      const [rows, communitySources] = await Promise.all([
+        database
+          .select({
+            name: venues.name,
+            slug: venues.slug,
+          })
+          .from(venues)
+          .where(eq(venues.id, targetId))
+          .limit(1),
+        database
+          .select({ id: venueSources.entityId })
+          .from(venueSources)
+          .innerJoin(sourceDocuments, eq(sourceDocuments.id, venueSources.documentId))
+          .innerJoin(catalogSources, eq(catalogSources.id, sourceDocuments.sourceId))
+          .where(
+            and(
+              eq(venueSources.entityId, targetId),
+              eq(catalogSources.connectorKind, "community"),
+            ),
+          )
+          .limit(1),
+      ]);
       return rows[0]
         ? {
             targetLabel: rows[0].name,
             targetPath: `/lieu/${encodeURIComponent(rows[0].slug)}`,
-            canHide: false,
+            canHide: Boolean(communitySources[0]),
           }
         : {
             targetLabel: "Lieu supprimé",
@@ -1938,15 +1959,71 @@ export function createProfessionalService(database: TodamDatabase) {
     id: string;
     targetType: ContentReport["targetType"];
     targetId: string;
+    category: ContentReport["category"];
+    mediaId: string | null;
     reason: string;
     status: ContentReport["status"];
     decision: string | null;
     submittedAt: Date;
     reviewedAt: Date | null;
   }): Promise<ContentReport> {
+    const mediaRows = report.mediaId
+      ? await database
+          .select({
+            id: mediaAssets.id,
+            url: mediaAssets.remoteUrl,
+            credit: mediaAssets.credit,
+            sourceUrl: sourceDocuments.url,
+            isActive: mediaAssets.isActive,
+          })
+          .from(mediaAssets)
+          .innerJoin(sourceDocuments, eq(sourceDocuments.id, mediaAssets.documentId))
+          .where(eq(mediaAssets.id, report.mediaId))
+          .limit(1)
+      : [];
+    const contributionRows =
+      report.targetType === "production"
+        ? await database
+            .select({
+              id: communitySubmissions.id,
+              status: communitySubmissions.status,
+              sourceUrl: communitySubmissions.sourceUrl,
+              submittedAt: communitySubmissions.createdAt,
+            })
+            .from(communitySubmissions)
+            .where(
+              report.mediaId
+                ? and(
+                    eq(communitySubmissions.productionId, report.targetId),
+                    eq(communitySubmissions.mediaId, report.mediaId),
+                  )
+                : eq(communitySubmissions.productionId, report.targetId),
+            )
+            .orderBy(desc(communitySubmissions.createdAt))
+            .limit(1)
+        : [];
+    const media = mediaRows[0];
+    const contribution = contributionRows[0];
     return {
       ...report,
       ...(await describeContentReportTarget(report.targetType, report.targetId)),
+      canHideMedia: Boolean(media?.isActive),
+      media: media
+        ? {
+            id: media.id,
+            url: media.url,
+            credit: media.credit,
+            sourceUrl: media.sourceUrl,
+          }
+        : null,
+      contribution: contribution
+        ? {
+            id: contribution.id,
+            status: contribution.status,
+            sourceUrl: contribution.sourceUrl,
+            submittedAt: contribution.submittedAt.toISOString(),
+          }
+        : null,
       submittedAt: report.submittedAt.toISOString(),
       reviewedAt: report.reviewedAt?.toISOString() ?? null,
     };
@@ -2142,6 +2219,8 @@ export function createProfessionalService(database: TodamDatabase) {
           id: contentReports.id,
           targetType: contentReports.targetType,
           targetId: contentReports.targetId,
+          category: contentReports.category,
+          mediaId: contentReports.mediaId,
           reason: contentReports.reason,
           status: contentReports.status,
           decision: contentReports.decision,
@@ -2183,22 +2262,76 @@ export function createProfessionalService(database: TodamDatabase) {
             "Ce signalement a déjà reçu une décision définitive.",
           );
         }
-        if (input.contentAction === "hide" && status !== "resolved") {
+        if (input.contentAction !== "none" && status !== "resolved") {
           throw new HttpProblem(
             400,
             "INVALID_CONTENT_REPORT_ACTION",
             "Le masquage doit clôturer le signalement comme résolu.",
           );
         }
-        if (input.contentAction === "hide") {
+        if (input.contentAction === "hide_media") {
+          if (
+            current.targetType !== "production" ||
+            current.category !== "visual_rights" ||
+            !current.mediaId
+          ) {
+            throw new HttpProblem(
+              400,
+              "CONTENT_REPORT_MEDIA_NOT_HIDEABLE",
+              "Ce signalement n’est pas associé à une affiche.",
+            );
+          }
+          const linkedMedia = await transaction
+            .select({ id: mediaAssets.id })
+            .from(mediaAssets)
+            .innerJoin(productionMedia, eq(productionMedia.mediaId, mediaAssets.id))
+            .where(
+              and(
+                eq(mediaAssets.id, current.mediaId),
+                eq(productionMedia.productionId, current.targetId),
+              ),
+            )
+            .limit(1);
+          if (!linkedMedia[0]) {
+            throw new HttpProblem(
+              404,
+              "CONTENT_REPORT_MEDIA_NOT_FOUND",
+              "L’affiche concernée est introuvable.",
+            );
+          }
+          const now = new Date();
+          await transaction
+            .update(mediaAssets)
+            .set({ isActive: false, updatedAt: now })
+            .where(eq(mediaAssets.id, current.mediaId));
+          await transaction
+            .update(communitySubmissions)
+            .set({
+              moderationHistory: sql`${communitySubmissions.moderationHistory} || ${JSON.stringify(
+                [
+                  {
+                    at: now.toISOString(),
+                    by: userId,
+                    action: "hide_media",
+                    reason: input.decision,
+                  },
+                ],
+              )}::jsonb`,
+              reviewedBy: userId,
+              reviewedAt: now,
+              updatedAt: now,
+            })
+            .where(eq(communitySubmissions.mediaId, current.mediaId));
+        } else if (input.contentAction === "hide") {
           if (current.targetType === "production") {
+            const now = new Date();
             const hidden = await transaction
               .update(productions)
               .set({
                 publicationStatus: "hidden",
-                reviewedAt: new Date(),
+                reviewedAt: now,
                 reviewedBy: userId,
-                updatedAt: new Date(),
+                updatedAt: now,
               })
               .where(eq(productions.id, current.targetId))
               .returning({ id: productions.id });
@@ -2209,6 +2342,25 @@ export function createProfessionalService(database: TodamDatabase) {
                 "Le spectacle concerné est introuvable.",
               );
             }
+            await transaction
+              .update(communitySubmissions)
+              .set({
+                status: "hidden",
+                moderationHistory: sql`${communitySubmissions.moderationHistory} || ${JSON.stringify(
+                  [
+                    {
+                      at: now.toISOString(),
+                      by: userId,
+                      action: "hide_production",
+                      reason: input.decision,
+                    },
+                  ],
+                )}::jsonb`,
+                reviewedBy: userId,
+                reviewedAt: now,
+                updatedAt: now,
+              })
+              .where(eq(communitySubmissions.productionId, current.targetId));
           } else if (current.targetType === "company") {
             const hidden = await transaction
               .update(companies)
@@ -2247,6 +2399,37 @@ export function createProfessionalService(database: TodamDatabase) {
                   )`,
                 ),
               );
+          } else if (current.targetType === "venue") {
+            const communityVenue = await transaction
+              .select({ id: venues.id })
+              .from(venues)
+              .innerJoin(venueSources, eq(venueSources.entityId, venues.id))
+              .innerJoin(
+                sourceDocuments,
+                eq(sourceDocuments.id, venueSources.documentId),
+              )
+              .innerJoin(
+                catalogSources,
+                eq(catalogSources.id, sourceDocuments.sourceId),
+              )
+              .where(
+                and(
+                  eq(venues.id, current.targetId),
+                  eq(catalogSources.connectorKind, "community"),
+                ),
+              )
+              .limit(1);
+            if (!communityVenue[0]) {
+              throw new HttpProblem(
+                400,
+                "CONTENT_REPORT_TARGET_NOT_HIDEABLE",
+                "Seuls les lieux créés par la communauté peuvent être masqués ici.",
+              );
+            }
+            await transaction
+              .update(venues)
+              .set({ isActive: false, updatedAt: new Date() })
+              .where(eq(venues.id, current.targetId));
           } else if (current.targetType === "review") {
             const hidden = await transaction
               .update(reviews)
@@ -2284,6 +2467,8 @@ export function createProfessionalService(database: TodamDatabase) {
             id: contentReports.id,
             targetType: contentReports.targetType,
             targetId: contentReports.targetId,
+            category: contentReports.category,
+            mediaId: contentReports.mediaId,
             reason: contentReports.reason,
             status: contentReports.status,
             decision: contentReports.decision,

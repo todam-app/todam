@@ -225,7 +225,7 @@ function ProfileContent() {
                     setEditing((value) => !value);
                     setFeedback(null);
                   }}
-                  variant="secondary"
+                  variant="quiet"
                 />
               </View>
 
@@ -446,7 +446,7 @@ function ProfileContent() {
                     <Button
                       label="Se déconnecter"
                       onPress={() => void signOut()}
-                      variant="secondary"
+                      variant="quiet"
                     />
                   </View>
                   <View className="gap-3 rounded-todam border border-danger bg-danger/5 p-5">

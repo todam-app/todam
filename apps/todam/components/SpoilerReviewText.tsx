@@ -21,7 +21,7 @@ export function SpoilerReviewText({
           <Button
             label="Afficher quand même"
             onPress={() => setRevealed(true)}
-            variant="secondary"
+            variant="quiet"
           />
         </View>
       </View>
