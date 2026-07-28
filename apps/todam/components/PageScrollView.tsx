@@ -18,6 +18,8 @@ import {
   type ViewProps,
 } from "react-native";
 
+import { isPrimaryMobilePath } from "../lib/navigation";
+
 type WebPageScrollContextValue = {
   isScrolled: boolean;
   setIsScrolled: (value: boolean) => void;
@@ -81,7 +83,9 @@ export function PageScrollView({
 
   const webClassName =
     Platform.OS === "web"
-      ? `todam-web-page-scroll${className ? ` ${className}` : ""}`
+      ? `todam-web-page-scroll${
+          isPrimaryMobilePath(pathname) ? " todam-web-page-scroll--primary-mobile" : ""
+        }${className ? ` ${className}` : ""}`
       : className;
   const scrollHandler = Platform.OS === "web" || onScroll ? handleScroll : undefined;
 
@@ -99,9 +103,12 @@ export function PageScrollView({
 }
 
 export function PageStaticView({ className, nativeID, ...props }: ViewProps) {
+  const pathname = usePathname();
   const webClassName =
     Platform.OS === "web"
-      ? `todam-web-page-static${className ? ` ${className}` : ""}`
+      ? `todam-web-page-static${
+          isPrimaryMobilePath(pathname) ? " todam-web-page-static--primary-mobile" : ""
+        }${className ? ` ${className}` : ""}`
       : className;
 
   return (

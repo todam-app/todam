@@ -473,8 +473,16 @@ async function mockPresentationApi(page: Page, role: PresentationRole) {
   await page.route("**/v1/me/dashboard", (route) =>
     fulfillJson(route, {
       profile: { pseudonym: "spectatrice-grenoble" },
-      counts: { seen: 1, ratings: 1, watchlist: 1, lists: 1 },
+      counts: { seen: 1, ratings: 1, watchlist: 1, lists: 1, reviews: 1 },
       recentDiary: [],
+      recentRatings: [
+        {
+          production: primaryCard,
+          value: 8,
+          ratedAt: verifiedAt,
+          hasReview: true,
+        },
+      ],
       ratingDistribution: Array.from({ length: 10 }, (_, index) => ({
         value: index + 1,
         count: index === 7 ? 1 : 0,
@@ -487,6 +495,7 @@ async function mockPresentationApi(page: Page, role: PresentationRole) {
       username: "spectatrice-grenoble",
       bio: "Théâtre, danse et formes contemporaines autour de Grenoble.",
       profileVisibility: "public",
+      memberSince: verifiedAt,
     }),
   );
   await page.route("**/v1/me/journal**", (route) =>
@@ -506,6 +515,49 @@ async function mockPresentationApi(page: Page, role: PresentationRole) {
       nextCursor: null,
     }),
   );
+  await page.route("**/v1/me/shows**", (route) => {
+    const section =
+      new URL(route.request().url()).searchParams.get("section") ?? "seen";
+    return fulfillJson(route, {
+      items: [
+        {
+          production: primaryCard,
+          section,
+          diaryEntryId:
+            section === "watchlist" ? null : "400234d9-6224-4372-bca3-5d430ac5d9f0",
+          seenCount: section === "watchlist" ? 0 : 1,
+          addedAt: verifiedAt,
+          attendedOn: section === "watchlist" ? null : "2026-12-09",
+          ratedAt: section === "rated" ? verifiedAt : null,
+          myRating: section === "rated" ? 8 : null,
+          communityRating: { average: 8.4, count: 12 },
+          review:
+            section === "rated"
+              ? {
+                  id: "300234d9-6224-4372-bca3-5d430ac5d9f0",
+                  body: "Une proposition précise et mémorable.",
+                  containsSpoiler: false,
+                  visibility: "public",
+                  status: "published",
+                  createdAt: verifiedAt,
+                  updatedAt: verifiedAt,
+                }
+              : null,
+        },
+      ],
+      nextCursor: null,
+      total: 1,
+      facets: {
+        disciplines: [{ value: "theatre", count: 1 }],
+        venues: [{ value: venue.name, count: 1 }],
+        years: [{ value: 2026, count: 1 }],
+        communityRatings: [{ value: 8, count: 1 }],
+        myRatings: [{ value: 8, count: 1 }],
+        reviews: [{ value: "with", count: 1 }],
+        upcoming: [],
+      },
+    });
+  });
   await page.route("**/v1/me/lists", (route) =>
     fulfillJson(route, {
       items: [
@@ -903,27 +955,39 @@ const routes = [
     role: "member",
   },
   {
-    name: "profil-a-voir",
-    path: "/profile?tab=a-voir",
-    heading: "spectatrice-grenoble",
+    name: "mes-spectacles-a-voir",
+    path: "/journal/a-voir",
+    heading: "À voir",
     role: "member",
   },
   {
-    name: "profil-avis",
-    path: "/profile?tab=avis",
-    heading: "spectatrice-grenoble",
+    name: "mes-spectacles-vus",
+    path: "/journal/vus",
+    heading: "Vus",
     role: "member",
   },
   {
-    name: "journal",
+    name: "mes-spectacles-notes",
+    path: "/journal/notes",
+    heading: "Notés",
+    role: "member",
+  },
+  {
+    name: "mes-avis",
+    path: "/journal/avis",
+    heading: "Mes avis",
+    role: "member",
+  },
+  {
+    name: "mes-spectacles",
     path: "/journal",
-    heading: "spectatrice-grenoble",
+    heading: "Mes spectacles",
     role: "member",
   },
   {
-    name: "listes-membre",
-    path: "/listes",
-    heading: "spectatrice-grenoble",
+    name: "mes-listes",
+    path: "/journal/listes",
+    heading: "Mes listes",
     role: "member",
   },
   {

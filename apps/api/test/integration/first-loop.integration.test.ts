@@ -197,6 +197,10 @@ describe("première boucle API sur PostgreSQL/PostGIS", () => {
       method: "GET",
       url: "/v1/me/home",
     });
+    const privateShows = await app.inject({
+      method: "GET",
+      url: "/v1/me/shows?section=seen",
+    });
     const privateDiary = await app.inject({
       method: "GET",
       url: `/v1/me/productions/${productionId}/diary`,
@@ -216,6 +220,7 @@ describe("première boucle API sur PostgreSQL/PostGIS", () => {
 
     expect(privateResponse.statusCode).toBe(401);
     expect(privateHome.statusCode).toBe(401);
+    expect(privateShows.statusCode).toBe(401);
     expect(privateDiary.statusCode).toBe(401);
     expect(privateDiaryRemoval.statusCode).toBe(401);
     expect(searchResponse.statusCode).toBe(200);
@@ -939,13 +944,164 @@ describe("première boucle API sur PostgreSQL/PostGIS", () => {
     expect(dashboard.statusCode).toBe(200);
     expect(dashboard.json().counts).toMatchObject({
       ratings: 1,
+      reviews: 0,
       seen: 1,
       watchlist: 0,
+    });
+    expect(dashboard.json().recentRatings[0]).toMatchObject({
+      production: { id: productionId },
+      value: 8,
+      hasReview: false,
     });
     expect(dashboard.json().ratingDistribution[7]).toEqual({
       value: 8,
       count: 1,
     });
+    const profile = await app.inject({
+      method: "GET",
+      url: "/v1/me/profile",
+      headers: { cookie },
+    });
+    expect(profile.statusCode, profile.body).toBe(200);
+    expect(new Date(profile.json().memberSince).toString()).not.toBe("Invalid Date");
+  });
+
+  it("exclut la note personnelle des facettes communautaires", async () => {
+    const cookie = await signUp("facettes@example.test", "facettes", "127.0.0.81");
+    const otherCookie = await signUp(
+      "facettes-autre@example.test",
+      "facettes-autre",
+      "127.0.0.82",
+    );
+    const thirdCookie = await signUp(
+      "facettes-tiers@example.test",
+      "facettes-tiers",
+      "127.0.0.83",
+    );
+    for (const [ratingCookie, value] of [
+      [cookie, 1],
+      [otherCookie, 8],
+      [thirdCookie, 10],
+    ] as const) {
+      const response = await app.inject({
+        method: "PUT",
+        url: `/v1/me/productions/${productionId}/rating`,
+        headers: { cookie: ratingCookie },
+        payload: { value },
+      });
+      expect(response.statusCode, response.body).toBe(200);
+    }
+    const review = await app.inject({
+      method: "PUT",
+      url: `/v1/me/reviews/${productionId}`,
+      headers: { cookie },
+      payload: {
+        body: "Un avis personnel pour tester les filtres combinés.",
+        containsSpoiler: false,
+        visibility: "private",
+      },
+    });
+    expect(review.statusCode, review.body).toBe(200);
+    const [otherProduction] = await db
+      .insert(productions)
+      .values({
+        slug: "autre-spectacle-facettes",
+        title: "Autre spectacle",
+        discipline: "opera",
+        audience: "general",
+        publicationStatus: "published",
+        reviewedAt: new Date(),
+        language: "français",
+      })
+      .returning({ id: productions.id });
+    const secondRating = await app.inject({
+      method: "PUT",
+      url: `/v1/me/productions/${otherProduction!.id}/rating`,
+      headers: { cookie },
+      payload: { value: 2 },
+    });
+    expect(secondRating.statusCode, secondRating.body).toBe(200);
+
+    const seen = await app.inject({
+      method: "GET",
+      url: "/v1/me/shows?section=seen&communityRating=9&hasReview=true&limit=1",
+      headers: { cookie },
+    });
+    expect(seen.statusCode, seen.body).toBe(200);
+    expect(seen.json()).toMatchObject({
+      total: 1,
+      nextCursor: null,
+      items: [
+        {
+          myRating: 1,
+          communityRating: { average: 9, count: 2 },
+          review: { visibility: "private" },
+        },
+      ],
+    });
+    expect(seen.json().facets.communityRatings).toContainEqual({
+      value: 9,
+      count: 1,
+    });
+    expect(seen.json().facets.reviews).toContainEqual({
+      value: "with",
+      count: 1,
+    });
+
+    const rated = await app.inject({
+      method: "GET",
+      url: "/v1/me/shows?section=rated&myRating=1",
+      headers: { cookie },
+    });
+    expect(rated.statusCode, rated.body).toBe(200);
+    expect(rated.json().items).toHaveLength(1);
+    expect(rated.json().items[0]).toMatchObject({
+      myRating: 1,
+      communityRating: { average: 9, count: 2 },
+    });
+    const firstPage = await app.inject({
+      method: "GET",
+      url: "/v1/me/shows?section=rated&limit=1",
+      headers: { cookie },
+    });
+    expect(firstPage.statusCode, firstPage.body).toBe(200);
+    expect(firstPage.json().total).toBe(2);
+    expect(firstPage.json().items).toHaveLength(1);
+    expect(firstPage.json().nextCursor).toEqual(expect.any(String));
+    expect(firstPage.json().facets.myRatings).toEqual([
+      { value: 1, count: 1 },
+      { value: 2, count: 1 },
+    ]);
+    const secondPage = await app.inject({
+      method: "GET",
+      url: `/v1/me/shows?section=rated&limit=1&cursor=${encodeURIComponent(
+        firstPage.json().nextCursor,
+      )}`,
+      headers: { cookie },
+    });
+    expect(secondPage.statusCode, secondPage.body).toBe(200);
+    expect(secondPage.json().items).toHaveLength(1);
+    expect(secondPage.json().nextCursor).toBeNull();
+    expect(secondPage.json().items[0].production.id).not.toBe(
+      firstPage.json().items[0].production.id,
+    );
+    const searched = await app.inject({
+      method: "GET",
+      url: "/v1/me/shows?section=rated&q=Autre",
+      headers: { cookie },
+    });
+    expect(searched.statusCode, searched.body).toBe(200);
+    expect(searched.json()).toMatchObject({
+      total: 1,
+      items: [{ myRating: 2 }],
+    });
+    const absentValue = await app.inject({
+      method: "GET",
+      url: "/v1/me/shows?section=rated&myRating=7",
+      headers: { cookie },
+    });
+    expect(absentValue.statusCode, absentValue.body).toBe(200);
+    expect(absentValue.json()).toMatchObject({ total: 0, items: [] });
   });
 
   it("liste et retire des séances sans dissocier une note de la dernière", async () => {

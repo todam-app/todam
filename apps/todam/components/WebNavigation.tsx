@@ -18,23 +18,22 @@ import {
 } from "react-native";
 
 import { authClient } from "../lib/auth-client";
+import {
+  isAuthPath,
+  isPrimaryMobilePath,
+  mobileContextForPath,
+} from "../lib/navigation";
 import { useWebPageScrolled } from "./PageScrollView";
 import { SearchBar } from "./SearchBar";
 
 const horizontalLogo = require("../assets/brand/todam-logo-horizontal.svg");
-const symbolLogo = require("../assets/brand/todam-symbol.svg");
 
-const publicNavigation = [{ href: "/decouvrir", label: "Découvrir" }] as const;
-const memberNavigation = [
-  { href: "/decouvrir", label: "Découvrir" },
-  { href: "/journal", label: "Journal" },
-  { href: "/listes", label: "Listes" },
-] as const;
+const memberNavigation = [{ href: "/journal", label: "Mes spectacles" }] as const;
 const mobileNavigation = [
-  { href: "/decouvrir", label: "Découvrir", icon: "compass-outline" },
+  { href: "/", label: "Accueil", icon: "home-outline" },
+  { href: "/journal", label: "Mes spectacles", icon: "albums-outline" },
   { href: "/search", label: "Rechercher", icon: "search-outline" },
-  { href: "/journal", label: "Journal", icon: "book-outline" },
-  { href: "/listes", label: "Listes", icon: "list-outline" },
+  { href: "/profile", label: "Profil", icon: "person-outline" },
 ] as const;
 
 function parameter(value: string | string[] | undefined): string {
@@ -70,6 +69,7 @@ function HeaderSearch({
 
 export function WebNavigation() {
   const pathname = usePathname();
+  const router = useRouter();
   const params = useGlobalSearchParams<{ q?: string | string[] }>();
   const session = authClient.useSession();
   const { width } = useWindowDimensions();
@@ -78,15 +78,11 @@ export function WebNavigation() {
   if (Platform.OS !== "web") return null;
 
   const mobile = width < 760;
-  const authShell = [
-    "/sign-in",
-    "/sign-up",
-    "/mot-de-passe-oublie",
-    "/reinitialiser-mot-de-passe",
-    "/email-verifie",
-  ].some((route) => pathname.startsWith(route));
+  const authShell = isAuthPath(pathname);
   const searchParameter = pathname.startsWith("/search") ? parameter(params.q) : "";
-  const navigation = session.data ? memberNavigation : publicNavigation;
+  const navigation = session.data ? memberNavigation : [];
+  const primaryMobilePath = isPrimaryMobilePath(pathname);
+  const mobileContext = mobileContextForPath(pathname);
 
   if (authShell) {
     return (
@@ -131,126 +127,133 @@ export function WebNavigation() {
   return (
     <>
       <Link href={"#contenu-principal" as Href} asChild>
-        <Pressable
-          accessibilityRole="link"
-          className="todam-skip-link"
-        >
+        <Pressable accessibilityRole="link" className="todam-skip-link">
           <Text className="text-base font-semibold text-paper">Aller au contenu</Text>
         </Pressable>
       </Link>
-      <View
-        className={`todam-web-header bg-paper ${
-          isScrolled ? "todam-web-header--scrolled" : ""
-        }`}
-        role="banner"
-        style={styles.header}
-      >
-        <View
-          accessibilityLabel="Navigation principale"
-          className="mx-auto w-full max-w-content flex-row items-center gap-3 px-4 md:px-8"
-          role="navigation"
-          style={[styles.headerInner, !mobile && styles.headerInnerDesktop]}
-          testID="web-header-frame"
-        >
-          <Link href="/" asChild>
-            <Pressable
-              accessibilityLabel="Todam, accueil"
-              accessibilityRole="link"
-              className="min-h-11 justify-center"
-              testID="global-home-logo"
-            >
-              <Image
-                accessibilityIgnoresInvertColors
-                accessible={false}
-                resizeMode="contain"
-                source={mobile ? symbolLogo : horizontalLogo}
-                style={mobile ? styles.symbol : styles.logo}
-              />
-              <Text className="sr-only">Todam</Text>
-            </Pressable>
-          </Link>
 
-          {mobile ? (
-            <View className="ml-auto flex-row items-center gap-1">
-              <Link href="/search" asChild>
-                <Pressable
-                  accessibilityLabel="Rechercher"
-                  accessibilityRole="link"
-                  className="h-11 w-11 items-center justify-center"
-                >
-                  <Ionicons color="#151515" name="search-outline" size={23} />
-                </Pressable>
-              </Link>
+      {!mobile ? (
+        <View
+          className={`todam-web-header bg-paper ${
+            isScrolled ? "todam-web-header--scrolled" : ""
+          }`}
+          role="banner"
+          style={styles.header}
+        >
+          <View
+            accessibilityLabel="Navigation principale"
+            className="mx-auto w-full max-w-content flex-row items-center gap-3 px-4 md:px-8"
+            role="navigation"
+            style={[styles.headerInner, styles.headerInnerDesktop]}
+            testID="web-header-frame"
+          >
+            <Link href="/" asChild>
+              <Pressable
+                accessibilityLabel="Todam, accueil"
+                accessibilityRole="link"
+                className="min-h-11 justify-center"
+                testID="global-home-logo"
+              >
+                <Image
+                  accessibilityIgnoresInvertColors
+                  accessible={false}
+                  resizeMode="contain"
+                  source={horizontalLogo}
+                  style={styles.logo}
+                />
+                <Text className="sr-only">Todam</Text>
+              </Pressable>
+            </Link>
+
+            <View style={styles.search}>
+              {!pathname.startsWith("/search") ? (
+                <HeaderSearch
+                  initialValue={searchParameter}
+                  key={`${pathname}?q=${searchParameter}`}
+                />
+              ) : null}
+            </View>
+            <View
+              accessibilityLabel="Navigation du compte"
+              className="flex-row items-center gap-1"
+              role="navigation"
+              testID="web-primary-navigation"
+            >
+              {navigation.map((item) => {
+                const active = pathname.startsWith(item.href);
+                return (
+                  <Link href={item.href} key={item.href} asChild>
+                    <Pressable
+                      accessibilityRole="link"
+                      aria-current={active ? "page" : undefined}
+                      className="min-h-11 justify-center px-3"
+                      style={active ? styles.activeNavigation : undefined}
+                    >
+                      <Text
+                        className={`text-base font-semibold ${
+                          active ? "text-accent" : "text-ink"
+                        }`}
+                      >
+                        {item.label}
+                      </Text>
+                    </Pressable>
+                  </Link>
+                );
+              })}
               <Link href={session.data ? "/profile" : "/sign-in"} asChild>
                 <Pressable
                   accessibilityLabel={session.data ? "Mon profil" : "Se connecter"}
                   accessibilityRole="link"
-                  className="h-11 w-11 items-center justify-center rounded-full border border-control"
+                  className="ml-1 h-11 min-w-11 items-center justify-center rounded-full border border-control px-3"
                 >
-                  <Ionicons
-                    color="#151515"
-                    name={session.data ? "person-outline" : "log-in-outline"}
-                    size={21}
-                  />
+                  {session.data ? (
+                    <Ionicons color="#151515" name="person-outline" size={20} />
+                  ) : (
+                    <Text className="text-base font-semibold text-ink">Connexion</Text>
+                  )}
                 </Pressable>
               </Link>
             </View>
-          ) : (
-            <>
-              <View style={styles.search}>
-                {!pathname.startsWith("/search") ? (
-                  <HeaderSearch
-                    initialValue={searchParameter}
-                    key={`${pathname}?q=${searchParameter}`}
-                  />
-                ) : null}
-              </View>
-              <View
-                accessibilityLabel="Navigation du compte"
-                className="flex-row items-center gap-1"
-                role="navigation"
-                testID="web-primary-navigation"
-              >
-                {navigation.map((item) => {
-                  const baseHref = item.href.split("?")[0]!;
-                  const active = pathname.startsWith(baseHref);
-                  return (
-                    <Link href={item.href} key={item.href} asChild>
-                      <Pressable
-                        accessibilityRole="link"
-                        aria-current={active ? "page" : undefined}
-                        className="min-h-11 justify-center px-3"
-                        style={active ? styles.activeNavigation : undefined}
-                      >
-                        <Text
-                          className={`text-base font-semibold ${
-                            active ? "text-accent" : "text-ink"
-                          }`}
-                        >
-                          {item.label}
-                        </Text>
-                      </Pressable>
-                    </Link>
-                  );
-                })}
-                <Link href={session.data ? "/profile" : "/sign-in"} asChild>
-                  <Pressable
-                    accessibilityLabel={session.data ? "Mon profil" : "Se connecter"}
-                    accessibilityRole="link"
-                    className="ml-1 h-11 min-w-11 items-center justify-center rounded-full border border-control px-3"
-                  >
-                    {session.data ? (
-                      <Ionicons color="#151515" name="person-outline" size={20} />
-                    ) : (
-                      <Text className="text-base font-semibold text-ink">Connexion</Text>
-                    )}
-                  </Pressable>
-                </Link>
-              </View>
-            </>
-          )}
+          </View>
         </View>
-      </View>
+      ) : !primaryMobilePath ? (
+        <View
+          className={`todam-web-header bg-paper ${
+            isScrolled ? "todam-web-header--scrolled" : ""
+          }`}
+          role="banner"
+          style={styles.header}
+        >
+          <View
+            accessibilityLabel="Navigation contextuelle"
+            className="mx-auto w-full max-w-content flex-row items-center gap-2 px-3"
+            role="navigation"
+            style={styles.headerInner}
+            testID="web-context-header"
+          >
+            <Pressable
+              accessibilityLabel="Retour"
+              accessibilityRole="button"
+              className="h-11 w-11 items-center justify-center"
+              onPress={() => {
+                if (router.canGoBack()) {
+                  router.back();
+                } else {
+                  router.replace(mobileContext.fallback as Href);
+                }
+              }}
+            >
+              <Ionicons color="#151515" name="arrow-back" size={24} />
+            </Pressable>
+            <Text
+              className="min-w-0 flex-1 text-lg font-semibold text-ink"
+              numberOfLines={1}
+            >
+              {mobileContext.title}
+            </Text>
+          </View>
+        </View>
+      ) : null}
 
       {mobile ? (
         <View
@@ -261,14 +264,14 @@ export function WebNavigation() {
           testID="web-mobile-navigation"
         >
           {mobileNavigation.map((item) => {
-            const baseHref = item.href.split("?")[0]!;
-            const active = pathname.startsWith(baseHref);
+            const active =
+              item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
             return (
               <Link href={item.href} key={item.href} asChild>
                 <Pressable
                   accessibilityRole="link"
                   aria-current={active ? "page" : undefined}
-                  className="min-h-16 flex-1 items-center justify-center gap-1"
+                  className="min-h-16 flex-1 items-center justify-center gap-1 px-0.5"
                 >
                   <Ionicons
                     color={active ? "#C43D28" : "#6F6B64"}
@@ -276,9 +279,12 @@ export function WebNavigation() {
                     size={21}
                   />
                   <Text
-                    className={`text-[11px] font-semibold ${
+                    className={`text-[10px] font-semibold ${
                       active ? "text-accent" : "text-muted"
                     }`}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                    minimumFontScale={0.82}
                   >
                     {item.label}
                   </Text>
@@ -318,9 +324,5 @@ const styles = StyleSheet.create({
   search: {
     flex: 1,
     minWidth: 180,
-  },
-  symbol: {
-    height: 38,
-    width: 38,
   },
 });

@@ -21,6 +21,7 @@ type KeyboardEventLike = {
 
 export function AccessibleTabs<Value extends string>({
   appearance = "underline",
+  compactOnMobile = false,
   label,
   onChange,
   tabs,
@@ -28,6 +29,7 @@ export function AccessibleTabs<Value extends string>({
   value,
 }: {
   appearance?: "boxed" | "underline";
+  compactOnMobile?: boolean;
   label: string;
   onChange: (value: Value) => void;
   tabs: readonly AccessibleTabItem<Value>[];
@@ -90,12 +92,15 @@ export function AccessibleTabs<Value extends string>({
               appearance === "boxed" &&
                 (selected ? styles.boxedSelected : styles.boxedIdle),
               appearance === "underline" && selected && styles.underlineSelected,
-              appearance === "underline" && width < 640 && styles.mobileUnderlineTab,
+              appearance === "underline" &&
+                width < 640 &&
+                (compactOnMobile ? styles.compactMobileTab : styles.mobileUnderlineTab),
               pressed && styles.pressed,
             ]}
             testID={`${testIdPrefix}-${tab.value}`}
           >
             <Text
+              adjustsFontSizeToFit={compactOnMobile}
               className={`text-base font-semibold ${
                 selected
                   ? "text-accent"
@@ -103,6 +108,8 @@ export function AccessibleTabs<Value extends string>({
                     ? "text-ink"
                     : "text-muted"
               }`}
+              minimumFontScale={compactOnMobile ? 0.78 : undefined}
+              numberOfLines={compactOnMobile ? 1 : undefined}
             >
               {tab.label}
             </Text>
@@ -127,6 +134,11 @@ const styles = StyleSheet.create({
   boxedSelected: {
     backgroundColor: "#FCEFEA",
     borderColor: "#C43D28",
+  },
+  compactMobileTab: {
+    flex: 1,
+    minWidth: 0,
+    paddingHorizontal: 5,
   },
   pressed: {
     opacity: 0.72,

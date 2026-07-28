@@ -47,8 +47,7 @@ export function LegalFooter({ alwaysVisible = false }: { alwaysVisible?: boolean
   const productLinks = session.data
     ? [
         { href: "/decouvrir" as const, label: "Découvrir" },
-        { href: "/journal" as const, label: "Journal" },
-        { href: "/listes" as const, label: "Listes" },
+        { href: "/journal" as const, label: "Mes spectacles" },
       ]
     : [
         { href: "/decouvrir" as const, label: "Découvrir" },

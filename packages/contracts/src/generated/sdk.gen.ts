@@ -109,6 +109,9 @@ import type {
   GetV1MeReviewsData,
   GetV1MeReviewsErrors,
   GetV1MeReviewsResponses,
+  GetV1MeShowsData,
+  GetV1MeShowsErrors,
+  GetV1MeShowsResponses,
   GetV1MeWatchlistData,
   GetV1MeWatchlistErrors,
   GetV1MeWatchlistResponses,
@@ -767,6 +770,28 @@ export const getV1MeDashboard = <ThrowOnError extends boolean = false>(
       },
     ],
     url: "/v1/me/dashboard",
+    ...options,
+  });
+
+/**
+ * Consulte et filtre ses spectacles personnels
+ */
+export const getV1MeShows = <ThrowOnError extends boolean = false>(
+  options: Options<GetV1MeShowsData, ThrowOnError>,
+): RequestResult<GetV1MeShowsResponses, GetV1MeShowsErrors, ThrowOnError> =>
+  (options.client ?? client).get<
+    GetV1MeShowsResponses,
+    GetV1MeShowsErrors,
+    ThrowOnError
+  >({
+    security: [
+      {
+        in: "cookie",
+        name: "better-auth.session_token",
+        type: "apiKey",
+      },
+    ],
+    url: "/v1/me/shows",
     ...options,
   });
 
@@ -1935,7 +1960,7 @@ export const getV1AdminCompanyClaims = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * approved une revendication de compagnie
+ * Approuve une revendication de compagnie
  */
 export const postV1AdminCompanyClaimsByClaimIdApproved = <
   ThrowOnError extends boolean = false,
@@ -1967,7 +1992,7 @@ export const postV1AdminCompanyClaimsByClaimIdApproved = <
   });
 
 /**
- * rejected une revendication de compagnie
+ * Refuse une revendication de compagnie
  */
 export const postV1AdminCompanyClaimsByClaimIdRejected = <
   ThrowOnError extends boolean = false,
@@ -1999,7 +2024,7 @@ export const postV1AdminCompanyClaimsByClaimIdRejected = <
   });
 
 /**
- * revoked une revendication de compagnie
+ * Révoque une revendication de compagnie
  */
 export const postV1AdminCompanyClaimsByClaimIdRevoked = <
   ThrowOnError extends boolean = false,
@@ -2057,7 +2082,7 @@ export const getV1AdminCatalogRevisions = <ThrowOnError extends boolean = false>
   });
 
 /**
- * approved une révision du catalogue
+ * Approuve une révision du catalogue
  */
 export const postV1AdminCatalogRevisionsByRevisionIdApproved = <
   ThrowOnError extends boolean = false,
@@ -2089,7 +2114,7 @@ export const postV1AdminCatalogRevisionsByRevisionIdApproved = <
   });
 
 /**
- * rejected une révision du catalogue
+ * Refuse une révision du catalogue
  */
 export const postV1AdminCatalogRevisionsByRevisionIdRejected = <
   ThrowOnError extends boolean = false,

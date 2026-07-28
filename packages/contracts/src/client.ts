@@ -54,6 +54,8 @@ import type {
   CreateListBody,
   MemberJournalQuery,
   MemberJournalResponse,
+  MyShowsQuery,
+  MyShowsResponse,
   ProfileSettings,
   OwnReview,
   PublicMember,
@@ -66,6 +68,7 @@ import type {
   UserListSummary,
   WatchlistItem,
 } from "./member.js";
+import { MyShowsResponseSchema } from "./member.js";
 import {
   CatalogCandidatesResponseSchema,
   ContentReportSchema,
@@ -147,6 +150,7 @@ export interface TodamApiClient {
   getMemberList(username: string, slug: string): Promise<UserListDetail>;
   getProductionState(productionId: string): Promise<ViewerProductionState>;
   getDashboard(): Promise<Dashboard>;
+  getMyShows(query: MyShowsQuery): Promise<MyShowsResponse>;
   getProfileSettings(): Promise<ProfileSettings>;
   updateProfile(input: UpdateProfileBody): Promise<ProfileSettings>;
   getMyJournal(query?: Partial<MemberJournalQuery>): Promise<MemberJournalResponse>;
@@ -347,6 +351,8 @@ export function createTodamApiClient(options: TodamApiClientOptions): TodamApiCl
         ViewerProductionStateSchema,
       ),
     getDashboard: () => request("/v1/me/dashboard", DashboardSchema),
+    getMyShows: (query) =>
+      request(`/v1/me/shows${queryString(query)}`, MyShowsResponseSchema),
     getProfileSettings: () => request("/v1/me/profile", ProfileSettingsResponseSchema),
     updateProfile: (input) =>
       request("/v1/me/profile", ProfileSettingsResponseSchema, {

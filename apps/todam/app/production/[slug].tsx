@@ -287,11 +287,13 @@ export default function ProductionScreen() {
       }),
     onSuccess: (state) => {
       updateState(state);
-      setFeedback("Ajouté au journal. Vous pouvez préciser la date maintenant.");
+      setFeedback(
+        "Ajouté à vos spectacles vus. Vous pouvez préciser la date maintenant.",
+      );
       setShowSeenDetails(true);
       void diary.refetch();
     },
-    onError: () => setFeedback("L’ajout au journal a échoué. Réessayez."),
+    onError: () => setFeedback("L’ajout à vos spectacles a échoué. Réessayez."),
   });
   const ratingMutation = useMutation({
     mutationFn: (value: number) => api.setRating(productionId ?? "", value),
@@ -332,12 +334,12 @@ export default function ProductionScreen() {
     }) => {
       const sessions = await api.getProductionDiary(productionId ?? "");
       const entryId = sessions[0]?.id;
-      if (!entryId) throw new Error("Entrée du journal introuvable.");
+      if (!entryId) throw new Error("Spectacle vu introuvable.");
       await api.updateDiaryEntry(entryId, { performanceId, attendedOn });
     },
     onSuccess: () => {
       setShowSeenDetails(false);
-      setFeedback("La date du journal a été enregistrée.");
+      setFeedback("La date du spectacle vu a été enregistrée.");
       void queryClient.invalidateQueries({ queryKey: ["my-journal"] });
     },
     onError: () => setFeedback("La date n’a pas été enregistrée."),
@@ -1130,8 +1132,8 @@ export default function ProductionScreen() {
                       </Pressable>
                       {!viewerState.data?.seen ? (
                         <Text className="text-sm leading-5 text-muted">
-                          Ajoutez d’abord ce spectacle à votre journal pour publier un
-                          avis.
+                          Ajoutez d’abord ce spectacle à vos spectacles vus pour publier
+                          un avis.
                         </Text>
                       ) : null}
                       {viewerState.data?.review &&
@@ -1176,7 +1178,7 @@ export default function ProductionScreen() {
                               </Text>
                               <Text className="text-sm leading-5 text-muted">
                                 Le texte disparaîtra de votre profil et de cette fiche.
-                                Votre note et votre journal seront conservés.
+                                Votre note et votre historique resteront conservés.
                               </Text>
                               <View className="flex-row flex-wrap gap-2">
                                 <Button

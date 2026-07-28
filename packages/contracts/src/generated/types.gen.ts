@@ -3445,6 +3445,7 @@ export type GetV1MeDashboardResponses = {
       ratings: number;
       watchlist: number;
       lists: number;
+      reviews: number;
     };
     recentDiary: Array<{
       id: string;
@@ -3496,6 +3497,56 @@ export type GetV1MeDashboardResponses = {
       performanceId: string | null;
       attendedOn: string | null;
       createdAt: string;
+    }>;
+    recentRatings: Array<{
+      production: {
+        id: string;
+        slug: string;
+        title: string;
+        discipline: "theatre" | "opera" | "ballet";
+        audience: "general" | "family" | "children";
+        minimumAge: number | null;
+        workTitle: string | null;
+        primaryCredit: string | null;
+        company: {
+          id: string;
+          slug: string;
+          name: string;
+          officialUrl: string | null;
+        } | null;
+        venueNames: Array<string>;
+        nextPerformance: string | null;
+        nextVenue: {
+          id: string;
+          slug: string;
+          name: string;
+          locality: string;
+          countryCode: string;
+          timezone: string;
+          officialUrl: string | null;
+        } | null;
+        poster: {
+          id: string;
+          url: string;
+          kind: "poster" | "key_visual" | "photo" | "logo";
+          alt: string | null;
+          credit: string;
+          copyrightHolder: string | null;
+          license: string | null;
+          rightsStatus:
+            | "permission_granted"
+            | "open_license"
+            | "contractual_display"
+            | "hotlink_only"
+            | "todam_original";
+          sourceUrl: string;
+          width: number | null;
+          height: number | null;
+        } | null;
+      };
+      value: number;
+      ratedAt: string;
+      hasReview: boolean;
     }>;
     ratingDistribution: Array<{
       value: number;
@@ -3551,6 +3602,217 @@ export type GetV1MeDashboardResponses = {
 
 export type GetV1MeDashboardResponse =
   GetV1MeDashboardResponses[keyof GetV1MeDashboardResponses];
+
+export type GetV1MeShowsData = {
+  body?: never;
+  path?: never;
+  query: {
+    section: "watchlist" | "seen" | "rated";
+    q?: string;
+    discipline?: "theatre" | "opera" | "ballet";
+    venue?: string;
+    year?: number;
+    communityRating?: number;
+    myRating?: number;
+    hasReview?: boolean;
+    upcoming?: "7d" | "30d" | "90d" | "none";
+    sort?: "recent" | "title" | "community-rating" | "my-rating" | "next-performance";
+    cursor?: string | null;
+    limit?: number;
+  };
+  url: "/v1/me/shows";
+};
+
+export type GetV1MeShowsErrors = {
+  /**
+   * Default Response
+   */
+  400: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  401: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  404: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+};
+
+export type GetV1MeShowsError = GetV1MeShowsErrors[keyof GetV1MeShowsErrors];
+
+export type GetV1MeShowsResponses = {
+  /**
+   * Default Response
+   */
+  200: {
+    items: Array<{
+      production: {
+        id: string;
+        slug: string;
+        title: string;
+        discipline: "theatre" | "opera" | "ballet";
+        audience: "general" | "family" | "children";
+        minimumAge: number | null;
+        workTitle: string | null;
+        primaryCredit: string | null;
+        company: {
+          id: string;
+          slug: string;
+          name: string;
+          officialUrl: string | null;
+        } | null;
+        venueNames: Array<string>;
+        nextPerformance: string | null;
+        nextVenue: {
+          id: string;
+          slug: string;
+          name: string;
+          locality: string;
+          countryCode: string;
+          timezone: string;
+          officialUrl: string | null;
+        } | null;
+        poster: {
+          id: string;
+          url: string;
+          kind: "poster" | "key_visual" | "photo" | "logo";
+          alt: string | null;
+          credit: string;
+          copyrightHolder: string | null;
+          license: string | null;
+          rightsStatus:
+            | "permission_granted"
+            | "open_license"
+            | "contractual_display"
+            | "hotlink_only"
+            | "todam_original";
+          sourceUrl: string;
+          width: number | null;
+          height: number | null;
+        } | null;
+      };
+      section: "watchlist" | "seen" | "rated";
+      diaryEntryId: string | null;
+      seenCount: number;
+      addedAt: string | null;
+      attendedOn: string | null;
+      ratedAt: string | null;
+      myRating: number | null;
+      communityRating: {
+        average: number | null;
+        count: number;
+      };
+      review: {
+        id: string;
+        body: string;
+        containsSpoiler: boolean;
+        visibility: "public" | "private";
+        status: "published" | "hidden" | "rejected";
+        createdAt: string;
+        updatedAt: string;
+      } | null;
+    }>;
+    nextCursor: string | null;
+    total: number;
+    facets: {
+      disciplines: Array<{
+        value: "theatre" | "opera" | "ballet";
+        count: number;
+      }>;
+      venues: Array<{
+        value: string;
+        count: number;
+      }>;
+      years: Array<{
+        value: number;
+        count: number;
+      }>;
+      communityRatings: Array<{
+        value: number;
+        count: number;
+      }>;
+      myRatings: Array<{
+        value: number;
+        count: number;
+      }>;
+      reviews: Array<{
+        value: "with" | "without";
+        count: number;
+      }>;
+      upcoming: Array<{
+        value: "7d" | "30d" | "90d" | "none";
+        count: number;
+      }>;
+    };
+  };
+};
+
+export type GetV1MeShowsResponse = GetV1MeShowsResponses[keyof GetV1MeShowsResponses];
 
 export type GetV1MeProfileData = {
   body?: never;
@@ -3649,6 +3911,7 @@ export type GetV1MeProfileResponses = {
     username: string;
     bio: string | null;
     profileVisibility: "public" | "private";
+    memberSince: string;
   };
 };
 
@@ -3756,6 +4019,7 @@ export type PatchV1MeProfileResponses = {
     username: string;
     bio: string | null;
     profileVisibility: "public" | "private";
+    memberSince: string;
   };
 };
 

@@ -499,8 +499,8 @@ export default function AccountSettingsScreen() {
               </Text>
               <Text className="text-lg font-bold text-ink">Supprimer mon compte</Text>
               <Text className="text-base leading-6 text-muted">
-                La suppression effacera ton journal, tes notes, tes avis et tes listes.
-                Les contributions professionnelles déjà publiées resteront dans
+                La suppression effacera tes spectacles vus, tes notes, tes avis et tes
+                listes. Les contributions professionnelles déjà publiées resteront dans
                 l’historique sans être rattachées à ton identité. Elle devra être
                 confirmée depuis l’e-mail envoyé par Todam.
               </Text>

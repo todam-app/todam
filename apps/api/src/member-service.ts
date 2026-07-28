@@ -4,6 +4,10 @@ import type {
   CreateListBody,
   MemberJournalQuery,
   MemberJournalResponse,
+  MyShowItem,
+  MyShowsFacets,
+  MyShowsQuery,
+  MyShowsResponse,
   OwnReview,
   ProfileSettings,
   PublicMember,
@@ -32,7 +36,7 @@ import {
   works,
   type TodamDatabase,
 } from "@todam/database";
-import { and, asc, count, desc, eq, ne, or, sql } from "drizzle-orm";
+import { and, asc, count, desc, eq, inArray, ne, or, sql } from "drizzle-orm";
 
 import { cardFields, mapCard, type CardRow } from "./catalog-service.js";
 import { currentFrenchCalendarDate } from "./calendar.js";
@@ -63,6 +67,33 @@ function toSlug(value: string): string {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "")
     .slice(0, 100);
+}
+
+function normalizeFilterValue(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLocaleLowerCase("fr")
+    .trim();
+}
+
+export function communityRatingBucket(average: number | null): number | null {
+  if (average === null) return null;
+  return average === 10 ? 10 : Math.floor(average);
+}
+
+function upcomingBucket(
+  nextPerformance: string | null,
+  now: Date,
+): "7d" | "30d" | "90d" | "none" | null {
+  if (!nextPerformance) return "none";
+  const difference = new Date(nextPerformance).getTime() - now.getTime();
+  if (difference < 0) return null;
+  const days = difference / 86_400_000;
+  if (days <= 7) return "7d";
+  if (days <= 30) return "30d";
+  if (days <= 90) return "90d";
+  return null;
 }
 
 export function createMemberService(database: TodamDatabase) {
@@ -217,10 +248,11 @@ export function createMemberService(database: TodamDatabase) {
     const knownAttendedDate = sql<string | null>`coalesce(
       ${diaryEntries.attendedOn},
       (
-        select (${performances.startsAt} at time zone ${venues.timezone})::date
-        from ${performances}
-        join ${venues} on ${venues.id} = ${performances.venueId}
-        where ${performances.id} = ${diaryEntries.performanceId}
+        select (personal_performance.starts_at at time zone personal_venue.timezone)::date
+        from performances personal_performance
+        join venues personal_venue
+          on personal_venue.id = personal_performance.venue_id
+        where personal_performance.id = ${diaryEntries.performanceId}
       )
     )`;
     const effectiveDate = sql`coalesce(
@@ -308,6 +340,442 @@ export function createMemberService(database: TodamDatabase) {
         hasReview: row.reviewId !== null,
       })),
       nextCursor: hasMore ? encodeCursor(offset + input.limit) : null,
+    };
+  }
+
+  async function getPersonalShows(
+    userId: string,
+    input: MyShowsQuery,
+  ): Promise<MyShowsResponse> {
+    type BaseRow = CardRow & {
+      sourceAddedAt: Date | null;
+      sourceAttendedOn: string | null;
+      sourceDiaryEntryId: string | null;
+    };
+
+    const knownAttendedDate = sql<string | null>`coalesce(
+      ${diaryEntries.attendedOn},
+      (
+        select (personal_performance.starts_at at time zone personal_venue.timezone)::date
+        from performances personal_performance
+        join venues personal_venue
+          on personal_venue.id = personal_performance.venue_id
+        where personal_performance.id = ${diaryEntries.performanceId}
+      )
+    )`;
+
+    let baseRows: BaseRow[];
+    if (input.section === "watchlist") {
+      const rows = await database
+        .select({
+          sourceAddedAt: watchlistEntries.addedAt,
+          sourceAttendedOn: sql<null>`null`,
+          sourceDiaryEntryId: sql<null>`null`,
+          ...cardFields,
+        })
+        .from(watchlistEntries)
+        .innerJoin(productions, eq(productions.id, watchlistEntries.productionId))
+        .leftJoin(works, eq(works.id, productions.workId))
+        .where(
+          and(
+            eq(watchlistEntries.userId, userId),
+            eq(productions.isActive, true),
+            eq(productions.publicationStatus, "published"),
+          ),
+        )
+        .orderBy(desc(watchlistEntries.addedAt));
+      baseRows = rows as BaseRow[];
+    } else if (input.section === "seen") {
+      const rows = await database
+        .select({
+          sourceAddedAt: diaryEntries.createdAt,
+          sourceAttendedOn: knownAttendedDate,
+          sourceDiaryEntryId: diaryEntries.id,
+          ...cardFields,
+        })
+        .from(diaryEntries)
+        .innerJoin(productions, eq(productions.id, diaryEntries.productionId))
+        .leftJoin(works, eq(works.id, productions.workId))
+        .where(
+          and(
+            eq(diaryEntries.userId, userId),
+            eq(productions.isActive, true),
+            eq(productions.publicationStatus, "published"),
+          ),
+        )
+        .orderBy(desc(knownAttendedDate), desc(diaryEntries.createdAt));
+      baseRows = rows as BaseRow[];
+    } else {
+      const rows = await database
+        .select({
+          sourceAddedAt: ratings.createdAt,
+          sourceAttendedOn: sql<null>`null`,
+          sourceDiaryEntryId: sql<null>`null`,
+          ...cardFields,
+        })
+        .from(ratings)
+        .innerJoin(productions, eq(productions.id, ratings.productionId))
+        .leftJoin(works, eq(works.id, productions.workId))
+        .where(
+          and(
+            eq(ratings.userId, userId),
+            eq(productions.isActive, true),
+            eq(productions.publicationStatus, "published"),
+          ),
+        )
+        .orderBy(desc(ratings.updatedAt));
+      baseRows = rows as BaseRow[];
+    }
+
+    const baseByProduction = new Map<string, { row: BaseRow; seenCount: number }>();
+    for (const row of baseRows) {
+      const existing = baseByProduction.get(row.id);
+      if (existing) {
+        existing.seenCount += 1;
+      } else {
+        baseByProduction.set(row.id, {
+          row,
+          seenCount: input.section === "seen" ? 1 : 0,
+        });
+      }
+    }
+    const productionIds = [...baseByProduction.keys()];
+    if (productionIds.length === 0) {
+      return {
+        items: [],
+        nextCursor: null,
+        total: 0,
+        facets: {
+          disciplines: [],
+          venues: [],
+          years: [],
+          communityRatings: [],
+          myRatings: [],
+          reviews: [],
+          upcoming: [],
+        },
+      };
+    }
+
+    const personalRatingRows = await database
+      .select({
+        productionId: ratings.productionId,
+        value: ratings.value,
+        ratedAt: ratings.updatedAt,
+      })
+      .from(ratings)
+      .where(
+        and(eq(ratings.userId, userId), inArray(ratings.productionId, productionIds)),
+      );
+    const personalReviewRows = await database
+      .select({
+        productionId: reviews.productionId,
+        id: reviews.id,
+        body: reviews.body,
+        containsSpoiler: reviews.containsSpoiler,
+        visibility: reviews.visibility,
+        status: reviews.status,
+        createdAt: reviews.createdAt,
+        updatedAt: reviews.updatedAt,
+      })
+      .from(reviews)
+      .where(
+        and(eq(reviews.userId, userId), inArray(reviews.productionId, productionIds)),
+      );
+    const communityRatingRows = await database
+      .select({
+        productionId: ratings.productionId,
+        average: sql<string | null>`avg(${ratings.value})`,
+        total: count(),
+      })
+      .from(ratings)
+      .where(
+        and(inArray(ratings.productionId, productionIds), ne(ratings.userId, userId)),
+      )
+      .groupBy(ratings.productionId);
+    const personalDiaryRows = await database
+      .select({
+        productionId: diaryEntries.productionId,
+        id: diaryEntries.id,
+        attendedOn: knownAttendedDate,
+        addedAt: diaryEntries.createdAt,
+      })
+      .from(diaryEntries)
+      .where(
+        and(
+          eq(diaryEntries.userId, userId),
+          inArray(diaryEntries.productionId, productionIds),
+        ),
+      )
+      .orderBy(desc(knownAttendedDate), desc(diaryEntries.createdAt));
+
+    const personalRatings = new Map(
+      personalRatingRows.map((row) => [row.productionId, row]),
+    );
+    const personalReviews = new Map(
+      personalReviewRows.map((row) => [
+        row.productionId,
+        {
+          id: row.id,
+          body: row.body,
+          containsSpoiler: row.containsSpoiler,
+          visibility: row.visibility,
+          status: row.status,
+          createdAt: row.createdAt.toISOString(),
+          updatedAt: row.updatedAt.toISOString(),
+        },
+      ]),
+    );
+    const communityRatings = new Map(
+      communityRatingRows.map((row) => [
+        row.productionId,
+        {
+          average: row.average === null ? null : Number(row.average),
+          count: Number(row.total),
+        },
+      ]),
+    );
+    const diaries = new Map<
+      string,
+      {
+        id: string;
+        attendedOn: string | null;
+        addedAt: Date;
+        count: number;
+      }
+    >();
+    for (const row of personalDiaryRows) {
+      const current = diaries.get(row.productionId);
+      if (current) {
+        current.count += 1;
+      } else {
+        diaries.set(row.productionId, { ...row, count: 1 });
+      }
+    }
+
+    const allItems: MyShowItem[] = [...baseByProduction.values()].map(
+      ({ row, seenCount }) => {
+        const personalRating = personalRatings.get(row.id);
+        const diary = diaries.get(row.id);
+        return {
+          production: mapCard(row),
+          section: input.section,
+          diaryEntryId: diary?.id ?? row.sourceDiaryEntryId,
+          seenCount: diary?.count ?? seenCount,
+          addedAt:
+            input.section === "watchlist"
+              ? (row.sourceAddedAt?.toISOString() ?? null)
+              : (diary?.addedAt.toISOString() ??
+                row.sourceAddedAt?.toISOString() ??
+                null),
+          attendedOn: diary?.attendedOn ?? row.sourceAttendedOn,
+          ratedAt: personalRating?.ratedAt.toISOString() ?? null,
+          myRating: personalRating?.value ?? null,
+          communityRating: communityRatings.get(row.id) ?? {
+            average: null,
+            count: 0,
+          },
+          review: personalReviews.get(row.id) ?? null,
+        };
+      },
+    );
+
+    type FacetName =
+      | "communityRating"
+      | "discipline"
+      | "myRating"
+      | "review"
+      | "upcoming"
+      | "venue"
+      | "year";
+
+    function matches(item: MyShowItem, omitted?: FacetName): boolean {
+      const normalizedQuery = normalizeFilterValue(input.q);
+      if (normalizedQuery) {
+        const searchable = normalizeFilterValue(
+          [
+            item.production.title,
+            item.production.workTitle,
+            item.production.primaryCredit,
+            item.production.company?.name,
+            ...item.production.venueNames,
+          ]
+            .filter(Boolean)
+            .join(" "),
+        );
+        if (!searchable.includes(normalizedQuery)) return false;
+      }
+      if (
+        omitted !== "discipline" &&
+        input.discipline &&
+        item.production.discipline !== input.discipline
+      ) {
+        return false;
+      }
+      if (omitted !== "venue" && input.venue) {
+        const venue = normalizeFilterValue(input.venue);
+        if (
+          !item.production.venueNames.some((name) =>
+            normalizeFilterValue(name).includes(venue),
+          )
+        ) {
+          return false;
+        }
+      }
+      if (omitted !== "year" && input.year) {
+        if (!item.attendedOn || Number(item.attendedOn.slice(0, 4)) !== input.year) {
+          return false;
+        }
+      }
+      if (omitted !== "communityRating" && input.communityRating) {
+        if (
+          communityRatingBucket(item.communityRating.average) !== input.communityRating
+        ) {
+          return false;
+        }
+      }
+      if (
+        omitted !== "myRating" &&
+        input.myRating &&
+        item.myRating !== input.myRating
+      ) {
+        return false;
+      }
+      if (omitted !== "review" && input.hasReview !== undefined) {
+        if (Boolean(item.review) !== input.hasReview) return false;
+      }
+      if (omitted !== "upcoming" && input.upcoming) {
+        if (
+          upcomingBucket(item.production.nextPerformance, new Date()) !== input.upcoming
+        ) {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    function sorted(items: MyShowItem[]): MyShowItem[] {
+      const french = new Intl.Collator("fr");
+      return [...items].sort((left, right) => {
+        if (input.sort === "title") {
+          return french.compare(left.production.title, right.production.title);
+        }
+        if (input.sort === "community-rating") {
+          return (
+            (right.communityRating.average ?? -1) - (left.communityRating.average ?? -1)
+          );
+        }
+        if (input.sort === "my-rating") {
+          return (right.myRating ?? -1) - (left.myRating ?? -1);
+        }
+        if (input.sort === "next-performance") {
+          const leftDate = left.production.nextPerformance
+            ? new Date(left.production.nextPerformance).getTime()
+            : Number.POSITIVE_INFINITY;
+          const rightDate = right.production.nextPerformance
+            ? new Date(right.production.nextPerformance).getTime()
+            : Number.POSITIVE_INFINITY;
+          return leftDate - rightDate;
+        }
+        const recentDate = (item: MyShowItem) =>
+          new Date(
+            input.section === "rated"
+              ? (item.ratedAt ?? item.addedAt ?? 0)
+              : input.section === "seen"
+                ? item.attendedOn
+                  ? `${item.attendedOn}T12:00:00Z`
+                  : (item.addedAt ?? 0)
+                : (item.addedAt ?? 0),
+          ).getTime();
+        return recentDate(right) - recentDate(left);
+      });
+    }
+
+    function countStrings(values: string[]): { value: string; count: number }[] {
+      const counts = new Map<string, number>();
+      for (const value of values) {
+        counts.set(value, (counts.get(value) ?? 0) + 1);
+      }
+      return [...counts.entries()]
+        .map(([value, facetCount]) => ({ value, count: facetCount }))
+        .sort((left, right) => left.value.localeCompare(right.value, "fr"));
+    }
+
+    function countRatings(
+      values: (number | null)[],
+    ): { value: number; count: number }[] {
+      const counts = new Map<number, number>();
+      for (const value of values) {
+        if (value === null) continue;
+        counts.set(value, (counts.get(value) ?? 0) + 1);
+      }
+      return [...counts.entries()]
+        .map(([value, facetCount]) => ({ value, count: facetCount }))
+        .sort((left, right) => left.value - right.value);
+    }
+
+    const disciplineItems = allItems.filter((item) => matches(item, "discipline"));
+    const venueItems = allItems.filter((item) => matches(item, "venue"));
+    const yearItems = allItems.filter((item) => matches(item, "year"));
+    const communityItems = allItems.filter((item) => matches(item, "communityRating"));
+    const personalRatingItems = allItems.filter((item) => matches(item, "myRating"));
+    const reviewItems = allItems.filter((item) => matches(item, "review"));
+    const upcomingItems = allItems.filter((item) => matches(item, "upcoming"));
+
+    const disciplineCounts = countStrings(
+      disciplineItems.map((item) => item.production.discipline),
+    );
+    const reviewCounts = {
+      with: reviewItems.filter((item) => item.review).length,
+      without: reviewItems.filter((item) => !item.review).length,
+    };
+    const facets: MyShowsFacets = {
+      disciplines: disciplineCounts.map((facet) => ({
+        value: facet.value as MyShowItem["production"]["discipline"],
+        count: facet.count,
+      })),
+      venues: countStrings(venueItems.flatMap((item) => item.production.venueNames)),
+      years: countStrings(
+        yearItems.flatMap((item) =>
+          item.attendedOn ? [item.attendedOn.slice(0, 4)] : [],
+        ),
+      ).map((facet) => ({ value: Number(facet.value), count: facet.count })),
+      communityRatings: countRatings(
+        communityItems.map((item) =>
+          communityRatingBucket(item.communityRating.average),
+        ),
+      ),
+      myRatings: countRatings(personalRatingItems.map((item) => item.myRating)),
+      reviews: [
+        ...(reviewCounts.with > 0
+          ? [{ value: "with" as const, count: reviewCounts.with }]
+          : []),
+        ...(reviewCounts.without > 0
+          ? [{ value: "without" as const, count: reviewCounts.without }]
+          : []),
+      ],
+      upcoming: countStrings(
+        upcomingItems.flatMap((item) => {
+          const value = upcomingBucket(item.production.nextPerformance, new Date());
+          return value ? [value] : [];
+        }),
+      ).map((facet) => ({
+        value: facet.value as "7d" | "30d" | "90d" | "none",
+        count: facet.count,
+      })),
+    };
+
+    const filtered = sorted(allItems.filter((item) => matches(item)));
+    const offset = decodeCursor(input.cursor);
+    const page = filtered.slice(offset, offset + input.limit);
+    return {
+      items: page,
+      nextCursor:
+        offset + input.limit < filtered.length
+          ? encodeCursor(offset + input.limit)
+          : null,
+      total: filtered.length,
+      facets,
     };
   }
 
@@ -553,12 +1021,17 @@ export function createMemberService(database: TodamDatabase) {
       return getJournal(userId, input, false);
     },
 
+    getMyShows(userId: string, input: MyShowsQuery): Promise<MyShowsResponse> {
+      return getPersonalShows(userId, input);
+    },
+
     async getProfileSettings(userId: string): Promise<ProfileSettings> {
       const rows = await database
         .select({
           username: user.pseudonym,
           bio: user.bio,
           profileVisibility: user.profileVisibility,
+          memberSince: user.createdAt,
         })
         .from(user)
         .where(eq(user.id, userId))
@@ -571,7 +1044,10 @@ export function createMemberService(database: TodamDatabase) {
           "Votre profil est introuvable.",
         );
       }
-      return profile;
+      return {
+        ...profile,
+        memberSince: profile.memberSince.toISOString(),
+      };
     },
 
     async updateProfile(
@@ -592,6 +1068,7 @@ export function createMemberService(database: TodamDatabase) {
           username: user.pseudonym,
           bio: user.bio,
           profileVisibility: user.profileVisibility,
+          memberSince: user.createdAt,
         });
       const profile = rows[0];
       if (!profile) {
@@ -601,7 +1078,10 @@ export function createMemberService(database: TodamDatabase) {
           "Votre profil est introuvable.",
         );
       }
-      return profile;
+      return {
+        ...profile,
+        memberSince: profile.memberSince.toISOString(),
+      };
     },
 
     listMyLists(userId: string): Promise<UserListSummary[]> {

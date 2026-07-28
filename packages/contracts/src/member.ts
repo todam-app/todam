@@ -129,8 +129,114 @@ export const ProfileSettingsSchema = z.object({
   username: z.string(),
   bio: z.string().nullable(),
   profileVisibility: ProfileVisibilitySchema,
+  memberSince: z.string().datetime({ offset: true }),
 });
 export type ProfileSettings = z.infer<typeof ProfileSettingsSchema>;
+
+export const MyShowsSectionSchema = z.enum(["watchlist", "seen", "rated"]);
+export type MyShowsSection = z.infer<typeof MyShowsSectionSchema>;
+
+export const MyShowsSortSchema = z.enum([
+  "recent",
+  "title",
+  "community-rating",
+  "my-rating",
+  "next-performance",
+]);
+export type MyShowsSort = z.infer<typeof MyShowsSortSchema>;
+
+export const MyShowsUpcomingSchema = z.enum(["7d", "30d", "90d", "none"]);
+export type MyShowsUpcoming = z.infer<typeof MyShowsUpcomingSchema>;
+
+export const MyShowsQuerySchema = z.object({
+  section: MyShowsSectionSchema,
+  q: z.string().trim().max(100).default(""),
+  discipline: DisciplineSchema.optional(),
+  venue: z.string().trim().min(1).max(240).optional(),
+  year: z.coerce.number().int().min(1900).max(2200).optional(),
+  communityRating: z.coerce.number().int().min(1).max(10).optional(),
+  myRating: z.coerce.number().int().min(1).max(10).optional(),
+  hasReview: QueryBooleanSchema.optional(),
+  upcoming: MyShowsUpcomingSchema.optional(),
+  sort: MyShowsSortSchema.default("recent"),
+  cursor: z.string().nullable().optional(),
+  limit: z.coerce.number().int().min(1).max(50).default(20),
+});
+export type MyShowsQuery = z.infer<typeof MyShowsQuerySchema>;
+
+export const MyShowReviewSchema = OwnReviewSchema.omit({ production: true });
+export type MyShowReview = z.infer<typeof MyShowReviewSchema>;
+
+export const MyShowCommunityRatingSchema = z.object({
+  average: z.number().min(1).max(10).nullable(),
+  count: z.number().int().nonnegative(),
+});
+export type MyShowCommunityRating = z.infer<typeof MyShowCommunityRatingSchema>;
+
+export const MyShowItemSchema = z.object({
+  production: ProductionCardSchema,
+  section: MyShowsSectionSchema,
+  diaryEntryId: UuidSchema.nullable(),
+  seenCount: z.number().int().nonnegative(),
+  addedAt: z.string().datetime({ offset: true }).nullable(),
+  attendedOn: z.string().date().nullable(),
+  ratedAt: z.string().datetime({ offset: true }).nullable(),
+  myRating: z.number().int().min(1).max(10).nullable(),
+  communityRating: MyShowCommunityRatingSchema,
+  review: MyShowReviewSchema.nullable(),
+});
+export type MyShowItem = z.infer<typeof MyShowItemSchema>;
+
+export const MyShowsCountFacetSchema = z.object({
+  value: z.string(),
+  count: z.number().int().nonnegative(),
+});
+export type MyShowsCountFacet = z.infer<typeof MyShowsCountFacetSchema>;
+
+export const MyShowsRatingFacetSchema = z.object({
+  value: z.number().int().min(1).max(10),
+  count: z.number().int().nonnegative(),
+});
+export type MyShowsRatingFacet = z.infer<typeof MyShowsRatingFacetSchema>;
+
+export const MyShowsFacetsSchema = z.object({
+  disciplines: z.array(
+    z.object({
+      value: DisciplineSchema,
+      count: z.number().int().nonnegative(),
+    }),
+  ),
+  venues: z.array(MyShowsCountFacetSchema),
+  years: z.array(
+    z.object({
+      value: z.number().int().min(1900).max(2200),
+      count: z.number().int().nonnegative(),
+    }),
+  ),
+  communityRatings: z.array(MyShowsRatingFacetSchema),
+  myRatings: z.array(MyShowsRatingFacetSchema),
+  reviews: z.array(
+    z.object({
+      value: z.enum(["with", "without"]),
+      count: z.number().int().nonnegative(),
+    }),
+  ),
+  upcoming: z.array(
+    z.object({
+      value: MyShowsUpcomingSchema,
+      count: z.number().int().nonnegative(),
+    }),
+  ),
+});
+export type MyShowsFacets = z.infer<typeof MyShowsFacetsSchema>;
+
+export const MyShowsResponseSchema = z.object({
+  items: z.array(MyShowItemSchema),
+  nextCursor: z.string().nullable(),
+  total: z.number().int().nonnegative(),
+  facets: MyShowsFacetsSchema,
+});
+export type MyShowsResponse = z.infer<typeof MyShowsResponseSchema>;
 
 const ListEditableFieldsSchema = z.object({
   name: z.string().trim().min(1).max(80),

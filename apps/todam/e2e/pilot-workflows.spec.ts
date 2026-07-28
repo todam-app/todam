@@ -283,9 +283,7 @@ test("une salle ouvre sa programmation puis une fiche spectacle alimentée par l
   ).toBeVisible();
 });
 
-test("le journal distingue les trois dates et une liste se réordonne au clavier", async ({
-  page,
-}) => {
+test("une liste se réordonne au clavier et change de visibilité", async ({ page }) => {
   await mockSession(page);
   let orderedItems = [firstCard, secondCard];
   let visibility: "public" | "private" = "public";
@@ -308,8 +306,16 @@ test("le journal distingue les trois dates et une liste se réordonne au clavier
   await page.route("**/v1/me/dashboard", (route) =>
     json(route, {
       profile: { pseudonym: "spectatrice-pilote" },
-      counts: { seen: 1, ratings: 1, watchlist: 0, lists: 1 },
+      counts: { seen: 1, ratings: 1, watchlist: 0, lists: 1, reviews: 1 },
       recentDiary: [],
+      recentRatings: [
+        {
+          production: firstCard,
+          value: 8,
+          ratedAt: "2026-07-22T10:00:00.000Z",
+          hasReview: true,
+        },
+      ],
       ratingDistribution: Array.from({ length: 10 }, (_, index) => ({
         value: index + 1,
         count: index === 7 ? 1 : 0,
@@ -322,6 +328,7 @@ test("le journal distingue les trois dates et une liste se réordonne au clavier
       username: "spectatrice-pilote",
       bio: null,
       profileVisibility: "public",
+      memberSince: now,
     }),
   );
   await page.route("**/v1/me/journal**", (route) =>
@@ -373,28 +380,23 @@ test("le journal distingue les trois dates et une liste se réordonne au clavier
     await json(route, { ok: true });
   });
 
-  await page.goto("/profile?tab=journal");
-  await expect(page.getByText("Vu le 20/07/2026")).toBeVisible();
-  await expect(page.getByText("Ajouté au journal le 21/07/2026")).toBeVisible();
-  await expect(page.getByText("Noté le 22/07/2026")).toBeVisible();
-
-  await page.getByRole("tab", { name: "Listes" }).click();
-  await page.getByRole("button", { name: /Grenoble 2027/ }).click();
+  await page.goto("/journal/listes");
+  await page.getByRole("link", { name: /Grenoble 2027/ }).click();
   const moveDown = page
-    .getByRole("button", { name: "Descendre dans la liste" })
+    .getByRole("button", { name: "Descendre Création pilote" })
     .first();
   await moveDown.focus();
   await page.keyboard.press("Enter");
-  await expect(page.getByText("L’ordre de la liste a été enregistré.")).toBeVisible();
+  await expect(page.getByText("L’ordre a été enregistré.")).toBeVisible();
   expect(orderedItems.map((item) => item.id)).toEqual([
     secondProductionId,
     productionId,
   ]);
 
-  await page.getByRole("button", { name: "Rendre privée" }).click();
-  await expect(
-    page.getByText("Cette liste est privée et ne possède pas de page partageable."),
-  ).toBeVisible();
+  await page.getByRole("radio", { name: "Privée" }).click();
+  await page.getByRole("button", { name: "Enregistrer" }).click();
+  await expect(page.getByText("La liste a été mise à jour.")).toBeVisible();
+  expect(visibility).toBe("private");
 });
 
 test("une compagnie revendique sa fiche avec une demande vérifiable", async ({

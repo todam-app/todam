@@ -96,8 +96,10 @@ async function mockAuthenticatedProfile(
           ratings: ratingDistribution.reduce((total, item) => total + item.count, 0),
           watchlist: 0,
           lists: 0,
+          reviews: 0,
         },
         recentDiary: [],
+        recentRatings: [],
         ratingDistribution,
         watchlist: [],
       }),
@@ -110,6 +112,26 @@ async function mockAuthenticatedProfile(
         username: "spectatrice-test",
         bio: null,
         profileVisibility: "public",
+        memberSince: now,
+      }),
+    });
+  });
+  await page.route("**/v1/me/shows**", async (route) => {
+    await route.fulfill({
+      contentType: "application/json",
+      body: JSON.stringify({
+        items: [],
+        nextCursor: null,
+        total: 0,
+        facets: {
+          disciplines: [],
+          venues: [],
+          years: [],
+          communityRatings: [],
+          myRatings: [],
+          reviews: [],
+          upcoming: [],
+        },
       }),
     });
   });
@@ -224,11 +246,11 @@ test("l'accueil connecté salue l'utilisateur et remplace le discours marketing"
     page.getByRole("heading", { exact: true, name: "À l’affiche en ce moment" }),
   ).toBeVisible();
   await expect(page.getByRole("link", { name: "Une pièce" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Ouvrir mon journal" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Ouvrir mes spectacles" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Gérer mes listes" })).toBeVisible();
 
   const [journalBox, listsBox] = await Promise.all([
-    page.getByRole("link", { name: "Ouvrir mon journal" }).boundingBox(),
+    page.getByRole("link", { name: "Ouvrir mes spectacles" }).boundingBox(),
     page.getByRole("link", { name: "Gérer mes listes" }).boundingBox(),
   ]);
   expect(journalBox).not.toBeNull();
@@ -480,7 +502,7 @@ test("les pages juridiques utilisent le fond Web commun", async ({ page }) => {
   expect(htmlBackground.image).toBe("none");
 });
 
-test("le profil ouvre les paramètres du compte et conserve le footer légal", async ({
+test("le profil sépare les informations, statistiques et paramètres du compte", async ({
   page,
 }) => {
   await mockAuthenticatedProfile(page);
@@ -490,15 +512,10 @@ test("le profil ouvre les paramètres du compte et conserve le footer légal", a
   await expect(
     page.getByRole("heading", { exact: true, name: "spectatrice-test" }),
   ).toBeVisible();
-  await expect(page.getByRole("tab", { name: "Journal" })).toBeVisible();
-  await expect(page.getByRole("tab", { name: "À voir" })).toBeVisible();
-  await expect(page.getByRole("tab", { name: "Listes" })).toBeVisible();
-  await expect(page.getByRole("tab", { name: "Avis" })).toBeVisible();
-  await expect(
-    page.getByText(
-      "Votre journal est vide. Recherchez un spectacle et marquez-le comme vu.",
-    ),
-  ).toBeVisible();
+  await expect(page.getByRole("tab", { name: "Informations" })).toBeVisible();
+  await expect(page.getByRole("tab", { name: "Statistiques" })).toBeVisible();
+  await expect(page.getByRole("tab", { name: "Paramètres" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Modifier mon profil" })).toBeVisible();
 
   await page.setViewportSize({ width: 375, height: 800 });
   expect(
@@ -506,12 +523,14 @@ test("le profil ouvre les paramètres du compte et conserve le footer légal", a
       () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
     ),
   ).toBe(false);
-  await expect(
-    page.getByRole("button", { name: "Rendre le journal privé" }),
-  ).toBeVisible();
+  await expect(page.getByTestId("web-mobile-navigation")).toBeVisible();
+  await expect(page.getByTestId("web-mobile-navigation").getByRole("link")).toHaveCount(
+    4,
+  );
 
   await page.setViewportSize({ width: 1440, height: 900 });
-  const settingsButton = page.getByRole("button", {
+  await page.getByRole("tab", { name: "Paramètres" }).click();
+  const settingsButton = page.getByRole("link", {
     name: "Paramètres du compte",
   });
   await expect(settingsButton).toBeVisible();
@@ -526,12 +545,6 @@ test("le profil ouvre les paramètres du compte et conserve le footer légal", a
   ).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Mentions légales" })).toHaveCount(0);
 
-  const footer = page.getByTestId("site-footer");
-  await expect(
-    footer.getByRole("link", { name: /Conditions d.utilisation/ }),
-  ).toBeVisible();
-  await expect(footer.getByRole("link", { name: "Confidentialité" })).toBeVisible();
-  await expect(footer.getByRole("link", { name: "Mentions légales" })).toBeVisible();
   await settingsButton.click();
   await expect(page).toHaveURL("/parametres-compte");
   await expect(
@@ -548,20 +561,107 @@ test("le profil ouvre les paramètres du compte et conserve le footer légal", a
   expect(emailSubmitWidth).toBeLessThan(400);
 
   await page.setViewportSize({ width: 375, height: 800 });
-  const [hasHorizontalOverflow, exportButtonWidth, deleteButtonWidth] =
-    await Promise.all([
-      page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth),
-      page
-        .getByRole("button", { name: "Exporter mes données" })
-        .evaluate((element) => element.getBoundingClientRect().width),
-      deleteButton.evaluate((element) => element.getBoundingClientRect().width),
-    ]);
+  const [hasHorizontalOverflow, deleteButtonWidth] = await Promise.all([
+    page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth),
+    deleteButton.evaluate((element) => element.getBoundingClientRect().width),
+  ]);
   expect(hasHorizontalOverflow).toBe(false);
-  expect(exportButtonWidth).toBeGreaterThan(250);
   expect(deleteButtonWidth).toBeGreaterThan(250);
 
   await deleteButton.click();
   await expect(page).toHaveURL("/supprimer-mon-compte");
+});
+
+test("Mes spectacles conserve ses filtres et tient à 320 px", async ({ page }) => {
+  await mockAuthenticatedProfile(page);
+  await page.unroute("**/v1/me/shows**");
+  await page.route("**/v1/me/shows**", async (route) => {
+    const url = new URL(route.request().url());
+    const selected = url.searchParams.get("myRating");
+    const item = {
+      production: {
+        id: "5aecf9f4-b9da-4da0-b8fa-8898e882d99f",
+        slug: "une-piece",
+        title: "Une pièce",
+        discipline: "theatre",
+        audience: "general",
+        minimumAge: null,
+        workTitle: null,
+        primaryCredit: "Compagnie Exemple",
+        company: null,
+        venueNames: ["Scène Exemple"],
+        nextPerformance: null,
+        nextVenue: null,
+        poster: null,
+      },
+      section: "rated",
+      diaryEntryId: "400234d9-6224-4372-bca3-5d430ac5d9f0",
+      seenCount: 1,
+      addedAt: "2026-07-26T12:00:00.000Z",
+      attendedOn: "2026-07-25",
+      ratedAt: "2026-07-26T12:00:00.000Z",
+      myRating: 8,
+      communityRating: { average: 7.4, count: 12 },
+      review: null,
+    };
+    await route.fulfill({
+      contentType: "application/json",
+      body: JSON.stringify({
+        items: selected && selected !== "8" ? [] : [item],
+        nextCursor: null,
+        total: selected && selected !== "8" ? 0 : 1,
+        facets: {
+          disciplines: [{ value: "theatre", count: 1 }],
+          venues: [{ value: "Scène Exemple", count: 1 }],
+          years: [{ value: 2026, count: 1 }],
+          communityRatings: [{ value: 7, count: 1 }],
+          myRatings: [{ value: 8, count: 1 }],
+          reviews: [{ value: "without", count: 1 }],
+          upcoming: [],
+        },
+      }),
+    });
+  });
+
+  await page.setViewportSize({ width: 320, height: 568 });
+  await page.goto("/journal/notes");
+  await expect(page.getByTestId("web-context-header")).toBeVisible();
+  await expect(page.getByTestId("web-mobile-navigation").getByRole("link")).toHaveCount(
+    4,
+  );
+  await expect(page.getByTestId("my-shows-navigation").getByRole("link")).toHaveCount(
+    5,
+  );
+  await expect(page.getByText("Communauté : 7,4/10 · 12 notes")).toBeVisible();
+  await expect(page.getByText("Ma note : 8/10")).toBeVisible();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
+    ),
+  ).toBe(false);
+
+  await page.getByRole("button", { name: "Ma note" }).click();
+  await expect(page.getByTestId("my-shows-filter-close-target")).toBeFocused();
+  await page.getByRole("radio", { name: /8\/10/ }).click();
+  await expect(page).toHaveURL(/\/journal\/notes\?myRating=8$/);
+  await expect(page.getByRole("button", { name: "Ma note : 8/10" })).toBeFocused();
+  await page.reload();
+  await expect(page.getByRole("button", { name: "Ma note : 8/10" })).toBeVisible();
+});
+
+test("les anciennes URL personnelles redirigent vers Mes spectacles", async ({
+  page,
+}) => {
+  await mockAuthenticatedProfile(page);
+  await page.goto("/listes");
+  await expect(page).toHaveURL("/journal/listes");
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Mes listes" }),
+  ).toBeVisible();
+
+  await page.goto("/profile?tab=avis");
+  await expect(page).toHaveURL("/journal/avis");
+  await expect(page.getByRole("heading", { level: 1, name: "Mes avis" })).toBeVisible();
 });
 
 test("l'export des paramètres affiche ses états de chargement, succès et erreur", async ({
@@ -611,7 +711,7 @@ test("l'export des paramètres affiche ses états de chargement, succès et erre
   });
   await page.goto("/parametres-compte");
 
-  const exportButton = page.getByRole("button", { name: "Exporter mes données" });
+  const exportButton = page.getByRole("button", { name: "Exporter en JSON" });
   await expect(exportButton).toBeEnabled();
   await exportButton.click();
   await expect(exportButton).toBeDisabled();

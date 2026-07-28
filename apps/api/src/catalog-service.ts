@@ -2186,8 +2186,10 @@ export function createCatalogService(database: TodamDatabase) {
         ratingCountRows,
         watchlistCountRows,
         listCountRows,
+        reviewCountRows,
         distributionRows,
         recentRows,
+        recentRatingRows,
         watchlistRows,
       ] = await Promise.all([
         database
@@ -2232,6 +2234,17 @@ export function createCatalogService(database: TodamDatabase) {
           ),
         database.select({ total: count() }).from(lists).where(eq(lists.userId, userId)),
         database
+          .select({ total: count() })
+          .from(reviews)
+          .innerJoin(productions, eq(productions.id, reviews.productionId))
+          .where(
+            and(
+              eq(reviews.userId, userId),
+              eq(productions.isActive, true),
+              eq(productions.publicationStatus, "published"),
+            ),
+          ),
+        database
           .select({ value: ratings.value, total: count() })
           .from(ratings)
           .innerJoin(productions, eq(productions.id, ratings.productionId))
@@ -2263,6 +2276,30 @@ export function createCatalogService(database: TodamDatabase) {
           )
           .orderBy(desc(diaryEntries.createdAt))
           .limit(10),
+        database
+          .select({
+            value: ratings.value,
+            ratedAt: ratings.updatedAt,
+            hasReview: sql<boolean>`exists (
+              select 1
+              from ${reviews}
+              where ${reviews.userId} = ${userId}
+                and ${reviews.productionId} = ${productions.id}
+            )`,
+            ...cardFields,
+          })
+          .from(ratings)
+          .innerJoin(productions, eq(productions.id, ratings.productionId))
+          .leftJoin(works, eq(works.id, productions.workId))
+          .where(
+            and(
+              eq(ratings.userId, userId),
+              eq(productions.isActive, true),
+              eq(productions.publicationStatus, "published"),
+            ),
+          )
+          .orderBy(desc(ratings.updatedAt))
+          .limit(6),
         database
           .select(cardFields)
           .from(watchlistEntries)
@@ -2297,6 +2334,7 @@ export function createCatalogService(database: TodamDatabase) {
           ratings: Number(ratingCountRows[0]?.total ?? 0),
           watchlist: Number(watchlistCountRows[0]?.total ?? 0),
           lists: Number(listCountRows[0]?.total ?? 0),
+          reviews: Number(reviewCountRows[0]?.total ?? 0),
         },
         recentDiary: recentRows.map((row) => ({
           id: row.diaryId,
@@ -2308,6 +2346,12 @@ export function createCatalogService(database: TodamDatabase) {
         ratingDistribution: Array.from({ length: 10 }, (_, index) => ({
           value: index + 1,
           count: distribution.get(index + 1) ?? 0,
+        })),
+        recentRatings: recentRatingRows.map((row) => ({
+          production: mapCard(row as CardRow),
+          value: row.value,
+          ratedAt: row.ratedAt.toISOString(),
+          hasReview: row.hasReview,
         })),
         watchlist: watchlistRows.map((row) => mapCard(row as CardRow)),
       };

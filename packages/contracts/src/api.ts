@@ -320,8 +320,17 @@ export const DashboardSchema = z.object({
     ratings: z.number().int().nonnegative(),
     watchlist: z.number().int().nonnegative(),
     lists: z.number().int().nonnegative(),
+    reviews: z.number().int().nonnegative(),
   }),
   recentDiary: z.array(DiaryEntrySchema),
+  recentRatings: z.array(
+    z.object({
+      production: ProductionCardSchema,
+      value: z.number().int().min(1).max(10),
+      ratedAt: z.string().datetime({ offset: true }),
+      hasReview: z.boolean(),
+    }),
+  ),
   ratingDistribution: RatingDistributionSchema,
   watchlist: z.array(ProductionCardSchema),
 });

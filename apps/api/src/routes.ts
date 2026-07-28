@@ -58,6 +58,8 @@ import {
   MemberListResponseSchema,
   MemberParamsSchema,
   MemberResponseSchema,
+  MyShowsQuerySchema,
+  MyShowsResponseSchema,
   ModerateClaimBodySchema,
   ModerateContentReportBodySchema,
   MutationResponseSchema,
@@ -729,6 +731,26 @@ export async function registerRoutes(
     async (request) => {
       const userId = await getRequiredUserId(auth, request);
       return catalog.getDashboard(userId);
+    },
+  );
+
+  app.get(
+    "/v1/me/shows",
+    {
+      schema: {
+        tags: ["Compte"],
+        summary: "Consulte et filtre ses spectacles personnels",
+        security: [{ sessionCookie: [] }],
+        querystring: MyShowsQuerySchema,
+        response: {
+          200: MyShowsResponseSchema,
+          ...problemResponses,
+        },
+      },
+    },
+    async (request) => {
+      const userId = await getRequiredUserId(auth, request);
+      return member.getMyShows(userId, request.query);
     },
   );
 

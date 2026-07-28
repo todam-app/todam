@@ -5,9 +5,9 @@ import { Platform, View } from "react-native";
 const PAGE_BACKGROUND = "#F7F3EC";
 
 const icons = {
-  index: "compass-outline",
-  journal: "book-outline",
-  listes: "list-outline",
+  index: "home-outline",
+  journal: "albums-outline",
+  profile: "person-outline",
   search: "search-outline",
 } as const;
 
@@ -46,8 +46,15 @@ export default function TabLayout() {
         <Tabs.Screen
           name="index"
           options={{
-            title: "Découvrir",
-            tabBarAccessibilityLabel: "Découvrir",
+            tabBarAccessibilityLabel: "Accueil",
+            title: "Accueil",
+          }}
+        />
+        <Tabs.Screen
+          name="journal"
+          options={{
+            title: "Mes spectacles",
+            tabBarAccessibilityLabel: "Mes spectacles",
           }}
         />
         <Tabs.Screen
@@ -58,14 +65,10 @@ export default function TabLayout() {
           }}
         />
         <Tabs.Screen
-          name="journal"
-          options={{ title: "Journal", tabBarAccessibilityLabel: "Journal" }}
+          name="profile"
+          options={{ title: "Profil", tabBarAccessibilityLabel: "Profil" }}
         />
-        <Tabs.Screen
-          name="listes"
-          options={{ title: "Listes", tabBarAccessibilityLabel: "Listes" }}
-        />
-        <Tabs.Screen name="profile" options={{ href: null }} />
+        <Tabs.Screen name="listes" options={{ href: null }} />
       </Tabs>
     </View>
   );

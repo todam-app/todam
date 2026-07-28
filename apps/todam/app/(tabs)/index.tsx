@@ -545,14 +545,14 @@ function ConnectedHome() {
                     className="min-h-24 min-w-56 flex-1 justify-center border border-control bg-paper px-5"
                   >
                     <Text className="font-serif text-xl font-semibold text-ink">
-                      Ouvrir mon journal
+                      Ouvrir mes spectacles
                     </Text>
                     <Text className="mt-1 text-sm text-accent">
                       Filtrer, dater et modifier mes entrées →
                     </Text>
                   </Pressable>
                 </Link>
-                <Link href="/listes" asChild>
+                <Link href="/journal/listes" asChild>
                   <Pressable
                     accessibilityRole="link"
                     className="min-h-24 min-w-56 flex-1 justify-center border border-control bg-paper px-5"
