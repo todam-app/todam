@@ -290,7 +290,7 @@ export default function VenuePage() {
                         accessibilityRole="link"
                         className="min-h-11 justify-center"
                       >
-                        <Text className="text-sm font-semibold text-accent">
+                  <Text className="text-sm font-semibold text-brand-text">
                           Découvrir
                         </Text>
                       </Pressable>
@@ -299,7 +299,7 @@ export default function VenuePage() {
                     <Text className="text-sm text-muted">Lieux</Text>
                   </View>
                   <View className="max-w-3xl gap-3">
-                    <Text className="text-xs font-bold uppercase tracking-widest text-accent">
+          <Text className="text-xs font-bold uppercase tracking-widest text-brand-text">
                       Lieu de spectacle
                     </Text>
                     <Text
@@ -319,7 +319,7 @@ export default function VenuePage() {
                         className="min-h-11 self-start justify-center"
                         onPress={() => void Linking.openURL(venue.data!.officialUrl!)}
                       >
-                        <Text className="text-base font-semibold text-accent">
+            <Text className="text-base font-semibold text-brand-text">
                           Site officiel du lieu ↗
                         </Text>
                       </Pressable>

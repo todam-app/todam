@@ -13,6 +13,7 @@ const staticPaths = [
   "/pour-les-salles",
   "/pour-les-compagnies",
   "/les-coulisses",
+  "/contact",
 ] as const;
 
 async function main() {

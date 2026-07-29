@@ -194,6 +194,9 @@ import type {
   PostV1CommunityProductionsData,
   PostV1CommunityProductionsErrors,
   PostV1CommunityProductionsResponses,
+  PostV1ContactData,
+  PostV1ContactErrors,
+  PostV1ContactResponses,
   PostV1ContentReportsData,
   PostV1ContentReportsErrors,
   PostV1ContentReportsResponses,
@@ -281,6 +284,25 @@ export const getV1PublicStats = <ThrowOnError extends boolean = false>(
     GetV1PublicStatsErrors,
     ThrowOnError
   >({ url: "/v1/public/stats", ...options });
+
+/**
+ * Envoie un message à Todam
+ */
+export const postV1Contact = <ThrowOnError extends boolean = false>(
+  options: Options<PostV1ContactData, ThrowOnError>,
+): RequestResult<PostV1ContactResponses, PostV1ContactErrors, ThrowOnError> =>
+  (options.client ?? client).post<
+    PostV1ContactResponses,
+    PostV1ContactErrors,
+    ThrowOnError
+  >({
+    url: "/v1/contact",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
 
 /**
  * Signale une information à corriger

@@ -103,15 +103,16 @@ export function createMemberService(database: TodamDatabase) {
     const rows = await database
       .select({
         id: user.id,
-        username: user.pseudonym,
+        username: user.username,
         bio: user.bio,
         profileVisibility: user.profileVisibility,
+        ratingVisibility: user.ratingVisibility,
         createdAt: user.createdAt,
       })
       .from(user)
       .where(
         and(
-          sql<boolean>`lower(${user.pseudonym}::text) = lower(${username})`,
+          sql<boolean>`lower(${user.username}::text) = lower(${username})`,
           requirePublic ? eq(user.profileVisibility, "public") : undefined,
         ),
       )
@@ -239,6 +240,7 @@ export function createMemberService(database: TodamDatabase) {
     memberId: string,
     input: MemberJournalQuery,
     publicOnly: boolean,
+    standaloneRatingsPublic = true,
   ): Promise<MemberJournalResponse> {
     const offset = decodeCursor(input.cursor);
     const reviewJoinCondition = and(
@@ -287,7 +289,14 @@ export function createMemberService(database: TodamDatabase) {
             )
           )`
         : undefined,
-      input.rating ? eq(ratings.value, input.rating) : undefined,
+      input.rating
+        ? and(
+            eq(ratings.value, input.rating),
+            publicOnly && !standaloneRatingsPublic
+              ? sql<boolean>`${reviews.id} is not null`
+              : undefined,
+          )
+        : undefined,
       input.hasReview === true
         ? sql<boolean>`${reviews.id} is not null`
         : input.hasReview === false
@@ -295,16 +304,22 @@ export function createMemberService(database: TodamDatabase) {
           : undefined,
     );
     const direction = input.order === "asc" ? asc : desc;
+    const ratingSortIsPrivate =
+      publicOnly &&
+      !standaloneRatingsPublic &&
+      (input.sort === "rated" || input.sort === "rating");
     const sortExpression =
       input.sort === "added"
         ? diaryEntries.createdAt
-        : input.sort === "rated"
-          ? ratings.updatedAt
-          : input.sort === "rating"
-            ? ratings.value
-            : input.sort === "title"
-              ? productions.title
-              : effectiveDate;
+        : ratingSortIsPrivate
+          ? effectiveDate
+          : input.sort === "rated"
+            ? ratings.updatedAt
+            : input.sort === "rating"
+              ? ratings.value
+              : input.sort === "title"
+                ? productions.title
+                : effectiveDate;
     const rows = await database
       .select({
         diaryId: diaryEntries.id,
@@ -331,16 +346,20 @@ export function createMemberService(database: TodamDatabase) {
     const hasMore = rows.length > input.limit;
 
     return {
-      items: rows.slice(0, input.limit).map((row) => ({
-        id: row.diaryId,
-        production: mapCard(row as CardRow),
-        performanceId: row.performanceId,
-        attendedOn: row.attendedOn,
-        addedAt: row.addedAt.toISOString(),
-        ratedAt: row.ratedAt?.toISOString() ?? null,
-        rating: row.rating,
-        hasReview: row.reviewId !== null,
-      })),
+      items: rows.slice(0, input.limit).map((row) => {
+        const ratingIsPublic =
+          !publicOnly || standaloneRatingsPublic || row.reviewId !== null;
+        return {
+          id: row.diaryId,
+          production: mapCard(row as CardRow),
+          performanceId: row.performanceId,
+          attendedOn: row.attendedOn,
+          addedAt: row.addedAt.toISOString(),
+          ratedAt: ratingIsPublic ? (row.ratedAt?.toISOString() ?? null) : null,
+          rating: ratingIsPublic ? row.rating : null,
+          hasReview: row.reviewId !== null,
+        };
+      }),
       nextCursor: hasMore ? encodeCursor(offset + input.limit) : null,
     };
   }
@@ -835,7 +854,7 @@ export function createMemberService(database: TodamDatabase) {
                     .from(user)
                     .where(
                       and(
-                        sql<boolean>`lower(${user.pseudonym}::text) = lower(${input.targetId})`,
+                        sql<boolean>`lower(${user.username}::text) = lower(${input.targetId})`,
                         or(
                           eq(user.profileVisibility, "public"),
                           reporterUserId ? eq(user.id, reporterUserId) : undefined,
@@ -975,6 +994,7 @@ export function createMemberService(database: TodamDatabase) {
               order: "desc",
             },
             true,
+            member.ratingVisibility === "public",
           ),
           database
             .select({
@@ -1036,7 +1056,7 @@ export function createMemberService(database: TodamDatabase) {
       input: MemberJournalQuery,
     ): Promise<MemberJournalResponse> {
       const member = await getUserByUsername(username, true);
-      return getJournal(member.id, input, true);
+      return getJournal(member.id, input, true, member.ratingVisibility === "public");
     },
 
     async getMyJournal(
@@ -1053,9 +1073,10 @@ export function createMemberService(database: TodamDatabase) {
     async getProfileSettings(userId: string): Promise<ProfileSettings> {
       const rows = await database
         .select({
-          username: user.pseudonym,
+          username: user.username,
           bio: user.bio,
           profileVisibility: user.profileVisibility,
+          ratingVisibility: user.ratingVisibility,
           memberSince: user.createdAt,
         })
         .from(user)
@@ -1086,13 +1107,17 @@ export function createMemberService(database: TodamDatabase) {
           ...(input.profileVisibility !== undefined
             ? { profileVisibility: input.profileVisibility }
             : {}),
+          ...(input.ratingVisibility !== undefined
+            ? { ratingVisibility: input.ratingVisibility }
+            : {}),
           updatedAt: new Date(),
         })
         .where(eq(user.id, userId))
         .returning({
-          username: user.pseudonym,
+          username: user.username,
           bio: user.bio,
           profileVisibility: user.profileVisibility,
+          ratingVisibility: user.ratingVisibility,
           memberSince: user.createdAt,
         });
       const profile = rows[0];
@@ -1116,7 +1141,7 @@ export function createMemberService(database: TodamDatabase) {
     async getMyList(userId: string, listId: string): Promise<UserListDetail> {
       await getOwnedList(userId, listId);
       const profileRows = await database
-        .select({ username: user.pseudonym })
+        .select({ username: user.username })
         .from(user)
         .where(eq(user.id, userId))
         .limit(1);
@@ -1190,7 +1215,7 @@ export function createMemberService(database: TodamDatabase) {
 
     async createList(userId: string, input: CreateListBody): Promise<UserListDetail> {
       const profileRows = await database
-        .select({ username: user.pseudonym })
+        .select({ username: user.username })
         .from(user)
         .where(eq(user.id, userId))
         .limit(1);
@@ -1290,7 +1315,7 @@ export function createMemberService(database: TodamDatabase) {
           .where(and(eq(lists.id, listId), eq(lists.userId, userId)))
           .returning({ id: lists.id }),
         database
-          .select({ username: user.pseudonym })
+          .select({ username: user.username })
           .from(user)
           .where(eq(user.id, userId))
           .limit(1),

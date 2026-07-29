@@ -23,10 +23,11 @@ SVG sont les sources de production à utiliser en priorité.
   avant vectorisation.
 
 La palette du logo est composée de l’encre `#151515`, de l’ivoire `#FCF8F2` et
-du corail doux `#F3A995`. Le point du symbole utilise ce corail ; le tracé et le
-mot-symbole restent inchangés. Le symbole et le mot-symbole sont des créations
-originales réalisées pour Todam. Le symbole correspond à la piste 3 validée le
-24 juillet 2026.
+du vermillon signal `#ED2215`. Le point du symbole utilise ce vermillon ; le
+tracé et le mot-symbole restent inchangés. Le corail doux `#F3A995` reste réservé
+aux halos et surfaces de l’interface. Le symbole et le mot-symbole sont des
+créations originales réalisées pour Todam. Le symbole correspond à la piste 3
+validée le 24 juillet 2026.
 
 Le logo horizontal doit rester lisible avec une marge libre au moins égale à
 la hauteur du point corail. Ne pas l’utiliser sous 120 px de large ; sous
@@ -35,4 +36,6 @@ conservés pour la production, tandis que les variantes opaques sont à privilé
 pour les e-mails, widgets et intégrations dont le fond n’est pas maîtrisé.
 
 Les variantes raster sont régénérables avec
-`powershell -File scripts/generate-brand-assets.ps1`.
+`powershell -File scripts/generate-brand-assets.ps1`. Le script synchronise
+également les variantes publiques, le logo transparent des e-mails et le visuel
+Open Graph.

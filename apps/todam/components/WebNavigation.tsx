@@ -28,6 +28,7 @@ import { useWebPageScrolled } from "./PageScrollView";
 import { SearchBar } from "./SearchBar";
 
 const horizontalLogo = require("../assets/brand/todam-logo-horizontal.svg");
+const symbolLogo = require("../assets/brand/todam-symbol.svg");
 
 const memberNavigation = [{ href: "/journal", label: "Mes spectacles" }] as const;
 const mobileNavigation = [
@@ -43,8 +44,12 @@ function parameter(value: string | string[] | undefined): string {
 
 function HeaderSearch({
   initialValue,
+  searchType,
+  syncSearchRoute = false,
 }: {
   initialValue: string;
+  searchType?: string;
+  syncSearchRoute?: boolean;
 }) {
   const router = useRouter();
   const [searchInput, setSearchInput] = useState(initialValue);
@@ -52,14 +57,30 @@ function HeaderSearch({
   function submitSearch() {
     const query = searchInput.trim();
     if (query.length < 2) return;
-    router.push({ pathname: "/search", params: { q: query } });
+    router.push({
+      pathname: "/search",
+      params: {
+        q: query,
+        ...(searchType ? { type: searchType } : {}),
+      },
+    });
+  }
+
+  function clearSearch() {
+    setSearchInput("");
+    if (syncSearchRoute) {
+      router.replace({
+        pathname: "/search",
+        params: searchType ? { type: searchType } : {},
+      });
+    }
   }
 
   return (
     <SearchBar
       accessibilityLabel="Titre, compagnie, lieu ou membre"
       onChangeText={setSearchInput}
-      onClear={() => setSearchInput("")}
+      onClear={clearSearch}
       onSubmit={submitSearch}
       placeholder="Rechercher un spectacle, une compagnie…"
       value={searchInput}
@@ -71,7 +92,10 @@ function HeaderSearch({
 export function WebNavigation() {
   const pathname = usePathname();
   const router = useRouter();
-  const params = useGlobalSearchParams<{ q?: string | string[] }>();
+  const params = useGlobalSearchParams<{
+    q?: string | string[];
+    type?: string | string[];
+  }>();
   const session = authClient.useSession();
   const { width } = useWindowDimensions();
   const isScrolled = useWebPageScrolled();
@@ -81,7 +105,22 @@ export function WebNavigation() {
   const mobile = width < 760;
   const authShell = isAuthPath(pathname);
   const searchParameter = pathname.startsWith("/search") ? parameter(params.q) : "";
+  const searchType = pathname.startsWith("/search") ? parameter(params.type) : "";
   const navigation = session.data ? memberNavigation : [];
+  const sessionUser = session.data?.user as
+    | {
+        displayUsername?: string | null;
+        name?: string | null;
+        username?: string | null;
+      }
+    | undefined;
+  const username = (
+    sessionUser?.username ??
+    sessionUser?.displayUsername ??
+    sessionUser?.name ??
+    ""
+  ).trim();
+  const profileInitial = Array.from(username)[0]?.toLocaleUpperCase("fr-FR");
   const primaryMobilePath = isPrimaryMobilePath(pathname);
   const mobileContext = mobileContextForPath(pathname);
 
@@ -203,21 +242,33 @@ export function WebNavigation() {
               })}
               <Link href={session.data ? "/profile" : "/sign-in"} asChild>
                 <Pressable
-                  accessibilityLabel={session.data ? "Mon profil" : "Se connecter"}
-                  accessibilityRole="link"
-                  className={`ml-1 h-11 min-w-11 items-center justify-center border px-3 ${
+                  accessibilityLabel={
                     session.data
-                      ? "todam-icon-button rounded-full border-control bg-paper"
+                      ? username
+                        ? `Ouvrir mon profil — @${username}`
+                        : "Ouvrir mon profil"
+                      : "Se connecter"
+                  }
+                  accessibilityRole="link"
+                  className={`ml-1 h-11 min-w-11 items-center justify-center ${
+                    session.data
+                      ? "todam-profile-button w-11 rounded-full"
                       : "todam-login-ticket"
                   }`}
                   style={session.data ? undefined : styles.loginTicket}
                 >
                   {session.data ? (
-                    <Ionicons
-                      color={tokens.color.ink}
-                      name="person-outline"
-                      size={20}
-                    />
+                    profileInitial ? (
+                      <Text className="todam-profile-initial text-lg font-semibold text-paper">
+                        {profileInitial}
+                      </Text>
+                    ) : (
+                      <Ionicons
+                        color={tokens.color.surface}
+                        name="person-outline"
+                        size={20}
+                      />
+                    )
                   ) : (
                     <Text style={styles.loginTicketLabel}>Se connecter</Text>
                   )}
@@ -226,7 +277,84 @@ export function WebNavigation() {
             </View>
           </View>
         </View>
-      ) : !primaryMobilePath ? (
+      ) : primaryMobilePath ? (
+        <View
+          className={`todam-web-header bg-paper ${
+            isScrolled ? "todam-web-header--scrolled" : ""
+          }`}
+          role="banner"
+          style={styles.header}
+        >
+          <View
+            accessibilityLabel="Navigation principale"
+            className="mx-auto w-full max-w-content flex-row items-center gap-2 px-3"
+            role="navigation"
+            style={styles.headerInner}
+            testID="web-mobile-header-frame"
+          >
+            <Link href="/" asChild>
+              <Pressable
+                accessibilityLabel="Todam, accueil"
+                accessibilityRole="link"
+                className="min-h-11 justify-center"
+                testID="global-home-logo"
+              >
+                <Image
+                  accessibilityIgnoresInvertColors
+                  accessible={false}
+                  resizeMode="contain"
+                  source={symbolLogo}
+                  style={styles.symbol}
+                />
+                <Text className="sr-only">Todam</Text>
+              </Pressable>
+            </Link>
+
+            <View style={styles.mobileSearch}>
+              <HeaderSearch
+                initialValue={searchParameter}
+                key={`${pathname}?q=${searchParameter}&type=${searchType}`}
+                searchType={searchType}
+                syncSearchRoute={pathname.startsWith("/search")}
+              />
+            </View>
+
+            <Link href={session.data ? "/profile" : "/sign-in"} asChild>
+              <Pressable
+                accessibilityLabel={
+                  session.data
+                    ? username
+                      ? `Ouvrir mon profil — @${username}`
+                      : "Ouvrir mon profil"
+                    : "Se connecter"
+                }
+                accessibilityRole="link"
+                className={`h-11 w-11 items-center justify-center rounded-full ${
+                  session.data
+                    ? "todam-profile-button"
+                    : "todam-icon-button border border-control bg-paper"
+                }`}
+              >
+                {session.data ? (
+                  profileInitial ? (
+                    <Text className="todam-profile-initial text-lg font-semibold text-paper">
+                      {profileInitial}
+                    </Text>
+                  ) : (
+                    <Ionicons
+                      color={tokens.color.surface}
+                      name="person-outline"
+                      size={20}
+                    />
+                  )
+                ) : (
+                  <Ionicons color={tokens.color.ink} name="log-in-outline" size={21} />
+                )}
+              </Pressable>
+            </Link>
+          </View>
+        </View>
+      ) : (
         <View
           className={`todam-web-header bg-paper ${
             isScrolled ? "todam-web-header--scrolled" : ""
@@ -263,7 +391,7 @@ export function WebNavigation() {
             </Text>
           </View>
         </View>
-      ) : null}
+      )}
 
       {mobile ? (
         <View
@@ -340,9 +468,17 @@ const styles = StyleSheet.create({
     height: 42,
     width: 140,
   },
+  mobileSearch: {
+    flex: 1,
+    minWidth: 0,
+  },
   search: {
     flex: 1,
     minWidth: 180,
+  },
+  symbol: {
+    height: 38,
+    width: 38,
   },
   loginTicket: {
     backgroundColor: tokens.button.quiet.background,

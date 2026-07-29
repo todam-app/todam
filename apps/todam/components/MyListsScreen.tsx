@@ -7,7 +7,6 @@ import { Pressable, Text, View } from "react-native";
 
 import { api } from "../lib/api";
 import { authClient } from "../lib/auth-client";
-import { AccessibleChoiceGroup } from "./AccessibleChoiceGroup";
 import { AsyncState } from "./AsyncState";
 import { MyShowsNavigation } from "./MyShowsNavigation";
 import { PageScrollView } from "./PageScrollView";
@@ -21,7 +20,6 @@ export function MyListsScreen() {
   const [creating, setCreating] = useState(false);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [visibility, setVisibility] = useState<"public" | "private">("private");
   const [feedback, setFeedback] = useState<string | null>(null);
   const lists = useQuery({
     queryKey: ["my-lists"],
@@ -38,7 +36,7 @@ export function MyListsScreen() {
       api.createList({
         name: name.trim(),
         description: description.trim() || null,
-        visibility,
+        visibility: "private",
       }),
     onSuccess: async (created) => {
       await Promise.all([
@@ -132,16 +130,9 @@ export function MyListsScreen() {
               value={description}
               webName="list-description"
             />
-            <AccessibleChoiceGroup
-              label="Visibilité de la liste"
-              onChange={setVisibility}
-              options={[
-                ["private", "Privée"],
-                ["public", "Publique"],
-              ]}
-              testIdPrefix="new-list-visibility"
-              value={visibility}
-            />
+            <Text className="text-sm leading-5 text-muted">
+              Cette liste est privée et visible uniquement par vous.
+            </Text>
             <Button
               disabled={!name.trim()}
               label="Créer la liste"
@@ -184,7 +175,7 @@ export function MyListsScreen() {
                     <Text className="text-sm text-muted">
                       {list.itemCount} spectacle{list.itemCount > 1 ? "s" : ""}
                       {" · "}
-                      {list.visibility === "public" ? "Publique" : "Privée"}
+                      Privée
                     </Text>
                   </View>
                   <Ionicons

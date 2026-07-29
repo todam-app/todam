@@ -40,8 +40,15 @@ export function accountExportToCsv(data: AccountExport): string {
     [
       "compte",
       data.account.id,
-      "pseudonyme",
-      data.account.pseudonym,
+      "nom_utilisateur",
+      data.account.username,
+      data.account.createdAt,
+    ],
+    [
+      "compte",
+      data.account.id,
+      "visibilite_notes",
+      data.account.ratingVisibility,
       data.account.createdAt,
     ],
     ["compte", data.account.id, "email", data.account.email, data.account.createdAt],
@@ -160,7 +167,7 @@ export function createAccountService(
       const rows = await database
         .select({
           email: user.email,
-          pseudonym: user.pseudonym,
+          username: user.username,
         })
         .from(user)
         .where(eq(user.id, userId))
@@ -206,8 +213,8 @@ export function createAccountService(
         .from(user)
         .where(
           exceptUserId
-            ? and(eq(user.pseudonym, normalizedUsername), ne(user.id, exceptUserId))
-            : eq(user.pseudonym, normalizedUsername),
+            ? and(eq(user.username, normalizedUsername), ne(user.id, exceptUserId))
+            : eq(user.username, normalizedUsername),
         )
         .limit(1);
       if (rows.length > 0) {
@@ -250,10 +257,11 @@ export function createAccountService(
         database
           .select({
             id: user.id,
-            pseudonym: user.pseudonym,
+            username: user.username,
             email: user.email,
             emailVerified: user.emailVerified,
             profileVisibility: user.profileVisibility,
+            ratingVisibility: user.ratingVisibility,
             bio: user.bio,
             homeLocality: user.homeLocality,
             homeCountryCode: user.homeCountryCode,
@@ -429,11 +437,12 @@ export function createAccountService(
         exportedAt: new Date().toISOString(),
         account: {
           id: profile.id,
-          pseudonym: profile.pseudonym,
+          username: profile.username,
           email: profile.email,
           emailVerified: profile.emailVerified,
           createdAt: profile.createdAt.toISOString(),
           profileVisibility: profile.profileVisibility,
+          ratingVisibility: profile.ratingVisibility,
           bio: profile.bio,
           homeCity:
             profile.homeLocality && profile.homeCountryCode

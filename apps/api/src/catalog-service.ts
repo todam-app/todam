@@ -601,7 +601,7 @@ export function createCatalogService(database: TodamDatabase) {
       const [profileRows, progressResult] = await Promise.all([
         database
           .select({
-            pseudonym: user.pseudonym,
+            username: user.username,
             homeLocality: user.homeLocality,
             homeCountryCode: user.homeCountryCode,
             homeOnboardingCompleted: user.homeOnboardingCompleted,
@@ -678,7 +678,7 @@ export function createCatalogService(database: TodamDatabase) {
       }
 
       return {
-        profile: { pseudonym: profile.pseudonym },
+        profile: { username: profile.username },
         homeCity,
         progress: {
           current: progress,
@@ -843,17 +843,17 @@ export function createCatalogService(database: TodamDatabase) {
           eq(user.profileVisibility, "public"),
           trimmedQuery
             ? sql<boolean>`(
-                unaccent(${user.pseudonym}::text) ilike unaccent(${pattern})
+                unaccent(${user.username}::text) ilike unaccent(${pattern})
                 or unaccent(coalesce(${user.bio}, '')) ilike unaccent(${pattern})
               )`
             : undefined,
         );
         const [rows, totalRows] = await Promise.all([
           database
-            .select({ username: user.pseudonym, bio: user.bio })
+            .select({ username: user.username, bio: user.bio })
             .from(user)
             .where(condition)
-            .orderBy(asc(user.pseudonym), asc(user.id))
+            .orderBy(asc(user.username), asc(user.id))
             .limit(input.limit + 1)
             .offset(offset),
           database.select({ total: count() }).from(user).where(condition),
@@ -863,16 +863,16 @@ export function createCatalogService(database: TodamDatabase) {
           trimmedQuery && Number(totalRows[0]?.total ?? 0) === 0
             ? ((
                 await database
-                  .select({ value: user.pseudonym })
+                  .select({ value: user.username })
                   .from(user)
                   .where(
                     and(
                       eq(user.profileVisibility, "public"),
-                      sql<boolean>`similarity(unaccent(${user.pseudonym}::text), unaccent(${trimmedQuery})) > 0.15`,
+                      sql<boolean>`similarity(unaccent(${user.username}::text), unaccent(${trimmedQuery})) > 0.15`,
                     ),
                   )
                   .orderBy(
-                    sql`similarity(unaccent(${user.pseudonym}::text), unaccent(${trimmedQuery})) desc`,
+                    sql`similarity(unaccent(${user.username}::text), unaccent(${trimmedQuery})) desc`,
                   )
                   .limit(1)
               )[0]?.value ?? null)
@@ -1729,7 +1729,7 @@ export function createCatalogService(database: TodamDatabase) {
         database
           .select({
             id: reviews.id,
-            username: user.pseudonym,
+            username: user.username,
             rating: ratings.value,
             body: reviews.body,
             containsSpoiler: reviews.containsSpoiler,
@@ -2208,7 +2208,7 @@ export function createCatalogService(database: TodamDatabase) {
         watchlistRows,
       ] = await Promise.all([
         database
-          .select({ pseudonym: user.pseudonym })
+          .select({ username: user.username })
           .from(user)
           .where(eq(user.id, userId))
           .limit(1),

@@ -3,7 +3,13 @@ import type { Discipline, SearchResponse } from "@todam/contracts";
 import { Button, SectionTitle, TextField } from "@todam/design-system";
 import { Link, useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
-import { Platform, Pressable, Text, View } from "react-native";
+import {
+  Platform,
+  Pressable,
+  Text,
+  useWindowDimensions,
+  View,
+} from "react-native";
 
 import { api } from "../lib/api";
 import { isIsoCalendarDate } from "../lib/dates";
@@ -68,6 +74,7 @@ export function DiscoverScreen({
     type?: string | string[];
   }>();
   const router = useRouter();
+  const { width } = useWindowDimensions();
   const initialQuery = parameter(params.q).trim();
   const initialType = parameter(params.type) as SearchType;
   const [input, setInput] = useState(initialQuery);
@@ -87,6 +94,7 @@ export function DiscoverScreen({
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
   const [advancedFiltersOpen, setAdvancedFiltersOpen] = useState(false);
+  const mobileWeb = Platform.OS === "web" && width < 760;
   const query = Platform.OS === "web" ? initialQuery : nativeQuery;
   const canUseInitialData =
     browse && initialData !== null && initialData.type === type && query.length === 0;
@@ -211,7 +219,7 @@ export function DiscoverScreen({
             Théâtre, opéra et ballet : explorez les spectacles publiés, leurs lieux,
             leurs compagnies et les journaux partagés par les membres.
           </Text>
-          {Platform.OS !== "web" || !browse ? (
+          {Platform.OS !== "web" || (!browse && !mobileWeb) ? (
             <View className="w-full max-w-2xl">
               <SearchBar
                 accessibilityLabel="Titre, compagnie, lieu ou membre"
@@ -474,7 +482,7 @@ export function DiscoverScreen({
                       className="min-h-11 justify-center"
                       onPress={() => submit(firstPage.suggestion!)}
                     >
-                      <Text className="text-base font-semibold text-accent">
+              <Text className="text-base font-semibold text-brand-text">
                         Rechercher « {firstPage.suggestion} »
                       </Text>
                     </Pressable>
@@ -516,7 +524,7 @@ export function DiscoverScreen({
                       <Text className="font-serif text-xl font-semibold text-ink">
                         {company.name}
                       </Text>
-                      <Text className="mt-1 text-sm font-semibold text-accent">
+                <Text className="mt-1 text-sm font-semibold text-brand-text">
                         Voir les productions et les dates de tournée
                       </Text>
                     </Pressable>

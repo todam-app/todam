@@ -90,6 +90,7 @@ export default function RootLayout() {
                   name="les-coulisses"
                   options={{ headerTitle: "Les coulisses" }}
                 />
+                <Stack.Screen name="contact" options={{ headerTitle: "Contact" }} />
                 <Stack.Screen
                   name="signaler"
                   options={{ headerTitle: "Signaler une information" }}

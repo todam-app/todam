@@ -1,12 +1,7 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { UsernameSchema } from "@todam/contracts";
-import {
-  Button,
-  RatingLights,
-  TextField,
-  tokens,
-} from "@todam/design-system";
+import { Button, RatingLights, TextField, tokens } from "@todam/design-system";
 import {
   Link,
   Redirect,
@@ -17,7 +12,7 @@ import {
 import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
 
-import { AccessibleChoiceGroup } from "../../components/AccessibleChoiceGroup";
+import { AccountSettingsContent } from "../../components/AccountSettingsContent";
 import { AccessibleTabs } from "../../components/AccessibleTabs";
 import { AsyncState } from "../../components/AsyncState";
 import { PageScrollView } from "../../components/PageScrollView";
@@ -60,12 +55,13 @@ function StatTile({
 }) {
   const content = (
     <Pressable
+      accessibilityLabel={`${label} : ${value}`}
       accessibilityRole={href ? "link" : undefined}
-      className="min-h-24 min-w-[138px] flex-1 items-center justify-center gap-1 rounded-panel border border-line bg-paper p-4 shadow-soft"
+      className="todam-interactive-card min-h-16 min-w-[96px] flex-1 items-center justify-center gap-1 rounded-todam px-3 py-2"
       disabled={!href}
     >
-      <Text className="font-serif text-3xl font-semibold text-ink">{value}</Text>
-      <Text className="text-center text-sm font-semibold text-muted">{label}</Text>
+      <Text className="font-serif text-2xl font-semibold text-ink">{value}</Text>
+      <Text className="text-center text-xs font-semibold text-muted">{label}</Text>
     </Pressable>
   );
 
@@ -138,6 +134,15 @@ function ProfileContent() {
     },
     onError: () => setFeedback("La visibilité n’a pas pu être modifiée."),
   });
+  const updateRatingVisibility = useMutation({
+    mutationFn: (visibility: "review_only" | "public") =>
+      api.updateProfile({ ratingVisibility: visibility }),
+    onSuccess: (updated) => {
+      queryClient.setQueryData(["profile-settings"], updated);
+      setFeedback("La visibilité des notes a été modifiée.");
+    },
+    onError: () => setFeedback("La visibilité des notes n’a pas pu être modifiée."),
+  });
 
   function selectSection(next: ProfileSection) {
     router.replace({
@@ -182,7 +187,7 @@ function ProfileContent() {
     <>
       <PrivatePageHead title="Profil" />
       <PageScrollView
-        contentContainerClassName="mx-auto w-full max-w-4xl gap-6 px-4 py-6 md:px-8 md:py-10"
+        contentContainerClassName="mx-auto w-full max-w-6xl gap-6 px-4 py-6 md:px-8 md:py-10"
         keyboardShouldPersistTaps="handled"
       >
         <AsyncState
@@ -197,35 +202,58 @@ function ProfileContent() {
         >
           {profile.data && dashboard.data ? (
             <>
-              <View className="items-center gap-3 pb-2">
-                <View className="h-24 w-24 items-center justify-center rounded-full border border-line bg-canvas">
+              <View className="gap-5 rounded-panel border border-line bg-paper p-5 shadow-soft md:flex-row md:items-center md:p-6">
+                <View className="h-20 w-20 items-center justify-center self-center rounded-full border border-line bg-canvas md:self-auto">
                   <Ionicons
                     accessibilityElementsHidden
                     color={tokens.color.muted}
                     importantForAccessibility="no"
                     name="person-outline"
-                    size={54}
+                    size={46}
                   />
                 </View>
-                <Text
-                  aria-level={1}
-                  accessibilityRole="header"
-                  className="font-serif text-3xl font-semibold text-ink"
-                >
-                  {profile.data.username}
-                </Text>
-                <Text className="text-sm font-semibold text-muted">
-                  Profil{" "}
-                  {profile.data.profileVisibility === "public" ? "public" : "privé"}
-                </Text>
-                <Button
-                  label={editing ? "Fermer la modification" : "Modifier mon profil"}
-                  onPress={() => {
-                    setEditing((value) => !value);
-                    setFeedback(null);
-                  }}
-                  variant="quiet"
-                />
+                <View className="min-w-0 flex-1 items-center gap-1 md:items-start">
+                  <Text
+                    aria-level={1}
+                    accessibilityRole="header"
+                    className="font-serif text-3xl font-semibold text-ink"
+                  >
+                    {profile.data.username}
+                  </Text>
+                  <Text className="text-sm font-semibold text-muted">
+                    Profil{" "}
+                    {profile.data.profileVisibility === "public" ? "public" : "privé"}
+                    {" · "}
+                    Membre depuis{" "}
+                    {new Intl.DateTimeFormat("fr-FR", {
+                      month: "long",
+                      year: "numeric",
+                    }).format(new Date(profile.data.memberSince))}
+                  </Text>
+                  {profile.data.bio ? (
+                    <Text
+                      className="pt-1 text-center text-base leading-6 text-ink md:text-left"
+                      numberOfLines={2}
+                    >
+                      {profile.data.bio}
+                    </Text>
+                  ) : null}
+                </View>
+                <View className="flex-row flex-wrap justify-center gap-3 md:justify-end">
+                  <Button
+                    label={editing ? "Fermer la modification" : "Modifier mon profil"}
+                    onPress={() => {
+                      setEditing((value) => !value);
+                      setFeedback(null);
+                    }}
+                    variant={editing ? "quiet" : "primary"}
+                  />
+                  <Button
+                    label="Se déconnecter"
+                    onPress={() => void signOut()}
+                    variant="quiet"
+                  />
+                </View>
               </View>
 
               {editing ? (
@@ -233,7 +261,7 @@ function ProfileContent() {
                   <TextField
                     autoCapitalize="none"
                     autoComplete="off"
-                    label="Pseudonyme"
+                    label="Nom d'utilisateur"
                     maxLength={30}
                     onChangeText={setUsernameDraft}
                     required
@@ -272,6 +300,37 @@ function ProfileContent() {
                 </Text>
               ) : null}
 
+              <View
+                accessibilityLabel="Activité du profil"
+                className="flex-row flex-wrap gap-2 rounded-panel border border-line bg-paper p-2 shadow-soft"
+              >
+                <StatTile
+                  href="/journal/a-voir"
+                  label="À voir"
+                  value={dashboard.data.counts.watchlist}
+                />
+                <StatTile
+                  href="/journal/vus"
+                  label="Vus"
+                  value={dashboard.data.counts.seen}
+                />
+                <StatTile
+                  href="/journal/notes"
+                  label="Notés"
+                  value={dashboard.data.counts.ratings}
+                />
+                <StatTile
+                  href="/journal/avis"
+                  label="Avis"
+                  value={dashboard.data.counts.reviews}
+                />
+                <StatTile
+                  href="/journal/listes"
+                  label="Listes"
+                  value={dashboard.data.counts.lists}
+                />
+              </View>
+
               <AccessibleTabs
                 appearance="underline"
                 compactOnMobile
@@ -294,7 +353,7 @@ function ProfileContent() {
                   <View className="todam-form-panel gap-4 p-5">
                     <View className="gap-1">
                       <Text className="text-sm font-semibold text-muted">
-                        Pseudonyme
+                        Nom d'utilisateur
                       </Text>
                       <Text className="text-base text-ink">
                         {profile.data.username}
@@ -333,41 +392,25 @@ function ProfileContent() {
               ) : null}
 
               {section === "statistics" ? (
-                <View className="gap-6">
-                  <View className="flex-row flex-wrap gap-3">
-                    <StatTile
-                      href="/journal/vus"
-                      label="Vus"
-                      value={dashboard.data.counts.seen}
-                    />
-                    <StatTile
-                      href="/journal/a-voir"
-                      label="À voir"
-                      value={dashboard.data.counts.watchlist}
-                    />
-                    <StatTile
-                      href="/journal/notes"
-                      label="Notés"
-                      value={dashboard.data.counts.ratings}
-                    />
-                    <StatTile
-                      href="/journal/listes"
-                      label="Listes"
-                      value={dashboard.data.counts.lists}
-                    />
-                    <StatTile
-                      href="/journal/avis"
-                      label="Avis écrits"
-                      value={dashboard.data.counts.reviews}
-                    />
-                    <View className="min-h-24 min-w-[210px] flex-1 items-center justify-center gap-2 rounded-panel border border-line bg-paper p-4 shadow-soft">
+                <View className="gap-6 md:flex-row md:items-start">
+                  <View className="todam-form-panel w-full items-center justify-center gap-3 p-6 md:w-72">
+                    <Text
+                      aria-level={2}
+                      accessibilityRole="header"
+                      className="text-lg font-bold text-ink"
+                    >
+                      Moyenne personnelle
+                    </Text>
+                    <View className="items-center gap-2">
                       <RatingLights showValue value={averageRating} />
                       <Text className="text-center text-sm font-semibold text-muted">
-                        Moyenne personnelle
+                        {ratingCount > 0
+                          ? `${ratingCount} ${ratingCount > 1 ? "notes" : "note"}`
+                          : "Aucune note"}
                       </Text>
                     </View>
                   </View>
-                  <View className="todam-form-panel gap-4 p-5">
+                  <View className="todam-form-panel min-w-0 flex-1 gap-4 p-5 md:p-6">
                     <Text
                       aria-level={2}
                       accessibilityRole="header"
@@ -408,68 +451,14 @@ function ProfileContent() {
               ) : null}
 
               {section === "settings" ? (
-                <View className="gap-6">
-                  <View className="todam-form-panel gap-4 p-5">
-                    <Text
-                      aria-level={2}
-                      accessibilityRole="header"
-                      className="font-serif text-2xl font-semibold text-ink"
-                    >
-                      Visibilité
-                    </Text>
-                    <Text className="text-base leading-6 text-muted">
-                      Un profil privé masque aussi les listes et avis réglés comme
-                      publics.
-                    </Text>
-                    <AccessibleChoiceGroup
-                      label="Visibilité du profil"
-                      onChange={(value) => updateVisibility.mutate(value)}
-                      options={[
-                        ["public", "Public"],
-                        ["private", "Privé"],
-                      ]}
-                      testIdPrefix="profile-visibility"
-                      value={profile.data.profileVisibility}
-                    />
-                  </View>
-                  <Link href="/parametres-compte" asChild>
-                    <Pressable
-                      accessibilityRole="link"
-                      className="min-h-16 flex-row items-center justify-between rounded-panel border border-line bg-paper px-5 shadow-soft"
-                    >
-                      <Text className="text-base font-semibold text-ink">
-                        Paramètres du compte
-                      </Text>
-                      <Ionicons
-                        color={tokens.color.muted}
-                        name="chevron-forward"
-                        size={22}
-                      />
-                    </Pressable>
-                  </Link>
-                  <View className="items-start">
-                    <Button
-                      label="Se déconnecter"
-                      onPress={() => void signOut()}
-                      variant="quiet"
-                    />
-                  </View>
-                  <View className="gap-3 rounded-panel border border-danger bg-error-soft p-5">
-                    <Text className="text-lg font-bold text-danger">
-                      Suppression du compte
-                    </Text>
-                    <Text className="text-sm leading-5 text-muted">
-                      Cette action efface définitivement vos données personnelles.
-                    </Text>
-                    <View className="items-start">
-                      <Button
-                        label="Supprimer mon compte"
-                        onPress={() => router.push("/supprimer-mon-compte")}
-                        variant="danger"
-                      />
-                    </View>
-                  </View>
-                </View>
+                <AccountSettingsContent
+                  onRatingVisibilityChange={(value) =>
+                    updateRatingVisibility.mutate(value)
+                  }
+                  onVisibilityChange={(value) => updateVisibility.mutate(value)}
+                  profileVisibility={profile.data.profileVisibility}
+                  ratingVisibility={profile.data.ratingVisibility}
+                />
               ) : null}
             </>
           ) : null}

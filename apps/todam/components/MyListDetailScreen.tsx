@@ -3,11 +3,10 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button, TextField, tokens } from "@todam/design-system";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { Platform, Share, Text, View } from "react-native";
+import { Text, View } from "react-native";
 
 import { api } from "../lib/api";
 import { authClient } from "../lib/auth-client";
-import { AccessibleChoiceGroup } from "./AccessibleChoiceGroup";
 import { AsyncState } from "./AsyncState";
 import { PageScrollView } from "./PageScrollView";
 import { PrivatePageHead } from "./PrivatePageHead";
@@ -20,7 +19,6 @@ export function MyListDetailScreen({ listId }: { listId: string }) {
   const session = authClient.useSession();
   const [nameDraft, setName] = useState<string | null>(null);
   const [descriptionDraft, setDescription] = useState<string | null>(null);
-  const [visibilityDraft, setVisibility] = useState<"public" | "private" | null>(null);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
   const detail = useQuery({
@@ -28,22 +26,15 @@ export function MyListDetailScreen({ listId }: { listId: string }) {
     queryFn: () => api.getList(listId),
     enabled: Boolean(session.data && listId),
   });
-  const profile = useQuery({
-    queryKey: ["profile-settings"],
-    queryFn: () => api.getProfileSettings(),
-    enabled: Boolean(session.data),
-  });
-
   const name = nameDraft ?? detail.data?.name ?? "";
   const description = descriptionDraft ?? detail.data?.description ?? "";
-  const visibility = visibilityDraft ?? detail.data?.visibility ?? "private";
 
   const update = useMutation({
     mutationFn: () =>
       api.updateList(listId, {
         name: name.trim(),
         description: description.trim() || null,
-        visibility,
+        visibility: "private",
       }),
     onSuccess: async () => {
       setFeedback("La liste a été mise à jour.");
@@ -94,31 +85,6 @@ export function MyListDetailScreen({ listId }: { listId: string }) {
       productionIds[index]!,
     ];
     reorder.mutate(productionIds);
-  }
-
-  async function shareList() {
-    if (!detail.data || !profile.data) return;
-    const path = `/membre/${profile.data.username}/listes/${detail.data.slug}`;
-    const url =
-      Platform.OS === "web" && typeof window !== "undefined"
-        ? new URL(path, window.location.origin).toString()
-        : path;
-    try {
-      if (
-        Platform.OS === "web" &&
-        typeof navigator !== "undefined" &&
-        navigator.share
-      ) {
-        await navigator.share({ title: detail.data.name, url });
-      } else if (Platform.OS === "web" && typeof navigator !== "undefined") {
-        await navigator.clipboard.writeText(url);
-        setFeedback("Le lien public a été copié.");
-      } else {
-        await Share.share({ message: `${detail.data.name} — ${url}` });
-      }
-    } catch {
-      setFeedback("Le partage n’a pas pu être ouvert.");
-    }
   }
 
   if (session.isPending) {
@@ -193,38 +159,15 @@ export function MyListDetailScreen({ listId }: { listId: string }) {
                   value={description}
                   webName="list-description"
                 />
-                <AccessibleChoiceGroup
-                  label="Visibilité de la liste"
-                  onChange={setVisibility}
-                  options={[
-                    ["private", "Privée"],
-                    ["public", "Publique"],
-                  ]}
-                  testIdPrefix="list-visibility"
-                  value={visibility}
+                <Text className="text-sm leading-5 text-muted">
+                  Cette liste est privée et visible uniquement par vous.
+                </Text>
+                <Button
+                  disabled={!name.trim()}
+                  label="Enregistrer"
+                  loading={update.isPending}
+                  onPress={() => update.mutate()}
                 />
-                <View className="flex-row flex-wrap gap-2">
-                  <Button
-                    disabled={!name.trim()}
-                    label="Enregistrer"
-                    loading={update.isPending}
-                    onPress={() => update.mutate()}
-                  />
-                  {detail.data.visibility === "public" &&
-                  profile.data?.profileVisibility === "public" ? (
-                    <Button
-                      label="Partager"
-                      onPress={() => void shareList()}
-                      variant="quiet"
-                    />
-                  ) : null}
-                </View>
-                {detail.data.visibility === "public" &&
-                profile.data?.profileVisibility === "private" ? (
-                  <Text className="text-sm text-muted">
-                    Rendez votre profil public pour rendre ce lien accessible.
-                  </Text>
-                ) : null}
               </View>
               {feedback ? (
                 <Text accessibilityLiveRegion="polite" className="text-sm text-muted">

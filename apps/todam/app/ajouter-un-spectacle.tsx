@@ -185,7 +185,7 @@ function VenueEditor({
                 })
               }
             >
-              <Text className="text-sm font-semibold text-accent">
+                  <Text className="text-sm font-semibold text-brand-text">
                 {venue.name} · {venue.locality}
               </Text>
             </Pressable>
@@ -563,7 +563,7 @@ export default function AddCommunityProductionPage() {
                 </Text>
                 {similarProductions.slice(0, 4).map((production) => (
                   <Link href={`/production/${production.slug}`} key={production.id}>
-                    <Text className="text-sm font-semibold text-accent">
+                  <Text className="text-sm font-semibold text-brand-text">
                       {production.title}
                       {production.company ? ` · ${production.company.name}` : ""}
                     </Text>
@@ -613,7 +613,7 @@ export default function AddCommunityProductionPage() {
                         setCompanyOfficialUrl(company.officialUrl ?? "");
                       }}
                     >
-                      <Text className="text-sm font-semibold text-accent">
+                    <Text className="text-sm font-semibold text-brand-text">
                         {company.name}
                       </Text>
                     </Pressable>
@@ -778,7 +778,7 @@ export default function AddCommunityProductionPage() {
             <Text className="rounded-todam border border-selected-border bg-selected p-4 text-sm leading-6 text-muted">
               Merci de respecter notre{" "}
               <Link href="/politique-editoriale">
-                <Text className="font-semibold text-accent">politique éditoriale</Text>
+              <Text className="font-semibold text-ink">politique éditoriale</Text>
               </Link>
               .
             </Text>

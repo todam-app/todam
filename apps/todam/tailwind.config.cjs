@@ -19,6 +19,8 @@ module.exports = {
         accent: "#C34E42",
         "accent-pressed": "#A83E35",
         "accent-soft": "#F3A995",
+        "brand-signal": "#ED2215",
+        "brand-text": "#D9271A",
         "coral-text": "#C34E42",
         "lilac-text": "#6651B8",
         "aqua-text": "#176C68",

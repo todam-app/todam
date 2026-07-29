@@ -30,7 +30,7 @@ function LegalLink({
   if (Platform.OS === "web") {
     return (
       <a
-        className="font-semibold text-accent"
+        className="font-semibold text-brand-text"
         href={href}
         rel="noreferrer"
         target="_blank"
@@ -40,7 +40,7 @@ function LegalLink({
     );
   }
   return (
-    <Link className="font-semibold text-accent" href={href}>
+    <Link className="font-semibold text-brand-text" href={href}>
       {children}
     </Link>
   );
@@ -233,7 +233,8 @@ export default function SignUpScreen() {
             Visibilité de ton journal
           </Text>
           <Text className="text-base leading-6 text-muted">
-            Ton profil pseudonyme et ton journal sont publics par défaut pour pouvoir
+            Ton profil sous ton nom d'utilisateur et ton journal sont publics par défaut
+            pour pouvoir
             être partagés. Ton e-mail et tes données de compte ne le sont jamais. Tu
             pourras rendre tout le profil privé — ce qui masque aussi les listes et avis
             publics. Chaque nouvelle liste et chaque nouvel avis sont privés par défaut,

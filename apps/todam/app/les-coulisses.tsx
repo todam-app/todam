@@ -125,7 +125,7 @@ export default function BehindTheScenesScreen() {
     <View
       className="todam-ticket self-start px-5 py-4"
     >
-      <Text className="text-xs font-bold uppercase tracking-widest text-accent">
+            <Text className="text-xs font-bold uppercase tracking-widest text-brand-text">
         Version publique
       </Text>
       <Text className="text-base mt-1 font-semibold text-ink">
@@ -236,7 +236,7 @@ export default function BehindTheScenesScreen() {
                   className="min-h-11 justify-center"
                   onPress={() => void stats.refetch()}
                 >
-                  <Text className="text-base font-semibold text-accent">Réessayer</Text>
+              <Text className="text-base font-semibold text-brand-text">Réessayer</Text>
                 </Pressable>
               </View>
             ) : stats.data ? (
@@ -248,7 +248,7 @@ export default function BehindTheScenesScreen() {
 
           <View className="todam-calm-panel gap-6 p-6 md:p-8">
             <View className="max-w-4xl gap-4">
-              <Text className="text-xs font-bold uppercase tracking-widest text-accent">
+            <Text className="text-xs font-bold uppercase tracking-widest text-brand-text">
                 Projet open source
               </Text>
               <Text
@@ -288,7 +288,7 @@ export default function BehindTheScenesScreen() {
 
           <View className="todam-calm-panel flex-row flex-wrap gap-8 p-6 md:p-8">
             <View className="min-w-64 flex-1 gap-3">
-              <Text className="text-xs font-bold uppercase tracking-widest text-accent">
+            <Text className="text-xs font-bold uppercase tracking-widest text-brand-text">
                 Le coût du projet
               </Text>
               <Text
@@ -341,7 +341,7 @@ export default function BehindTheScenesScreen() {
                   className="min-w-56 flex-1 gap-2 rounded-panel border border-line bg-paper p-5 shadow-soft md:min-w-[190px]"
                   key={item.label}
                 >
-                  <Text className="text-xs font-bold uppercase tracking-widest text-accent">
+                <Text className="text-xs font-bold uppercase tracking-widest text-brand-text">
                     {String(index + 1).padStart(2, "0")} · {item.label}
                   </Text>
                   <Text className="text-lg font-semibold leading-7 text-ink">
@@ -354,7 +354,7 @@ export default function BehindTheScenesScreen() {
 
           <View className="gap-7 border-y border-line py-8">
             <View className="max-w-4xl gap-3">
-              <Text className="text-xs font-bold uppercase tracking-widest text-accent">
+          <Text className="text-xs font-bold uppercase tracking-widest text-brand-text">
                 Fiabilité opérationnelle
               </Text>
               <Text

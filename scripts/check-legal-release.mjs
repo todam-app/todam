@@ -25,10 +25,10 @@ const requiredProductionVariables = [
 ];
 
 const documents = [
-  ["docs/legal/conditions-utilisation-v1.0.2.md", "1.0.2", "28 juillet 2026"],
-  ["docs/legal/confidentialite-v1.0.3.md", "1.0.3", "28 juillet 2026"],
+  ["docs/legal/conditions-utilisation-v1.0.3.md", "1.0.3", "29 juillet 2026"],
+  ["docs/legal/confidentialite-v1.0.4.md", "1.0.4", "29 juillet 2026"],
   ["docs/legal/mentions-legales-v1.0.0.md", "1.0.0", "26 juillet 2026"],
-  ["docs/legal/suppression-compte-v1.0.2.md", "1.0.2", "28 juillet 2026"],
+  ["docs/legal/suppression-compte-v1.0.3.md", "1.0.3", "29 juillet 2026"],
 ];
 
 const forbiddenPublisherMarkers = [

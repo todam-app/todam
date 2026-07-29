@@ -92,7 +92,7 @@ export default function PublicListPage() {
                       accessibilityRole="link"
                       className="min-h-11 justify-center"
                     >
-                      <Text className="text-sm font-semibold text-accent">
+            <Text className="text-sm font-semibold text-brand-text">
                         Journal de @{list.data.username}
                       </Text>
                     </Pressable>

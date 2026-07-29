@@ -14,7 +14,7 @@ Références officielles :
 | Type Google Play probable                     | Données Todam                     | Finalité                         | Obligatoire                    |
 | --------------------------------------------- | --------------------------------- | -------------------------------- | ------------------------------ |
 | Informations personnelles — adresse e-mail    | Compte et vérification            | Gestion de compte                | Oui pour un compte             |
-| Identifiants utilisateur                      | Identifiant et pseudonyme         | Fonctionnement, personnalisation | Oui pour un compte             |
+| Identifiants utilisateur                      | Identifiant et nom d'utilisateur | Fonctionnement, personnalisation | Oui pour un compte             |
 | Activité dans l'application                   | Journal, notes, liste « À voir »  | Fonctionnalité                   | Non, sauf usage de la fonction |
 | Contenu généré par l'utilisateur              | Futures critiques et listes       | Fonctionnalité sociale           | Non, V2 seulement              |
 | Informations et performances de l'application | Erreurs Sentry filtrées           | Diagnostic                       | À confirmer dans le binaire    |

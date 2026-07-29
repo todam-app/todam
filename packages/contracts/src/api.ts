@@ -245,6 +245,31 @@ export const ContentReportBodySchema = z
   });
 export type ContentReportBody = z.infer<typeof ContentReportBodySchema>;
 
+export const ContactBodySchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(1, "Indiquez votre nom.")
+    .max(120, "Le nom ne peut pas dépasser 120 caractères."),
+  email: z
+    .string()
+    .trim()
+    .email("Indiquez une adresse e-mail valide.")
+    .max(254, "L’adresse e-mail est trop longue."),
+  subject: z
+    .string()
+    .trim()
+    .min(3, "L’objet doit contenir au moins 3 caractères.")
+    .max(160, "L’objet ne peut pas dépasser 160 caractères."),
+  message: z
+    .string()
+    .trim()
+    .min(10, "Le message doit contenir au moins 10 caractères.")
+    .max(5000, "Le message ne peut pas dépasser 5000 caractères."),
+  website: z.string().max(200).default(""),
+});
+export type ContactBody = z.infer<typeof ContactBodySchema>;
+
 export const ContentReportResponseSchema = z.object({
   id: UuidSchema,
   status: z.literal("open"),
@@ -329,7 +354,7 @@ export const RatingDistributionSchema = z.array(
 
 export const DashboardSchema = z.object({
   profile: z.object({
-    pseudonym: z.string(),
+    username: z.string(),
   }),
   counts: z.object({
     seen: z.number().int().nonnegative(),
@@ -367,7 +392,7 @@ export type HomeDiscoveryItem = z.infer<typeof HomeDiscoveryItemSchema>;
 
 export const HomeResponseSchema = z.object({
   profile: z.object({
-    pseudonym: z.string(),
+    username: z.string(),
   }),
   homeCity: CityOptionSchema.nullable(),
   progress: z.object({

@@ -28,6 +28,11 @@ describe("tokens accessibles", () => {
     expect(contrast(tokens.color.ink, tokens.color.background)).toBeGreaterThan(4.5);
   });
 
+  it("garde le texte de marque au niveau WCAG AA sur les fonds neutres", () => {
+    expect(contrast(tokens.color.brandText, tokens.color.background)).toBeGreaterThan(4.5);
+    expect(contrast(tokens.color.brandText, tokens.color.surface)).toBeGreaterThan(4.5);
+  });
+
   it("garde le libellé du bouton destructif au niveau WCAG AA", () => {
     expect(contrast(tokens.color.surface, tokens.color.error)).toBeGreaterThan(4.5);
   });
@@ -97,6 +102,8 @@ describe("tokens accessibles", () => {
 
   it("expose les accents éditoriaux, rayons et surfaces Web", () => {
     expect({
+      brandSignal: tokens.color.brandSignal,
+      brandText: tokens.color.brandText,
       coral: tokens.color.coral,
       lilac: tokens.color.lilac,
       aqua: tokens.color.aqua,
@@ -105,6 +112,8 @@ describe("tokens accessibles", () => {
       glass: tokens.surface.glass,
       shadow: tokens.shadow.light,
     }).toEqual({
+      brandSignal: "#ED2215",
+      brandText: "#D9271A",
       coral: "#F3A995",
       lilac: "#C8B8F0",
       aqua: "#9FD8D0",

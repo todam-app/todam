@@ -281,7 +281,7 @@ const publicList = {
   name: "À voir autour de Grenoble",
   description:
     "Une sélection de spectacles à partager pour préparer les prochains mois.",
-  visibility: "public",
+  visibility: "private",
   itemCount: 3,
   updatedAt: verifiedAt,
 } as const;
@@ -290,7 +290,7 @@ const publicMember: PublicMember = {
   username: "spectatrice-grenoble",
   bio: "Théâtre, danse et formes contemporaines autour de Grenoble.",
   memberSince: "2025-09-12T10:00:00.000Z",
-  counts: { seen: 18, lists: 2, reviews: 7 },
+  counts: { seen: 18, lists: 0, reviews: 7 },
   recentJournal: [
     {
       id: "400234d9-6224-4372-bca3-5d430ac5d9f0",
@@ -303,7 +303,7 @@ const publicMember: PublicMember = {
       hasReview: true,
     },
   ],
-  publicLists: [publicList],
+  publicLists: [],
   recentReviews: [
     {
       id: "300234d9-6224-4372-bca3-5d430ac5d9f0",
@@ -457,7 +457,7 @@ async function mockPresentationApi(page: Page, role: PresentationRole) {
   }));
   await page.route("**/v1/me/home", (route) =>
     fulfillJson(route, {
-      profile: { pseudonym: publicMember.username },
+      profile: { username: publicMember.username },
       homeCity: {
         locality: "Grenoble",
         countryCode: "FR",
@@ -472,7 +472,7 @@ async function mockPresentationApi(page: Page, role: PresentationRole) {
   );
   await page.route("**/v1/me/dashboard", (route) =>
     fulfillJson(route, {
-      profile: { pseudonym: "spectatrice-grenoble" },
+      profile: { username: "spectatrice-grenoble" },
       counts: { seen: 1, ratings: 1, watchlist: 1, lists: 1, reviews: 1 },
       recentDiary: [],
       recentRatings: [
@@ -495,6 +495,7 @@ async function mockPresentationApi(page: Page, role: PresentationRole) {
       username: "spectatrice-grenoble",
       bio: "Théâtre, danse et formes contemporaines autour de Grenoble.",
       profileVisibility: "public",
+      ratingVisibility: "review_only",
       memberSince: verifiedAt,
     }),
   );

@@ -36,7 +36,7 @@ export function CatalogSources({
             key={`${source.url}-${source.retrievedAt}`}
             onPress={() => void Linking.openURL(source.url)}
           >
-            <Text className="text-base font-semibold text-accent">
+        <Text className="text-base font-semibold text-brand-text">
               {source.title} ↗
             </Text>
             <Text className="text-xs leading-5 text-muted">

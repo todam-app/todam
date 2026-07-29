@@ -188,7 +188,7 @@ export default function CompanyPage() {
                         accessibilityRole="link"
                         className="min-h-11 justify-center"
                       >
-                        <Text className="text-sm font-semibold text-accent">
+                  <Text className="text-sm font-semibold text-brand-text">
                           Découvrir
                         </Text>
                       </Pressable>
@@ -196,7 +196,7 @@ export default function CompanyPage() {
                     <Text className="text-sm text-muted">/ Compagnies</Text>
                   </View>
                   <View className="max-w-3xl gap-3">
-                    <Text className="text-xs font-bold uppercase tracking-widest text-accent">
+          <Text className="text-xs font-bold uppercase tracking-widest text-brand-text">
                       Compagnie
                     </Text>
                     <Text
@@ -222,7 +222,7 @@ export default function CompanyPage() {
                         className="min-h-11 self-start justify-center"
                         onPress={() => void Linking.openURL(company.data!.officialUrl!)}
                       >
-                        <Text className="text-base font-semibold text-accent">
+            <Text className="text-base font-semibold text-brand-text">
                           Site officiel de la compagnie ↗
                         </Text>
                       </Pressable>
@@ -269,7 +269,7 @@ export default function CompanyPage() {
                                 accessibilityRole="link"
                                 className="min-h-11 justify-center"
                               >
-                                <Text className="font-serif text-lg font-semibold text-accent">
+                    <Text className="font-serif text-lg font-semibold text-brand-text">
                                   {performance.production.title}
                                 </Text>
                               </Pressable>
@@ -280,7 +280,7 @@ export default function CompanyPage() {
                               accessibilityRole="link"
                               className="min-h-11 justify-center"
                             >
-                              <Text className="text-base font-semibold text-accent">
+                    <Text className="text-base font-semibold text-brand-text">
                                 {performance.venue.name}, {performance.venue.locality}
                               </Text>
                             </Pressable>

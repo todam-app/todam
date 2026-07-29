@@ -34,7 +34,7 @@ export function HomeCitySelector({ city }: { city: CityOption | null }) {
         testID="home-city-selector"
       >
         <View className="min-w-0 flex-1 gap-1">
-          <Text className="text-xs font-bold uppercase tracking-[1.5px] text-accent">
+        <Text className="text-xs font-bold uppercase tracking-[1.5px] text-brand-text">
             Votre ville
           </Text>
           <Text className="text-xl font-semibold text-ink">{city.label}</Text>
@@ -126,7 +126,7 @@ export function HomeCitySelector({ city }: { city: CityOption | null }) {
         </Text>
         <Link href="/confidentialite" asChild>
           <Pressable accessibilityRole="link" className="min-h-11 justify-center">
-            <Text className="text-base font-semibold text-accent">En savoir plus</Text>
+          <Text className="text-base font-semibold text-brand-text">En savoir plus</Text>
           </Pressable>
         </Link>
       </View>

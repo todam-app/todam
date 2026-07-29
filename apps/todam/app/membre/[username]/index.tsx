@@ -101,7 +101,7 @@ export default function PublicMemberPage() {
             {profile.data ? (
               <View className="gap-9">
                 <View className="max-w-3xl gap-3 border-b border-line pb-8">
-                  <Text className="text-xs font-bold uppercase tracking-widest text-accent">
+          <Text className="text-xs font-bold uppercase tracking-widest text-brand-text">
                     Journal public
                   </Text>
                   <Text

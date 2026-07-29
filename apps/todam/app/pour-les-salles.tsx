@@ -65,7 +65,7 @@ export default function ForVenuesPage() {
       <PageScrollView contentContainerClassName="flex-grow">
         <View className="todam-page-before-footer mx-auto w-full max-w-content flex-1 gap-14 px-5 py-10 md:px-8 md:py-16">
           <View className="max-w-4xl gap-6 border-b border-line pb-12">
-            <Text className="text-xs font-bold uppercase tracking-[2px] text-accent">
+        <Text className="text-xs font-bold uppercase tracking-[2px] text-brand-text">
               Pour les salles
             </Text>
             <Text
@@ -140,7 +140,7 @@ export default function ForVenuesPage() {
                 "Choisir éventuellement un emplacement discret pour un QR code ou un lien.",
               ].map((item, index) => (
                 <View className="flex-row gap-4" key={item}>
-                  <Text className="text-base w-7 font-bold text-accent">
+              <Text className="text-base w-7 font-bold text-brand-text">
                     0{index + 1}
                   </Text>
                   <Text className="max-w-[70ch] flex-1 text-base leading-6 text-ink">
@@ -200,7 +200,7 @@ export default function ForVenuesPage() {
                   </Text>
                   <View className="gap-6 md:flex-row md:items-stretch">
                     <View className="todam-calm-panel min-w-0 flex-1 p-5">
-                      <Text className="mb-2 text-xs font-bold uppercase tracking-widest text-accent">
+            <Text className="mb-2 text-xs font-bold uppercase tracking-widest text-brand-text">
                         Fiche publique
                       </Text>
                       <ProductionListItem
@@ -213,7 +213,7 @@ export default function ForVenuesPage() {
                       </Text>
                     </View>
                     <View className="todam-calm-panel flex-1 justify-center gap-4 p-5">
-                      <Text className="text-xs font-bold uppercase tracking-widest text-accent">
+            <Text className="text-xs font-bold uppercase tracking-widest text-brand-text">
                         Après « Vu »
                       </Text>
                       <Text className="font-serif text-2xl font-semibold text-ink">
@@ -257,7 +257,7 @@ export default function ForVenuesPage() {
                   accessibilityRole="link"
                   className="min-h-11 justify-center px-3"
                 >
-                  <Text className="text-base font-semibold text-accent">
+            <Text className="text-base font-semibold text-brand-text">
                     Voir l’infrastructure et les limites actuelles →
                   </Text>
                 </Pressable>

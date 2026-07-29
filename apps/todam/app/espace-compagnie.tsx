@@ -275,7 +275,7 @@ function DraftVisualPreview({
     return (
       <View className="gap-6 border-y border-line bg-canvas py-7">
         <View className="max-w-3xl gap-3">
-          <Text className="text-xs font-bold uppercase tracking-widest text-accent">
+          <Text className="text-xs font-bold uppercase tracking-widest text-brand-text">
             Aperçu privé · compagnie
           </Text>
           <Text
@@ -303,7 +303,7 @@ function DraftVisualPreview({
             </Text>
           ) : null}
           {companyForm.officialUrl ? (
-            <Text className="todam-wrap-technical text-sm font-semibold text-accent">
+            <Text className="todam-wrap-technical text-sm font-semibold text-brand-text">
               {companyForm.officialUrl}
             </Text>
           ) : null}
@@ -333,7 +333,7 @@ function DraftVisualPreview({
           )}
         </View>
         <View className="min-w-0 flex-1 gap-3">
-          <Text className="text-xs font-bold uppercase tracking-widest text-accent">
+          <Text className="text-xs font-bold uppercase tracking-widest text-brand-text">
             Aperçu privé ·{" "}
             {productionForm.discipline === "theatre"
               ? "Théâtre"

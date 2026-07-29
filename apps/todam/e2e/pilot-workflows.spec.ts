@@ -283,16 +283,16 @@ test("une salle ouvre sa programmation puis une fiche spectacle alimentée par l
   ).toBeVisible();
 });
 
-test("une liste se réordonne au clavier et change de visibilité", async ({ page }) => {
+test("une liste privée se réordonne au clavier", async ({ page }) => {
   await mockSession(page);
   let orderedItems = [firstCard, secondCard];
-  let visibility: "public" | "private" = "public";
+  let submittedVisibility: "private" | undefined;
   const detail = (): UserListDetail => ({
     id: listId,
     slug: "grenoble-2027",
     name: "Grenoble 2027",
     description: "Deux spectacles à suivre.",
-    visibility,
+    visibility: "private",
     itemCount: orderedItems.length,
     updatedAt: now,
     username: "spectatrice-pilote",
@@ -305,7 +305,7 @@ test("une liste se réordonne au clavier et change de visibilité", async ({ pag
 
   await page.route("**/v1/me/dashboard", (route) =>
     json(route, {
-      profile: { pseudonym: "spectatrice-pilote" },
+      profile: { username: "spectatrice-pilote" },
       counts: { seen: 1, ratings: 1, watchlist: 0, lists: 1, reviews: 1 },
       recentDiary: [],
       recentRatings: [
@@ -328,6 +328,7 @@ test("une liste se réordonne au clavier et change de visibilité", async ({ pag
       username: "spectatrice-pilote",
       bio: null,
       profileVisibility: "public",
+      ratingVisibility: "review_only",
       memberSince: now,
     }),
   );
@@ -356,7 +357,7 @@ test("une liste se réordonne au clavier et change de visibilité", async ({ pag
           slug: "grenoble-2027",
           name: "Grenoble 2027",
           description: "Deux spectacles à suivre.",
-          visibility,
+          visibility: "private",
           itemCount: orderedItems.length,
           updatedAt: now,
         },
@@ -366,9 +367,9 @@ test("une liste se réordonne au clavier et change de visibilité", async ({ pag
   await page.route(`**/v1/me/lists/${listId}`, async (route) => {
     if (route.request().method() === "PATCH") {
       const input = route.request().postDataJSON() as {
-        visibility?: "public" | "private";
+        visibility?: "private";
       };
-      visibility = input.visibility ?? visibility;
+      submittedVisibility = input.visibility;
     }
     await json(route, detail());
   });
@@ -393,10 +394,12 @@ test("une liste se réordonne au clavier et change de visibilité", async ({ pag
     productionId,
   ]);
 
-  await page.getByRole("radio", { name: "Privée" }).click();
+  await expect(
+    page.getByText("Cette liste est privée et visible uniquement par vous."),
+  ).toBeVisible();
   await page.getByRole("button", { name: "Enregistrer" }).click();
   await expect(page.getByText("La liste a été mise à jour.")).toBeVisible();
-  expect(visibility).toBe("private");
+  expect(submittedVisibility).toBe("private");
 });
 
 test("une compagnie revendique sa fiche avec une demande vérifiable", async ({

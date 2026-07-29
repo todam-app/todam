@@ -104,7 +104,7 @@ export function createAuth(database: TodamDatabase, emailSender: EmailSender) {
         const rows = await database
           .select({
             email: user.email,
-            pseudonym: user.pseudonym,
+            username: user.username,
             termsVersion: user.termsVersion,
             privacyNoticeVersion: user.privacyNoticeVersion,
             termsAcceptedAt: user.termsAcceptedAt,
@@ -119,7 +119,7 @@ export function createAuth(database: TodamDatabase, emailSender: EmailSender) {
         try {
           await emailSender.send({
             ...createWelcomeEmail({
-              displayName: profile.pseudonym,
+              displayName: profile.username,
               privacyNotice: {
                 pdfUrl: documents.privacyNotice.pdfUrl,
                 version: profile.privacyNoticeVersion,
@@ -213,8 +213,8 @@ export function createAuth(database: TodamDatabase, emailSender: EmailSender) {
             if (!UsernameSchema.safeParse(usernameValue).success) {
               throw new HttpProblem(
                 400,
-                "INVALID_PSEUDONYM",
-                "Le pseudonyme doit contenir 3 à 30 lettres, chiffres, points, tirets ou underscores.",
+                "INVALID_USERNAME",
+                "Le nom d'utilisateur doit contenir 3 à 30 lettres, chiffres, points, tirets ou underscores.",
               );
             }
             if (candidate.age15OrOlder !== true) {
@@ -266,7 +266,7 @@ export function createAuth(database: TodamDatabase, emailSender: EmailSender) {
       username({
         minUsernameLength: 3,
         maxUsernameLength: 30,
-        // Les nouveaux pseudonymes sont contrôlés par le hook ci-dessus.
+        // Les nouveaux noms d'utilisateur sont contrôlés par le hook ci-dessus.
         // Ce validateur reste permissif afin de ne pas bloquer la connexion
         // d’un éventuel compte historique avec un ancien format.
         usernameValidator: () => true,
@@ -275,7 +275,7 @@ export function createAuth(database: TodamDatabase, emailSender: EmailSender) {
         schema: {
           user: {
             fields: {
-              username: "pseudonym",
+              username: "username",
               displayUsername: "name",
             },
           },

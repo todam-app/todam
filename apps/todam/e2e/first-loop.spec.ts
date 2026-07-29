@@ -96,7 +96,7 @@ async function mockAuthenticatedProfile(
     await route.fulfill({
       contentType: "application/json",
       body: JSON.stringify({
-        profile: { pseudonym: "spectatrice-test" },
+        profile: { username: "spectatrice-test" },
         counts: {
           seen: 0,
           ratings: ratingDistribution.reduce((total, item) => total + item.count, 0),
@@ -118,6 +118,7 @@ async function mockAuthenticatedProfile(
         username: "spectatrice-test",
         bio: null,
         profileVisibility: "public",
+        ratingVisibility: "review_only",
         memberSince: now,
       }),
     });
@@ -169,7 +170,7 @@ async function mockAuthenticatedProfile(
     await route.fulfill({
       contentType: "application/json",
       body: JSON.stringify({
-        profile: { pseudonym: "spectatrice-test" },
+        profile: { username: "spectatrice-test" },
         homeCity: null,
         progress: { current: 0, target: 5, completed: false },
         radiusKm: 50,
@@ -282,7 +283,7 @@ test("l'accueil masque la progression terminée et les listes vides restent expl
     await route.fulfill({
       contentType: "application/json",
       body: JSON.stringify({
-        profile: { pseudonym: "spectatrice-test" },
+        profile: { username: "spectatrice-test" },
         homeCity: null,
         progress: { current: 5, target: 5, completed: true },
         radiusKm: 50,
@@ -358,7 +359,7 @@ test("le contenu reste centré et le scroll Web utilise le viewport", async ({
   expect(headerBox.width).toBeCloseTo(1120, 0);
   expect(headerBox.right - navigationBox.right).toBeGreaterThanOrEqual(24);
   expect(headerBox.right - navigationBox.right).toBeLessThanOrEqual(33);
-  expect(webBackground.color).toBe("rgb(250, 243, 232)");
+  expect(webBackground.color).toBe("rgb(240, 234, 225)");
   expect(webBackground.image).toContain("linear-gradient");
   await expect(page.locator("body")).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
   await expect(page.locator("#root")).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
@@ -530,7 +531,7 @@ test("les pages juridiques utilisent le fond Web commun", async ({ page }) => {
           const color = window.getComputedStyle(ancestor).backgroundColor;
           if (
             color !== "rgba(0, 0, 0, 0)" &&
-            color !== "rgb(250, 243, 232)" &&
+            color !== "rgb(240, 234, 225)" &&
             color !== "rgb(252, 248, 242)"
           ) {
             unexpectedColors.push(color);
@@ -541,7 +542,7 @@ test("les pages juridiques utilisent le fond Web commun", async ({ page }) => {
       }),
     )
     .toEqual([]);
-  await expect(pageScroller).toHaveCSS("background-color", "rgb(250, 243, 232)");
+  await expect(pageScroller).toHaveCSS("background-color", "rgb(240, 234, 225)");
   await expect(pageScroller).toHaveCSS("background-image", /linear-gradient/);
   await expect(page.locator("body")).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
   const htmlBackground = await page.locator("html").evaluate((element) => {
@@ -551,7 +552,7 @@ test("les pages juridiques utilisent le fond Web commun", async ({ page }) => {
       image: style.backgroundImage,
     };
   });
-  expect(htmlBackground.color).toBe("rgb(250, 243, 232)");
+  expect(htmlBackground.color).toBe("rgb(240, 234, 225)");
   expect(htmlBackground.image).toContain("linear-gradient");
 });
 
@@ -734,11 +735,12 @@ test("l'export des paramètres affiche ses états de chargement, succès et erre
         exportedAt: "2026-07-26T12:00:00.000Z",
         account: {
           id: "user-profile-test",
-          pseudonym: "spectatrice-test",
+          username: "spectatrice-test",
           email: "spectatrice@example.test",
           emailVerified: true,
           createdAt: "2026-07-26T12:00:00.000Z",
           profileVisibility: "public",
+          ratingVisibility: "review_only",
           bio: null,
           homeCity: null,
         },
@@ -978,7 +980,7 @@ test("les paramètres exposent les bons champs et confirment les modifications",
   await newEmail.blur();
   await expect(newEmail).toHaveCSS("outline-width", "0px");
 
-  await username.fill("nouveau-pseudonyme");
+  await username.fill("nouveau-nom-utilisateur");
   await page.getByRole("button", { name: "Modifier le nom d'utilisateur" }).click();
   await expect(page.getByText("Ton nom d'utilisateur a été modifié.")).toBeVisible();
 
@@ -1083,4 +1085,102 @@ test("les pages publiques Web utilisent uniquement l'en-tête Todam", async ({
       await expect(page.getByText(/médiateur|médiation/i)).toHaveCount(0);
     }
   }
+});
+
+test("le footer ouvre la page Contact et le formulaire confirme son envoi", async ({
+  page,
+}) => {
+  let submitted: Record<string, unknown> | undefined;
+  await page.route("**/v1/contact", async (route) => {
+    submitted = route.request().postDataJSON() as Record<string, unknown>;
+    await route.fulfill({
+      body: JSON.stringify({ ok: true }),
+      contentType: "application/json",
+      status: 200,
+    });
+  });
+
+  await page.goto("/");
+  await page.getByTestId("site-footer").scrollIntoViewIfNeeded();
+  await page.getByRole("link", { name: "contact@todam.fr" }).click();
+
+  await expect(page).toHaveURL("/contact");
+  await expect(
+    page.getByRole("heading", { exact: true, name: "Écrivez à Todam" }),
+  ).toBeVisible();
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+    "href",
+    "http://localhost:8082/contact",
+  );
+  await expect(
+    page.getByRole("link", { name: "Écrire à contact@todam.fr" }),
+  ).toBeVisible();
+  await expect(
+    page.getByText(
+      "Todam utilise ces informations uniquement pour répondre à votre message.",
+    ),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "En savoir plus sur vos données et vos droits" }),
+  ).toBeVisible();
+  await expectFooterBelowViewport(page);
+
+  await page.getByRole("button", { name: "Envoyer le message" }).click();
+  await expect(page.getByText("Indiquez votre nom.")).toBeVisible();
+  await expect(page.getByText("Indiquez une adresse e-mail valide.")).toBeVisible();
+
+  await page.getByLabel("Nom").fill("Camille");
+  await page.getByLabel("Adresse e-mail").fill("camille@example.test");
+  await page.getByLabel("Objet").fill("Une question");
+  await page
+    .getByLabel("Message")
+    .fill("Bonjour, voici ma question à propos de Todam.");
+  await page.getByRole("button", { name: "Envoyer le message" }).click();
+
+  await expect(page.getByText("Votre message a bien été envoyé.")).toBeVisible();
+  expect(submitted).toEqual({
+    name: "Camille",
+    email: "camille@example.test",
+    subject: "Une question",
+    message: "Bonjour, voici ma question à propos de Todam.",
+    website: "",
+  });
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/");
+  await page.getByTestId("site-footer").scrollIntoViewIfNeeded();
+  await page.getByRole("link", { exact: true, name: "Contact" }).click();
+  await expect(page).toHaveURL("/contact");
+});
+
+test("le formulaire Contact propose l'adresse directe si l'envoi échoue", async ({
+  page,
+}) => {
+  await page.route("**/v1/contact", async (route) => {
+    await route.fulfill({
+      body: JSON.stringify({
+        type: "about:blank",
+        title: "Service indisponible",
+        status: 503,
+        detail: "Le message n’a pas pu être envoyé. Réessayez dans quelques instants.",
+        code: "CONTACT_DELIVERY_UNAVAILABLE",
+      }),
+      contentType: "application/problem+json",
+      status: 503,
+    });
+  });
+  await page.goto("/contact");
+  await page.getByLabel("Nom").fill("Camille");
+  await page.getByLabel("Adresse e-mail").fill("camille@example.test");
+  await page.getByLabel("Objet").fill("Une question");
+  await page
+    .getByLabel("Message")
+    .fill("Bonjour, voici ma question à propos de Todam.");
+  await page.getByRole("button", { name: "Envoyer le message" }).click();
+
+  await expect(
+    page.getByText(
+      /Le message n’a pas pu être envoyé.*Vous pouvez aussi écrire directement à contact@todam\.fr\./,
+    ),
+  ).toBeVisible();
 });

@@ -10,6 +10,9 @@ import {
 export const ProfileVisibilitySchema = z.enum(["public", "private"]);
 export type ProfileVisibility = z.infer<typeof ProfileVisibilitySchema>;
 
+export const RatingVisibilitySchema = z.enum(["review_only", "public"]);
+export type RatingVisibility = z.infer<typeof RatingVisibilitySchema>;
+
 const QueryBooleanSchema = z.preprocess(
   (value) => (value === "true" ? true : value === "false" ? false : value),
   z.boolean(),
@@ -122,6 +125,7 @@ export type PublicMember = z.infer<typeof PublicMemberSchema>;
 export const UpdateProfileBodySchema = z.object({
   bio: z.string().trim().max(500).nullable().optional(),
   profileVisibility: ProfileVisibilitySchema.optional(),
+  ratingVisibility: RatingVisibilitySchema.optional(),
 });
 export type UpdateProfileBody = z.infer<typeof UpdateProfileBodySchema>;
 
@@ -129,6 +133,7 @@ export const ProfileSettingsSchema = z.object({
   username: z.string(),
   bio: z.string().nullable(),
   profileVisibility: ProfileVisibilitySchema,
+  ratingVisibility: RatingVisibilitySchema,
   memberSince: z.string().datetime({ offset: true }),
 });
 export type ProfileSettings = z.infer<typeof ProfileSettingsSchema>;
@@ -241,7 +246,7 @@ export type MyShowsResponse = z.infer<typeof MyShowsResponseSchema>;
 const ListEditableFieldsSchema = z.object({
   name: z.string().trim().min(1).max(80),
   description: z.string().trim().max(500).nullable().default(null),
-  visibility: ContentVisibilitySchema.default("private"),
+  visibility: z.literal("private").default("private"),
 });
 export const CreateListBodySchema = ListEditableFieldsSchema.extend({
   productionId: UuidSchema.optional(),

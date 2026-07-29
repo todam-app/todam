@@ -56,7 +56,7 @@ function LinkedSectionTitle({
       </Link>
       <Link href={href} asChild>
         <Pressable accessibilityRole="link" className="min-h-11 justify-center">
-          <Text className="text-base font-semibold text-accent">Voir tout →</Text>
+          <Text className="text-base font-semibold text-brand-text">Voir tout →</Text>
         </Pressable>
       </Link>
     </View>
@@ -147,7 +147,7 @@ function MarketingHome({
         <View className="todam-page-before-footer mx-auto w-full max-w-content flex-1 gap-16 px-5 py-10 md:px-8 md:py-16">
           <View className="todam-public-hero gap-10 py-6 md:py-10 lg:py-14">
             <View className="max-w-3xl justify-center gap-6">
-              <Text className="text-xs font-bold uppercase tracking-[2px] text-accent">
+              <Text className="text-xs font-bold uppercase tracking-[2px] text-brand-text">
                 Votre mémoire du spectacle vivant
               </Text>
               <Text
@@ -251,7 +251,8 @@ function MarketingHome({
                 {
                   number: "03",
                   title: "Partagez",
-                  body: "Publiez un journal pseudonyme, un avis ou une liste.",
+                  body:
+                    "Publiez un journal sous votre nom d'utilisateur, un avis ou une liste.",
                   href: "/sign-up" as const,
                 },
               ].map((step, index) => (
@@ -266,7 +267,7 @@ function MarketingHome({
                       <Text
                         className={`font-serif text-3xl font-semibold ${
                           index === 0
-                            ? "text-coral-text"
+                            ? "text-brand-text"
                             : index === 1
                               ? "text-lilac-text"
                               : "text-aqua-text"
@@ -278,7 +279,7 @@ function MarketingHome({
                         accessibilityElementsHidden
                         color={
                           index === 0
-                            ? tokens.color.coralText
+                            ? tokens.color.brandText
                             : index === 1
                               ? tokens.color.lilacText
                               : tokens.color.aquaText
@@ -320,7 +321,7 @@ function MarketingHome({
                 accessibilityRole="link"
                 className="min-h-11 self-start justify-center"
               >
-                <Text className="text-base font-semibold text-accent">
+                <Text className="text-base font-semibold text-brand-text">
                   Découvrir les coulisses de Todam →
                 </Text>
               </Pressable>
@@ -343,7 +344,7 @@ function MarketingHome({
                   <Text className="text-base leading-6 text-muted">
                     Vérifiez votre programme et testez le parcours spectateur.
                   </Text>
-                  <Text className="text-base font-semibold text-accent">
+                  <Text className="text-base font-semibold text-brand-text">
                     Voir le pilote pour les salles →
                   </Text>
                 </Pressable>
@@ -359,7 +360,7 @@ function MarketingHome({
                   <Text className="text-base leading-6 text-muted">
                     Revendiquez votre fiche et proposez des informations vérifiées.
                   </Text>
-                  <Text className="text-base font-semibold text-accent">
+                  <Text className="text-base font-semibold text-brand-text">
                     Voir le parcours des compagnies →
                   </Text>
                 </Pressable>
@@ -397,8 +398,8 @@ function ConnectedHome() {
             <View className="gap-11">
               <View className="todam-connected-hero gap-8 p-6 md:p-9">
                 <View className="justify-center gap-5">
-                  <Text className="text-xs font-bold uppercase tracking-[2px] text-accent">
-                    {home.data.profile.pseudonym}
+                  <Text className="text-xs font-bold uppercase tracking-[2px] text-brand-text">
+                    {home.data.profile.username}
                   </Text>
                   <Text
                     aria-level={1}
@@ -445,7 +446,7 @@ function ConnectedHome() {
                         accessibilityRole="link"
                         className="min-h-11 justify-center"
                       >
-                        <Text className="text-sm font-semibold text-accent">
+                        <Text className="text-sm font-semibold text-brand-text">
                           Continuer →
                         </Text>
                       </Pressable>
@@ -463,12 +464,18 @@ function ConnectedHome() {
                     />
                   </View>
                   {!home.data.homeCity ? (
-                    <Link href="/parametres-compte" asChild>
+                    <Link
+                      href={{
+                        pathname: "/profile",
+                        params: { section: "settings" },
+                      }}
+                      asChild
+                    >
                       <Pressable
                         accessibilityRole="link"
                         className="min-h-11 self-start justify-center"
                       >
-                        <Text className="text-sm font-semibold text-accent">
+                        <Text className="text-sm font-semibold text-brand-text">
                           Choisir une ville pour personnaliser l’affiche →
                         </Text>
                       </Pressable>
@@ -496,7 +503,7 @@ function ConnectedHome() {
                     <Text className="font-serif text-xl font-semibold text-ink">
                       Ouvrir mes spectacles
                     </Text>
-                    <Text className="mt-1 text-sm text-accent">
+                    <Text className="mt-1 text-sm text-brand-text">
                       Filtrer, dater et modifier mes entrées →
                     </Text>
                   </Pressable>
@@ -509,7 +516,7 @@ function ConnectedHome() {
                     <Text className="font-serif text-xl font-semibold text-ink">
                       Gérer mes listes
                     </Text>
-                    <Text className="mt-1 text-sm text-accent">
+                    <Text className="mt-1 text-sm text-brand-text">
                       Créer, réordonner et partager →
                     </Text>
                   </Pressable>

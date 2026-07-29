@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   CitySearchQuerySchema,
   CompanyProductionParamsSchema,
+  ContactBodySchema,
   EmailChangeBodySchema,
   EmailSignInBodySchema,
   HomeCityBodySchema,
@@ -18,6 +19,41 @@ import {
 import { ProductionCardSchema } from "./catalog.js";
 
 describe("contrats API", () => {
+  it("valide et normalise un message de contact", () => {
+    expect(
+      ContactBodySchema.parse({
+        name: "  Camille  ",
+        email: "camille@example.test",
+        subject: "  Une question  ",
+        message: "  Bonjour, voici ma question.  ",
+      }),
+    ).toEqual({
+      name: "Camille",
+      email: "camille@example.test",
+      subject: "Une question",
+      message: "Bonjour, voici ma question.",
+      website: "",
+    });
+
+    expect(() =>
+      ContactBodySchema.parse({
+        name: "",
+        email: "adresse-invalide",
+        subject: "Hi",
+        message: "Trop court",
+      }),
+    ).toThrow();
+    expect(() =>
+      ContactBodySchema.parse({
+        name: "Camille",
+        email: "camille@example.test",
+        subject: "Question",
+        message: "Un message suffisamment détaillé.",
+        website: "x".repeat(201),
+      }),
+    ).toThrow();
+  });
+
   it("décrit les connexions par email et nom d'utilisateur", () => {
     expect(
       EmailSignInBodySchema.parse({
@@ -103,7 +139,7 @@ describe("contrats API", () => {
 
   it("décrit l'accueil connecté et sa progression sur cinq spectacles", () => {
     const home = HomeResponseSchema.parse({
-      profile: { pseudonym: "spectatrice" },
+      profile: { username: "spectatrice" },
       homeCity: {
         locality: "Monaco",
         countryCode: "MC",
@@ -116,7 +152,7 @@ describe("contrats API", () => {
       recentlyAdded: [],
     });
 
-    expect(home.profile.pseudonym).toBe("spectatrice");
+    expect(home.profile.username).toBe("spectatrice");
     expect(home.progress).toEqual({ current: 4, target: 5, completed: false });
   });
 

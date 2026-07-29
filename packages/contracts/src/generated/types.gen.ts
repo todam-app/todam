@@ -161,6 +161,135 @@ export type GetV1PublicStatsResponses = {
 export type GetV1PublicStatsResponse =
   GetV1PublicStatsResponses[keyof GetV1PublicStatsResponses];
 
+export type PostV1ContactData = {
+  body: {
+    name: string;
+    email: string;
+    subject: string;
+    message: string;
+    website?: string;
+  };
+  path?: never;
+  query?: never;
+  url: "/v1/contact";
+};
+
+export type PostV1ContactErrors = {
+  /**
+   * Default Response
+   */
+  400: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  401: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  404: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+};
+
+export type PostV1ContactError = PostV1ContactErrors[keyof PostV1ContactErrors];
+
+export type PostV1ContactResponses = {
+  /**
+   * Default Response
+   */
+  200: {
+    ok: true;
+  };
+};
+
+export type PostV1ContactResponse =
+  PostV1ContactResponses[keyof PostV1ContactResponses];
+
 export type PostV1ContentReportsData = {
   body: {
     targetType: "production" | "venue" | "company" | "member" | "list" | "review";
@@ -433,8 +562,8 @@ export type PostV1AuthSignUpEmailData = {
     email: string;
     password: string;
     age15OrOlder: true;
-    termsVersion: "1.0.2";
-    privacyNoticeVersion: "1.0.3";
+    termsVersion: "1.0.3";
+    privacyNoticeVersion: "1.0.4";
     channel: "web" | "android";
     callbackURL?: string;
   };
@@ -627,11 +756,12 @@ export type GetV1MeExportResponses = {
         exportedAt: string;
         account: {
           id: string;
-          pseudonym: string;
+          username: string;
           email: string;
           emailVerified: boolean;
           createdAt: string;
           profileVisibility: "public" | "private";
+          ratingVisibility: "review_only" | "public";
           bio: string | null;
           homeCity: {
             locality: string;
@@ -3635,7 +3765,7 @@ export type GetV1MeHomeResponses = {
    */
   200: {
     profile: {
-      pseudonym: string;
+      username: string;
     };
     homeCity: {
       locality: string;
@@ -4065,7 +4195,7 @@ export type GetV1MeDashboardResponses = {
    */
   200: {
     profile: {
-      pseudonym: string;
+      username: string;
     };
     counts: {
       seen: number;
@@ -4586,6 +4716,7 @@ export type GetV1MeProfileResponses = {
     username: string;
     bio: string | null;
     profileVisibility: "public" | "private";
+    ratingVisibility: "review_only" | "public";
     memberSince: string;
   };
 };
@@ -4597,6 +4728,7 @@ export type PatchV1MeProfileData = {
   body: {
     bio?: string | null;
     profileVisibility?: "public" | "private";
+    ratingVisibility?: "review_only" | "public";
   };
   path?: never;
   query?: never;
@@ -4716,6 +4848,7 @@ export type PatchV1MeProfileResponses = {
     username: string;
     bio: string | null;
     profileVisibility: "public" | "private";
+    ratingVisibility: "review_only" | "public";
     memberSince: string;
   };
 };
@@ -5045,7 +5178,7 @@ export type PostV1MeListsData = {
   body: {
     name: string;
     description?: string | null;
-    visibility?: "public" | "private";
+    visibility?: "private";
     productionId?: string;
   };
   path?: never;
@@ -5888,7 +6021,7 @@ export type PatchV1MeListsByListIdData = {
   body: {
     name?: string;
     description?: string | null;
-    visibility?: "public" | "private";
+    visibility?: "private";
   };
   path: {
     listId: string;

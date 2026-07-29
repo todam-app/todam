@@ -129,7 +129,7 @@ export function Button({
                       : variant === "dangerGhost"
                         ? tokens.color.error
                         : variant === "ghost"
-                          ? tokens.color.accent
+                          ? tokens.color.brandText
                           : tokens.color.ink
           }
         />
@@ -509,7 +509,7 @@ const styles = StyleSheet.create({
     color: tokens.color.error,
   },
   buttonLabelGhost: {
-    color: tokens.color.accent,
+    color: tokens.color.brandText,
   },
   buttonLabelQuietWeb: {
     color: tokens.button.quiet.text,
@@ -577,7 +577,7 @@ const styles = StyleSheet.create({
     lineHeight: 34,
   },
   eyebrow: {
-    color: tokens.color.accent,
+    color: tokens.color.brandText,
     fontSize: 12,
     fontWeight: "800",
     letterSpacing: 1.2,
@@ -625,7 +625,7 @@ const styles = StyleSheet.create({
     top: 0,
   },
   trailingActionLabel: {
-    color: tokens.color.accent,
+    color: tokens.color.brandText,
     fontSize: 13,
     fontWeight: "700",
   },

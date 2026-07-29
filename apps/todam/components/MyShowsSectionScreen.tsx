@@ -167,7 +167,7 @@ function ReviewSummary({ item }: { item: MyShowItem }) {
   return (
     <View className="todam-form-panel gap-3 p-4">
       <View className="flex-row flex-wrap items-center gap-2">
-        <Text className="text-xs font-bold uppercase tracking-wide text-accent">
+          <Text className="text-xs font-bold uppercase tracking-wide text-brand-text">
           Mon avis
         </Text>
         <Text className="text-xs text-muted">

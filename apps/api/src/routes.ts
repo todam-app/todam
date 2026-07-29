@@ -24,6 +24,7 @@ import {
   CompanyParamsSchema,
   CompanyProductionParamsSchema,
   CompanyResponseSchema,
+  ContactBodySchema,
   ContentReportBodySchema,
   ContentReportIdParamsSchema,
   ContentReportSchema,
@@ -95,6 +96,7 @@ import {
   ViewerProductionStateSchema,
   WatchlistPageSchema,
 } from "@todam/contracts";
+import type { EmailSender } from "@todam/domain";
 import type { FastifyInstance } from "fastify";
 import type { ZodTypeProvider } from "fastify-type-provider-zod";
 import { z } from "zod";
@@ -128,12 +130,18 @@ const problemResponses = {
   503: ProblemDetailsSchema,
   500: ProblemDetailsSchema,
 };
+const CONTACT_EMAIL = "contact@todam.fr";
+
+function singleLine(value: string): string {
+  return value.replace(/[\r\n]+/g, " ").trim();
+}
 
 export interface RouteDependencies {
   account: AccountService;
   auth: TodamAuth;
   catalog: CatalogService;
   community: CommunityService;
+  emailSender: EmailSender;
   member: MemberService;
   professional: ProfessionalService;
   publicStats: PublicStatsService;
@@ -144,13 +152,23 @@ export async function registerRoutes(
   dependencies: RouteDependencies,
 ) {
   const app = baseApp.withTypeProvider<ZodTypeProvider>();
-  const { account, auth, catalog, community, member, professional, publicStats } =
-    dependencies;
+  const {
+    account,
+    auth,
+    catalog,
+    community,
+    emailSender,
+    member,
+    professional,
+    publicStats,
+  } = dependencies;
   const rateLimiter = new InMemoryRateLimiter();
   const guardAuth = (scope: string, ip: string) =>
     rateLimiter.assertAllowed(`auth:${scope}:${ip}`, 10, 15 * 60_000);
   const guardDeletion = (ip: string) =>
     rateLimiter.assertAllowed(`delete:${ip}`, 5, 60 * 60_000);
+  const guardContact = (ip: string) =>
+    rateLimiter.assertAllowed(`contact:${ip}`, 5, 60 * 60_000);
   const guardContentReport = (ip: string) =>
     rateLimiter.assertAllowed(`content-report:${ip}`, 10, 60 * 60_000);
   const guardCommunityCreation = (userId: string, ip: string) => {
@@ -206,6 +224,57 @@ export async function registerRoutes(
       reply
         .header("cache-control", "public, max-age=60, stale-while-revalidate=300")
         .send(await publicStats.getStats()),
+  );
+
+  app.post(
+    "/v1/contact",
+    {
+      schema: {
+        tags: ["Contact"],
+        summary: "Envoie un message à Todam",
+        body: ContactBodySchema,
+        response: {
+          200: EmptyResponseSchema,
+          ...problemResponses,
+        },
+      },
+      preHandler: async (request) => guardContact(request.ip),
+    },
+    async (request) => {
+      if (request.body.website.trim()) return { ok: true as const };
+
+      const name = singleLine(request.body.name);
+      const subject = singleLine(request.body.subject);
+      try {
+        await emailSender.send({
+          to: CONTACT_EMAIL,
+          replyTo: {
+            email: request.body.email,
+            name,
+          },
+          subject: `[Todam] ${subject}`,
+          text: [
+            "Nouveau message reçu depuis le formulaire de contact Todam.",
+            "",
+            `Nom : ${name}`,
+            `E-mail : ${request.body.email}`,
+            `Objet : ${subject}`,
+            "",
+            "Message :",
+            request.body.message,
+          ].join("\n"),
+        });
+      } catch (error) {
+        request.log.error({ err: error }, "L’envoi du formulaire de contact a échoué.");
+        throw new HttpProblem(
+          503,
+          "CONTACT_DELIVERY_UNAVAILABLE",
+          "Le message n’a pas pu être envoyé. Réessayez dans quelques instants.",
+        );
+      }
+
+      return { ok: true as const };
+    },
   );
 
   app.post(

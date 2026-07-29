@@ -1890,9 +1890,9 @@ export function createProfessionalService(database: TodamDatabase) {
     }
     if (targetType === "member") {
       const rows = await database
-        .select({ username: user.pseudonym })
+        .select({ username: user.username })
         .from(user)
-        .where(sql<boolean>`lower(${user.pseudonym}::text) = lower(${targetId})`)
+        .where(sql<boolean>`lower(${user.username}::text) = lower(${targetId})`)
         .limit(1);
       return rows[0]
         ? {
@@ -1911,7 +1911,7 @@ export function createProfessionalService(database: TodamDatabase) {
         .select({
           name: lists.name,
           slug: lists.slug,
-          username: user.pseudonym,
+          username: user.username,
         })
         .from(lists)
         .innerJoin(user, eq(user.id, lists.userId))
@@ -1935,7 +1935,7 @@ export function createProfessionalService(database: TodamDatabase) {
       .select({
         productionSlug: productions.slug,
         productionTitle: productions.title,
-        username: user.pseudonym,
+        username: user.username,
       })
       .from(reviews)
       .innerJoin(productions, eq(productions.id, reviews.productionId))

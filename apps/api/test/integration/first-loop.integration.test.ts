@@ -784,7 +784,7 @@ describe("première boucle API sur PostgreSQL/PostGIS", () => {
     });
     expect(firstHome.statusCode, firstHome.body).toBe(200);
     expect(firstHome.json()).toMatchObject({
-      profile: { pseudonym: "spectatrice-accueil" },
+      profile: { username: "spectatrice-accueil" },
       homeCity: { locality: "Monaco", countryCode: "MC" },
       progress: { current: 1, target: 5, completed: false },
       radiusKm: 50,
@@ -980,9 +980,9 @@ describe("première boucle API sur PostgreSQL/PostGIS", () => {
       url: "/v1/auth/sign-up/email",
       remoteAddress: "127.0.0.22",
       payload: {
-        name: "autre-pseudonyme",
-        username: "autre-pseudonyme",
-        displayUsername: "autre-pseudonyme",
+        name: "autre-nom-utilisateur",
+        username: "autre-nom-utilisateur",
+        displayUsername: "autre-nom-utilisateur",
         email: "DOUBLON@example.test",
         password: "Todam-test-2026",
         age15OrOlder: true,
@@ -1044,7 +1044,7 @@ describe("première boucle API sur PostgreSQL/PostGIS", () => {
       name: "Nom occupé",
       email: "occupee@example.test",
       emailVerified: true,
-      pseudonym: "nom-occupe",
+      username: "nom-occupe",
       ageConfirmedAt: new Date(),
       age15OrOlder: true,
       termsVersion: CURRENT_TERMS_VERSION,
@@ -1065,12 +1065,12 @@ describe("première boucle API sur PostgreSQL/PostGIS", () => {
       url: "/v1/me/username",
       headers: { cookie },
       remoteAddress: "127.0.0.33",
-      payload: { username: "nouveau-pseudonyme" },
+      payload: { username: "nouveau-nom-utilisateur" },
     });
     expect(duplicateUsername.statusCode).toBe(409);
     expect(duplicateUsername.json().code).toBe("USERNAME_ALREADY_TAKEN");
     expect(usernameChange.statusCode).toBe(200);
-    expect(usernameChange.json()).toEqual({ username: "nouveau-pseudonyme" });
+    expect(usernameChange.json()).toEqual({ username: "nouveau-nom-utilisateur" });
     if (usernameChange.headers["set-cookie"]) {
       cookie = usernameChange.headers["set-cookie"] as string;
     }
@@ -1133,7 +1133,7 @@ describe("première boucle API sur PostgreSQL/PostGIS", () => {
     const beforeConfirmation = await db
       .select({ email: user.email })
       .from(user)
-      .where(eq(user.pseudonym, "nouveau-pseudonyme"))
+      .where(eq(user.username, "nouveau-nom-utilisateur"))
       .limit(1);
     expect(beforeConfirmation[0]?.email).toBe(email);
     const verificationEmail = sentEmails.find(
@@ -1161,7 +1161,7 @@ describe("première boucle API sur PostgreSQL/PostGIS", () => {
     const afterConfirmation = await db
       .select({ email: user.email })
       .from(user)
-      .where(eq(user.pseudonym, "nouveau-pseudonyme"))
+      .where(eq(user.username, "nouveau-nom-utilisateur"))
       .limit(1);
     expect(afterConfirmation[0]?.email).toBe("nouvelle@example.test");
     if (confirmation.headers["set-cookie"]) {
@@ -1738,7 +1738,7 @@ describe("première boucle API sur PostgreSQL/PostGIS", () => {
       name: "Compte non vérifié",
       email: "non-verifie@example.test",
       emailVerified: false,
-      pseudonym: "compte-non-verifie",
+      username: "compte-non-verifie",
       ageConfirmedAt: new Date(),
       age15OrOlder: true,
       termsVersion: CURRENT_TERMS_VERSION,
@@ -1845,6 +1845,52 @@ describe("première boucle API sur PostgreSQL/PostGIS", () => {
     });
     expect(rating.statusCode, rating.body).toBe(200);
 
+    const privateStandaloneRating = await app.inject({
+      method: "GET",
+      url: "/v1/members/journal-public/journal",
+    });
+    expect(privateStandaloneRating.statusCode, privateStandaloneRating.body).toBe(200);
+    expect(privateStandaloneRating.json().items[0]).toMatchObject({
+      rating: null,
+      ratedAt: null,
+      hasReview: false,
+    });
+    const aggregateWithPrivateRating = await app.inject({
+      method: "GET",
+      url: "/v1/productions/reve-elodie-muses-2025",
+    });
+    expect(aggregateWithPrivateRating.statusCode, aggregateWithPrivateRating.body).toBe(
+      200,
+    );
+    expect(aggregateWithPrivateRating.json().ratingSummary).toEqual({
+      average: 9,
+      count: 1,
+    });
+    const publicStandaloneSetting = await app.inject({
+      method: "PATCH",
+      url: "/v1/me/profile",
+      headers: { cookie },
+      payload: { ratingVisibility: "public" },
+    });
+    expect(publicStandaloneSetting.statusCode, publicStandaloneSetting.body).toBe(200);
+    expect(publicStandaloneSetting.json().ratingVisibility).toBe("public");
+    const publicStandaloneRating = await app.inject({
+      method: "GET",
+      url: "/v1/members/journal-public/journal",
+    });
+    expect(publicStandaloneRating.statusCode, publicStandaloneRating.body).toBe(200);
+    expect(publicStandaloneRating.json().items[0]).toMatchObject({
+      rating: 9,
+      hasReview: false,
+    });
+    const restorePrivateDefault = await app.inject({
+      method: "PATCH",
+      url: "/v1/me/profile",
+      headers: { cookie },
+      payload: { ratingVisibility: "review_only" },
+    });
+    expect(restorePrivateDefault.statusCode, restorePrivateDefault.body).toBe(200);
+
     const review = await app.inject({
       method: "PUT",
       url: `/v1/me/reviews/${productionId}`,
@@ -1857,6 +1903,18 @@ describe("première boucle API sur PostgreSQL/PostGIS", () => {
     });
     expect(review.statusCode, review.body).toBe(200);
 
+    const publicList = await app.inject({
+      method: "POST",
+      url: "/v1/me/lists",
+      headers: { cookie },
+      payload: {
+        name: "Liste publique",
+        description: null,
+        visibility: "public",
+      },
+    });
+    expect(publicList.statusCode).toBe(400);
+
     const createdList = await app.inject({
       method: "POST",
       url: "/v1/me/lists",
@@ -1864,7 +1922,7 @@ describe("première boucle API sur PostgreSQL/PostGIS", () => {
       payload: {
         name: "Mes découvertes",
         description: "Les spectacles à faire connaître.",
-        visibility: "public",
+        visibility: "private",
       },
     });
     expect(createdList.statusCode, createdList.body).toBe(200);
@@ -1885,7 +1943,7 @@ describe("première boucle API sur PostgreSQL/PostGIS", () => {
     expect(publicProfile.statusCode, publicProfile.body).toBe(200);
     expect(publicProfile.json().counts).toMatchObject({
       seen: 1,
-      lists: 1,
+      lists: 0,
       reviews: 1,
     });
     expect(publicProfile.json().recentReviews[0]).toMatchObject({
@@ -1919,12 +1977,11 @@ describe("première boucle API sur PostgreSQL/PostGIS", () => {
       url: "/v1/members/journal-public/journal",
     });
     expect(hiddenJournal.statusCode).toBe(404);
-    const stillPublicList = await app.inject({
+    const privateList = await app.inject({
       method: "GET",
       url: `/v1/members/journal-public/lists/${listSlug}`,
     });
-    expect(stillPublicList.statusCode, stillPublicList.body).toBe(200);
-    expect(stillPublicList.json().items).toHaveLength(1);
+    expect(privateList.statusCode).toBe(404);
   });
 
   it("enregistre un signalement public sans exposer de données personnelles", async () => {
@@ -1976,7 +2033,7 @@ describe("première boucle API sur PostgreSQL/PostGIS", () => {
     const [owner] = await db
       .select({ id: user.id })
       .from(user)
-      .where(eq(user.pseudonym, "private-report-owner"))
+      .where(eq(user.username, "private-report-owner"))
       .limit(1);
     const [privateList] = await db
       .insert(lists)
@@ -2035,7 +2092,7 @@ describe("première boucle API sur PostgreSQL/PostGIS", () => {
     await db
       .update(user)
       .set({ role: "trusted_contributor" })
-      .where(eq(user.pseudonym, "corrections-todam"));
+      .where(eq(user.username, "corrections-todam"));
 
     const queue = await app.inject({
       method: "GET",
@@ -2155,7 +2212,7 @@ describe("première boucle API sur PostgreSQL/PostGIS", () => {
     await db
       .update(user)
       .set({ role: "trusted_contributor" })
-      .where(eq(user.pseudonym, "affiche-moderation"));
+      .where(eq(user.username, "affiche-moderation"));
 
     const queue = await app.inject({
       method: "GET",
@@ -2260,7 +2317,7 @@ describe("première boucle API sur PostgreSQL/PostGIS", () => {
     await db
       .update(user)
       .set({ role: "trusted_contributor" })
-      .where(eq(user.pseudonym, "lieu-moderation"));
+      .where(eq(user.username, "lieu-moderation"));
 
     const resolved = await app.inject({
       method: "POST",
@@ -2367,7 +2424,7 @@ describe("première boucle API sur PostgreSQL/PostGIS", () => {
     await db
       .update(user)
       .set({ role: "admin" })
-      .where(eq(user.pseudonym, "moderation-todam"));
+      .where(eq(user.username, "moderation-todam"));
     const approval = await app.inject({
       method: "POST",
       url: `/v1/admin/company-claims/${claim.json().id}/approved`,

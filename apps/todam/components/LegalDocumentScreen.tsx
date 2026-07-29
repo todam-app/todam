@@ -27,7 +27,7 @@ function inlineText(text: string): ReactNode[] {
       return address ? (
         <Text
           accessibilityRole="link"
-          className="text-base font-semibold text-accent"
+        className="text-base font-semibold text-brand-text"
           key={`${part}-${index}`}
           onPress={() => void Linking.openURL(`mailto:${address}`)}
         >
@@ -135,7 +135,7 @@ export function LegalDocumentScreen({
           {children}
           <Text
             accessibilityRole="link"
-            className="min-h-11 py-3 text-base font-semibold text-accent"
+        className="min-h-11 py-3 text-base font-semibold text-brand-text"
             onPress={() => void Linking.openURL(legalPdfUrl(documentId))}
           >
             Télécharger la version PDF archivée

@@ -3,9 +3,9 @@ import { z } from "zod";
 import { UsernameSchema } from "./identity.js";
 import { RightsStatusSchema } from "./rights.js";
 
-export const CURRENT_TERMS_VERSION = "1.0.2";
-export const CURRENT_PRIVACY_NOTICE_VERSION = "1.0.3";
-export const LEGAL_EFFECTIVE_DATE = "2026-07-28";
+export const CURRENT_TERMS_VERSION = "1.0.3";
+export const CURRENT_PRIVACY_NOTICE_VERSION = "1.0.4";
+export const LEGAL_EFFECTIVE_DATE = "2026-07-29";
 
 export const RegistrationChannelSchema = z.enum(["web", "android"]);
 export type RegistrationChannel = z.infer<typeof RegistrationChannelSchema>;
@@ -45,11 +45,12 @@ export const AccountExportSchema = z.object({
   exportedAt: z.string().datetime({ offset: true }),
   account: z.object({
     id: z.string(),
-    pseudonym: z.string(),
+    username: z.string(),
     email: z.string().email(),
     emailVerified: z.boolean(),
     createdAt: z.string().datetime({ offset: true }),
     profileVisibility: z.enum(["public", "private"]),
+    ratingVisibility: z.enum(["review_only", "public"]),
     bio: z.string().nullable(),
     homeCity: z
       .object({

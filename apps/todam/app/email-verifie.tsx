@@ -26,7 +26,10 @@ export default function EmailVerifiedScreen() {
 
   function continueAfterVerification() {
     if (emailChanged) {
-      router.replace("/parametres-compte");
+      router.replace({
+        pathname: "/profile",
+        params: { section: "settings" },
+      });
       return;
     }
     router.replace({

@@ -511,7 +511,7 @@ export function MyShowsFilters({
               setAllFiltersOpen(false);
             }}
           >
-            <Text className="text-base font-bold text-accent">Tout effacer</Text>
+              <Text className="text-base font-bold text-brand-text">Tout effacer</Text>
           </Pressable>
         </View>
       </FilterOverlay>

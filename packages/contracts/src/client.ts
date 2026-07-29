@@ -34,6 +34,7 @@ import {
   ViewerProductionStateSchema,
   type CityOption,
   type CitySelection,
+  type ContactBody,
   type ContentReportBody,
   type Dashboard,
   type DiarySession,
@@ -141,6 +142,7 @@ export interface CatalogSearchOptions {
 export interface TodamApiClient {
   getCurrentLegalDocuments(): Promise<LegalCurrentResponse>;
   getPublicStats(): Promise<PublicStats>;
+  sendContactMessage(input: ContactBody): Promise<void>;
   search(query: string): Promise<SearchResponse>;
   searchCatalog(options: CatalogSearchOptions): Promise<SearchResponse>;
   searchCities(query?: string): Promise<CityOption[]>;
@@ -342,6 +344,12 @@ export function createTodamApiClient(options: TodamApiClientOptions): TodamApiCl
     getCurrentLegalDocuments: () =>
       request("/v1/legal/current", LegalCurrentResponseSchema),
     getPublicStats: () => request("/v1/public/stats", PublicStatsSchema),
+    sendContactMessage: async (input) => {
+      await request("/v1/contact", EmptyResponseSchema, {
+        method: "POST",
+        body: JSON.stringify(input),
+      });
+    },
     search: (query) =>
       request(`/v1/search?q=${encodeURIComponent(query)}`, SearchResponseSchema),
     searchCatalog: (input) =>

@@ -7,5 +7,5 @@ export const UsernameSchema = z
   .max(30)
   .regex(
     /^[\p{L}\p{N}._-]+$/u,
-    "Le pseudonyme peut contenir des lettres, chiffres, points, tirets et underscores.",
+    "Le nom d'utilisateur peut contenir des lettres, chiffres, points, tirets et underscores.",
   );

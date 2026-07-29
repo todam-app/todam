@@ -44,6 +44,8 @@ export const tokens = {
     accent: "#C34E42",
     accentPressed: "#A83E35",
     accentSoft: "#F3A995",
+    brandSignal: "#ED2215",
+    brandText: "#D9271A",
     coralText: "#C34E42",
     lilacText: "#6651B8",
     aquaText: "#176C68",

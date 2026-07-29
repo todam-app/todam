@@ -8,14 +8,16 @@ Add-Type -AssemblyName System.Drawing
 $appRootPath = [System.IO.Path]::GetFullPath($AppRoot)
 $assetDirectory = Join-Path $appRootPath "assets\brand"
 $publicBrandDirectory = Join-Path $appRootPath "public\brand"
+$publicEmailDirectory = Join-Path $appRootPath "public\email"
 $publicOgDirectory = Join-Path $appRootPath "public\og"
 [System.IO.Directory]::CreateDirectory($publicBrandDirectory) | Out-Null
+[System.IO.Directory]::CreateDirectory($publicEmailDirectory) | Out-Null
 [System.IO.Directory]::CreateDirectory($publicOgDirectory) | Out-Null
 
 $ink = [System.Drawing.ColorTranslator]::FromHtml("#151515")
 $paper = [System.Drawing.ColorTranslator]::FromHtml("#FFFDF8")
 $ivory = [System.Drawing.ColorTranslator]::FromHtml("#FCF8F2")
-$accent = [System.Drawing.ColorTranslator]::FromHtml("#F3A995")
+$accent = [System.Drawing.ColorTranslator]::FromHtml("#ED2215")
 
 function Set-BrandAccent {
   param(
@@ -198,6 +200,28 @@ try {
     } finally {
       $bitmap.Dispose()
     }
+  }
+
+  $emailLogo = New-Object System.Drawing.Bitmap(
+    304,
+    92,
+    [System.Drawing.Imaging.PixelFormat]::Format32bppArgb
+  )
+  $emailLogoGraphics = [System.Drawing.Graphics]::FromImage($emailLogo)
+  try {
+    $emailLogoGraphics.Clear([System.Drawing.Color]::Transparent)
+    $emailLogoGraphics.InterpolationMode =
+      [System.Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic
+    $emailLogoGraphics.SmoothingMode =
+      [System.Drawing.Drawing2D.SmoothingMode]::HighQuality
+    $emailLogoGraphics.DrawImage($sourceLogo, 0, 0, 304, 92)
+    $emailLogo.Save(
+      (Join-Path $publicEmailDirectory "todam-logo.png"),
+      [System.Drawing.Imaging.ImageFormat]::Png
+    )
+  } finally {
+    $emailLogoGraphics.Dispose()
+    $emailLogo.Dispose()
   }
 
   $tile = New-Object System.Drawing.Bitmap(

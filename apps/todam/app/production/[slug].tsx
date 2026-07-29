@@ -149,7 +149,7 @@ function DescriptionProvenance({
           className="min-h-11 justify-center"
           onPress={() => void Linking.openURL(description.sourceUrl!)}
         >
-          <Text className="text-xs font-semibold text-accent">
+        <Text className="text-xs font-semibold text-brand-text">
             {description.sourceTitle ?? "Source"} ↗
           </Text>
         </Pressable>
@@ -200,7 +200,7 @@ function Schedule({
             ) : null}
             <Link href={`/lieu/${performance.venue.slug}`} asChild>
               <Pressable accessibilityRole="link" className="min-h-11 justify-center">
-                <Text className="text-base font-semibold text-accent">
+              <Text className="text-base font-semibold text-brand-text">
                   {performance.venue.name} · {performance.venue.locality}
                 </Text>
               </Pressable>
@@ -212,7 +212,7 @@ function Schedule({
               className="min-h-11 justify-center"
               onPress={() => void Linking.openURL(performance.officialUrl!)}
             >
-              <Text className="text-base font-semibold text-accent">Billetterie ↗</Text>
+              <Text className="text-base font-semibold text-brand-text">Billetterie ↗</Text>
             </Pressable>
           ) : null}
         </View>
@@ -244,9 +244,6 @@ export default function ProductionScreen() {
   const [confirmingReviewDelete, setConfirmingReviewDelete] = useState(false);
   const [showLists, setShowLists] = useState(false);
   const [newListName, setNewListName] = useState("");
-  const [newListVisibility, setNewListVisibility] = useState<"public" | "private">(
-    "private",
-  );
   const resumed = useRef(false);
   const hydratedReviewId = useRef<string | null>(null);
 
@@ -400,12 +397,11 @@ export default function ProductionScreen() {
       api.createList({
         name: newListName,
         description: null,
-        visibility: newListVisibility,
+        visibility: "private",
         productionId: productionId ?? "",
       }),
     onSuccess: (created) => {
       setNewListName("");
-      setNewListVisibility("private");
       queryClient.setQueryData(["my-lists"], [...(lists.data ?? []), created]);
       void queryClient.invalidateQueries({ queryKey: ["dashboard"] });
       setShowLists(false);
@@ -684,7 +680,7 @@ export default function ProductionScreen() {
                       accessibilityRole="link"
                       className="min-h-11 justify-center"
                     >
-                      <Text className="text-sm font-semibold text-accent">
+                  <Text className="text-sm font-semibold text-brand-text">
                         Découvrir
                       </Text>
                     </Pressable>
@@ -719,7 +715,7 @@ export default function ProductionScreen() {
                             void Linking.openURL(production.data!.posters[0]!.sourceUrl)
                           }
                         >
-                          <Text className="text-xs font-semibold text-accent">
+                  <Text className="text-xs font-semibold text-brand-text">
                             Source et droits du visuel ↗
                           </Text>
                         </Pressable>
@@ -762,7 +758,7 @@ export default function ProductionScreen() {
                             accessibilityRole="link"
                             className="min-h-11 self-start justify-center"
                           >
-                            <Text className="text-lg font-semibold text-accent">
+                <Text className="text-lg font-semibold text-brand-text">
                               {production.data.company.name}
                             </Text>
                           </Pressable>
@@ -812,7 +808,7 @@ export default function ProductionScreen() {
                               accessibilityRole="link"
                               className="min-h-11 justify-center"
                             >
-                              <Text className="text-base font-semibold text-accent">
+                  <Text className="text-base font-semibold text-brand-text">
                                 {nextScheduledPerformance.venue.name} ·{" "}
                                 {nextScheduledPerformance.venue.locality}
                               </Text>
@@ -828,7 +824,7 @@ export default function ProductionScreen() {
                                 )
                               }
                             >
-                              <Text className="text-base font-semibold text-accent">
+                    <Text className="text-base font-semibold text-brand-text">
                                 Billetterie officielle ↗
                               </Text>
                             </Pressable>
@@ -1014,19 +1010,8 @@ export default function ProductionScreen() {
                           value={newListName}
                           webName={`production-${production.data.id}-new-list-name`}
                         />
-                        <AccessibleChoiceGroup
-                          label="Visibilité de la nouvelle liste"
-                          onChange={setNewListVisibility}
-                          options={[
-                            ["private", "Privée"],
-                            ["public", "Publique"],
-                          ]}
-                          testIdPrefix={`production-${production.data.id}-new-list-visibility`}
-                          value={newListVisibility}
-                        />
                         <Text className="text-sm leading-5 text-muted">
-                          Une liste publique est partageable lorsque votre profil est
-                          public ; une liste privée reste visible par vous seul.
+                          Cette liste est privée et visible uniquement par vous.
                         </Text>
                         <Button
                           disabled={!newListName.trim()}
@@ -1095,9 +1080,7 @@ export default function ProductionScreen() {
                     <SectionTitle>Avis des membres</SectionTitle>
                     {production.data.ratingSummary.average ? (
                       <View className="items-end gap-2">
-                        <RatingLights
-                          value={production.data.ratingSummary.average}
-                        />
+                        <RatingLights value={production.data.ratingSummary.average} />
                         <Text className="text-sm text-muted">
                           {production.data.ratingSummary.average}/10 ·{" "}
                           {production.data.ratingSummary.count} note(s)
@@ -1274,7 +1257,7 @@ export default function ProductionScreen() {
                                 accessibilityRole="link"
                                 className="min-h-11 justify-center"
                               >
-                                <Text className="text-base font-semibold text-accent">
+                          <Text className="text-base font-semibold text-brand-text">
                                   @{review.username}
                                 </Text>
                               </Pressable>

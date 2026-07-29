@@ -19,14 +19,21 @@ Les couleurs exécutables sont centralisées dans `src/tokens.ts` :
 - `color.surface` (`#FFFDF8`) : cartes, formulaires, en-têtes et pied de page ;
 - `color.ink` (`#151515`) : texte principal et CTA principal ;
 - `color.muted` (`#6F6B64`) : informations secondaires ;
-- `color.accent` (`#6651B8`) : liens, notation et certains états actifs ;
+- `color.brandSignal` (`#ED2215`) : point du logo et rares accents graphiques
+  de marque, jamais les petits textes essentiels ;
+- `color.brandText` (`#D9271A`) : petits liens et courts surtitres de marque sur
+  les fonds neutres ;
+- `color.accent` (`#C34E42`) : certains états fonctionnels, progressions et
+  sélections existantes ;
 - `color.coral` (`#F3A995`), `color.lilac` (`#C8B8F0`) et `color.aqua`
   (`#9FD8D0`) : halos et compositions de scène ;
 - `color.selectedSurface` et `color.selectedBorder` : sélection, toujours accompagnée
   d’un libellé, d’une icône ou d’un état accessible ;
 - `color.error` : erreurs, suppressions et alertes réellement critiques.
 
-L’ancien vermillon `#C43D28` n’est plus une couleur d’identité ni d’interaction.
+L’ancien vermillon `#C43D28` reste abandonné. Le vermillon signal `#ED2215`
+appartient au signe graphique ; sa variante de texte `#D9271A` est assombrie
+pour conserver un contraste WCAG AA sur la toile et les surfaces neutres.
 
 ## Surfaces et mise en page
 
@@ -86,7 +93,7 @@ Le contrat « 01 — filet brique » est remplacé par le système suivant.
 
 ### Actions discrètes et danger
 
-- `ghost` est une action textuelle secondaire ;
+- `ghost` est une action textuelle secondaire en `color.brandText` ;
 - `dangerGhost` prépare une suppression ;
 - `danger` confirme une action destructive avec le rouge fonctionnel ;
 - un bouton désactivé utilise les tokens gris, sans effet de survol.

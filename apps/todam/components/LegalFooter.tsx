@@ -2,7 +2,6 @@ import { Link, type Href } from "expo-router";
 import { useState } from "react";
 import {
   Image,
-  Linking,
   Platform,
   Pressable,
   Text,
@@ -112,14 +111,7 @@ export function LegalFooter({ alwaysVisible = false }: { alwaysVisible?: boolean
           })}
           <View className="min-h-11 flex-row items-center justify-between">
             <Text className="text-xs text-muted">© 2026 Todam</Text>
-            <Pressable
-              accessibilityLabel="Écrire à contact@todam.fr"
-              accessibilityRole="link"
-              className="min-h-11 justify-center"
-              onPress={() => void Linking.openURL("mailto:contact@todam.fr")}
-            >
-              <Text className="text-xs font-semibold text-muted">Contact</Text>
-            </Pressable>
+            <FooterInternalLink href="/contact" label="Contact" />
           </View>
         </View>
       </View>
@@ -177,13 +169,7 @@ export function LegalFooter({ alwaysVisible = false }: { alwaysVisible?: boolean
           </View>
           <View className="min-w-36 gap-1">
             <Text className="text-base mb-2 font-semibold text-ink">Contact</Text>
-            <Pressable
-              accessibilityRole="link"
-              className="min-h-11 justify-center"
-              onPress={() => void Linking.openURL("mailto:contact@todam.fr")}
-            >
-              <Text className="text-sm text-muted">contact@todam.fr</Text>
-            </Pressable>
+            <FooterInternalLink href="/contact" label="contact@todam.fr" />
           </View>
         </View>
         <View className="border-t border-line pt-5">

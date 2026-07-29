@@ -5,8 +5,9 @@
 La bêta Todam autorise :
 
 - les notes et avis publics sur les spectacles ;
-- les profils publics pseudonymes, avec journal globalement public ou privé ;
-- les listes personnalisées publiques ou privées ;
+- les profils publics sous un nom d'utilisateur, avec journal globalement public ou
+  privé ;
+- les listes personnalisées privées signalées par leur propriétaire ;
 - les signalements concernant une production, un lieu ou une compagnie ;
 - les revendications de compagnies et les révisions professionnelles validées par Todam.
 
@@ -60,9 +61,9 @@ informations de droits complètes d’un visuel lié.
 ## Vie privée
 
 - L'adresse e-mail et les identifiants internes ne figurent jamais sur les profils.
-- Les profils publics sont pseudonymes et `noindex` par défaut.
+- Les profils publics sont identifiés par un nom d'utilisateur et `noindex` par défaut.
 - Un membre peut rendre son journal privé.
-- Chaque liste possède sa propre visibilité.
+- La liste « À voir » et les listes personnalisées sont privées.
 - Les brouillons professionnels et les files de modération exigent une authentification
   et une autorisation côté serveur.
 

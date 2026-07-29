@@ -36,6 +36,10 @@ export const profileVisibilityEnum = pgEnum("profile_visibility", [
   "public",
   "private",
 ]);
+export const ratingVisibilityEnum = pgEnum("rating_visibility", [
+  "review_only",
+  "public",
+]);
 export const publicationStatusEnum = pgEnum("publication_status", [
   "draft",
   "published",
@@ -163,7 +167,7 @@ export const user = pgTable(
     email: citext("email").notNull(),
     emailVerified: boolean("email_verified").default(false).notNull(),
     image: text("image"),
-    pseudonym: citext("pseudonym").notNull(),
+    username: citext("username").notNull(),
     ageConfirmedAt: timestamp("age_confirmed_at", {
       withTimezone: true,
     }).notNull(),
@@ -183,12 +187,15 @@ export const user = pgTable(
     profileVisibility: profileVisibilityEnum("profile_visibility")
       .default("public")
       .notNull(),
+    ratingVisibility: ratingVisibilityEnum("rating_visibility")
+      .default("review_only")
+      .notNull(),
     bio: text("bio"),
     ...timestamps,
   },
   (table) => [
     uniqueIndex("users_email_unique").on(table.email),
-    uniqueIndex("users_pseudonym_unique").on(table.pseudonym),
+    uniqueIndex("users_username_unique").on(table.username),
     check("users_age_15_or_older_true", sql`${table.age15OrOlder} = true`),
     check(
       "users_home_city_complete",
