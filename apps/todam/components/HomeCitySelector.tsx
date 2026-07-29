@@ -30,7 +30,7 @@ export function HomeCitySelector({ city }: { city: CityOption | null }) {
   if (!editing && city) {
     return (
       <View
-        className="gap-3 rounded-todam border border-line bg-paper p-5 md:flex-row md:items-center md:justify-between"
+        className="todam-calm-panel gap-3 p-5 md:flex-row md:items-center md:justify-between"
         testID="home-city-selector"
       >
         <View className="min-w-0 flex-1 gap-1">
@@ -61,7 +61,7 @@ export function HomeCitySelector({ city }: { city: CityOption | null }) {
 
   return (
     <View
-      className="gap-4 rounded-todam border border-line bg-paper p-5"
+      className="todam-form-panel gap-4 p-5"
       testID="home-city-selector"
     >
       <View className="gap-1">
@@ -87,7 +87,7 @@ export function HomeCitySelector({ city }: { city: CityOption | null }) {
       ) : cityQuery.isPending ? (
         <Text className="text-sm text-muted">Recherche des villes…</Text>
       ) : cityQuery.isError ? (
-        <Text accessibilityRole="alert" className="text-sm text-[#A1261A]">
+        <Text accessibilityRole="alert" className="text-sm text-error">
           Les villes ne peuvent pas être chargées. Réessayez.
         </Text>
       ) : cityQuery.data?.length === 0 ? (
@@ -115,7 +115,7 @@ export function HomeCitySelector({ city }: { city: CityOption | null }) {
         </View>
       )}
       {cityMutation.isError ? (
-        <Text accessibilityRole="alert" className="text-sm text-[#A1261A]">
+        <Text accessibilityRole="alert" className="text-sm text-error">
           {"La ville n'a pas été enregistrée. Réessayez."}
         </Text>
       ) : null}

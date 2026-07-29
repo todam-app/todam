@@ -1,6 +1,7 @@
 import "../global.css";
 
 import { DefaultTheme, Stack, ThemeProvider } from "expo-router";
+import { tokens } from "@todam/design-system";
 import Head from "expo-router/head";
 import { StatusBar } from "expo-status-bar";
 import { Platform, View } from "react-native";
@@ -11,7 +12,7 @@ import { WebNavigation } from "../components/WebNavigation";
 import { PUBLIC_WEB_URL } from "../lib/config";
 
 const DEFAULT_WEB_TITLE = "Todam - Journal de spectacles";
-const TODAM_PAGE_BACKGROUND = "#FCF8F2";
+const TODAM_PAGE_BACKGROUND = tokens.color.background;
 const TODAM_NAVIGATION_THEME = {
   ...DefaultTheme,
   colors: {
@@ -76,8 +77,8 @@ export default function RootLayout() {
                   contentStyle: { backgroundColor: TODAM_PAGE_BACKGROUND },
                   headerShown: Platform.OS !== "web",
                   headerShadowVisible: false,
-                  headerStyle: { backgroundColor: "#FFFDF8" },
-                  headerTintColor: "#151515",
+                  headerStyle: { backgroundColor: tokens.color.surface },
+                  headerTintColor: tokens.color.ink,
                 }}
               >
                 <Stack.Screen name="(tabs)" options={{ headerShown: false }} />

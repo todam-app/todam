@@ -50,7 +50,7 @@ export default function EmailVerifiedScreen() {
   return (
     <>
       <PrivatePageHead title="Adresse e-mail vérifiée" />
-      <PageStaticView className="mx-auto w-full max-w-lg flex-1 items-center justify-center gap-5 px-5 py-12">
+      <PageStaticView className="todam-auth-panel mx-auto my-8 w-[calc(100%_-_2.5rem)] max-w-lg flex-1 items-center justify-center gap-5 p-6 md:my-12 md:p-8">
         <Text
           aria-level={1}
           accessibilityRole="header"

@@ -11,10 +11,10 @@ import type {
   MyShowsQuery,
   MyShowsSection,
 } from "@todam/contracts";
-import { Button, tokens } from "@todam/design-system";
+import { Button, RatingLights } from "@todam/design-system";
 import { Link, type Href, useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
-import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
+import { Text, View } from "react-native";
 
 import { api } from "../lib/api";
 import { authClient } from "../lib/auth-client";
@@ -165,7 +165,7 @@ function ReviewSummary({ item }: { item: MyShowItem }) {
   if (!review) return null;
 
   return (
-    <View className="gap-3 rounded-todam border border-line bg-paper p-4">
+    <View className="todam-form-panel gap-3 p-4">
       <View className="flex-row flex-wrap items-center gap-2">
         <Text className="text-xs font-bold uppercase tracking-wide text-accent">
           Mon avis
@@ -228,17 +228,19 @@ function ShowResult({ item, showReview }: { item: MyShowItem; showReview: boolea
   return (
     <View className="gap-3 border-b border-line pb-5">
       <ProductionListItem production={item.production} />
-      <View className="flex-row flex-wrap gap-x-5 gap-y-2 px-1">
-        <View className="rounded-full bg-canvas px-3 py-1.5">
-          <Text className="text-sm font-semibold text-ink">
-            Communauté : {formatCommunityRating(item)}
+      <View className="flex-row flex-wrap gap-4 px-1">
+        <View className="gap-2 rounded-todam bg-canvas px-3 py-2">
+          <Text className="text-xs font-semibold text-muted">
+            Communauté · {formatCommunityRating(item)}
           </Text>
+          {item.communityRating.average !== null ? (
+            <RatingLights value={item.communityRating.average} />
+          ) : null}
         </View>
         {item.myRating !== null ? (
-          <View className="rounded-full bg-accent px-3 py-1.5">
-            <Text className="text-sm font-bold text-white">
-              Ma note : {item.myRating}/10
-            </Text>
+          <View className="gap-2 rounded-todam bg-selected px-3 py-2">
+            <Text className="text-xs font-semibold text-accent">Ma note</Text>
+            <RatingLights value={item.myRating} />
           </View>
         ) : null}
         {item.seenCount > 1 ? (
@@ -391,38 +393,14 @@ export function MyShowsSectionScreen({ section }: { section: MyShowsSection }) {
         </AsyncState>
         {section === "rated" ? (
           <Link href="/journal/avis" asChild>
-            <Pressable
+            <Button
               accessibilityRole="link"
-              className="todam-cta-standard min-h-12 items-center justify-center rounded-todam border border-control"
-              style={Platform.OS === "web" ? styles.standardButtonWeb : undefined}
-            >
-              <Text
-                className="font-semibold text-accent"
-                style={
-                  Platform.OS === "web" ? styles.standardButtonLabelWeb : undefined
-                }
-              >
-                Voir uniquement mes avis écrits
-              </Text>
-            </Pressable>
+              label="Voir uniquement mes avis écrits"
+              variant="secondary"
+            />
           </Link>
         ) : null}
       </PageScrollView>
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  standardButtonLabelWeb: {
-    color: tokens.button.standard.text,
-    fontFamily: tokens.button.standard.fontFamily,
-    fontWeight: tokens.button.standard.fontWeight,
-  },
-  standardButtonWeb: {
-    backgroundColor: tokens.button.standard.background,
-    borderColor: tokens.button.standard.border,
-    borderRadius: tokens.button.standard.radius,
-    borderWidth: tokens.button.standard.borderWidth,
-    boxSizing: "border-box",
-  },
-});

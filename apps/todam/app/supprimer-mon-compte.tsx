@@ -39,7 +39,7 @@ export default function DeleteMyAccountScreen() {
   return (
     <>
       <PrivatePageHead title="Supprimer mon compte" />
-      <PageStaticView className="mx-auto w-full max-w-lg flex-1 justify-center gap-5 px-5 py-12">
+      <PageStaticView className="todam-auth-panel mx-auto my-8 w-[calc(100%_-_2.5rem)] max-w-lg flex-1 justify-center gap-5 p-6 md:my-12 md:p-8">
         <Text
           aria-level={1}
           accessibilityRole="header"

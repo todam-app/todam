@@ -1,5 +1,6 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import type { HomeDiscoveryItem } from "@todam/contracts";
+import { tokens } from "@todam/design-system";
 import { useRef, useState } from "react";
 import {
   Platform,
@@ -35,9 +36,9 @@ export function HomeDiscoveryCollection({
 
   if (items.length === 0) {
     return (
-      <Text className="border-l-2 border-accent py-1 pl-4 text-base leading-6 text-muted">
-        {emptyMessage}
-      </Text>
+      <View className="todam-editorial-empty min-h-36 justify-center p-5">
+        <Text className="text-base leading-6 text-muted">{emptyMessage}</Text>
+      </View>
     );
   }
 
@@ -83,7 +84,7 @@ export function HomeDiscoveryCollection({
             }
           >
             <Ionicons
-              color={offset <= 0 ? "#6F6B64" : "#151515"}
+              color={offset <= 0 ? tokens.color.muted : tokens.color.ink}
               name="arrow-back"
               size={20}
             />
@@ -104,7 +105,7 @@ export function HomeDiscoveryCollection({
             }
           >
             <Ionicons
-              color={atEnd ? "#6F6B64" : "#151515"}
+              color={atEnd ? tokens.color.muted : tokens.color.ink}
               name="arrow-forward"
               size={20}
             />

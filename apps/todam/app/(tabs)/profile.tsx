@@ -1,7 +1,12 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { UsernameSchema } from "@todam/contracts";
-import { Button, TextField } from "@todam/design-system";
+import {
+  Button,
+  RatingLights,
+  TextField,
+  tokens,
+} from "@todam/design-system";
 import {
   Link,
   Redirect,
@@ -56,7 +61,7 @@ function StatTile({
   const content = (
     <Pressable
       accessibilityRole={href ? "link" : undefined}
-      className="min-h-24 min-w-[138px] flex-1 items-center justify-center gap-1 rounded-todam border border-line bg-paper p-4"
+      className="min-h-24 min-w-[138px] flex-1 items-center justify-center gap-1 rounded-panel border border-line bg-paper p-4 shadow-soft"
       disabled={!href}
     >
       <Text className="font-serif text-3xl font-semibold text-ink">{value}</Text>
@@ -170,13 +175,7 @@ function ProfileContent() {
     0,
   );
   const ratingCount = distribution.reduce((sum, item) => sum + item.count, 0);
-  const average =
-    ratingCount > 0
-      ? (ratingTotal / ratingCount).toLocaleString("fr-FR", {
-          maximumFractionDigits: 1,
-          minimumFractionDigits: 1,
-        })
-      : "—";
+  const averageRating = ratingCount > 0 ? ratingTotal / ratingCount : null;
   const maxDistribution = Math.max(1, ...distribution.map((item) => item.count));
 
   return (
@@ -202,7 +201,7 @@ function ProfileContent() {
                 <View className="h-24 w-24 items-center justify-center rounded-full border border-line bg-canvas">
                   <Ionicons
                     accessibilityElementsHidden
-                    color="#6F6B64"
+                    color={tokens.color.muted}
                     importantForAccessibility="no"
                     name="person-outline"
                     size={54}
@@ -230,7 +229,7 @@ function ProfileContent() {
               </View>
 
               {editing ? (
-                <View className="gap-4 rounded-todam border border-line bg-paper p-5">
+                <View className="todam-form-panel gap-4 p-5">
                   <TextField
                     autoCapitalize="none"
                     autoComplete="off"
@@ -292,7 +291,7 @@ function ProfileContent() {
                   >
                     Informations
                   </Text>
-                  <View className="gap-4 rounded-todam border border-line bg-paper p-5">
+                  <View className="todam-form-panel gap-4 p-5">
                     <View className="gap-1">
                       <Text className="text-sm font-semibold text-muted">
                         Pseudonyme
@@ -361,12 +360,14 @@ function ProfileContent() {
                       label="Avis écrits"
                       value={dashboard.data.counts.reviews}
                     />
-                    <StatTile
-                      label="Moyenne personnelle"
-                      value={ratingCount > 0 ? `${average}/10` : "—"}
-                    />
+                    <View className="min-h-24 min-w-[210px] flex-1 items-center justify-center gap-2 rounded-panel border border-line bg-paper p-4 shadow-soft">
+                      <RatingLights showValue value={averageRating} />
+                      <Text className="text-center text-sm font-semibold text-muted">
+                        Moyenne personnelle
+                      </Text>
+                    </View>
                   </View>
-                  <View className="gap-4 rounded-todam border border-line bg-paper p-5">
+                  <View className="todam-form-panel gap-4 p-5">
                     <Text
                       aria-level={2}
                       accessibilityRole="header"
@@ -408,7 +409,7 @@ function ProfileContent() {
 
               {section === "settings" ? (
                 <View className="gap-6">
-                  <View className="gap-4 rounded-todam border border-line bg-paper p-5">
+                  <View className="todam-form-panel gap-4 p-5">
                     <Text
                       aria-level={2}
                       accessibilityRole="header"
@@ -434,12 +435,16 @@ function ProfileContent() {
                   <Link href="/parametres-compte" asChild>
                     <Pressable
                       accessibilityRole="link"
-                      className="min-h-16 flex-row items-center justify-between rounded-todam border border-line bg-paper px-5"
+                      className="min-h-16 flex-row items-center justify-between rounded-panel border border-line bg-paper px-5 shadow-soft"
                     >
                       <Text className="text-base font-semibold text-ink">
                         Paramètres du compte
                       </Text>
-                      <Ionicons color="#6F6B64" name="chevron-forward" size={22} />
+                      <Ionicons
+                        color={tokens.color.muted}
+                        name="chevron-forward"
+                        size={22}
+                      />
                     </Pressable>
                   </Link>
                   <View className="items-start">
@@ -449,7 +454,7 @@ function ProfileContent() {
                       variant="quiet"
                     />
                   </View>
-                  <View className="gap-3 rounded-todam border border-danger bg-danger/5 p-5">
+                  <View className="gap-3 rounded-panel border border-danger bg-error-soft p-5">
                     <Text className="text-lg font-bold text-danger">
                       Suppression du compte
                     </Text>

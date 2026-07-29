@@ -5,6 +5,7 @@ import type {
   MyShowsQuery,
   MyShowsSection,
 } from "@todam/contracts";
+import { tokens } from "@todam/design-system";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   Modal,
@@ -183,7 +184,7 @@ function FilterOptions({
       >
         <Text className="text-base font-semibold text-ink">Toutes</Text>
         {selected === undefined ? (
-          <Ionicons color="#C43D28" name="checkmark" size={21} />
+          <Ionicons color={tokens.color.accent} name="checkmark" size={21} />
         ) : null}
       </Pressable>
       {options.map((option) => {
@@ -207,7 +208,9 @@ function FilterOptions({
               {option.count !== undefined ? (
                 <Text className="text-base text-muted">{option.count}</Text>
               ) : null}
-              {active ? <Ionicons color="#C43D28" name="checkmark" size={21} /> : null}
+              {active ? (
+                <Ionicons color={tokens.color.accent} name="checkmark" size={21} />
+              ) : null}
             </View>
           </Pressable>
         );
@@ -266,7 +269,7 @@ function FilterOverlay({
     <Modal animationType="fade" onRequestClose={onClose} transparent visible={visible}>
       <View
         accessibilityViewIsModal
-        className={`flex-1 bg-black/45 ${
+        className={`todam-modal-scrim flex-1 bg-black/45 ${
           sidePanel
             ? "items-end"
             : desktop
@@ -281,7 +284,7 @@ function FilterOverlay({
           style={StyleSheet.absoluteFill}
         />
         <View
-          className={`max-h-[92%] w-full bg-paper ${
+          className={`todam-modal-panel max-h-[92%] w-full bg-paper ${
             sidePanel
               ? "h-full max-w-md"
               : desktop
@@ -305,7 +308,7 @@ function FilterOverlay({
               onPress={onClose}
               testID={`my-shows-filter-close-${sidePanel ? "all" : "target"}`}
             >
-              <Ionicons color="#151515" name="close" size={24} />
+              <Ionicons color={tokens.color.ink} name="close" size={24} />
             </Pressable>
           </View>
           {children}
@@ -428,7 +431,7 @@ export function MyShowsFilters({
           className="todam-icon-button h-11 w-11 items-center justify-center rounded-todam border border-control bg-paper"
           onPress={() => setAllFiltersOpen(true)}
         >
-          <Ionicons color="#151515" name="options-outline" size={22} />
+          <Ionicons color={tokens.color.ink} name="options-outline" size={22} />
         </Pressable>
       </View>
 
@@ -483,7 +486,7 @@ export function MyShowsFilters({
                     </Text>
                   </View>
                   <Ionicons
-                    color="#6F6B64"
+                    color={tokens.color.muted}
                     name={expanded ? "chevron-up" : "chevron-down"}
                     size={22}
                   />

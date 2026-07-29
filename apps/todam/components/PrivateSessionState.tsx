@@ -24,22 +24,24 @@ export function PrivateSessionRequired({
 
   return (
     <PageScrollView contentContainerClassName="flex-grow">
-      <View className="todam-page-before-footer mx-auto w-full max-w-xl flex-1 items-center justify-center gap-5 px-5 py-12">
-        <Text
-          aria-level={1}
-          accessibilityRole="header"
-          className="text-center font-serif text-4xl font-semibold text-ink"
-        >
-          Votre espace personnel
-        </Text>
-        <Text className="text-center text-base leading-6 text-muted">
-          {description}
-        </Text>
-        <View className="w-full max-w-xs gap-3">
-          <Button label="Se connecter" onPress={() => router.push("/sign-in")} />
-          <Link href="/sign-up" asChild>
-            <Button label="Créer un compte" variant="secondary" />
-          </Link>
+      <View className="todam-page-before-footer mx-auto w-full max-w-xl flex-1 items-center justify-center px-5 py-12">
+        <View className="todam-auth-panel w-full items-center gap-5 p-6 md:p-8">
+          <Text
+            aria-level={1}
+            accessibilityRole="header"
+            className="text-center font-serif text-4xl font-semibold text-ink"
+          >
+            Votre espace personnel
+          </Text>
+          <Text className="text-center text-base leading-6 text-muted">
+            {description}
+          </Text>
+          <View className="w-full max-w-xs gap-3">
+            <Button label="Se connecter" onPress={() => router.push("/sign-in")} />
+            <Link href="/sign-up" asChild>
+              <Button label="Créer un compte" variant="secondary" />
+            </Link>
+          </View>
         </View>
       </View>
     </PageScrollView>

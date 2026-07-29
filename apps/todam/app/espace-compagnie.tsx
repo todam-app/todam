@@ -9,7 +9,12 @@ import {
   type RightsStatus,
   type VenueSummary,
 } from "@todam/contracts";
-import { Button, SectionTitle, TextField } from "@todam/design-system";
+import {
+  Button,
+  PosterPlaceholder,
+  SectionTitle,
+  TextField,
+} from "@todam/design-system";
 import { useRouter } from "expo-router";
 import Head from "expo-router/head";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
@@ -310,30 +315,21 @@ function DraftVisualPreview({
   return (
     <View className="gap-8 border-y border-line bg-canvas py-7">
       <View className="gap-6 md:flex-row md:items-start">
-        <View className="w-40 overflow-hidden rounded-todam border border-control bg-paper">
+        <View className="w-40 overflow-hidden rounded-media bg-placeholder">
           {media[0] && isHttpUrl(media[0].remoteUrl) ? (
             <Image
               accessibilityLabel={
                 media[0].alt || `Aperçu du visuel de ${productionForm.title}`
               }
-              className="aspect-[2/3] w-full bg-placeholder"
-              resizeMode="cover"
+              className="aspect-[148/210] w-full bg-placeholder"
+              resizeMode="contain"
               source={{ uri: media[0].remoteUrl }}
             />
           ) : (
-            <View className="aspect-[2/3] justify-between bg-placeholder p-4">
-              <Text className="font-serif text-3xl font-bold text-accent">T</Text>
-              <Text className="text-base font-semibold leading-5 text-ink">
-                Visuel non publié
-              </Text>
-              <Text className="text-xs uppercase text-muted">
-                {productionForm.discipline === "theatre"
-                  ? "Théâtre"
-                  : productionForm.discipline === "opera"
-                    ? "Opéra"
-                    : "Ballet"}
-              </Text>
-            </View>
+            <PosterPlaceholder
+              discipline={productionForm.discipline}
+              title={productionForm.title || "Brouillon sans titre"}
+            />
           )}
         </View>
         <View className="min-w-0 flex-1 gap-3">
@@ -475,7 +471,7 @@ function ChoiceButtons<T extends string>({
 
 function RevisionPreview({ revision }: { revision: CatalogRevision }) {
   return (
-    <View className="gap-4 border border-control bg-paper p-5 md:p-6">
+    <View className="todam-management-panel gap-4 p-5 md:p-6">
       <View className="flex-row flex-wrap items-center justify-between gap-3">
         <View className="gap-1">
           <Text className="font-serif text-xl font-semibold text-ink">
@@ -485,7 +481,7 @@ function RevisionPreview({ revision }: { revision: CatalogRevision }) {
             {revision.targetType === "company" ? "Fiche compagnie" : "Spectacle"}
           </Text>
         </View>
-        <View className="border border-accent px-3 py-2">
+        <View className="rounded-full border border-selected-border bg-selected px-3 py-2">
           <Text className="text-sm font-semibold text-accent">
             {revisionStatusLabel(revision.status)}
           </Text>
@@ -527,7 +523,7 @@ function RevisionPreview({ revision }: { revision: CatalogRevision }) {
         </Text>
       ) : null}
       {revision.decisionReason ? (
-        <Text className="border-l-2 border-accent pl-3 text-base leading-6 text-muted">
+        <Text className="rounded-todam border border-selected-border bg-selected p-4 text-base leading-6 text-muted">
           Décision Todam : {revision.decisionReason}
         </Text>
       ) : null}
@@ -564,7 +560,7 @@ function VenuePicker({
         webName="venue-search"
       />
       {(venues.data?.venues.length ?? 0) > 0 ? (
-        <View className="border border-control">
+        <View className="overflow-hidden rounded-panel border border-line bg-paper">
           {venues.data?.venues.map((venue) => (
             <Pressable
               accessibilityRole="button"
@@ -915,7 +911,10 @@ function ProductionFields({
           <Text className="text-base leading-6 text-muted">Aucun crédit saisi.</Text>
         ) : null}
         {credits.map((credit, index) => (
-          <View className="gap-4 border border-control p-4" key={credit.key}>
+          <View
+            className="gap-4 rounded-panel border border-line bg-canvas p-4"
+            key={credit.key}
+          >
             <View className="flex-row items-center justify-between gap-3">
               <Text className="text-base font-semibold text-ink">
                 Crédit {index + 1}
@@ -1000,7 +999,10 @@ function ProductionFields({
           />
         </View>
         {performances.map((performance, index) => (
-          <View className="gap-4 border border-control p-4" key={performance.key}>
+          <View
+            className="gap-4 rounded-panel border border-line bg-canvas p-4"
+            key={performance.key}
+          >
             <View className="flex-row items-center justify-between gap-3">
               <Text className="text-base font-semibold text-ink">Date {index + 1}</Text>
               <Button
@@ -1148,7 +1150,10 @@ function ProductionFields({
           />
         </View>
         {media.map((visual, index) => (
-          <View className="gap-4 border border-control p-4" key={visual.key}>
+          <View
+            className="gap-4 rounded-panel border border-line bg-canvas p-4"
+            key={visual.key}
+          >
             <View className="flex-row items-center justify-between gap-3">
               <Text className="text-base font-semibold text-ink">
                 Visuel {index + 1}
@@ -2251,7 +2256,7 @@ export default function CompanyWorkspacePage() {
                 ) : null}
               </View>
 
-              <View className="min-w-0 flex-1 gap-7 border border-control bg-paper p-5 md:p-7">
+              <View className="todam-management-panel min-w-0 flex-1 gap-7 p-5 md:p-7">
                 <View className="gap-2 border-b border-line pb-5">
                   <Text className="font-serif text-2xl font-semibold text-ink">
                     {targetMode === "company"

@@ -6,7 +6,13 @@ import {
   type ProductionDescription,
   type ViewerProductionState,
 } from "@todam/contracts";
-import { Button, SectionTitle, TextField, tokens } from "@todam/design-system";
+import {
+  Button,
+  RatingLights,
+  SectionTitle,
+  TextField,
+  tokens,
+} from "@todam/design-system";
 import { Link, useLoaderData, useLocalSearchParams, useRouter } from "expo-router";
 import Head from "expo-router/head";
 import { createStaticLoader } from "expo-router/server";
@@ -166,16 +172,18 @@ function Schedule({
 }) {
   if (performances.length === 0) {
     return (
-      <Text className="border-l-2 border-accent py-1 pl-4 text-base leading-6 text-muted">
-        Aucune représentation {title.toLocaleLowerCase("fr")} n’est publiée.
-      </Text>
+      <View className="todam-editorial-empty justify-center p-5">
+        <Text className="text-base leading-6 text-muted">
+          Aucune représentation {title.toLocaleLowerCase("fr")} n’est publiée.
+        </Text>
+      </View>
     );
   }
   return (
-    <View className="border-t border-line">
+    <View className="gap-3">
       {performances.map((performance) => (
         <View
-          className="gap-2 border-b border-line py-4 md:flex-row md:items-center md:justify-between"
+          className="todam-ticket gap-2 px-5 py-4 md:flex-row md:items-center md:justify-between"
           key={performance.id}
         >
           <View className="gap-1">
@@ -660,7 +668,7 @@ export default function ProductionScreen() {
                 {parameter(params.created) === "1" ? (
                   <View
                     accessibilityLiveRegion="polite"
-                    className="gap-2 border border-success bg-[#EEF7F1] p-5"
+                    className="gap-2 rounded-panel border border-success bg-success-soft p-5"
                   >
                     <Text className="text-base font-semibold text-success">
                       Le spectacle est publié.
@@ -881,7 +889,7 @@ export default function ProductionScreen() {
                       {feedback ? (
                         <Text
                           accessibilityLiveRegion="polite"
-                          className="border-l-2 border-accent py-1 pl-3 text-sm text-ink"
+                          className="rounded-todam border border-selected-border bg-selected px-4 py-3 text-sm text-ink"
                         >
                           {feedback}
                         </Text>
@@ -889,7 +897,7 @@ export default function ProductionScreen() {
                     </View>
 
                     {showSeenDetails ? (
-                      <View className="gap-4 border border-control bg-paper p-4">
+                      <View className="todam-form-panel gap-4 p-4">
                         <Text className="text-base font-semibold text-ink">
                           Préciser la représentation — facultatif
                         </Text>
@@ -954,7 +962,7 @@ export default function ProductionScreen() {
                     ) : null}
 
                     {showLists ? (
-                      <View className="gap-3 border border-control bg-paper p-4">
+                      <View className="todam-form-panel gap-3 p-4">
                         <Text className="text-base font-semibold text-ink">
                           Choisir une liste
                         </Text>
@@ -1061,10 +1069,12 @@ export default function ProductionScreen() {
                       ))}
                     </View>
                   ) : (
-                    <Text className="border-l-2 border-accent py-1 pl-4 text-base leading-6 text-muted">
-                      Les crédits détaillés n’ont pas encore été confirmés par une
-                      source autorisée.
-                    </Text>
+                    <View className="todam-editorial-empty justify-center p-5">
+                      <Text className="text-base leading-6 text-muted">
+                        Les crédits détaillés n’ont pas encore été confirmés par une
+                        source autorisée.
+                      </Text>
+                    </View>
                   )}
                 </View>
 
@@ -1084,14 +1094,22 @@ export default function ProductionScreen() {
                 <View className="gap-4">
                   <View className="flex-row flex-wrap items-end justify-between gap-3">
                     <SectionTitle>Avis des membres</SectionTitle>
-                    <Text className="text-sm text-muted">
-                      {production.data.ratingSummary.average
-                        ? `${production.data.ratingSummary.average}/10 · ${production.data.ratingSummary.count} note(s)`
-                        : "Pas encore de note"}
-                    </Text>
+                    {production.data.ratingSummary.average ? (
+                      <View className="items-end gap-2">
+                        <RatingLights
+                          value={production.data.ratingSummary.average}
+                        />
+                        <Text className="text-sm text-muted">
+                          {production.data.ratingSummary.average}/10 ·{" "}
+                          {production.data.ratingSummary.count} note(s)
+                        </Text>
+                      </View>
+                    ) : (
+                      <Text className="text-sm text-muted">Pas encore de note</Text>
+                    )}
                   </View>
                   {session.data ? (
-                    <View className="gap-4 border border-control bg-paper p-4">
+                    <View className="todam-form-panel gap-4 p-5">
                       <View className="gap-2">
                         <Text className="text-base font-semibold text-ink">
                           Ma note
@@ -1166,7 +1184,7 @@ export default function ProductionScreen() {
                       viewerState.data.review.status !== "published" ? (
                         <View
                           accessibilityRole="alert"
-                          className="gap-1 border-l-2 border-[#9A5A00] bg-[#FFF8E7] px-4 py-3"
+                          className="gap-1 rounded-todam border border-warning bg-warning-soft px-4 py-3"
                         >
                           <Text className="text-base font-semibold text-ink">
                             Avis non publié
@@ -1197,7 +1215,7 @@ export default function ProductionScreen() {
                           {confirmingReviewDelete ? (
                             <View
                               accessibilityLiveRegion="polite"
-                              className="gap-3 border-l-2 border-error bg-[#FFF4F2] p-4"
+                              className="gap-3 rounded-todam border border-error bg-error-soft p-4"
                             >
                               <Text className="text-base font-semibold text-ink">
                                 Supprimer définitivement cet avis ?
@@ -1263,9 +1281,7 @@ export default function ProductionScreen() {
                               </Pressable>
                             </Link>
                             {review.rating ? (
-                              <Text className="text-base font-semibold text-ink">
-                                {review.rating}/10
-                              </Text>
+                              <RatingLights value={review.rating} />
                             ) : null}
                           </View>
                           <SpoilerReviewText
@@ -1288,9 +1304,11 @@ export default function ProductionScreen() {
                       ))}
                     </View>
                   ) : (
-                    <Text className="border-l-2 border-accent pl-4 text-base leading-6 text-muted">
-                      Aucun avis public pour le moment.
-                    </Text>
+                    <View className="todam-editorial-empty justify-center p-5">
+                      <Text className="text-base leading-6 text-muted">
+                        Aucun avis public pour le moment.
+                      </Text>
+                    </View>
                   )}
                 </View>
 

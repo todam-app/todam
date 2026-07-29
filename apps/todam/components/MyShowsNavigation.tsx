@@ -30,7 +30,7 @@ export function MyShowsNavigation({ counts }: { counts: MyShowsCounts }) {
               accessibilityRole="link"
               aria-current={active ? "page" : undefined}
               className={`min-h-[68px] min-w-0 flex-1 items-center justify-center border-accent px-0.5 ${
-                active ? "border-b-2 bg-accent/5" : ""
+                active ? "border-b-2 border-selected-border bg-selected" : ""
               }`}
             >
               <Text

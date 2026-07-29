@@ -133,7 +133,7 @@ export default function ClaimCompanyPage() {
             </Text>
           </View>
           {!params.companyId ? (
-            <View className="gap-3 border-l-2 border-accent pl-4">
+            <View className="gap-3 rounded-todam border border-selected-border bg-selected p-4">
               <Text className="text-base leading-6 text-muted">
                 Aucune compagnie n’est sélectionnée. Recherchez d’abord sa fiche.
               </Text>
@@ -145,7 +145,7 @@ export default function ClaimCompanyPage() {
               </View>
             </View>
           ) : (
-            <View className="gap-5 border border-control bg-paper p-5 md:p-6">
+            <View className="todam-form-panel gap-5 p-5 md:p-6">
               <TextField
                 autoComplete="name"
                 label="Votre identité"

@@ -41,7 +41,7 @@ export function SelectionChip({
         disabled
           ? "border-control bg-disabled"
           : selected
-            ? "border-accent bg-selected"
+            ? "border-selected-border bg-selected"
             : "border-control bg-paper"
       }`}
       disabled={disabled || loading}

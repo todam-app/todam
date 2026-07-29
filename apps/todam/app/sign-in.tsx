@@ -63,7 +63,7 @@ export default function SignInScreen() {
     <>
       <PrivatePageHead title="Connexion" />
       <PageScrollView
-        contentContainerClassName="mx-auto w-full max-w-lg gap-6 px-5 py-10"
+        contentContainerClassName="todam-auth-panel mx-auto my-8 w-[calc(100%_-_2.5rem)] max-w-lg gap-6 p-6 md:my-12 md:p-8"
         keyboardShouldPersistTaps="handled"
       >
         <View className="gap-2">

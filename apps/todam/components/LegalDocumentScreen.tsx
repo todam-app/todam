@@ -92,7 +92,7 @@ export function LegalDocumentScreen({
         contentInsetAdjustmentBehavior="automatic"
       >
         <View
-          className={`${Platform.OS === "web" ? "todam-page-before-footer " : ""}mx-auto w-full max-w-3xl gap-5 px-5 py-10 md:px-8 md:py-14`}
+          className={`${Platform.OS === "web" ? "todam-page-before-footer " : ""}todam-legal-document mx-auto w-full max-w-3xl gap-5 px-5 py-10 md:px-10 md:py-14`}
         >
           <View className="gap-4" {...viewProps}>
             {blocks.map((block, index) => {

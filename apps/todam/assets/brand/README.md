@@ -22,13 +22,14 @@ SVG sont les sources de production à utiliser en priorité.
 - Les fichiers suffixés `-source.png` conservent les maquettes raster validées
   avant vectorisation.
 
-La palette est composée de l’encre `#151515`, de l’ivoire `#FCF8F2` et du
-vermillon `#C43D28`. Le symbole et le mot-symbole sont des créations originales
-réalisées pour Todam. Le symbole correspond à la piste 3 validée le
+La palette du logo est composée de l’encre `#151515`, de l’ivoire `#FCF8F2` et
+du corail doux `#F3A995`. Le point du symbole utilise ce corail ; le tracé et le
+mot-symbole restent inchangés. Le symbole et le mot-symbole sont des créations
+originales réalisées pour Todam. Le symbole correspond à la piste 3 validée le
 24 juillet 2026.
 
 Le logo horizontal doit rester lisible avec une marge libre au moins égale à
-la hauteur du point vermillon. Ne pas l’utiliser sous 120 px de large ; sous
+la hauteur du point corail. Ne pas l’utiliser sous 120 px de large ; sous
 cette taille, utiliser la tuile carrée. Les masters SVG transparents sont
 conservés pour la production, tandis que les variantes opaques sont à privilégier
 pour les e-mails, widgets et intégrations dont le fond n’est pas maîtrisé.

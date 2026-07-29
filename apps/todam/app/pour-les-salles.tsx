@@ -199,7 +199,7 @@ export default function ForVenuesPage() {
                     décoratif ajouté à la page.
                   </Text>
                   <View className="gap-6 md:flex-row md:items-stretch">
-                    <View className="min-w-0 flex-1 border border-control bg-paper p-5">
+                    <View className="todam-calm-panel min-w-0 flex-1 p-5">
                       <Text className="mb-2 text-xs font-bold uppercase tracking-widest text-accent">
                         Fiche publique
                       </Text>
@@ -212,7 +212,7 @@ export default function ForVenuesPage() {
                         depuis la fiche.
                       </Text>
                     </View>
-                    <View className="flex-1 justify-center gap-4 border border-control bg-paper p-5">
+                    <View className="todam-calm-panel flex-1 justify-center gap-4 p-5">
                       <Text className="text-xs font-bold uppercase tracking-widest text-accent">
                         Après « Vu »
                       </Text>

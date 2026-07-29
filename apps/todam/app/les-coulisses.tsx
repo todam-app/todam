@@ -50,8 +50,7 @@ function formatGeneratedAt(value: string): string {
 function StatTicket({ label, value }: { label: string; value: string }) {
   return (
     <View
-      className="min-w-52 flex-1 gap-3 rounded-todam border-2 border-line bg-paper p-5"
-      style={styles.ticket}
+      className="todam-ticket min-w-52 flex-1 gap-3 p-5"
     >
       <View className="h-1 w-10 rounded-full bg-accent" />
       <Text
@@ -80,15 +79,25 @@ function ExternalLink({
   return (
     <Pressable
       accessibilityRole="link"
-      className={`todam-cta-standard min-h-11 items-center justify-center rounded-todam border px-5 py-3 ${
-        secondary ? "border-control bg-paper" : "border-accent bg-accent"
-      }`}
+      className="min-h-11 items-center justify-center rounded-todam border px-5 py-3"
       onPress={() => void Linking.openURL(href)}
-      style={Platform.OS === "web" ? styles.standardButtonWeb : undefined}
+      style={
+        Platform.OS === "web"
+          ? secondary
+            ? styles.quietButtonWeb
+            : styles.standardButtonWeb
+          : undefined
+      }
     >
       <Text
         className={`text-base font-semibold ${secondary ? "text-ink" : "text-paper"}`}
-        style={Platform.OS === "web" ? styles.standardButtonLabelWeb : undefined}
+        style={
+          Platform.OS === "web"
+            ? secondary
+              ? styles.quietButtonLabelWeb
+              : styles.standardButtonLabelWeb
+            : undefined
+        }
       >
         {label}
       </Text>
@@ -114,8 +123,7 @@ export default function BehindTheScenesScreen() {
 
   const buildStamp = (
     <View
-      className="self-start rounded-todam border-2 border-accent bg-paper px-5 py-4"
-      style={styles.stamp}
+      className="todam-ticket self-start px-5 py-4"
     >
       <Text className="text-xs font-bold uppercase tracking-widest text-accent">
         Version publique
@@ -154,7 +162,7 @@ export default function BehindTheScenesScreen() {
         <View
           className={`${Platform.OS === "web" ? "todam-page-before-footer " : ""}mx-auto w-full max-w-content gap-16 px-5 py-10 md:px-8 md:py-16`}
         >
-          <View className="gap-8 rounded-todam border-2 border-ink bg-paper p-6 md:p-10">
+          <View className="todam-calm-panel gap-8 p-6 md:p-10">
             <View className="self-start rounded-full bg-ink px-4 py-2">
               <Text className="text-xs font-bold uppercase tracking-widest text-paper">
                 Projet open source · chiffres réels · build public
@@ -238,7 +246,7 @@ export default function BehindTheScenesScreen() {
             ) : null}
           </View>
 
-          <View className="gap-6 rounded-todam border-2 border-ink bg-paper p-6 md:p-8">
+          <View className="todam-calm-panel gap-6 p-6 md:p-8">
             <View className="max-w-4xl gap-4">
               <Text className="text-xs font-bold uppercase tracking-widest text-accent">
                 Projet open source
@@ -278,7 +286,7 @@ export default function BehindTheScenesScreen() {
             </View>
           </View>
 
-          <View className="flex-row flex-wrap gap-8 rounded-todam border-2 border-accent bg-paper p-6 md:p-8">
+          <View className="todam-calm-panel flex-row flex-wrap gap-8 p-6 md:p-8">
             <View className="min-w-64 flex-1 gap-3">
               <Text className="text-xs font-bold uppercase tracking-widest text-accent">
                 Le coût du projet
@@ -330,7 +338,7 @@ export default function BehindTheScenesScreen() {
             <View className="flex-row flex-wrap gap-4">
               {stack.map((item, index) => (
                 <View
-                  className="min-w-56 flex-1 gap-2 rounded-todam border border-line bg-paper p-5 md:min-w-[190px]"
+                  className="min-w-56 flex-1 gap-2 rounded-panel border border-line bg-paper p-5 shadow-soft md:min-w-[190px]"
                   key={item.label}
                 >
                   <Text className="text-xs font-bold uppercase tracking-widest text-accent">
@@ -362,7 +370,7 @@ export default function BehindTheScenesScreen() {
               </Text>
             </View>
             <View className="flex-row flex-wrap gap-4">
-              <View className="min-w-64 flex-1 gap-3 border border-control bg-paper p-5">
+              <View className="todam-calm-panel min-w-64 flex-1 gap-3 p-5">
                 <Text className="text-base font-semibold text-ink">Sauvegardes</Text>
                 <Text className="text-base leading-6 text-muted">
                   La sauvegarde automatisée de la machine est comprise dans le budget.
@@ -372,7 +380,7 @@ export default function BehindTheScenesScreen() {
                   restauration documenté.
                 </Text>
               </View>
-              <View className="min-w-64 flex-1 gap-3 border border-control bg-paper p-5">
+              <View className="todam-calm-panel min-w-64 flex-1 gap-3 p-5">
                 <Text className="text-base font-semibold text-ink">Supervision</Text>
                 <Text className="text-base leading-6 text-muted">
                   Le Web et l’API exposent des contrôles de disponibilité et de
@@ -384,7 +392,7 @@ export default function BehindTheScenesScreen() {
             </View>
           </View>
 
-          <View className="flex-row flex-wrap gap-8 border border-control bg-paper p-6 md:p-8">
+          <View className="todam-calm-panel flex-row flex-wrap gap-8 p-6 md:p-8">
             <View className="min-w-64 flex-1 gap-4">
               <Text
                 aria-level={2}
@@ -460,10 +468,16 @@ const styles = StyleSheet.create({
     borderWidth: tokens.button.standard.borderWidth,
     boxSizing: "border-box",
   },
-  stamp: {
-    transform: [{ rotate: "-2deg" }],
+  quietButtonLabelWeb: {
+    color: tokens.button.quiet.text,
+    fontFamily: tokens.button.quiet.fontFamily,
+    fontWeight: tokens.button.quiet.fontWeight,
   },
-  ticket: {
-    borderStyle: "dashed",
+  quietButtonWeb: {
+    backgroundColor: tokens.button.quiet.background,
+    borderColor: tokens.button.quiet.border,
+    borderRadius: tokens.button.quiet.radius,
+    borderWidth: tokens.button.quiet.borderWidth,
+    boxSizing: "border-box",
   },
 });

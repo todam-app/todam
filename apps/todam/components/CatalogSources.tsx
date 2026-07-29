@@ -47,9 +47,11 @@ export function CatalogSources({
           </Pressable>
         ))
       ) : (
-        <Text className="border-l-2 border-accent py-1 pl-4 text-base leading-6 text-muted">
-          Aucune source publique n’est actuellement associée à cette fiche.
-        </Text>
+        <View className="todam-editorial-empty justify-center p-5">
+          <Text className="text-base leading-6 text-muted">
+            Aucune source publique n’est actuellement associée à cette fiche.
+          </Text>
+        </View>
       )}
       {lastVerifiedAt ? (
         <Text className="text-sm text-muted">

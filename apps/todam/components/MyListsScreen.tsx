@@ -1,6 +1,6 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button, TextField } from "@todam/design-system";
+import { Button, TextField, tokens } from "@todam/design-system";
 import { Link, useRouter } from "expo-router";
 import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
@@ -106,7 +106,7 @@ export function MyListsScreen() {
           }}
         />
         {creating ? (
-          <View className="gap-4 rounded-todam border border-line bg-paper p-5">
+          <View className="todam-form-panel gap-4 p-5">
             <Text
               aria-level={2}
               accessibilityRole="header"
@@ -170,7 +170,7 @@ export function MyListsScreen() {
               <Link href={`/journal/listes/${list.id}`} asChild key={list.id}>
                 <Pressable
                   accessibilityRole="link"
-                  className="todam-interactive-card min-h-24 flex-row items-center justify-between gap-4 rounded-todam border border-line bg-paper p-5"
+                  className="todam-interactive-card min-h-24 flex-row items-center justify-between gap-4 rounded-panel border border-line bg-paper p-5 shadow-soft"
                 >
                   <View className="min-w-0 flex-1 gap-1">
                     <Text className="font-serif text-xl font-semibold text-ink">
@@ -187,7 +187,11 @@ export function MyListsScreen() {
                       {list.visibility === "public" ? "Publique" : "Privée"}
                     </Text>
                   </View>
-                  <Ionicons color="#6F6B64" name="chevron-forward" size={22} />
+                  <Ionicons
+                    color={tokens.color.muted}
+                    name="chevron-forward"
+                    size={22}
+                  />
                 </Pressable>
               </Link>
             ))}

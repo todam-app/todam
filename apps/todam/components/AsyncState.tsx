@@ -1,3 +1,4 @@
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { Button, tokens } from "@todam/design-system";
 import type { ReactNode } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
@@ -27,7 +28,7 @@ export function AsyncState({
         accessibilityLabel="Chargement en cours"
         accessibilityLiveRegion="polite"
         accessibilityRole="progressbar"
-        className="min-h-44 items-center justify-center gap-3"
+        className="todam-editorial-empty min-h-44 items-center justify-center gap-3 p-6"
       >
         <ActivityIndicator color={tokens.color.accent} />
         <Text className="text-base leading-6 text-muted">Chargement…</Text>
@@ -36,7 +37,14 @@ export function AsyncState({
   }
   if (error) {
     return (
-      <View className="min-h-44 items-center justify-center gap-3 rounded-todam border border-line bg-paper p-6">
+      <View className="todam-editorial-empty min-h-44 items-center justify-center gap-3 p-6">
+        <Ionicons
+          accessibilityElementsHidden
+          color={tokens.color.error}
+          importantForAccessibility="no"
+          name="alert-circle-outline"
+          size={21}
+        />
         <Text
           accessibilityRole="alert"
           className="text-center text-base leading-6 text-ink"
@@ -51,7 +59,7 @@ export function AsyncState({
     return (
       <View
         accessibilityLiveRegion="polite"
-        className="min-h-44 items-center justify-center gap-4 rounded-todam border border-line bg-paper p-6"
+        className="todam-editorial-empty min-h-44 items-center justify-center gap-4 p-6"
       >
         <Text className="text-center text-base leading-6 text-muted">
           {emptyMessage}

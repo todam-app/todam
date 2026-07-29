@@ -10,6 +10,11 @@ const disciplineLabels: Record<ProductionCard["discipline"], string> = {
   opera: "Opéra",
   ballet: "Ballet",
 };
+const disciplineClasses: Record<ProductionCard["discipline"], string> = {
+  theatre: "text-coral-text",
+  opera: "text-accent",
+  ballet: "text-aqua-text",
+};
 
 export function ProductionListItem({
   headingLevel = 3,
@@ -24,7 +29,7 @@ export function ProductionListItem({
         accessibilityHint="Ouvre la fiche du spectacle"
         accessibilityLabel={production.title}
         accessibilityRole="link"
-        className="todam-interactive-card min-h-28 flex-row gap-4 border-b border-line bg-transparent py-4"
+        className="todam-interactive-card min-h-32 flex-row gap-4 rounded-todam border border-transparent bg-transparent p-3"
       >
         <ProductionPoster
           compact
@@ -33,7 +38,9 @@ export function ProductionListItem({
           title={production.title}
         />
         <View className="min-w-0 flex-1 justify-center gap-1">
-          <Text className="text-xs font-bold uppercase tracking-wide text-accent">
+          <Text
+            className={`text-xs font-bold uppercase tracking-wide ${disciplineClasses[production.discipline]}`}
+          >
             {disciplineLabels[production.discipline]}
             {production.minimumAge !== null
               ? ` · Dès ${production.minimumAge} ans`
@@ -43,6 +50,7 @@ export function ProductionListItem({
             aria-level={headingLevel}
             accessibilityRole="header"
             className="font-serif text-xl font-semibold leading-6 text-ink"
+            numberOfLines={2}
           >
             {production.title}
           </Text>
@@ -62,11 +70,11 @@ export function ProductionListItem({
               {" · "}
               {production.nextVenue.name}, {production.nextVenue.locality}
             </Text>
-          ) : (
+          ) : production.venueNames.length > 0 ? (
             <Text className="text-sm text-muted">
-              {production.venueNames.join(" · ") || "Prochaine date à confirmer"}
+              {production.venueNames.join(" · ")}
             </Text>
-          )}
+          ) : null}
         </View>
       </Pressable>
     </Link>

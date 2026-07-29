@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
   },
   boxedSelected: {
     backgroundColor: tokens.color.selectedSurface,
-    borderColor: tokens.color.accent,
+    borderColor: tokens.color.selectedBorder,
   },
   compactMobileTab: {
     flex: 1,
@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
   },
   underlineSelected: {
-    borderBottomColor: tokens.color.accent,
+    borderBottomColor: tokens.color.selectedBorder,
     borderBottomWidth: 3,
   },
 });

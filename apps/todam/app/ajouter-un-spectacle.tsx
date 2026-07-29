@@ -114,7 +114,7 @@ function VenueEditor({
   const suggestions = venueSearch.data?.venues ?? [];
 
   return (
-    <View className="gap-4 border border-control bg-paper p-5">
+    <View className="todam-form-panel gap-4 p-5">
       <View className="flex-row flex-wrap items-center justify-between gap-3">
         <Text className="font-serif text-xl font-semibold text-ink">
           Représentation
@@ -193,7 +193,7 @@ function VenueEditor({
         </View>
       ) : null}
       {!draft.venueId ? (
-        <View className="gap-4 border-l-2 border-accent pl-4">
+        <View className="gap-4 rounded-todam border border-selected-border bg-selected p-4">
           <Text className="text-sm leading-5 text-muted">
             Si le lieu n’existe pas, complétez ses informations pour le créer.
           </Text>
@@ -775,7 +775,7 @@ export default function AddCommunityProductionPage() {
               </Text>
             </View>
 
-            <Text className="border-l-2 border-accent pl-4 text-sm leading-6 text-muted">
+            <Text className="rounded-todam border border-selected-border bg-selected p-4 text-sm leading-6 text-muted">
               Merci de respecter notre{" "}
               <Link href="/politique-editoriale">
                 <Text className="font-semibold text-accent">politique éditoriale</Text>

@@ -1,5 +1,5 @@
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
-import { Button, SectionTitle } from "@todam/design-system";
+import { Button, RatingLights, SectionTitle } from "@todam/design-system";
 import { TodamApiError } from "@todam/contracts";
 import { Link, useLocalSearchParams, useRouter } from "expo-router";
 import Head from "expo-router/head";
@@ -161,7 +161,7 @@ export default function PublicMemberPage() {
                         >
                           <Pressable
                             accessibilityRole="link"
-                            className="min-h-28 w-full max-w-sm justify-center border border-control bg-paper p-4"
+                            className="todam-interactive-card min-h-28 w-full max-w-sm justify-center rounded-panel border border-line bg-paper p-4 shadow-soft"
                           >
                             <Text className="font-serif text-xl font-semibold text-ink">
                               {list.name}
@@ -196,7 +196,7 @@ export default function PublicMemberPage() {
                       {entries.map((entry) => (
                         <View className="gap-1" key={entry.id}>
                           <ProductionListItem production={entry.production} />
-                          <Text className="pb-2 text-sm text-muted">
+                          <Text className="text-sm text-muted">
                             {entry.attendedOn
                               ? `Vu le ${new Intl.DateTimeFormat("fr-FR").format(
                                   new Date(`${entry.attendedOn}T12:00:00Z`),
@@ -204,8 +204,12 @@ export default function PublicMemberPage() {
                               : `Ajouté le ${new Intl.DateTimeFormat("fr-FR").format(
                                   new Date(entry.addedAt),
                                 )}`}
-                            {entry.rating ? ` · ${entry.rating}/10` : ""}
                           </Text>
+                          {entry.rating ? (
+                            <View className="pb-2">
+                              <RatingLights value={entry.rating} />
+                            </View>
+                          ) : null}
                         </View>
                       ))}
                     </View>
@@ -234,9 +238,7 @@ export default function PublicMemberPage() {
                           <ProductionListItem production={review.production} />
                           <View className="flex-row flex-wrap items-center gap-3">
                             {review.rating ? (
-                              <Text className="text-base font-semibold text-accent">
-                                {review.rating}/10
-                              </Text>
+                              <RatingLights value={review.rating} />
                             ) : null}
                             {review.containsSpoiler ? (
                               <Text className="text-xs font-semibold uppercase tracking-wide text-muted">

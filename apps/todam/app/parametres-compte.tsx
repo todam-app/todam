@@ -262,7 +262,7 @@ export default function AccountSettingsScreen() {
             </Text>
           </View>
 
-          <View className="gap-4 rounded-todam border border-line bg-paper p-5 md:p-6">
+          <View className="todam-form-panel gap-4 p-5 md:p-6">
             <SectionTitle>Ville de découverte</SectionTitle>
             <Text className="text-base leading-6 text-muted">
               Choisis ou modifie la ville utilisée pour classer les spectacles proches
@@ -286,7 +286,7 @@ export default function AccountSettingsScreen() {
             </AsyncState>
           </View>
 
-          <View className="gap-4 rounded-todam border border-line bg-paper p-5 md:p-6">
+          <View className="todam-form-panel gap-4 p-5 md:p-6">
             <SectionTitle>Adresse e-mail</SectionTitle>
             <Text className="text-base leading-6 text-muted">
               Adresse actuelle : {sessionUser?.email}
@@ -340,7 +340,7 @@ export default function AccountSettingsScreen() {
             </View>
           </View>
 
-          <View className="gap-4 rounded-todam border border-line bg-paper p-5 md:p-6">
+          <View className="todam-form-panel gap-4 p-5 md:p-6">
             <SectionTitle>Nom d{"'"}utilisateur</SectionTitle>
             <Text className="text-base leading-6 text-muted">
               Entre 3 et 30 lettres, chiffres, points, tirets ou underscores.
@@ -387,7 +387,7 @@ export default function AccountSettingsScreen() {
             </View>
           </View>
 
-          <View className="gap-4 rounded-todam border border-line bg-paper p-5 md:p-6">
+          <View className="todam-form-panel gap-4 p-5 md:p-6">
             <SectionTitle>Mot de passe</SectionTitle>
             <PasswordField
               autoComplete="current-password"
@@ -454,7 +454,7 @@ export default function AccountSettingsScreen() {
           </View>
 
           <View
-            className="gap-6 rounded-todam border border-line bg-paper p-5 md:p-6"
+            className="todam-form-panel gap-6 p-5 md:p-6"
             testID="account-data-card"
           >
             <View className="gap-4">

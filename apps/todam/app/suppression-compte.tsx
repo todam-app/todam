@@ -52,7 +52,7 @@ export default function AccountDeletionScreen() {
 
   return (
     <LegalDocumentScreen documentId="deletion">
-      <View className="mt-6 gap-4 rounded-todam border border-line bg-paper p-5">
+      <View className="todam-calm-panel mt-6 gap-4 p-5">
         {token ? (
           <Button
             label="Confirmer la suppression définitive"

@@ -1,7 +1,7 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Discipline, OwnReview } from "@todam/contracts";
-import { Button } from "@todam/design-system";
+import { Button, tokens } from "@todam/design-system";
 import { Link, type Href, useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
@@ -160,7 +160,7 @@ function Overlay({
     <Modal animationType="fade" onRequestClose={onClose} transparent visible={visible}>
       <View
         accessibilityViewIsModal
-        className={`flex-1 bg-black/45 ${
+        className={`todam-modal-scrim flex-1 bg-black/45 ${
           sidePanel
             ? "items-end"
             : desktop
@@ -175,7 +175,7 @@ function Overlay({
           style={StyleSheet.absoluteFill}
         />
         <View
-          className={`max-h-[92%] w-full bg-paper ${
+          className={`todam-modal-panel max-h-[92%] w-full bg-paper ${
             sidePanel
               ? "h-full max-w-md"
               : desktop
@@ -199,7 +199,7 @@ function Overlay({
               onPress={onClose}
               testID={`review-filter-close-${sidePanel ? "all" : "target"}`}
             >
-              <Ionicons color="#151515" name="close" size={24} />
+              <Ionicons color={tokens.color.ink} name="close" size={24} />
             </Pressable>
           </View>
           {children}
@@ -230,7 +230,7 @@ function Options({
       >
         <Text className="text-base font-semibold text-ink">Tous</Text>
         {selected === undefined ? (
-          <Ionicons color="#C43D28" name="checkmark" size={21} />
+          <Ionicons color={tokens.color.accent} name="checkmark" size={21} />
         ) : null}
       </Pressable>
       {options.map((option) => {
@@ -256,7 +256,9 @@ function Options({
               {option.count !== undefined ? (
                 <Text className="text-base text-muted">{option.count}</Text>
               ) : null}
-              {active ? <Ionicons color="#C43D28" name="checkmark" size={21} /> : null}
+              {active ? (
+                <Ionicons color={tokens.color.accent} name="checkmark" size={21} />
+              ) : null}
             </View>
           </Pressable>
         );
@@ -499,7 +501,7 @@ export function MyReviewsScreen() {
             className="todam-icon-button h-11 w-11 items-center justify-center rounded-todam border border-control bg-paper"
             onPress={() => setAllOpen(true)}
           >
-            <Ionicons color="#151515" name="options-outline" size={22} />
+            <Ionicons color={tokens.color.ink} name="options-outline" size={22} />
           </Pressable>
         </View>
         <AsyncState
@@ -557,7 +559,7 @@ export function MyReviewsScreen() {
                     {filterLabels[key]}
                   </Text>
                   <Ionicons
-                    color="#6F6B64"
+                    color={tokens.color.muted}
                     name={expanded === key ? "chevron-up" : "chevron-down"}
                     size={22}
                   />

@@ -68,14 +68,23 @@
 
 :root {
   --todam-color-canvas: #fcf8f2;
-  --todam-color-gutter: #faf3e8;
+  --todam-color-gutter: #f8f1ea;
   --todam-color-page: var(--todam-color-canvas);
+  --todam-color-paper: #fffdf8;
+  --todam-color-ink: #151515;
+  --todam-color-muted: #6f6b64;
+  --todam-color-accent: #6651b8;
+  --todam-color-accent-pressed: #504093;
+  --todam-color-focus: #7864c8;
+  --todam-color-line: #e2d9cd;
   --todam-color-coral: #f3a995;
   --todam-color-lilac: #c8b8f0;
   --todam-color-aqua: #9fd8d0;
-  --todam-shadow-soft: 0 10px 30px rgba(43, 34, 27, 0.1);
+  --todam-shadow-soft: 0 16px 42px rgba(43, 34, 27, 0.09);
+  --todam-shadow-lift: 0 22px 54px rgba(65, 48, 92, 0.13);
+  --todam-shadow-lilac: 0 12px 36px rgba(120, 100, 200, 0.16);
   --todam-web-content-width: 1120px;
-  --todam-web-header-height: 70px;
+  --todam-web-header-height: 78px;
 }
 
 html,
@@ -87,15 +96,20 @@ body,
 html {
   background-attachment: fixed;
   background-color: var(--todam-color-gutter);
-  background-image: linear-gradient(
-    to right,
-    var(--todam-color-gutter) 0,
-    var(--todam-color-gutter) calc(50% - 560px),
-    var(--todam-color-page) calc(50% - 560px),
-    var(--todam-color-page) calc(50% + 560px),
-    var(--todam-color-gutter) calc(50% + 560px),
-    var(--todam-color-gutter) 100%
-  );
+  background-image:
+    radial-gradient(circle at -8% 24%, rgba(243, 169, 149, 0.38), transparent 34%),
+    radial-gradient(circle at 106% 76%, rgba(159, 216, 208, 0.34), transparent 32%),
+    radial-gradient(circle at 104% 18%, rgba(200, 184, 240, 0.28), transparent 28%),
+    linear-gradient(
+      to right,
+      rgba(243, 169, 149, 0.2) 0,
+      rgba(252, 248, 242, 0.88) calc(50% - 560px),
+      var(--todam-color-page) calc(50% - 559px),
+      var(--todam-color-page) calc(50% + 559px),
+      rgba(252, 248, 242, 0.88) calc(50% + 560px),
+      rgba(159, 216, 208, 0.18) 100%
+    );
+  color: var(--todam-color-ink);
   font-family: "Work Sans", Arial, Helvetica, sans-serif;
 }
 
@@ -113,7 +127,7 @@ body {
 .todam-web-header {
   -webkit-backdrop-filter: blur(16px);
   backdrop-filter: blur(16px);
-  background-color: rgba(255, 253, 248, 0.82) !important;
+  background-color: rgba(255, 253, 248, 0.86) !important;
   left: 0;
   margin-inline: auto;
   max-width: var(--todam-web-content-width);
@@ -126,11 +140,11 @@ body {
 }
 
 .todam-web-header--scrolled {
-  box-shadow: 0 8px 24px rgba(43, 34, 27, 0.1);
+  box-shadow: 0 12px 34px rgba(43, 34, 27, 0.1);
 }
 
 .todam-production-card {
-  box-shadow: 0 4px 18px rgba(43, 34, 27, 0.06);
+  box-shadow: 0 12px 32px rgba(43, 34, 27, 0.07);
   min-width: 0;
 }
 
@@ -141,14 +155,21 @@ body {
   width: 100%;
 }
 
-.todam-public-hero,
+.todam-public-hero {
+  background:
+    radial-gradient(circle at 92% 18%, rgba(200, 184, 240, 0.2), transparent 35%),
+    radial-gradient(circle at 72% 92%, rgba(159, 216, 208, 0.17), transparent 38%);
+  border-bottom: 1px solid rgba(226, 217, 205, 0.82);
+  overflow: hidden;
+}
+
 .todam-connected-hero {
   background:
-    radial-gradient(circle at 88% 14%, rgba(200, 184, 240, 0.72), transparent 32%),
-    radial-gradient(circle at 68% 90%, rgba(159, 216, 208, 0.58), transparent 34%),
-    linear-gradient(135deg, #fffdf8 0%, #fcf8f2 58%, rgba(243, 169, 149, 0.45) 100%);
-  border: 1px solid rgba(216, 209, 198, 0.82);
-  border-radius: 12px;
+    radial-gradient(circle at 92% 12%, rgba(200, 184, 240, 0.5), transparent 34%),
+    radial-gradient(circle at 72% 92%, rgba(159, 216, 208, 0.38), transparent 36%),
+    rgba(255, 253, 248, 0.86);
+  border: 1px solid rgba(226, 217, 205, 0.86);
+  border-radius: 18px;
   box-shadow: var(--todam-shadow-soft);
   overflow: hidden;
 }
@@ -171,10 +192,10 @@ body {
 .todam-discover-filter-bar {
   -webkit-backdrop-filter: blur(16px);
   backdrop-filter: blur(16px);
-  background-color: rgba(252, 248, 242, 0.9);
-  border: 1px solid rgba(216, 209, 198, 0.9);
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(43, 34, 27, 0.07);
+  background-color: rgba(255, 253, 248, 0.9);
+  border: 1px solid rgba(226, 217, 205, 0.92);
+  border-radius: 16px;
+  box-shadow: 0 12px 34px rgba(43, 34, 27, 0.07);
   position: sticky !important;
   top: 0 !important;
   z-index: 40;
@@ -184,18 +205,19 @@ body {
   background:
     linear-gradient(rgba(255, 253, 248, 0.94), rgba(255, 253, 248, 0.94)),
     linear-gradient(110deg, var(--todam-color-lilac), var(--todam-color-aqua));
-  border-radius: 12px;
+  border-radius: 16px;
 }
 
 .todam-result-list-card {
-  border: 1px solid #d8d1c6;
-  border-radius: 12px;
-  box-shadow: 0 4px 16px rgba(43, 34, 27, 0.05);
+  background: rgba(255, 253, 248, 0.78);
+  border: 1px solid var(--todam-color-line);
+  border-radius: 16px;
+  box-shadow: 0 10px 28px rgba(43, 34, 27, 0.06);
 }
 
 .todam-production-hero {
-  border: 1px solid rgba(216, 209, 198, 0.82);
-  border-radius: 12px;
+  border: 1px solid rgba(226, 217, 205, 0.86);
+  border-radius: 18px;
   box-shadow: var(--todam-shadow-soft);
   overflow: hidden;
 }
@@ -220,10 +242,49 @@ body {
 
 .todam-ticket {
   background-color: rgba(255, 253, 248, 0.86);
-  border: 1px dashed #9b9388;
-  border-left: 4px solid #c43d28;
-  border-radius: 12px;
-  box-shadow: 0 4px 16px rgba(43, 34, 27, 0.07);
+  border: 1px solid var(--todam-color-line);
+  border-radius: 14px;
+  box-shadow: 0 12px 30px rgba(43, 34, 27, 0.07);
+  overflow: hidden;
+  position: relative;
+}
+
+.todam-ticket::before,
+.todam-ticket::after,
+.todam-login-ticket::before,
+.todam-login-ticket::after {
+  background: var(--todam-color-canvas);
+  border: 1px solid var(--todam-color-line);
+  border-radius: 999px;
+  content: "";
+  height: 12px;
+  position: absolute;
+  top: calc(50% - 6px);
+  width: 12px;
+  z-index: 2;
+}
+
+.todam-ticket::before,
+.todam-login-ticket::before {
+  left: -7px;
+}
+
+.todam-ticket::after,
+.todam-login-ticket::after {
+  right: -7px;
+}
+
+.todam-login-ticket {
+  box-shadow: var(--todam-shadow-lilac);
+  overflow: hidden;
+  position: relative;
+}
+
+.todam-mobile-nav {
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+  background-color: rgba(255, 253, 248, 0.92) !important;
+  box-shadow: 0 -10px 32px rgba(43, 34, 27, 0.08);
 }
 
 .todam-skip-link {
@@ -238,7 +299,7 @@ body {
 
 .todam-skip-link:focus,
 .todam-skip-link:focus-visible {
-  outline: 3px solid #c43d28;
+  outline: 3px solid var(--todam-color-focus);
   outline-offset: 2px;
   top: 12px;
 }
@@ -246,15 +307,19 @@ body {
 .todam-web-page-scroll {
   --todam-page-header-offset: var(--todam-web-header-height);
   background-color: var(--todam-color-gutter) !important;
-  background-image: linear-gradient(
-    to right,
-    var(--todam-color-gutter) 0,
-    var(--todam-color-gutter) calc(50% - 560px),
-    var(--todam-color-page) calc(50% - 560px),
-    var(--todam-color-page) calc(50% + 560px),
-    var(--todam-color-gutter) calc(50% + 560px),
-    var(--todam-color-gutter) 100%
-  ) !important;
+  background-image:
+    radial-gradient(circle at -8% 24%, rgba(243, 169, 149, 0.38), transparent 34%),
+    radial-gradient(circle at 106% 76%, rgba(159, 216, 208, 0.34), transparent 32%),
+    radial-gradient(circle at 104% 18%, rgba(200, 184, 240, 0.28), transparent 28%),
+    linear-gradient(
+      to right,
+      rgba(243, 169, 149, 0.2) 0,
+      rgba(252, 248, 242, 0.88) calc(50% - 560px),
+      var(--todam-color-page) calc(50% - 559px),
+      var(--todam-color-page) calc(50% + 559px),
+      rgba(252, 248, 242, 0.88) calc(50% + 560px),
+      rgba(159, 216, 208, 0.18) 100%
+    ) !important;
   overflow-x: hidden !important;
   overflow-y: auto !important;
   padding-top: var(--todam-page-header-offset);
@@ -305,7 +370,7 @@ textarea:focus-visible,
 [role="tab"]:focus-visible,
 [role="radio"]:focus-visible,
 [role="checkbox"]:focus-visible {
-  outline: 3px solid #c43d28 !important;
+  outline: 3px solid var(--todam-color-focus) !important;
   outline-offset: 3px;
 }
 
@@ -349,9 +414,10 @@ textarea:focus-visible,
 
   .todam-cta-standard:not([aria-disabled="true"]):hover,
   [data-todam-cta="standard"]:not([aria-disabled="true"]):hover {
-    background-color: #c43d28 !important;
-    border-color: #c43d28 !important;
+    background-color: #282335 !important;
+    border-color: #282335 !important;
     filter: none;
+    box-shadow: var(--todam-shadow-lilac);
   }
 
   .todam-cta-standard:not([aria-disabled="true"]):hover *,
@@ -360,15 +426,22 @@ textarea:focus-visible,
   }
 
   [data-todam-cta="quiet"]:not([aria-disabled="true"]):hover {
-    background-color: #fcf8f2 !important;
+    background-color: #f7f3fc !important;
     border-color: #151515 !important;
     filter: none;
   }
 
+  .todam-login-ticket:hover {
+    background-color: #f7f3fc !important;
+    border-color: #a99bd8 !important;
+    box-shadow: 0 14px 34px rgba(120, 100, 200, 0.2);
+  }
+
   [data-todam-cta="featured"]:not([aria-disabled="true"]):hover {
-    background-color: #c43d28 !important;
-    border-color: #c43d28 !important;
+    background-color: #282335 !important;
+    border-color: #282335 !important;
     filter: none;
+    box-shadow: var(--todam-shadow-lilac);
   }
 
   [data-todam-cta="featured"]:not([aria-disabled="true"]):hover * {
@@ -394,20 +467,20 @@ textarea:focus-visible,
   }
 
   .todam-interactive-card:not([aria-disabled="true"]):hover {
-    border-color: #c43d28 !important;
-    box-shadow: var(--todam-shadow-soft);
+    border-color: #a99bd8 !important;
+    box-shadow: var(--todam-shadow-lift);
     opacity: 1;
-    transform: translateY(-4px);
+    transform: translateY(-2px);
   }
 
   .todam-icon-button:not([aria-disabled="true"]):hover {
-    background-color: #fcefea !important;
-    border-color: #c43d28 !important;
+    background-color: #eee9fa !important;
+    border-color: var(--todam-color-focus) !important;
     filter: none;
   }
 
   .todam-icon-button:not([aria-disabled="true"]):hover * {
-    color: #c43d28 !important;
+    color: var(--todam-color-accent) !important;
   }
 
   button:not(:disabled):not(.todam-cta-standard):not([data-todam-cta]):not(
@@ -452,9 +525,99 @@ button:not(:disabled):not([data-todam-cta]):not(.todam-icon-button):active,
   outline: none;
 }
 
+.todam-search-bar {
+  border-radius: 12px !important;
+  box-shadow: 0 8px 24px rgba(43, 34, 27, 0.04);
+  min-height: 50px;
+}
+
 .todam-search-bar:focus-within {
-  border-color: #c43d28 !important;
-  box-shadow: 0 0 0 3px rgba(196, 61, 40, 0.14);
+  border-color: var(--todam-color-focus) !important;
+  box-shadow:
+    0 0 0 3px rgba(120, 100, 200, 0.18),
+    0 10px 28px rgba(65, 48, 92, 0.08);
+}
+
+.todam-calm-panel,
+.todam-form-panel,
+.todam-management-panel,
+.todam-auth-panel,
+.todam-editorial-empty,
+.todam-modal-panel {
+  background:
+    linear-gradient(rgba(255, 253, 248, 0.94), rgba(255, 253, 248, 0.94)),
+    linear-gradient(125deg, var(--todam-color-coral), var(--todam-color-lilac), var(--todam-color-aqua));
+  border: 1px solid var(--todam-color-line);
+  border-radius: 18px;
+  box-shadow: var(--todam-shadow-soft);
+}
+
+.todam-auth-panel {
+  box-shadow:
+    var(--todam-shadow-soft),
+    0 0 54px rgba(200, 184, 240, 0.12);
+}
+
+.todam-management-panel,
+.todam-form-panel {
+  background: rgba(255, 253, 248, 0.92);
+}
+
+.todam-editorial-empty {
+  min-height: 176px;
+  overflow: hidden;
+  position: relative;
+}
+
+.todam-editorial-empty::before {
+  background:
+    radial-gradient(circle at 18% 50%, rgba(243, 169, 149, 0.2), transparent 34%),
+    radial-gradient(circle at 82% 42%, rgba(159, 216, 208, 0.2), transparent 32%),
+    radial-gradient(circle at 58% 10%, rgba(200, 184, 240, 0.18), transparent 28%);
+  content: "";
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+}
+
+.todam-editorial-empty > * {
+  position: relative;
+}
+
+.todam-modal-scrim {
+  -webkit-backdrop-filter: blur(7px);
+  backdrop-filter: blur(7px);
+  background-color: rgba(21, 21, 21, 0.28) !important;
+}
+
+.todam-tabs-boxed {
+  background: rgba(255, 253, 248, 0.72);
+  border: 1px solid var(--todam-color-line);
+  border-radius: 14px;
+  padding: 5px;
+}
+
+.todam-tabs-underline {
+  border-bottom-color: var(--todam-color-line) !important;
+}
+
+[role="tab"][aria-selected="true"],
+[role="radio"][aria-checked="true"],
+[role="checkbox"][aria-checked="true"] {
+  box-shadow: 0 0 0 1px rgba(120, 100, 200, 0.12);
+}
+
+.todam-web-footer {
+  background:
+    radial-gradient(circle at 5% 10%, rgba(243, 169, 149, 0.1), transparent 26%),
+    radial-gradient(circle at 95% 80%, rgba(159, 216, 208, 0.1), transparent 25%),
+    var(--todam-color-paper) !important;
+}
+
+.todam-legal-document {
+  background: rgba(255, 253, 248, 0.52);
+  border-left: 1px solid rgba(226, 217, 205, 0.72);
+  border-right: 1px solid rgba(226, 217, 205, 0.72);
 }
 
 input:-webkit-autofill,
@@ -467,11 +630,17 @@ input:-webkit-autofill:focus {
 
 @media (max-width: 1119px) {
   html {
-    background: var(--todam-color-page);
+    background:
+      radial-gradient(circle at -10% 20%, rgba(243, 169, 149, 0.16), transparent 30%),
+      radial-gradient(circle at 108% 72%, rgba(159, 216, 208, 0.14), transparent 32%),
+      var(--todam-color-page);
   }
 
   .todam-web-page-scroll {
-    background: var(--todam-color-page) !important;
+    background:
+      radial-gradient(circle at -10% 20%, rgba(243, 169, 149, 0.16), transparent 30%),
+      radial-gradient(circle at 108% 72%, rgba(159, 216, 208, 0.14), transparent 32%),
+      var(--todam-color-page) !important;
   }
 }
 
@@ -505,24 +674,23 @@ input:-webkit-autofill:focus {
   }
 
   .todam-hero-collage {
-    display: flex;
-    margin-right: -20px;
-    overflow-x: auto;
-    padding-bottom: 12px;
-    padding-right: 20px;
-    scrollbar-width: none;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    margin-right: 0;
+    overflow: visible;
+    padding: 0;
   }
 
   .todam-hero-collage > * {
-    flex: 0 0 210px;
+    width: 100%;
   }
 
   .todam-hero-collage > :nth-child(2) {
-    margin-top: 24px;
+    margin-top: 0;
   }
 }
 
-@media (min-width: 360px) {
+@media (min-width: 768px) {
   .todam-production-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -532,15 +700,11 @@ input:-webkit-autofill:focus {
   }
 }
 
-@media (min-width: 768px) {
-  .todam-production-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
+@media (min-width: 900px) {
   .todam-public-hero,
   .todam-connected-hero {
     display: grid;
-    grid-template-columns: minmax(0, 3fr) minmax(280px, 2fr);
+    grid-template-columns: minmax(0, 1.05fr) minmax(430px, 0.95fr);
   }
 }
 

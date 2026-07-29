@@ -1,3 +1,4 @@
+import { tokens } from "@todam/design-system";
 import { ScrollViewStyleReset } from "expo-router/html";
 import type { PropsWithChildren } from "react";
 
@@ -10,7 +11,7 @@ export default function Root({ children }: PropsWithChildren) {
           content="width=device-width, initial-scale=1, viewport-fit=cover"
           name="viewport"
         />
-        <meta content="#FCF8F2" name="theme-color" />
+        <meta content={tokens.color.background} name="theme-color" />
         <link
           as="font"
           crossOrigin="anonymous"

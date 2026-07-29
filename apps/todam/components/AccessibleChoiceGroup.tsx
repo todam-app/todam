@@ -108,7 +108,7 @@ const styles = StyleSheet.create({
     borderColor: tokens.color.controlBorder,
   },
   option: {
-    borderRadius: 6,
+    borderRadius: tokens.radius.medium,
     borderWidth: 1,
     justifyContent: "center",
     minHeight: 44,
@@ -120,6 +120,6 @@ const styles = StyleSheet.create({
   },
   selected: {
     backgroundColor: tokens.color.selectedSurface,
-    borderColor: tokens.color.accent,
+    borderColor: tokens.color.selectedBorder,
   },
 });

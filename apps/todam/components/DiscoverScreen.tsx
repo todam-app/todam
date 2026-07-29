@@ -416,7 +416,7 @@ export function DiscoverScreen({
             ) : null}
           </View>
           {!browse && query.length < 2 ? (
-            <View className="border-l-2 border-accent py-2 pl-4">
+            <View className="rounded-todam border border-selected-border bg-selected p-4">
               <Text className="text-base leading-6 text-muted">
                 Saisissez au moins deux caractères pour lancer la recherche.
               </Text>

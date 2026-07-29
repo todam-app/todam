@@ -138,7 +138,7 @@ export default function PublicListPage() {
                     ))}
                   </View>
                 ) : (
-                  <View className="items-start gap-3 border-l-2 border-accent pl-4">
+                  <View className="todam-editorial-empty items-start justify-center gap-3 p-5">
                     <Text className="text-base text-muted">
                       Cette liste est encore vide.
                     </Text>

@@ -14,8 +14,75 @@ $publicOgDirectory = Join-Path $appRootPath "public\og"
 
 $ink = [System.Drawing.ColorTranslator]::FromHtml("#151515")
 $paper = [System.Drawing.ColorTranslator]::FromHtml("#FFFDF8")
-$ivory = [System.Drawing.ColorTranslator]::FromHtml("#F7F3EC")
-$accent = [System.Drawing.ColorTranslator]::FromHtml("#C43D28")
+$ivory = [System.Drawing.ColorTranslator]::FromHtml("#FCF8F2")
+$accent = [System.Drawing.ColorTranslator]::FromHtml("#F3A995")
+
+function Set-BrandAccent {
+  param(
+    [string]$Path,
+    [System.Drawing.Color]$AccentColor
+  )
+
+  if (-not [System.IO.File]::Exists($Path)) {
+    return
+  }
+
+  $loaded = New-Object System.Drawing.Bitmap($Path)
+  $result = New-Object System.Drawing.Bitmap(
+    $loaded.Width,
+    $loaded.Height,
+    [System.Drawing.Imaging.PixelFormat]::Format32bppArgb
+  )
+  $graphics = [System.Drawing.Graphics]::FromImage($result)
+  try {
+    $graphics.DrawImageUnscaled($loaded, 0, 0)
+  } finally {
+    $graphics.Dispose()
+    $loaded.Dispose()
+  }
+
+  $rectangle = [System.Drawing.Rectangle]::new(0, 0, $result.Width, $result.Height)
+  $bitmapData = $result.LockBits(
+    $rectangle,
+    [System.Drawing.Imaging.ImageLockMode]::ReadWrite,
+    [System.Drawing.Imaging.PixelFormat]::Format32bppArgb
+  )
+  try {
+    $byteCount = [Math]::Abs($bitmapData.Stride) * $result.Height
+    $pixels = New-Object byte[] $byteCount
+    [System.Runtime.InteropServices.Marshal]::Copy(
+      $bitmapData.Scan0,
+      $pixels,
+      0,
+      $byteCount
+    )
+    for ($index = 0; $index -lt $byteCount; $index += 4) {
+      $blue = $pixels[$index]
+      $green = $pixels[$index + 1]
+      $red = $pixels[$index + 2]
+      $alpha = $pixels[$index + 3]
+      if ($alpha -gt 0 -and $red -gt 140 -and $green -lt 110 -and $blue -lt 90) {
+        $pixels[$index] = $AccentColor.B
+        $pixels[$index + 1] = $AccentColor.G
+        $pixels[$index + 2] = $AccentColor.R
+      }
+    }
+    [System.Runtime.InteropServices.Marshal]::Copy(
+      $pixels,
+      0,
+      $bitmapData.Scan0,
+      $byteCount
+    )
+  } finally {
+    $result.UnlockBits($bitmapData)
+  }
+
+  try {
+    $result.Save($Path, [System.Drawing.Imaging.ImageFormat]::Png)
+  } finally {
+    $result.Dispose()
+  }
+}
 
 function Save-Png {
   param(
@@ -53,7 +120,10 @@ function New-OpaqueLogo {
       if ($pixel.A -eq 0) {
         continue
       }
-      $isAccent = $pixel.R -gt 120 -and $pixel.G -lt 110 -and $pixel.B -lt 90
+      $isAccent =
+        ($pixel.R -gt 140 -and $pixel.G -lt 110 -and $pixel.B -lt 90) -or
+        ($pixel.R -gt 220 -and $pixel.G -gt 120 -and $pixel.G -lt 200 -and
+          $pixel.B -gt 110 -and $pixel.B -lt 180)
       $target = if ($Monochrome -or -not $isAccent) { $InkColor } else { $AccentColor }
       $alpha = $pixel.A / 255.0
       $red = [int][Math]::Round($target.R * $alpha + $Background.R * (1 - $alpha))
@@ -63,6 +133,18 @@ function New-OpaqueLogo {
     }
   }
   return $result
+}
+
+@(
+  "todam-app-icon.png",
+  "todam-app-icon-foreground.png",
+  "todam-favicon.png",
+  "todam-logo-horizontal.png",
+  "todam-logo-horizontal-source.png",
+  "todam-symbol.png",
+  "todam-symbol-source.png"
+) | ForEach-Object {
+  Set-BrandAccent -Path (Join-Path $assetDirectory $_) -AccentColor $accent
 }
 
 $sourceLogo = New-Object System.Drawing.Bitmap(

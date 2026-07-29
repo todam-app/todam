@@ -1,8 +1,9 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { tokens } from "@todam/design-system";
 import { Tabs } from "expo-router";
 import { Platform, View } from "react-native";
 
-const PAGE_BACKGROUND = "#FCF8F2";
+const PAGE_BACKGROUND = tokens.color.background;
 
 const icons = {
   index: "home-outline",
@@ -19,14 +20,14 @@ export default function TabLayout() {
           animation: "none",
           headerShown: false,
           sceneStyle: { backgroundColor: PAGE_BACKGROUND },
-          tabBarActiveTintColor: "#C43D28",
-          tabBarInactiveTintColor: "#6F6B64",
+          tabBarActiveTintColor: tokens.color.accent,
+          tabBarInactiveTintColor: tokens.color.muted,
           tabBarStyle:
             Platform.OS === "web"
               ? { display: "none" }
               : {
-                  backgroundColor: "#FFFDF8",
-                  borderTopColor: "#D8D1C6",
+                  backgroundColor: tokens.color.surface,
+                  borderTopColor: tokens.color.border,
                   height: 68,
                   paddingBottom: 8,
                   paddingTop: 6,

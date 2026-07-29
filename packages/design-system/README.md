@@ -1,115 +1,127 @@
 # Design system Todam
 
-Tokens et composants universels de Todam. Les primitives restent compatibles avec Expo
-Web, iOS et Android et respectent une zone tactile minimale de 44 px.
+Tokens et composants universels de Todam. La cible produit actuelle est le Web
+responsive. Les primitives partagées conservent des contrats accessibles et une cible
+interactive minimale de 44 px.
 
 Licence : Apache-2.0. Ce package ne peut importer aucun module AGPL.
 
-## Surfaces neutres
+## Direction visuelle
 
-Les fonds chauds ont chacun un rôle unique :
+Todam utilise une scène lumineuse contemporaine : une toile ivoire stable, des surfaces
+porcelaine, une typographie éditoriale pour les titres et des lumières corail, lilas et
+aqua derrière des voiles translucides. Ces lumières soutiennent la hiérarchie sans
+devenir des illustrations autonomes.
 
-- `color.background` (`#FCF8F2`) : toile générale des pages ;
-- `color.surface` (`#FFFDF8`) : cartes, sections, en-têtes et pieds de page ;
-- `color.placeholder` (`#F0E9DF`) : visuel absent ou non publié ;
-- `color.disabled` (`#E5E0D8`) : contrôle réellement indisponible ;
-- `color.border` (`#D8D1C6`) : séparation, jamais surface de contenu.
+Les couleurs exécutables sont centralisées dans `src/tokens.ts` :
 
-Ne pas créer de variantes presque identiques de `color.surface`. Une sous-section de
-carte reste sur la même porcelaine et utilise une bordure lorsque sa séparation doit
-être visible.
+- `color.background` (`#FCF8F2`) : toile générale ;
+- `color.surface` (`#FFFDF8`) : cartes, formulaires, en-têtes et pied de page ;
+- `color.ink` (`#151515`) : texte principal et CTA principal ;
+- `color.muted` (`#6F6B64`) : informations secondaires ;
+- `color.accent` (`#6651B8`) : liens, notation et certains états actifs ;
+- `color.coral` (`#F3A995`), `color.lilac` (`#C8B8F0`) et `color.aqua`
+  (`#9FD8D0`) : halos et compositions de scène ;
+- `color.selectedSurface` et `color.selectedBorder` : sélection, toujours accompagnée
+  d’un libellé, d’une icône ou d’un état accessible ;
+- `color.error` : erreurs, suppressions et alertes réellement critiques.
 
-## Couche éditoriale vivante
+L’ancien vermillon `#C43D28` n’est plus une couleur d’identité ni d’interaction.
 
-Les teintes `color.coral` (`#F3A995`), `color.lilac` (`#C8B8F0`) et `color.aqua`
-(`#9FD8D0`) sont décoratives. Elles structurent les compositions d’affiches absentes,
-les halos et les fonds de hero ; elles ne portent jamais seules une information ou un
-état.
+## Surfaces et mise en page
 
-Les panneaux éditoriaux utilisent `radius.panel` (12 px), les affiches `radius.media`
-(16 px) et, sur le Web uniquement, `shadow.light`. La surface `surface.glass` peut être
-associée à un flou de 16 px pour les éléments sticky. Les structures natives conservent
-des surfaces opaques et n’emploient ni flou, ni gradient, ni animation décorative.
+Le Web utilise un canvas central de 1120 px. Les gouttières extérieures portent une
+lumière corail à gauche et aqua/lilas à droite ; le contenu central reste ivoire et
+lisible. Sous cette largeur, les halos deviennent très discrets.
 
-Lorsqu’aucune affiche publiable n’existe, `PosterPlaceholder` conserve la mention «
-Visuel non publié ». Sa composition varie de façon déterministe selon la discipline et
-le titre, avec le symbole Todam fourni par l’application. Elle ne doit jamais imiter une
-affiche officielle.
+Les panneaux utilisent :
 
-## Bouton standard Todam
+- `radius.panel` (18 px) pour les cartes et panneaux ;
+- `radius.medium` (10 px) pour les contrôles ;
+- `radius.media` (16 px) pour les affiches ;
+- `shadow.light` ou `shadow.lift` pour des ombres larges et diffuses ;
+- `surface.glass` pour les éléments Web sticky ou fixes avec flou.
 
-Le bouton **01 — filet brique** est la direction officielle des CTA ordinaires sur le
-Web. Sa source de vérité exécutable est `tokens.button.standard` dans `src/tokens.ts`.
+Les pages légales et les interfaces de gestion emploient les mêmes tokens avec moins de
+décoration et une largeur de lecture limitée.
 
-### Style à conserver
+## Affiches
 
-- fond porcelaine `#FFFDF8` ;
-- bordure continue de 1 px, tomate `#C43D28` ;
-- texte encre `#171412` ;
-- rayon de 4 px ;
-- libellé Work Sans 500 ;
-- hauteur interactive minimale de 44 px ;
-- dimensionnement `border-box` ;
-- aucune ombre, aucun dégradé et aucune couleur de remplissage décorative.
+Toute affiche utilise le ratio A5 exact `148 / 210`.
 
-Les variantes Web `primary` et `secondary` ont volontairement la même apparence. Deux
-CTA ordinaires placés côte à côte ne doivent pas être différenciés par des couleurs
-arbitraires : leur ordre, leur libellé et leur contexte portent la hiérarchie.
+Une affiche publiable est affichée en entier avec `contain`, sur une surface neutre. Le
+cadre ne reçoit ni texte, ni badge, ni bouton, ni gradient, ni recadrage destructeur.
 
-Les CTA construits sans le composant `Button` doivent réutiliser
-`tokens.button.standard`, sans recopier les couleurs en dur. La composition de référence
-reste `design/mockups/companies-selected-buttons/01-page-filet-brique-exact.png`, mais
-les tokens exécutables priment toujours sur les couleurs d’une capture.
+`PosterPlaceholder` représente uniquement l’absence d’un visuel publiable. Il produit
+une composition déterministe de projecteurs, brume, voiles et petites lumières selon la
+discipline et le titre. Le titre sert uniquement de graine et de libellé accessible :
+aucun titre, logo ou faux marquage d’affiche n’est visible dans le placeholder.
 
-### Exceptions fonctionnelles
+## Contrat des boutons
 
-- `featured` est réservé au CTA unique qui porte l’action principale d’un hero ou d’un
-  premier écran. Il utilise un fond encre `#151515`, un texte porcelaine, un rayon de 4
-  px et devient vermillon au survol Web ;
-- `danger` reste un bouton rouge rempli avec texte blanc ;
-- `quiet` est réservé aux actions de service secondaires : annuler, modifier, recharger,
-  exporter, afficher davantage ou ajouter un champ dans un formulaire ;
-- `dangerGhost` prépare une suppression sans donner au premier clic le poids visuel de
-  la confirmation finale ;
-- un état sélectionné ou réussi peut conserver le vert prévu par le design system ;
-- un bouton désactivé reste gris ;
-- `ghost` reste une action textuelle discrète pour partager, signaler ou ouvrir une
-  ressource connexe ;
-- onglets, filtres, notes, choix radio, navigation, cartes et boutons icône ne sont pas
-  des CTA standards et ne doivent pas recevoir ce style ;
-- iOS et Android conservent leurs variantes actuelles sauf décision produit explicite.
+Le contrat « 01 — filet brique » est remplacé par le système suivant.
 
-Le survol remplit le bouton en tomate `#C43D28` et passe son texte en porcelaine
-`#FFFDF8`, sans modifier son opacité. L’appui le décale de 1 px et le focus clavier
-conserve un contour rouge visible de 3 px.
+### CTA principal
 
-Toute évolution de cette direction nécessite une décision produit explicite et la mise à
-jour coordonnée des tokens, des tests de contraste, du test Playwright de la page
-`/pour-les-compagnies` et des captures de présentation.
+`primary` et `featured` portent l’action principale :
+
+- fond encre `#151515` ;
+- texte porcelaine `#FFFDF8` ;
+- bordure encre de 1 px ;
+- rayon de 10 px ;
+- Work Sans 600 ;
+- légère lueur lilas au survol Web.
+
+`featured` reste réservé au CTA principal d’un hero ou d’un premier écran.
+
+### CTA secondaire
+
+`secondary` et `quiet` portent les actions secondaires ou utilitaires :
+
+- fond porcelaine ;
+- bordure encre de 1 px ;
+- texte encre ;
+- rayon de 10 px ;
+- surface lilas très pâle au survol Web.
+
+### Actions discrètes et danger
+
+- `ghost` est une action textuelle secondaire ;
+- `dangerGhost` prépare une suppression ;
+- `danger` confirme une action destructive avec le rouge fonctionnel ;
+- un bouton désactivé utilise les tokens gris, sans effet de survol.
+
+Les boutons construits hors du composant `Button` réutilisent les mêmes tokens. Le
+bouton « Se connecter » du header ajoute seulement la silhouette accessible d’un billet
+contemporain : petites encoches latérales, fond porcelaine, bordure fine et halo lilas.
+
+## Sélections, champs et navigation
+
+Les champs utilisent une surface porcelaine, une bordure fine et un focus lilas visible.
+Les onglets, filtres, radios et chips sélectionnés utilisent la surface lilas pâle et la
+bordure `selectedBorder`. La sélection ne dépend jamais uniquement de la couleur.
+
+La navigation active conserve `aria-current` et ajoute un indicateur de position. Les
+modales utilisent un voile sombre translucide, un panneau porcelaine et un focus
+clavier contenu par leurs contrôles existants.
+
+## Notation
+
+Une note sur dix est représentée par dix petites lumières. `RatingLights` fournit
+l’affichage éditorial et son libellé accessible. `RatingPicker` conserve dix choix
+radio accessibles, les flèches clavier et une cible minimale de 44 px par valeur.
 
 ## Hiérarchie des actions
 
-Choisir la variante selon l’effet produit, pas selon la couleur souhaitée :
+| Intention | Variante ou composant |
+| --- | --- |
+| Action principale d’un écran | `primary` ou `featured` |
+| Action secondaire ou annulation | `secondary` ou `quiet` |
+| Action contextuelle discrète | `ghost` |
+| Préparer une suppression | `dangerGhost` |
+| Confirmer une suppression | `danger` |
+| Choisir une option | chip, onglet ou radio avec état sélectionné |
+| Ouvrir un contenu | lien ou carte interactive |
 
-| Intention                                   | Variante ou composant                  | Exemple de libellé        |
-| ------------------------------------------- | -------------------------------------- | ------------------------- |
-| Action principale d’un hero                 | `featured`                             | « Créer mon journal »     |
-| Continuer un parcours ou créer un objet     | `primary` ou `secondary`               | « Enregistrer »           |
-| Action utilitaire réversible                | `quiet`                                | « Modifier mon profil »   |
-| Action connexe ou navigation contextuelle   | `ghost`                                | « Partager ce journal »   |
-| Préparer une suppression                    | `dangerGhost`                          | « Supprimer l’avis »      |
-| Confirmer une suppression ou un masquage    | `danger`                               | « Oui, supprimer l’avis » |
-| Choisir une option                          | composant de sélection avec `selected` | « Théâtre » coché         |
-| Ouvrir un contenu                           | carte ou lien avec survol dédié        | fiche d’un spectacle      |
-| Action uniquement représentée par une icône | bouton icône nommé                     | fermer ou faire défiler   |
-
-Les libellés décrivent l’action et son objet. Éviter « Modifier », « Supprimer », «
-Retour » ou « Continuer » lorsqu’un libellé plus précis tient dans le même espace. Un
-choix actif utilise `color.selectedSurface`, une bordure accentuée et
-`accessibilityState.selected` ; il ne dépend jamais de la différence entre `primary` et
-`secondary`.
-
-Toutes les variantes conservent une cible de 44 px, un focus clavier visible et un
-retour d’appui. Sur Web, le survol d’un bouton `quiet` renforce seulement sa bordure ;
-une carte cliquable relève sa bordure et se déplace de 1 px ; un bouton icône reçoit la
-surface de sélection. Les états désactivés ne changent pas au survol.
+Toutes les variantes conservent une cible de 44 px, un focus clavier visible, un retour
+d’appui et un libellé accessible.

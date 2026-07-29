@@ -3,9 +3,9 @@ import {
   type PressableProps,
   Platform,
   Pressable,
-  ScrollView,
   Text,
   View,
+  useWindowDimensions,
 } from "react-native";
 
 export interface RatingPickerProps {
@@ -21,6 +21,9 @@ type KeyboardEventLike = {
 };
 
 export function RatingPicker({ disabled = false, onChange, value }: RatingPickerProps) {
+  const { width } = useWindowDimensions();
+  const compact = width < 520;
+
   function keyboardProps(rating: number, selected: boolean): PressableProps {
     if (Platform.OS !== "web") return {};
     return {
@@ -51,60 +54,75 @@ export function RatingPicker({ disabled = false, onChange, value }: RatingPicker
   }
 
   return (
-    <View className="w-full gap-2">
-      <ScrollView
-        contentContainerStyle={{ flexGrow: 1 }}
-        horizontal
-        showsHorizontalScrollIndicator={false}
+    <View className="w-full gap-3">
+      <Text
+        accessibilityLiveRegion="polite"
+        className="font-serif text-3xl font-semibold text-ink"
       >
-        <View
-          accessibilityLabel={value ? `Note actuelle : ${value} sur 10` : "Aucune note"}
-          accessibilityRole="radiogroup"
-          className="flex-row overflow-hidden rounded-todam border border-control bg-paper"
-          style={{ minWidth: 440, width: "100%" }}
-        >
-          {Array.from({ length: 10 }, (_, index) => index + 1).map((rating) => {
-            const selected = value === rating;
-            return (
-              <Pressable
-                {...keyboardProps(rating, selected)}
-                accessibilityLabel={`Noter ${rating} sur 10`}
-                accessibilityRole="radio"
-                accessibilityState={{ checked: selected, disabled, selected }}
-                disabled={disabled}
-                key={rating}
-                onPress={() => onChange(rating)}
-                testID={`rating-option-${rating}`}
+        {value ?? "—"}
+        <Text className="font-sans text-base font-medium text-muted">/10</Text>
+      </Text>
+      <View
+        accessibilityLabel={value ? `Note actuelle : ${value} sur 10` : "Aucune note"}
+        accessibilityRole="radiogroup"
+        className="flex-row flex-wrap overflow-hidden rounded-panel border border-line bg-paper p-1"
+      >
+        {Array.from({ length: 10 }, (_, index) => index + 1).map((rating) => {
+          const selected = value === rating;
+          const illuminated = value !== null && rating <= value;
+          return (
+            <Pressable
+              {...keyboardProps(rating, selected)}
+              accessibilityLabel={`Noter ${rating} sur 10`}
+              accessibilityRole="radio"
+              accessibilityState={{ checked: selected, disabled, selected }}
+              disabled={disabled}
+              key={rating}
+              onPress={() => onChange(rating)}
+              testID={`rating-option-${rating}`}
+              style={{
+                alignItems: "center",
+                backgroundColor: selected
+                  ? tokens.color.selectedSurface
+                  : disabled
+                    ? tokens.color.disabled
+                    : tokens.color.surface,
+                borderColor: selected
+                  ? tokens.color.selectedBorder
+                  : "transparent",
+                borderRadius: tokens.radius.medium,
+                borderWidth: 1,
+                gap: 2,
+                justifyContent: "center",
+                minHeight: 48,
+                width: compact ? "20%" : "10%",
+              }}
+            >
+              <View
                 style={{
-                  alignItems: "center",
-                  backgroundColor: selected
+                  backgroundColor: illuminated
                     ? tokens.color.accent
-                    : disabled
-                      ? tokens.color.disabled
-                      : tokens.color.surface,
-                  borderLeftColor:
-                    rating === 1 ? "transparent" : tokens.color.controlBorder,
-                  borderLeftWidth: rating === 1 ? 0 : 1,
-                  flex: 1,
-                  justifyContent: "center",
-                  minHeight: 44,
-                  minWidth: 44,
+                    : tokens.color.surface,
+                  borderColor: tokens.color.selectedBorder,
+                  borderRadius: tokens.radius.round,
+                  borderWidth: 1,
+                  height: 10,
+                  width: 10,
+                }}
+              />
+              <Text
+                style={{
+                  color: selected ? tokens.color.accent : tokens.color.muted,
+                  fontSize: 10,
+                  fontWeight: selected ? "700" : "500",
                 }}
               >
-                <Text
-                  style={{
-                    color: selected ? tokens.color.surface : tokens.color.ink,
-                    fontSize: 13,
-                    fontWeight: "700",
-                  }}
-                >
-                  {rating}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </View>
-      </ScrollView>
+                {rating}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
       <View className="flex-row justify-between">
         <Text className="text-xs text-muted">Pas pour moi</Text>
         <Text className="text-xs text-muted">Inoubliable</Text>

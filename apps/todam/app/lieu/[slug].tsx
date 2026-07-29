@@ -356,7 +356,7 @@ export default function VenuePage() {
                   />
 
                   {groups.length === 0 ? (
-                    <View className="border-l-2 border-accent py-2 pl-4">
+                    <View className="todam-editorial-empty justify-center p-5">
                       <Text className="text-base leading-6 text-muted">
                         Aucun spectacle ne correspond à ces filtres.
                       </Text>

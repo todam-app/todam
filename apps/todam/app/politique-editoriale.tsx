@@ -64,7 +64,7 @@ export default function EditorialPolicyPage() {
               </View>
             ))}
           </View>
-          <Text className="border-l-2 border-accent pl-4 text-base leading-7 text-muted">
+          <Text className="rounded-todam border border-selected-border bg-selected p-4 text-base leading-7 text-muted">
             Une erreur ou un problème de droits peut être transmis depuis le bouton «
             Signaler ou corriger » de chaque fiche.
           </Text>

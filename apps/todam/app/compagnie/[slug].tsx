@@ -238,9 +238,11 @@ export default function CompanyPage() {
                       <ProductionListItem key={production.id} production={production} />
                     ))
                   ) : (
-                    <Text className="border-l-2 border-accent pl-4 text-base leading-6 text-muted">
-                      Aucune production actuelle n’est encore référencée.
-                    </Text>
+                    <View className="todam-editorial-empty justify-center p-5">
+                      <Text className="text-base leading-6 text-muted">
+                        Aucune production actuelle n’est encore référencée.
+                      </Text>
+                    </View>
                   )}
                 </View>
 

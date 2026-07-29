@@ -1,6 +1,6 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button, TextField } from "@todam/design-system";
+import { Button, TextField, tokens } from "@todam/design-system";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Platform, Share, Text, View } from "react-native";
@@ -167,7 +167,7 @@ export function MyListDetailScreen({ listId }: { listId: string }) {
                   {detail.data.itemCount > 1 ? "s" : ""}
                 </Text>
               </View>
-              <View className="gap-4 rounded-todam border border-line bg-paper p-5">
+              <View className="todam-form-panel gap-4 p-5">
                 <Text
                   aria-level={2}
                   accessibilityRole="header"
@@ -240,7 +240,7 @@ export function MyListDetailScreen({ listId }: { listId: string }) {
                   Spectacles
                 </Text>
                 {detail.data.items.length === 0 ? (
-                  <Text className="rounded-todam border border-line bg-paper p-5 text-base text-muted">
+                  <Text className="todam-editorial-empty p-5 text-base text-muted">
                     Cette liste est vide. Ajoutez-y un spectacle depuis sa fiche.
                   </Text>
                 ) : (
@@ -277,7 +277,11 @@ export function MyListDetailScreen({ listId }: { listId: string }) {
               </View>
               <View className="gap-3 border-t border-danger/30 pt-6">
                 <View className="flex-row items-center gap-2">
-                  <Ionicons color="#B42318" name="warning-outline" size={22} />
+                  <Ionicons
+                    color={tokens.color.error}
+                    name="warning-outline"
+                    size={22}
+                  />
                   <Text className="text-base font-bold text-danger">
                     Supprimer cette liste
                   </Text>

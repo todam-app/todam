@@ -1,3 +1,4 @@
+import { tokens } from "@todam/design-system";
 import { Stack } from "expo-router";
 import { Platform } from "react-native";
 
@@ -7,8 +8,8 @@ export default function JournalLayout() {
       screenOptions={{
         headerShown: Platform.OS !== "web",
         headerShadowVisible: false,
-        headerStyle: { backgroundColor: "#FFFDF8" },
-        headerTintColor: "#151515",
+        headerStyle: { backgroundColor: tokens.color.surface },
+        headerTintColor: tokens.color.ink,
       }}
     >
       <Stack.Screen name="index" options={{ headerShown: false }} />

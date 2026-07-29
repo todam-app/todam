@@ -42,10 +42,10 @@ export function Button({
   ...props
 }: ButtonProps) {
   const [focused, setFocused] = useState(false);
-  const standardWebButton =
-    Platform.OS === "web" && (variant === "primary" || variant === "secondary");
+  const standardWebButton = Platform.OS === "web" && variant === "primary";
   const featuredButton = variant === "featured";
-  const quietWebButton = Platform.OS === "web" && variant === "quiet";
+  const quietWebButton =
+    Platform.OS === "web" && (variant === "secondary" || variant === "quiet");
   const textAction = variant === "ghost" || variant === "dangerGhost";
   const webInteraction =
     Platform.OS !== "web"
@@ -290,20 +290,12 @@ export interface PosterPlaceholderProps {
   title: string;
   discipline: "theatre" | "opera" | "ballet";
   compact?: boolean;
-  brandSymbol?: ReactNode;
 }
-
-const disciplineLabels = {
-  theatre: "Théâtre",
-  opera: "Opéra",
-  ballet: "Ballet",
-} as const;
 
 export function PosterPlaceholder({
   title,
   discipline,
   compact = false,
-  brandSymbol,
 }: PosterPlaceholderProps) {
   const titleSeed = Array.from(title).reduce(
     (total, character) => (total + character.codePointAt(0)!) % 17,
@@ -319,55 +311,52 @@ export function PosterPlaceholder({
   return (
     <View
       accessibilityLabel={`Affiche indisponible pour ${title}`}
+      accessibilityRole="image"
       style={[styles.poster, compositionStyle, compact && styles.posterCompact]}
     >
       <View
         style={[
-          styles.posterOrb,
+          styles.posterGlow,
           discipline === "theatre"
-            ? styles.posterOrbTheatre
+            ? styles.posterGlowTheatre
             : discipline === "opera"
-              ? styles.posterOrbOpera
-              : styles.posterOrbBallet,
-          { transform: [{ translateX: titleSeed - 8 }] },
+              ? styles.posterGlowOpera
+              : styles.posterGlowBallet,
+          {
+            transform: [
+              { translateX: titleSeed - 8 },
+              { translateY: titleSeed - 6 },
+            ],
+          },
         ]}
       />
       <View
         style={[
-          styles.posterRibbon,
+          styles.posterMist,
           discipline === "theatre"
-            ? styles.posterRibbonTheatre
+            ? styles.posterMistTheatre
             : discipline === "opera"
-              ? styles.posterRibbonOpera
-              : styles.posterRibbonBallet,
-          { transform: [{ rotate: `${titleSeed - 12}deg` }] },
+              ? styles.posterMistOpera
+              : styles.posterMistBallet,
+          { transform: [{ rotate: `${titleSeed - 7}deg` }] },
         ]}
       />
-      <View style={styles.posterTopline}>
-        <View style={[styles.posterMark, compact && styles.posterMarkCompact]}>
-          {brandSymbol ?? (
-            <Text
-              style={[
-                styles.posterMarkFallback,
-                compact && styles.posterMarkTextCompact,
-              ]}
-            >
-              T
-            </Text>
-          )}
-        </View>
-        {!compact ? (
-          <Text style={styles.posterDiscipline}>{disciplineLabels[discipline]}</Text>
-        ) : null}
-      </View>
-      <View style={styles.posterCaption}>
-        <Text
-          numberOfLines={compact ? 3 : 2}
-          style={[styles.posterTitle, compact && styles.posterTitleCompact]}
-        >
-          Visuel non publié
-        </Text>
-        {!compact ? <View style={styles.posterRule} /> : null}
+      <View style={[styles.posterBeam, styles.posterBeamLeft]} />
+      <View style={[styles.posterBeam, styles.posterBeamRight]} />
+      <View style={styles.posterStage}>
+        {Array.from({ length: compact ? 5 : 8 }, (_, index) => (
+          <View
+            key={index}
+            style={[
+              styles.posterStageLight,
+              index % 3 === 0
+                ? styles.posterStageLightCoral
+                : index % 3 === 1
+                  ? styles.posterStageLightLilac
+                  : styles.posterStageLightAqua,
+            ]}
+          />
+        ))}
       </View>
     </View>
   );
@@ -416,6 +405,56 @@ export function SectionTitle({
       <Text aria-level={level} accessibilityRole="header" style={styles.heading}>
         {children}
       </Text>
+    </View>
+  );
+}
+
+export function RatingLights({
+  label,
+  showValue = false,
+  value,
+}: {
+  label?: string;
+  showValue?: boolean;
+  value: number | null;
+}) {
+  const normalized = value === null ? 0 : Math.max(0, Math.min(10, value));
+  const fullLights = Math.floor(normalized);
+  const hasPartialLight = normalized - fullLights >= 0.25;
+  const accessibleLabel =
+    label ?? (value === null ? "Aucune note" : `Note : ${value} sur 10`);
+
+  return (
+    <View
+      accessible
+      accessibilityLabel={accessibleLabel}
+      style={styles.ratingLightsGroup}
+    >
+      {showValue ? (
+        <Text style={styles.ratingLightsValue}>
+          {value === null
+            ? "—"
+            : value.toLocaleString("fr-FR", { maximumFractionDigits: 1 })}
+          <Text style={styles.ratingLightsScale}>/10</Text>
+        </Text>
+      ) : null}
+      <View style={styles.ratingLightsRow}>
+        {Array.from({ length: 10 }, (_, index) => {
+          const light = index + 1;
+          const filled = light <= fullLights;
+          const partial = !filled && hasPartialLight && light === fullLights + 1;
+          return (
+            <View
+              key={light}
+              style={[
+                styles.ratingLight,
+                filled && styles.ratingLightFilled,
+                partial && styles.ratingLightPartial,
+              ]}
+            />
+          );
+        })}
+      </View>
     </View>
   );
 }
@@ -481,7 +520,7 @@ const styles = StyleSheet.create({
     transform: [{ translateY: 1 }],
   },
   buttonFocused: {
-    outlineColor: tokens.color.accent,
+    outlineColor: tokens.color.focus,
     outlineOffset: 2,
     outlineStyle: "solid",
     outlineWidth: 3,
@@ -498,7 +537,7 @@ const styles = StyleSheet.create({
   },
   buttonSecondary: {
     backgroundColor: tokens.color.surface,
-    borderColor: tokens.color.controlBorder,
+    borderColor: tokens.color.ink,
     borderWidth: 1,
   },
   buttonStandardWeb: {
@@ -560,8 +599,8 @@ const styles = StyleSheet.create({
     position: "relative",
   },
   inputFocused: {
-    borderColor: tokens.color.accent,
-    outlineColor: "rgba(196, 61, 40, 0.14)",
+    borderColor: tokens.color.focus,
+    outlineColor: "rgba(120, 100, 200, 0.18)",
     outlineOffset: 0,
     outlineStyle: "solid",
     outlineWidth: 3,
@@ -591,121 +630,144 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   poster: {
-    alignItems: "flex-start",
-    aspectRatio: 2 / 3,
+    alignItems: "center",
+    aspectRatio: 148 / 210,
     borderRadius: tokens.radius.media,
-    justifyContent: "space-between",
+    justifyContent: "flex-end",
     minWidth: 150,
     overflow: "hidden",
-    padding: tokens.space.md,
     position: "relative",
     width: "100%",
   },
   posterTheatre: {
-    backgroundColor: tokens.color.coral,
+    backgroundColor: tokens.color.placeholderTheatre,
   },
   posterOpera: {
-    backgroundColor: tokens.color.lilac,
+    backgroundColor: tokens.color.placeholderOpera,
   },
   posterBallet: {
-    backgroundColor: tokens.color.aqua,
+    backgroundColor: tokens.color.placeholderBallet,
   },
   posterCompact: {
-    minWidth: 64,
-    padding: tokens.space.sm,
-    width: 64,
+    minWidth: 68,
+    width: 68,
   },
-  posterCaption: {
-    gap: tokens.space.sm,
-    width: "100%",
-    zIndex: 2,
-  },
-  posterDiscipline: {
-    color: tokens.color.ink,
-    fontSize: 10,
-    fontWeight: "800",
-    letterSpacing: 1,
-    textTransform: "uppercase",
-  },
-  posterMark: {
-    height: 38,
-    width: 38,
-    zIndex: 2,
-  },
-  posterMarkCompact: {
-    height: 24,
-    width: 24,
-  },
-  posterMarkFallback: {
-    color: tokens.color.ink,
-    fontFamily: Platform.select({ web: "Playfair Display", default: "serif" }),
-    fontSize: 30,
-    fontWeight: "900",
-  },
-  posterMarkTextCompact: {
-    fontSize: 20,
-  },
-  posterTopline: {
-    alignItems: "center",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    width: "100%",
-    zIndex: 2,
-  },
-  posterOrb: {
+  posterGlow: {
     borderRadius: tokens.radius.round,
-    height: "48%",
-    opacity: 0.72,
+    height: "56%",
+    opacity: 0.82,
     position: "absolute",
-    right: "-16%",
-    top: "18%",
-    width: "72%",
+    right: "-18%",
+    top: "20%",
+    width: "84%",
   },
-  posterOrbTheatre: {
+  posterGlowTheatre: {
     backgroundColor: tokens.color.lilac,
   },
-  posterOrbOpera: {
+  posterGlowOpera: {
     backgroundColor: tokens.color.aqua,
   },
-  posterOrbBallet: {
+  posterGlowBallet: {
     backgroundColor: tokens.color.coral,
   },
-  posterRibbon: {
-    borderColor: tokens.color.ink,
+  posterMist: {
+    backgroundColor: "rgba(255, 253, 248, 0.58)",
     borderRadius: tokens.radius.round,
-    borderWidth: 2,
-    height: "64%",
-    left: "-36%",
-    opacity: 0.76,
+    height: "54%",
+    left: "-30%",
+    opacity: 0.84,
     position: "absolute",
-    top: "4%",
-    width: "112%",
+    top: "34%",
+    width: "122%",
   },
-  posterRibbonTheatre: {
-    borderBottomColor: "transparent",
+  posterMistTheatre: {
+    borderColor: "rgba(243, 169, 149, 0.44)",
+    borderWidth: 1,
   },
-  posterRibbonOpera: {
-    borderLeftColor: "transparent",
+  posterMistOpera: {
+    borderColor: "rgba(200, 184, 240, 0.46)",
+    borderWidth: 1,
   },
-  posterRibbonBallet: {
-    borderRightColor: "transparent",
+  posterMistBallet: {
+    borderColor: "rgba(159, 216, 208, 0.54)",
+    borderWidth: 1,
   },
-  posterRule: {
-    backgroundColor: tokens.color.ink,
-    height: 2,
-    width: 36,
+  posterBeam: {
+    backgroundColor: "rgba(255, 253, 248, 0.68)",
+    height: "96%",
+    position: "absolute",
+    top: "-28%",
+    width: "24%",
   },
-  posterTitle: {
+  posterBeamLeft: {
+    left: "18%",
+    transform: [{ rotate: "-19deg" }],
+  },
+  posterBeamRight: {
+    right: "18%",
+    transform: [{ rotate: "19deg" }],
+  },
+  posterStage: {
+    alignItems: "center",
+    bottom: "7%",
+    flexDirection: "row",
+    gap: 5,
+    justifyContent: "center",
+    position: "absolute",
+    width: "100%",
+  },
+  posterStageLight: {
+    borderRadius: tokens.radius.round,
+    height: 5,
+    opacity: 0.9,
+    width: 5,
+  },
+  posterStageLightAqua: {
+    backgroundColor: tokens.color.aqua,
+  },
+  posterStageLightCoral: {
+    backgroundColor: tokens.color.coral,
+  },
+  posterStageLightLilac: {
+    backgroundColor: tokens.color.lilac,
+  },
+  ratingLightsGroup: {
+    alignItems: "flex-start",
+    gap: tokens.space.sm,
+  },
+  ratingLightsRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 7,
+  },
+  ratingLight: {
+    backgroundColor: tokens.color.surface,
+    borderColor: tokens.color.selectedBorder,
+    borderRadius: tokens.radius.round,
+    borderWidth: 1,
+    height: 9,
+    width: 9,
+  },
+  ratingLightFilled: {
+    backgroundColor: tokens.color.accent,
+    borderColor: tokens.color.accent,
+    boxShadow: "0 0 10px rgba(102, 81, 184, 0.34)",
+  },
+  ratingLightPartial: {
+    backgroundColor: tokens.color.lilac,
+    borderColor: tokens.color.accent,
+  },
+  ratingLightsScale: {
+    color: tokens.color.muted,
+    fontFamily: Platform.select({ web: "Work Sans", default: "sans-serif" }),
+    fontSize: 16,
+    fontWeight: "500",
+  },
+  ratingLightsValue: {
     color: tokens.color.ink,
-    fontFamily: Platform.select({ web: "Work Sans", default: "Inter" }),
-    fontSize: 15,
-    fontWeight: "700",
-    lineHeight: 20,
-    maxWidth: "92%",
-  },
-  posterTitleCompact: {
-    fontSize: 11,
-    lineHeight: 14,
+    fontFamily: Platform.select({ web: "Playfair Display", default: "serif" }),
+    fontSize: 36,
+    fontWeight: "600",
   },
   sectionTitle: {
     gap: tokens.space.xs,

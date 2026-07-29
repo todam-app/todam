@@ -61,7 +61,7 @@ function HeaderSearch({
       onChangeText={setSearchInput}
       onClear={() => setSearchInput("")}
       onSubmit={submitSearch}
-      placeholder="Rechercher"
+      placeholder="Rechercher un spectacle, une compagnie…"
       value={searchInput}
       webName="global-search"
     />
@@ -207,15 +207,19 @@ export function WebNavigation() {
                   accessibilityRole="link"
                   className={`ml-1 h-11 min-w-11 items-center justify-center border px-3 ${
                     session.data
-                      ? "todam-icon-button rounded-full border-control"
-                      : "todam-cta-standard"
+                      ? "todam-icon-button rounded-full border-control bg-paper"
+                      : "todam-login-ticket"
                   }`}
-                  style={session.data ? undefined : styles.standardButton}
+                  style={session.data ? undefined : styles.loginTicket}
                 >
                   {session.data ? (
-                    <Ionicons color="#151515" name="person-outline" size={20} />
+                    <Ionicons
+                      color={tokens.color.ink}
+                      name="person-outline"
+                      size={20}
+                    />
                   ) : (
-                    <Text style={styles.standardButtonLabel}>Se connecter</Text>
+                    <Text style={styles.loginTicketLabel}>Se connecter</Text>
                   )}
                 </Pressable>
               </Link>
@@ -240,7 +244,7 @@ export function WebNavigation() {
             <Pressable
               accessibilityLabel="Retour"
               accessibilityRole="button"
-              className="todam-icon-button h-11 w-11 items-center justify-center rounded-todam border border-control bg-paper"
+              className="todam-icon-button h-11 w-11 items-center justify-center rounded-full border border-line bg-paper"
               onPress={() => {
                 if (router.canGoBack()) {
                   router.back();
@@ -249,7 +253,7 @@ export function WebNavigation() {
                 }
               }}
             >
-              <Ionicons color="#151515" name="arrow-back" size={24} />
+              <Ionicons color={tokens.color.ink} name="arrow-back" size={24} />
             </Pressable>
             <Text
               className="min-w-0 flex-1 text-lg font-semibold text-ink"
@@ -264,7 +268,7 @@ export function WebNavigation() {
       {mobile ? (
         <View
           accessibilityLabel="Navigation mobile"
-          className="fixed bottom-0 left-0 right-0 z-[110] flex-row border-t border-line bg-paper"
+          className="todam-mobile-nav fixed bottom-0 left-0 right-0 z-[110] flex-row border-t border-line bg-paper"
           role="navigation"
           style={styles.bottomNavigation}
           testID="web-mobile-navigation"
@@ -278,11 +282,17 @@ export function WebNavigation() {
                   accessibilityLabel={item.label}
                   accessibilityRole="link"
                   aria-current={active ? "page" : undefined}
-                  className="min-h-16 flex-1 items-center justify-center gap-1 px-0.5"
+                  className="relative min-h-16 flex-1 items-center justify-center gap-1 px-0.5"
                 >
+                  {active ? (
+                    <View
+                      accessibilityElementsHidden
+                      className="absolute top-0 h-0.5 w-8 rounded-full bg-accent"
+                    />
+                  ) : null}
                   <Ionicons
                     accessibilityElementsHidden
-                    color={active ? "#C43D28" : "#6F6B64"}
+                    color={active ? tokens.color.accent : tokens.color.muted}
                     importantForAccessibility="no"
                     name={item.icon}
                     size={21}
@@ -309,14 +319,14 @@ export function WebNavigation() {
 
 const styles = StyleSheet.create({
   activeNavigation: {
-    borderBottomColor: "#C43D28",
+    borderBottomColor: tokens.color.accent,
     borderBottomWidth: 3,
   },
   bottomNavigation: {
     minHeight: 66,
   },
   header: {
-    borderBottomColor: "rgba(216, 209, 198, 0.9)",
+    borderBottomColor: "rgba(226, 217, 205, 0.9)",
     borderBottomWidth: 1,
   },
   headerInner: {
@@ -324,27 +334,28 @@ const styles = StyleSheet.create({
     minHeight: 62,
   },
   headerInnerDesktop: {
-    minHeight: 70,
+    minHeight: 78,
   },
   logo: {
-    height: 40,
-    width: 132,
+    height: 42,
+    width: 140,
   },
   search: {
     flex: 1,
     minWidth: 180,
   },
-  standardButton: {
-    backgroundColor: tokens.button.standard.background,
-    borderColor: tokens.button.standard.border,
-    borderRadius: tokens.button.standard.radius,
-    borderWidth: tokens.button.standard.borderWidth,
+  loginTicket: {
+    backgroundColor: tokens.button.quiet.background,
+    borderColor: tokens.color.border,
+    borderRadius: tokens.button.quiet.radius,
+    borderWidth: tokens.button.quiet.borderWidth,
     boxSizing: "border-box",
+    minWidth: 120,
   },
-  standardButtonLabel: {
-    color: tokens.button.standard.text,
-    fontFamily: tokens.button.standard.fontFamily,
+  loginTicketLabel: {
+    color: tokens.button.quiet.text,
+    fontFamily: tokens.button.quiet.fontFamily,
     fontSize: 16,
-    fontWeight: tokens.button.standard.fontWeight,
+    fontWeight: tokens.button.quiet.fontWeight,
   },
 });

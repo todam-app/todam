@@ -1,3 +1,4 @@
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { useQuery } from "@tanstack/react-query";
 import {
   PublicMemberSchema,
@@ -5,7 +6,12 @@ import {
   type PublicMember,
   type SearchResponse,
 } from "@todam/contracts";
-import { Button, SectionTitle } from "@todam/design-system";
+import {
+  Button,
+  RatingLights,
+  SectionTitle,
+  tokens,
+} from "@todam/design-system";
 import { Link, useLoaderData } from "expo-router";
 import Head from "expo-router/head";
 import { createStaticLoader } from "expo-router/server";
@@ -147,6 +153,7 @@ function MarketingHome({
       : {}),
   });
   const journalPreview = showcase.data?.recentJournal.slice(0, 3) ?? [];
+  const featuredJournalEntry = journalPreview[0] ?? null;
   const jsonLd = {
     "@context": "https://schema.org",
     "@graph": [
@@ -185,7 +192,7 @@ function MarketingHome({
       </Head>
       <Page>
         <View className="todam-page-before-footer mx-auto w-full max-w-content flex-1 gap-16 px-5 py-10 md:px-8 md:py-16">
-          <View className="todam-public-hero gap-8 p-6 md:p-9 lg:p-11">
+          <View className="todam-public-hero gap-10 py-6 md:py-10 lg:py-14">
             <View className="max-w-3xl justify-center gap-6">
               <Text className="text-xs font-bold uppercase tracking-[2px] text-accent">
                 Votre mémoire du spectacle vivant
@@ -231,12 +238,9 @@ function MarketingHome({
                 />
               ))}
               {!catalog.isPending && (catalog.data?.productions.length ?? 0) === 0 ? (
-                <View className="min-h-72 justify-end rounded-media bg-lilac p-5">
-                  <Text className="text-xs font-bold uppercase tracking-widest text-ink">
-                    Prochainement
-                  </Text>
-                  <Text className="mt-2 font-serif text-2xl font-semibold text-ink">
-                    Les spectacles du pilote arrivent ici.
+                <View className="todam-editorial-empty min-h-72 justify-end p-5">
+                  <Text className="font-serif text-2xl font-semibold text-ink">
+                    Aucun spectacle mis en avant pour le moment.
                   </Text>
                 </View>
               ) : null}
@@ -245,7 +249,7 @@ function MarketingHome({
 
           <View className="gap-5">
             <LinkedSectionTitle href="/decouvrir">
-              À l’affiche dans Todam
+              À l’affiche
             </LinkedSectionTitle>
             <AsyncState
               empty={
@@ -275,9 +279,9 @@ function MarketingHome({
             </AsyncState>
           </View>
 
-          <View className="gap-5 rounded-panel border border-line bg-paper p-6 shadow-soft md:flex-row md:items-start md:p-8">
-            <View className="min-w-0 flex-1 gap-2">
-              <Text className="text-xs font-bold uppercase tracking-widest text-accent">
+          <View className="todam-calm-panel gap-6 p-6 md:flex-row md:items-stretch md:p-8">
+            <View className="min-w-0 flex-1 justify-center gap-3">
+              <Text className="text-xs font-bold uppercase tracking-widest text-coral-text">
                 {showcase.data ? "Un journal public" : "Votre journal"}
               </Text>
               {showcase.data ? (
@@ -301,48 +305,62 @@ function MarketingHome({
                 </Text>
               )}
             </View>
-            <View className="min-w-0 flex-[1.35] gap-2 border-t border-line pt-4 md:border-l md:border-t-0 md:pl-6 md:pt-0">
-              {journalPreview.length > 0
-                ? journalPreview.map((entry) => (
-                    <Link
-                      href={`/production/${entry.production.slug}`}
-                      key={entry.id}
-                      asChild
+            <View className="min-w-0 flex-[1.35] justify-center gap-2 border-t border-line pt-5 md:border-l md:border-t-0 md:pl-7 md:pt-0">
+              {featuredJournalEntry ? (
+                <>
+                  <Text className="text-[11px] font-bold uppercase tracking-widest text-accent">
+                    Vu récemment
+                  </Text>
+                  <Link
+                    href={`/production/${featuredJournalEntry.production.slug}`}
+                    asChild
+                  >
+                    <Pressable
+                      accessibilityRole="link"
+                      className="min-h-11 justify-center gap-1"
                     >
-                      <Pressable
-                        accessibilityRole="link"
-                        className="min-h-14 justify-center gap-1 border-b border-line py-2"
-                      >
-                        <Text className="font-serif text-lg font-semibold text-ink">
-                          {entry.production.title}
+                      <Text className="font-serif text-xl font-semibold text-ink">
+                        {featuredJournalEntry.production.title}
+                      </Text>
+                      {featuredJournalEntry.production.company ? (
+                        <Text className="text-sm text-ink">
+                          {featuredJournalEntry.production.company.name}
                         </Text>
+                      ) : featuredJournalEntry.production.primaryCredit ? (
                         <Text className="text-sm text-muted">
-                          {entry.attendedOn
-                            ? `Vu le ${new Intl.DateTimeFormat("fr-FR").format(
-                                new Date(`${entry.attendedOn}T12:00:00Z`),
-                              )}`
-                            : `Ajouté le ${new Intl.DateTimeFormat("fr-FR").format(
-                                new Date(entry.addedAt),
-                              )}`}
-                          {entry.rating ? ` · ${entry.rating}/10` : ""}
+                          {featuredJournalEntry.production.primaryCredit}
                         </Text>
-                      </Pressable>
-                    </Link>
-                  ))
-                : ["Dates vues", "Notes personnelles", "Listes partageables"].map(
+                      ) : null}
+                      {featuredJournalEntry.production.venueNames[0] ? (
+                        <Text className="text-sm text-muted">
+                          {featuredJournalEntry.production.venueNames[0]}
+                        </Text>
+                      ) : null}
+                    </Pressable>
+                  </Link>
+                </>
+              ) : (
+                ["Dates vues", "Notes personnelles", "Listes partageables"].map(
                     (feature) => (
                       <Text className="text-sm text-muted" key={feature}>
                         {feature}
                       </Text>
                     ),
-                  )}
+                  )
+              )}
             </View>
+            {featuredJournalEntry?.rating ? (
+              <View className="min-w-44 justify-center gap-3 border-t border-line pt-5 md:border-l md:border-t-0 md:pl-7 md:pt-0">
+                <Text className="text-[11px] font-bold uppercase tracking-widest text-accent">
+                  Ma note
+                </Text>
+                <RatingLights showValue value={featuredJournalEntry.rating} />
+              </View>
+            ) : null}
           </View>
 
           <View className="gap-7">
-            <SectionTitle eyebrow="Simple et personnel">
-              Un journal en trois gestes
-            </SectionTitle>
+            <SectionTitle>Un journal en trois gestes</SectionTitle>
             <View className="gap-0 border-y border-line md:flex-row">
               {[
                 {
@@ -371,9 +389,38 @@ function MarketingHome({
                       index > 0 ? "border-t border-line md:border-l md:border-t-0" : ""
                     }`}
                   >
-                    <Text className="w-full text-sm font-bold text-accent">
-                      {step.number}
-                    </Text>
+                    <View className="w-full flex-row items-center gap-3">
+                      <Text
+                        className={`font-serif text-3xl font-semibold ${
+                          index === 0
+                            ? "text-coral-text"
+                            : index === 1
+                              ? "text-accent"
+                              : "text-aqua-text"
+                        }`}
+                      >
+                        {step.number}
+                      </Text>
+                      <Ionicons
+                        accessibilityElementsHidden
+                        color={
+                          index === 0
+                            ? tokens.color.coralText
+                            : index === 1
+                              ? tokens.color.accent
+                              : tokens.color.aquaText
+                        }
+                        importantForAccessibility="no"
+                        name={
+                          index === 0
+                            ? "search-outline"
+                            : index === 1
+                              ? "pencil-outline"
+                              : "share-outline"
+                        }
+                        size={17}
+                      />
+                    </View>
                     <Text className="w-full font-serif text-2xl font-semibold text-ink">
                       {step.title}
                     </Text>
@@ -415,7 +462,7 @@ function MarketingHome({
               <Link href="/pour-les-salles" asChild>
                 <Pressable
                   accessibilityRole="link"
-                  className="todam-interactive-card min-h-48 flex-1 justify-center gap-3 border border-control bg-paper p-6"
+                  className="todam-interactive-card min-h-48 flex-1 justify-center gap-3 rounded-panel border border-line bg-paper p-6 shadow-soft"
                 >
                   <Text className="font-serif text-2xl font-semibold text-ink">
                     Vous programmez un lieu{"\u00A0"}?
@@ -431,7 +478,7 @@ function MarketingHome({
               <Link href="/pour-les-compagnies" asChild>
                 <Pressable
                   accessibilityRole="link"
-                  className="todam-interactive-card min-h-48 flex-1 justify-center gap-3 border border-control bg-paper p-6"
+                  className="todam-interactive-card min-h-48 flex-1 justify-center gap-3 rounded-panel border border-line bg-paper p-6 shadow-soft"
                 >
                   <Text className="font-serif text-2xl font-semibold text-ink">
                     Vous portez un spectacle{"\u00A0"}?
@@ -571,7 +618,7 @@ function ConnectedHome() {
                 <Link href="/journal" asChild>
                   <Pressable
                     accessibilityRole="link"
-                    className="todam-interactive-card min-h-24 min-w-56 flex-1 justify-center border border-control bg-paper px-5"
+                    className="todam-interactive-card min-h-24 min-w-56 flex-1 justify-center rounded-panel border border-line bg-paper px-5 shadow-soft"
                   >
                     <Text className="font-serif text-xl font-semibold text-ink">
                       Ouvrir mes spectacles
@@ -584,7 +631,7 @@ function ConnectedHome() {
                 <Link href="/journal/listes" asChild>
                   <Pressable
                     accessibilityRole="link"
-                    className="todam-interactive-card min-h-24 min-w-56 flex-1 justify-center border border-control bg-paper px-5"
+                    className="todam-interactive-card min-h-24 min-w-56 flex-1 justify-center rounded-panel border border-line bg-paper px-5 shadow-soft"
                   >
                     <Text className="font-serif text-xl font-semibold text-ink">
                       Gérer mes listes

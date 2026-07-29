@@ -9,6 +9,7 @@ import {
   Text,
   View,
   useWindowDimensions,
+  type PressableProps,
 } from "react-native";
 
 import { getProductionActionsPresentation } from "../lib/production-actions";
@@ -37,15 +38,25 @@ function ActionButton({
   selected = false,
   tone,
 }: ActionButtonProps) {
-  const standardWebButton =
-    Platform.OS === "web" && (tone === "primary" || tone === "secondary");
-  const foreground = standardWebButton
+  const primaryWebButton = Platform.OS === "web" && tone === "primary";
+  const secondaryWebButton = Platform.OS === "web" && tone === "secondary";
+  const foreground = primaryWebButton
     ? tokens.button.standard.text
-    : tone === "primary"
-      ? tokens.color.surface
-      : tone === "success"
-        ? tokens.color.success
-        : tokens.color.ink;
+    : secondaryWebButton
+      ? tokens.button.quiet.text
+      : tone === "primary"
+        ? tokens.color.surface
+        : tone === "success"
+          ? tokens.color.accent
+          : tokens.color.ink;
+  const webInteractionProps =
+    primaryWebButton || secondaryWebButton
+      ? ({
+          dataSet: {
+            todamCta: primaryWebButton ? "standard" : "quiet",
+          },
+        } as unknown as PressableProps)
+      : {};
 
   return (
     <Pressable
@@ -54,12 +65,13 @@ function ActionButton({
       accessibilityState={{ disabled: disabled || loading, selected }}
       disabled={disabled || loading}
       onPress={onPress}
-      {...(standardWebButton ? { className: "todam-cta-standard" } : {})}
+      {...webInteractionProps}
       style={({ pressed }) => [
         styles.action,
-        standardWebButton && styles.actionStandardWeb,
-        !standardWebButton && tone === "primary" && styles.actionPrimary,
-        !standardWebButton && tone === "secondary" && styles.actionSecondary,
+        primaryWebButton && styles.actionStandardWeb,
+        secondaryWebButton && styles.actionQuietWeb,
+        !primaryWebButton && tone === "primary" && styles.actionPrimary,
+        !secondaryWebButton && tone === "secondary" && styles.actionSecondary,
         tone === "success" && styles.actionSuccess,
         pressed && styles.actionPressed,
         (disabled || loading) && styles.actionDisabled,
@@ -80,7 +92,8 @@ function ActionButton({
             <Text
               style={[
                 styles.label,
-                standardWebButton && styles.labelStandardWeb,
+                (primaryWebButton || secondaryWebButton) &&
+                  styles.labelStandardWeb,
                 { color: foreground },
               ]}
             >
@@ -178,9 +191,16 @@ const styles = StyleSheet.create({
     borderWidth: tokens.button.standard.borderWidth,
     boxSizing: "border-box",
   },
+  actionQuietWeb: {
+    backgroundColor: tokens.button.quiet.background,
+    borderColor: tokens.button.quiet.border,
+    borderRadius: tokens.button.quiet.radius,
+    borderWidth: tokens.button.quiet.borderWidth,
+    boxSizing: "border-box",
+  },
   actionSuccess: {
-    backgroundColor: tokens.color.surface,
-    borderColor: tokens.color.success,
+    backgroundColor: tokens.color.selectedSurface,
+    borderColor: tokens.color.selectedBorder,
     borderWidth: 1,
   },
   actions: {

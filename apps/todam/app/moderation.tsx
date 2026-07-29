@@ -160,7 +160,7 @@ function CatalogCandidateCard({
           : null;
 
   return (
-    <View className="gap-5 border border-control bg-paper p-5 md:p-6">
+    <View className="todam-management-panel gap-5 p-5 md:p-6">
       <View className="flex-row flex-wrap items-start justify-between gap-3">
         <View className="min-w-0 flex-1 gap-1">
           <Text className="text-xs font-bold uppercase tracking-wide text-accent">
@@ -174,7 +174,7 @@ function CatalogCandidateCard({
             <Text className="text-sm text-muted">{candidate.secondaryLabel}</Text>
           ) : null}
         </View>
-        <Text className="text-base border border-accent px-3 py-2 font-semibold text-accent">
+        <Text className="text-base rounded-full border border-selected-border bg-selected px-3 py-2 font-semibold text-accent">
           {publicationLabel}
         </Text>
       </View>
@@ -182,7 +182,7 @@ function CatalogCandidateCard({
       {candidate.readinessIssues.length > 0 ? (
         <View
           accessibilityRole="alert"
-          className="gap-2 border-l-2 border-error bg-[#FFF4F2] p-4"
+          className="gap-2 rounded-todam border border-error bg-error-soft p-4"
         >
           <Text className="text-base font-semibold text-error">
             Publication bloquée
@@ -321,7 +321,7 @@ function ClaimCard({
     onSuccess: onChanged,
   });
   return (
-    <View className="gap-5 border border-control bg-paper p-5 md:p-6">
+    <View className="todam-management-panel gap-5 p-5 md:p-6">
       <View className="gap-1">
         <Text className="font-serif text-xl font-semibold text-ink">
           {claim.companyName}
@@ -445,7 +445,7 @@ function ReportCard({
   const closed = report.status === "resolved" || report.status === "dismissed";
 
   return (
-    <View className="gap-5 border border-control bg-paper p-5 md:p-6">
+    <View className="todam-management-panel gap-5 p-5 md:p-6">
       <View className="flex-row flex-wrap items-start justify-between gap-3">
         <View className="gap-1">
           <Text className="font-serif text-xl font-semibold text-ink">
@@ -459,7 +459,7 @@ function ReportCard({
             }).format(new Date(report.submittedAt))}
           </Text>
         </View>
-        <Text className="text-base border border-accent px-3 py-2 font-semibold text-accent">
+        <Text className="text-base rounded-full border border-selected-border bg-selected px-3 py-2 font-semibold text-accent">
           {reportStatusLabel(report.status)}
         </Text>
       </View>
@@ -470,7 +470,7 @@ function ReportCard({
         <Text className="text-base leading-7 text-ink">{report.reason}</Text>
       </View>
       {report.media ? (
-        <View className="gap-3 border border-line p-4 md:flex-row md:items-start">
+        <View className="gap-3 rounded-panel border border-line bg-canvas p-4 md:flex-row md:items-start">
           <Image
             accessibilityIgnoresInvertColors
             source={{ uri: report.media.url }}
@@ -645,7 +645,7 @@ function RevisionCard({
     onSuccess: onChanged,
   });
   return (
-    <View className="gap-5 border border-control bg-paper p-5 md:p-6">
+    <View className="todam-management-panel gap-5 p-5 md:p-6">
       <View className="flex-row flex-wrap items-start justify-between gap-3">
         <View className="gap-1">
           <Text className="font-serif text-xl font-semibold text-ink">
@@ -657,7 +657,7 @@ function RevisionCard({
             {revision.changes.length > 1 ? "s" : ""}
           </Text>
         </View>
-        <Text className="text-base border border-accent px-3 py-2 font-semibold text-accent">
+        <Text className="text-base rounded-full border border-selected-border bg-selected px-3 py-2 font-semibold text-accent">
           {statusLabel(revision.status)}
         </Text>
       </View>

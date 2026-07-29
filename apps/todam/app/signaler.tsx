@@ -127,7 +127,7 @@ export default function ContentReportPage() {
           ) : report.isSuccess ? (
             <View
               accessibilityLiveRegion="polite"
-              className="gap-4 border border-success bg-[#EEF7F1] p-5 md:p-6"
+              className="gap-4 rounded-panel border border-success bg-success-soft p-5 md:p-6"
             >
               <Text className="text-base font-semibold text-success">
                 Le signalement a bien été enregistré.
@@ -145,7 +145,7 @@ export default function ContentReportPage() {
               </View>
             </View>
           ) : (
-            <View className="gap-5 border border-control bg-paper p-5 md:p-6">
+            <View className="todam-form-panel gap-5 p-5 md:p-6">
               <AccessibleChoiceGroup
                 label="Que concerne votre demande ?"
                 onChange={setCategory}

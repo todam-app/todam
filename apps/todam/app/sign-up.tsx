@@ -124,7 +124,7 @@ export default function SignUpScreen() {
     return (
       <>
         <PrivatePageHead title="Confirmer l’adresse e-mail" />
-        <PageStaticView className="mx-auto w-full max-w-lg flex-1 items-center justify-center gap-5 px-5 py-12">
+        <PageStaticView className="todam-auth-panel mx-auto my-8 w-[calc(100%_-_2.5rem)] max-w-lg flex-1 items-center justify-center gap-5 p-6 md:my-12 md:p-8">
           <Text
             aria-level={1}
             accessibilityRole="header"
@@ -167,7 +167,7 @@ export default function SignUpScreen() {
     <>
       <PrivatePageHead title="Créer un compte" />
       <PageScrollView
-        contentContainerClassName="mx-auto w-full max-w-lg gap-6 px-5 py-10"
+        contentContainerClassName="todam-auth-panel mx-auto my-8 w-[calc(100%_-_2.5rem)] max-w-lg gap-6 p-6 md:my-12 md:p-8"
         keyboardShouldPersistTaps="handled"
       >
         <View className="gap-2">
@@ -228,7 +228,7 @@ export default function SignUpScreen() {
           value={password}
           webName="new-password"
         />
-        <View className="gap-2 border-l-2 border-accent pl-4">
+        <View className="gap-2 rounded-todam border border-selected-border bg-selected p-4">
           <Text className="text-base font-semibold text-ink">
             Visibilité de ton journal
           </Text>
@@ -267,12 +267,12 @@ export default function SignUpScreen() {
           </Text>
         ) : null}
         {error ? (
-          <Text accessibilityRole="alert" className="text-base text-[#A1261A]">
+          <Text accessibilityRole="alert" className="text-base text-error">
             {error}
           </Text>
         ) : null}
         {duplicateEmail ? (
-          <View className="gap-2 rounded-todam border border-line bg-paper p-4">
+          <View className="todam-calm-panel gap-2 p-4">
             <Text className="text-sm leading-5 text-muted">
               Retrouve ton compte existant :
             </Text>

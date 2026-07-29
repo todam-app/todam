@@ -45,44 +45,46 @@ describe("tokens accessibles", () => {
       surface: "#FFFDF8",
       placeholder: "#F0E9DF",
       disabled: "#E5E0D8",
-      border: "#D8D1C6",
-      selectedSurface: "#FCEFEA",
+      border: "#E2D9CD",
+      selectedSurface: "#EEE9FA",
     });
   });
 
-  it("conserve exactement la direction visuelle du bouton standard", () => {
+  it("centralise le CTA principal encre", () => {
     expect(tokens.button.standard).toEqual({
-      background: "#FFFDF8",
-      border: "#C43D28",
+      background: "#151515",
+      backgroundHover: "#282335",
+      border: "#151515",
       borderWidth: 1,
       fontFamily: "Work Sans",
-      fontWeight: "500",
-      radius: 4,
-      text: "#171412",
+      fontWeight: "600",
+      radius: 10,
+      text: "#FFFDF8",
     });
   });
 
   it("centralise le bouton de service neutre", () => {
     expect(tokens.button.quiet).toEqual({
       background: "#FFFDF8",
-      border: "#978F84",
+      backgroundHover: "#F7F3FC",
+      border: "#151515",
       borderWidth: 1,
       fontFamily: "Work Sans",
       fontWeight: "500",
-      radius: 4,
-      text: "#171412",
+      radius: 10,
+      text: "#151515",
     });
   });
 
   it("centralise le CTA vedette et conserve son contraste", () => {
     expect(tokens.button.featured).toEqual({
       background: "#151515",
-      backgroundHover: "#C43D28",
+      backgroundHover: "#282335",
       border: "#151515",
       borderWidth: 1,
       fontFamily: "Work Sans",
       fontWeight: "600",
-      radius: 4,
+      radius: 10,
       text: "#FFFDF8",
     });
     expect(
@@ -106,23 +108,20 @@ describe("tokens accessibles", () => {
       coral: "#F3A995",
       lilac: "#C8B8F0",
       aqua: "#9FD8D0",
-      panel: 12,
+      panel: 18,
       media: 16,
-      glass: "rgba(255, 253, 248, 0.82)",
-      shadow: "0 10px 30px rgba(43, 34, 27, 0.10)",
+      glass: "rgba(255, 253, 248, 0.86)",
+      shadow: "0 16px 42px rgba(43, 34, 27, 0.09)",
     });
   });
 
-  it("garde le bouton standard lisible et sa bordure perceptible", () => {
+  it("garde le bouton principal lisible sur ses surfaces", () => {
     expect(
       contrast(tokens.button.standard.text, tokens.button.standard.background),
-    ).toBeCloseTo(18.04, 2);
+    ).toBeGreaterThan(4.5);
     expect(
-      contrast(tokens.button.standard.border, tokens.button.standard.background),
-    ).toBeCloseTo(5.11, 2);
-    expect(
-      contrast(tokens.button.standard.border, tokens.color.background),
-    ).toBeCloseTo(4.91, 2);
+      contrast(tokens.button.standard.background, tokens.color.background),
+    ).toBeGreaterThan(4.5);
   });
 
   it("garde la bordure du bouton neutre perceptible sur les fonds Web", () => {

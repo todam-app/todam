@@ -1,6 +1,7 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useQuery } from "@tanstack/react-query";
 import type { Dashboard, ProductionCard } from "@todam/contracts";
+import { tokens } from "@todam/design-system";
 import { Link } from "expo-router";
 import { Pressable, Text, View } from "react-native";
 
@@ -46,7 +47,7 @@ function PreviewSection({
         accessibilityHint={`Ouvre tous les spectacles ${title.toLocaleLowerCase("fr-FR")}`}
         accessibilityLabel={`${title}, ${count} spectacle${count > 1 ? "s" : ""}`}
         accessibilityRole="link"
-        className="todam-interactive-card gap-4 rounded-todam border border-line bg-paper p-4"
+        className="todam-interactive-card gap-4 rounded-panel border border-line bg-paper p-5 shadow-soft"
       >
         <View className="flex-row items-center justify-between gap-3">
           <View className="min-w-0 flex-1 flex-row items-baseline gap-2">
@@ -59,7 +60,11 @@ function PreviewSection({
             </Text>
             <Text className="text-sm text-muted">{count}</Text>
           </View>
-          <Ionicons color="#6F6B64" name="chevron-forward" size={22} />
+          <Ionicons
+            color={tokens.color.muted}
+            name="chevron-forward"
+            size={22}
+          />
         </View>
         {items.length > 0 ? (
           <View className="flex-row gap-3">
