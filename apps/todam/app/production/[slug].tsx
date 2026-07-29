@@ -42,7 +42,10 @@ import { API_URL, PUBLIC_WEB_URL } from "../../lib/config";
 import { isIsoCalendarDate, isPastOrTodayCalendarDate } from "../../lib/dates";
 import { formatPerformance } from "../../lib/format";
 import { serializeJsonLd } from "../../lib/json-ld";
-import { getPublishedCatalogSlugs } from "../../lib/static-catalog-params";
+import {
+  areRouteLoadersDisabled,
+  getPublishedCatalogSlugs,
+} from "../../lib/static-catalog-params";
 
 const INITIAL_DATA_UPDATED_AT = Date.now();
 
@@ -87,11 +90,7 @@ export async function generateStaticParams(): Promise<{ slug: string }[]> {
 
 export const loader = createStaticLoader(async (params) => {
   const slug = Array.isArray(params.slug) ? params.slug[0] : params.slug;
-  if (
-    !slug ||
-    slug.startsWith("[") ||
-    process.env.TODAM_DISABLE_ROUTE_LOADERS === "1"
-  ) {
+  if (!slug || slug.startsWith("[") || areRouteLoadersDisabled()) {
     return null;
   }
   const response = await fetch(

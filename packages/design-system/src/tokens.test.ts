@@ -46,14 +46,14 @@ describe("tokens accessibles", () => {
       placeholder: "#F0E9DF",
       disabled: "#E5E0D8",
       border: "#E2D9CD",
-      selectedSurface: "#EEE9FA",
+      selectedSurface: "#FCEAE2",
     });
   });
 
   it("centralise le CTA principal encre", () => {
     expect(tokens.button.standard).toEqual({
       background: "#151515",
-      backgroundHover: "#282335",
+      backgroundHover: "#151515",
       border: "#151515",
       borderWidth: 1,
       fontFamily: "Work Sans",
@@ -66,7 +66,7 @@ describe("tokens accessibles", () => {
   it("centralise le bouton de service neutre", () => {
     expect(tokens.button.quiet).toEqual({
       background: "#FFFDF8",
-      backgroundHover: "#F7F3FC",
+      backgroundHover: "#FCEAE2",
       border: "#151515",
       borderWidth: 1,
       fontFamily: "Work Sans",
@@ -79,7 +79,7 @@ describe("tokens accessibles", () => {
   it("centralise le CTA vedette et conserve son contraste", () => {
     expect(tokens.button.featured).toEqual({
       background: "#151515",
-      backgroundHover: "#282335",
+      backgroundHover: "#151515",
       border: "#151515",
       borderWidth: 1,
       fontFamily: "Work Sans",

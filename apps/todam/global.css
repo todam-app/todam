@@ -73,16 +73,17 @@
   --todam-color-paper: #fffdf8;
   --todam-color-ink: #151515;
   --todam-color-muted: #6f6b64;
-  --todam-color-accent: #6651b8;
-  --todam-color-accent-pressed: #504093;
-  --todam-color-focus: #7864c8;
+  --todam-color-accent: #c34e42;
+  --todam-color-accent-pressed: #a83e35;
+  --todam-color-focus: #c34e42;
   --todam-color-line: #e2d9cd;
   --todam-color-coral: #f3a995;
+  --todam-color-coral-soft: #fceae2;
   --todam-color-lilac: #c8b8f0;
   --todam-color-aqua: #9fd8d0;
   --todam-shadow-soft: 0 16px 42px rgba(43, 34, 27, 0.09);
   --todam-shadow-lift: 0 22px 54px rgba(65, 48, 92, 0.13);
-  --todam-shadow-lilac: 0 12px 36px rgba(120, 100, 200, 0.16);
+  --todam-shadow-coral: 0 12px 36px rgba(243, 169, 149, 0.32);
   --todam-web-content-width: 1120px;
   --todam-web-header-height: 78px;
 }
@@ -275,7 +276,7 @@ body {
 }
 
 .todam-login-ticket {
-  box-shadow: var(--todam-shadow-lilac);
+  box-shadow: var(--todam-shadow-coral);
   overflow: hidden;
   position: relative;
 }
@@ -414,10 +415,10 @@ textarea:focus-visible,
 
   .todam-cta-standard:not([aria-disabled="true"]):hover,
   [data-todam-cta="standard"]:not([aria-disabled="true"]):hover {
-    background-color: #282335 !important;
-    border-color: #282335 !important;
+    background-color: #151515 !important;
+    border-color: var(--todam-color-coral) !important;
     filter: none;
-    box-shadow: var(--todam-shadow-lilac);
+    box-shadow: var(--todam-shadow-coral);
   }
 
   .todam-cta-standard:not([aria-disabled="true"]):hover *,
@@ -426,22 +427,22 @@ textarea:focus-visible,
   }
 
   [data-todam-cta="quiet"]:not([aria-disabled="true"]):hover {
-    background-color: #f7f3fc !important;
-    border-color: #151515 !important;
+    background-color: var(--todam-color-coral-soft) !important;
+    border-color: var(--todam-color-coral) !important;
     filter: none;
   }
 
   .todam-login-ticket:hover {
-    background-color: #f7f3fc !important;
-    border-color: #a99bd8 !important;
-    box-shadow: 0 14px 34px rgba(120, 100, 200, 0.2);
+    background-color: var(--todam-color-coral-soft) !important;
+    border-color: var(--todam-color-coral) !important;
+    box-shadow: var(--todam-shadow-coral);
   }
 
   [data-todam-cta="featured"]:not([aria-disabled="true"]):hover {
-    background-color: #282335 !important;
-    border-color: #282335 !important;
+    background-color: #151515 !important;
+    border-color: var(--todam-color-coral) !important;
     filter: none;
-    box-shadow: var(--todam-shadow-lilac);
+    box-shadow: var(--todam-shadow-coral);
   }
 
   [data-todam-cta="featured"]:not([aria-disabled="true"]):hover * {
@@ -467,20 +468,20 @@ textarea:focus-visible,
   }
 
   .todam-interactive-card:not([aria-disabled="true"]):hover {
-    border-color: #a99bd8 !important;
-    box-shadow: var(--todam-shadow-lift);
+    border-color: var(--todam-color-coral) !important;
+    box-shadow: var(--todam-shadow-coral);
     opacity: 1;
     transform: translateY(-2px);
   }
 
   .todam-icon-button:not([aria-disabled="true"]):hover {
-    background-color: #eee9fa !important;
-    border-color: var(--todam-color-focus) !important;
+    background-color: var(--todam-color-coral-soft) !important;
+    border-color: var(--todam-color-coral) !important;
     filter: none;
   }
 
   .todam-icon-button:not([aria-disabled="true"]):hover * {
-    color: var(--todam-color-accent) !important;
+    color: var(--todam-color-ink) !important;
   }
 
   button:not(:disabled):not(.todam-cta-standard):not([data-todam-cta]):not(
@@ -534,8 +535,8 @@ button:not(:disabled):not([data-todam-cta]):not(.todam-icon-button):active,
 .todam-search-bar:focus-within {
   border-color: var(--todam-color-focus) !important;
   box-shadow:
-    0 0 0 3px rgba(120, 100, 200, 0.18),
-    0 10px 28px rgba(65, 48, 92, 0.08);
+    0 0 0 3px rgba(243, 169, 149, 0.3),
+    0 10px 28px rgba(243, 169, 149, 0.12);
 }
 
 .todam-calm-panel,
@@ -604,7 +605,7 @@ button:not(:disabled):not([data-todam-cta]):not(.todam-icon-button):active,
 [role="tab"][aria-selected="true"],
 [role="radio"][aria-checked="true"],
 [role="checkbox"][aria-checked="true"] {
-  box-shadow: 0 0 0 1px rgba(120, 100, 200, 0.12);
+  box-shadow: 0 0 0 1px rgba(243, 169, 149, 0.24);
 }
 
 .todam-web-footer {

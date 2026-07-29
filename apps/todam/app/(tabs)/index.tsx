@@ -1,14 +1,11 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useQuery } from "@tanstack/react-query";
 import {
-  PublicMemberSchema,
   SearchResponseSchema,
-  type PublicMember,
   type SearchResponse,
 } from "@todam/contracts";
 import {
   Button,
-  RatingLights,
   SectionTitle,
   tokens,
 } from "@todam/design-system";
@@ -75,40 +72,21 @@ export const loader = createStaticLoader(() =>
       sort: "date",
       limit: "4",
     });
-    const memberQuery = new URLSearchParams({
-      q: "",
-      type: "members",
-      limit: "1",
-    });
-    const [catalogResponse, membersResponse] = await Promise.all([
-      fetch(`${API_URL}/v1/search?${catalogQuery.toString()}`),
-      fetch(`${API_URL}/v1/search?${memberQuery.toString()}`),
-    ]);
-    if (!catalogResponse.ok || !membersResponse.ok) {
+    const catalogResponse = await fetch(
+      `${API_URL}/v1/search?${catalogQuery.toString()}`,
+    );
+    if (!catalogResponse.ok) {
       throw new Error("Impossible de précharger le catalogue de l’accueil.");
     }
     const catalog = SearchResponseSchema.parse(await catalogResponse.json());
-    const members = SearchResponseSchema.parse(await membersResponse.json());
-    const firstMember = members.members[0];
-    let showcase: PublicMember | null = null;
-    if (firstMember) {
-      const memberResponse = await fetch(
-        `${API_URL}/v1/members/${encodeURIComponent(firstMember.username)}`,
-      );
-      if (memberResponse.ok) {
-        showcase = PublicMemberSchema.parse(await memberResponse.json());
-      }
-    }
-    return { catalog, showcase };
+    return { catalog };
   }),
 );
 
 function MarketingHome({
   initialCatalog,
-  initialShowcase,
 }: {
   initialCatalog: SearchResponse | null;
-  initialShowcase: PublicMember | null;
 }) {
   const { width } = useWindowDimensions();
   const catalog = useQuery({
@@ -129,31 +107,6 @@ function MarketingHome({
       : {}),
     staleTime: 60_000,
   });
-  const showcase = useQuery({
-    queryKey: ["public-home-showcase"],
-    queryFn: async () => {
-      const members = await api.searchCatalog({
-        q: "",
-        type: "members",
-        limit: 1,
-      });
-      const first = members.members[0];
-      if (!first) return null;
-      try {
-        return await api.getMember(first.username);
-      } catch {
-        return null;
-      }
-    },
-    ...(initialShowcase
-      ? {
-          initialData: initialShowcase,
-          initialDataUpdatedAt: INITIAL_DATA_UPDATED_AT,
-        }
-      : {}),
-  });
-  const journalPreview = showcase.data?.recentJournal.slice(0, 3) ?? [];
-  const featuredJournalEntry = journalPreview[0] ?? null;
   const jsonLd = {
     "@context": "https://schema.org",
     "@graph": [
@@ -279,86 +232,6 @@ function MarketingHome({
             </AsyncState>
           </View>
 
-          <View className="todam-calm-panel gap-6 p-6 md:flex-row md:items-stretch md:p-8">
-            <View className="min-w-0 flex-1 justify-center gap-3">
-              <Text className="text-xs font-bold uppercase tracking-widest text-coral-text">
-                {showcase.data ? "Un journal public" : "Votre journal"}
-              </Text>
-              {showcase.data ? (
-                <Link href={`/membre/${showcase.data.username}`} asChild>
-                  <Pressable
-                    accessibilityRole="link"
-                    className="min-h-11 self-start justify-center"
-                  >
-                    <Text className="font-serif text-2xl font-semibold text-ink">
-                      @{showcase.data.username}
-                    </Text>
-                    <Text className="mt-1 text-sm font-semibold text-accent">
-                      Voir le profil et ses listes →
-                    </Text>
-                  </Pressable>
-                </Link>
-              ) : (
-                <Text className="max-w-xl text-base leading-6 text-muted">
-                  Gardez vos dates, vos notes et vos listes au même endroit. Votre
-                  e-mail reste privé.
-                </Text>
-              )}
-            </View>
-            <View className="min-w-0 flex-[1.35] justify-center gap-2 border-t border-line pt-5 md:border-l md:border-t-0 md:pl-7 md:pt-0">
-              {featuredJournalEntry ? (
-                <>
-                  <Text className="text-[11px] font-bold uppercase tracking-widest text-accent">
-                    Vu récemment
-                  </Text>
-                  <Link
-                    href={`/production/${featuredJournalEntry.production.slug}`}
-                    asChild
-                  >
-                    <Pressable
-                      accessibilityRole="link"
-                      className="min-h-11 justify-center gap-1"
-                    >
-                      <Text className="font-serif text-xl font-semibold text-ink">
-                        {featuredJournalEntry.production.title}
-                      </Text>
-                      {featuredJournalEntry.production.company ? (
-                        <Text className="text-sm text-ink">
-                          {featuredJournalEntry.production.company.name}
-                        </Text>
-                      ) : featuredJournalEntry.production.primaryCredit ? (
-                        <Text className="text-sm text-muted">
-                          {featuredJournalEntry.production.primaryCredit}
-                        </Text>
-                      ) : null}
-                      {featuredJournalEntry.production.venueNames[0] ? (
-                        <Text className="text-sm text-muted">
-                          {featuredJournalEntry.production.venueNames[0]}
-                        </Text>
-                      ) : null}
-                    </Pressable>
-                  </Link>
-                </>
-              ) : (
-                ["Dates vues", "Notes personnelles", "Listes partageables"].map(
-                    (feature) => (
-                      <Text className="text-sm text-muted" key={feature}>
-                        {feature}
-                      </Text>
-                    ),
-                  )
-              )}
-            </View>
-            {featuredJournalEntry?.rating ? (
-              <View className="min-w-44 justify-center gap-3 border-t border-line pt-5 md:border-l md:border-t-0 md:pl-7 md:pt-0">
-                <Text className="text-[11px] font-bold uppercase tracking-widest text-accent">
-                  Ma note
-                </Text>
-                <RatingLights showValue value={featuredJournalEntry.rating} />
-              </View>
-            ) : null}
-          </View>
-
           <View className="gap-7">
             <SectionTitle>Un journal en trois gestes</SectionTitle>
             <View className="gap-0 border-y border-line md:flex-row">
@@ -395,7 +268,7 @@ function MarketingHome({
                           index === 0
                             ? "text-coral-text"
                             : index === 1
-                              ? "text-accent"
+                              ? "text-lilac-text"
                               : "text-aqua-text"
                         }`}
                       >
@@ -407,7 +280,7 @@ function MarketingHome({
                           index === 0
                             ? tokens.color.coralText
                             : index === 1
-                              ? tokens.color.accent
+                              ? tokens.color.lilacText
                               : tokens.color.aquaText
                         }
                         importantForAccessibility="no"
@@ -656,9 +529,6 @@ export default function HomeScreen() {
   return session.data ? (
     <ConnectedHome />
   ) : (
-    <MarketingHome
-      initialCatalog={preloaded?.catalog ?? null}
-      initialShowcase={preloaded?.showcase ?? null}
-    />
+    <MarketingHome initialCatalog={preloaded?.catalog ?? null} />
   );
 }

@@ -600,7 +600,7 @@ const styles = StyleSheet.create({
   },
   inputFocused: {
     borderColor: tokens.color.focus,
-    outlineColor: "rgba(120, 100, 200, 0.18)",
+    outlineColor: "rgba(195, 78, 66, 0.18)",
     outlineOffset: 0,
     outlineStyle: "solid",
     outlineWidth: 3,
@@ -749,13 +749,13 @@ const styles = StyleSheet.create({
     width: 9,
   },
   ratingLightFilled: {
-    backgroundColor: tokens.color.accent,
-    borderColor: tokens.color.accent,
-    boxShadow: "0 0 10px rgba(102, 81, 184, 0.34)",
+    backgroundColor: tokens.color.coral,
+    borderColor: tokens.color.coral,
+    boxShadow: "0 0 10px rgba(243, 169, 149, 0.42)",
   },
   ratingLightPartial: {
-    backgroundColor: tokens.color.lilac,
-    borderColor: tokens.color.accent,
+    backgroundColor: tokens.color.selectedSurface,
+    borderColor: tokens.color.coral,
   },
   ratingLightsScale: {
     color: tokens.color.muted,

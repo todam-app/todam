@@ -6,11 +6,18 @@ type StaticCatalogType = "productions" | "venues" | "companies";
 
 const PAGE_SIZE = 50;
 
+export function areRouteLoadersDisabled(): boolean {
+  return (
+    process.env.TODAM_DISABLE_ROUTE_LOADERS === "1" ||
+    process.env.NODE_ENV === "development"
+  );
+}
+
 export async function loadOptionalStaticData<T>(
   label: string,
   load: () => Promise<T>,
 ): Promise<T | null> {
-  if (process.env.TODAM_DISABLE_ROUTE_LOADERS === "1") return null;
+  if (areRouteLoadersDisabled()) return null;
 
   try {
     return await load();
