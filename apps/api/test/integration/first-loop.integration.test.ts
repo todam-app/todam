@@ -2528,6 +2528,10 @@ describe("première boucle API sur PostgreSQL/PostGIS", () => {
       }),
     ]);
 
+    await db
+      .update(companies)
+      .set({ shortDescription: null, officialUrl: null })
+      .where(eq(companies.id, company!.id));
     const revisionApproval = await app.inject({
       method: "POST",
       url: `/v1/admin/catalog-revisions/${revision.json().id}/approved`,
@@ -2655,18 +2659,6 @@ describe("première boucle API sur PostgreSQL/PostGIS", () => {
             rightsStatus: null,
           },
           {
-            field: "durationMinutes",
-            newValue: 65,
-            provenanceUrl: "https://compagnie.example.test/creation-2027",
-            rightsStatus: null,
-          },
-          {
-            field: "language",
-            newValue: "fr",
-            provenanceUrl: "https://compagnie.example.test/creation-2027",
-            rightsStatus: null,
-          },
-          {
             field: "description.short",
             newValue: {
               body: "Une création originale de la compagnie pour la saison 2027.",
@@ -2683,19 +2675,6 @@ describe("première boucle API sur PostgreSQL/PostGIS", () => {
             },
             provenanceUrl: "https://compagnie.example.test/creation-2027",
             rightsStatus: "permission_granted",
-          },
-          {
-            field: "credits",
-            newValue: [
-              {
-                artistId: null,
-                name: "Camille Martin",
-                role: "choreographer",
-                label: null,
-              },
-            ],
-            provenanceUrl: "https://compagnie.example.test/creation-2027",
-            rightsStatus: null,
           },
           {
             field: "performances",
@@ -2721,6 +2700,41 @@ describe("première boucle API sur PostgreSQL/PostGIS", () => {
       headers: { cookie: representativeCookie },
     });
     expect(productionSubmitted.statusCode, productionSubmitted.body).toBe(200);
+    const [catalogSource] = await db
+      .select({ id: catalogSources.id })
+      .from(catalogSources)
+      .limit(1);
+    const [catalogDocument] = await db
+      .select({ id: sourceDocuments.id })
+      .from(sourceDocuments)
+      .where(eq(sourceDocuments.sourceId, catalogSource!.id))
+      .limit(1);
+    const [metadataOnlyVisual] = await db
+      .insert(mediaAssets)
+      .values({
+        sourceId: catalogSource!.id,
+        documentId: catalogDocument!.id,
+        externalKey: "creation-pilote-metadata-only",
+        kind: "poster",
+        remoteUrl: "https://images.example.test/creation-pilote.jpg",
+        storagePolicy: "metadata_only",
+        alt: "Référence de l’affiche de Création pilote 2027",
+        credit: "Source officielle, crédit non indiqué",
+        copyrightHolder: null,
+        rightsStatus: "review_required",
+        termsUrl: null,
+        mimeType: "image/jpeg",
+      })
+      .returning({ id: mediaAssets.id });
+    await db.insert(productionMedia).values({
+      productionId: draftProduction.json().id,
+      mediaId: metadataOnlyVisual!.id,
+      isPrimary: true,
+      position: 0,
+    });
+    await db
+      .delete(productionCompanies)
+      .where(eq(productionCompanies.productionId, draftProduction.json().id));
     const productionApproved = await app.inject({
       method: "POST",
       url: `/v1/admin/catalog-revisions/${productionRevision.json().id}/approved`,
@@ -2739,6 +2753,11 @@ describe("première boucle API sur PostgreSQL/PostGIS", () => {
     expect(nowPublic.statusCode, nowPublic.body).toBe(200);
     expect(nowPublic.json().title).toBe("Création pilote 2027");
     expect(nowPublic.json().discipline).toBe("ballet");
+    expect(nowPublic.json().durationMinutes).toBeNull();
+    expect(nowPublic.json().language).toBeNull();
+    expect(nowPublic.json().credits).toEqual([]);
+    expect(nowPublic.json().company).toBeNull();
+    expect(nowPublic.json().posters).toEqual([]);
 
     const moderationHistory = await app.inject({
       method: "GET",

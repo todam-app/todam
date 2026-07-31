@@ -1986,18 +1986,13 @@ export default function CompanyWorkspacePage() {
         mediaComplete);
   const canSubmit =
     canSave &&
-    (targetMode === "company"
-      ? companyForm.shortDescription.trim().length > 0 &&
-        isHttpUrl(companyForm.officialUrl)
-      : productionForm.shortDescription.trim().length > 0 &&
+    (targetMode === "company" ||
+      (productionForm.shortDescription.trim().length > 0 &&
         productionForm.fullDescription.trim().length > 0 &&
-        Number(productionForm.durationMinutes) > 0 &&
-        productionForm.language.trim().length > 0 &&
-        credits.length > 0 &&
         performances.some(
           (performance) =>
             performance.status !== "cancelled" && isZonedDateTime(performance.startsAt),
-        ));
+        )));
 
   const saveRevision = useMutation({
     onMutate: () => setFeedback(null),
@@ -2455,8 +2450,8 @@ export default function CompanyWorkspacePage() {
                   {!canSubmit ? (
                     <Text className="max-w-[65ch] text-sm leading-5 text-error">
                       {targetMode === "company"
-                        ? "Avant l’envoi, renseignez une présentation courte et un site officiel valide."
-                        : "Avant l’envoi, renseignez les deux descriptions, au moins un crédit et une représentation non annulée complète."}
+                        ? "Avant l’envoi, vérifiez le nom et les éventuels champs renseignés."
+                        : "Avant l’envoi, renseignez les deux descriptions et une représentation non annulée complète."}
                     </Text>
                   ) : null}
                   <Text className="max-w-[65ch] text-sm leading-5 text-muted">

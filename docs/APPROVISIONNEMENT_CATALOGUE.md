@@ -305,9 +305,11 @@ une page de données codées en dur.
 Une modification d’une compagnie, d’une description ou de son document source replace la
 production publiée concernée en `draft`. Une suppression dans un flux déclaré complet
 retire la description de cette source et déclenche le même contrôle éditorial. La
-republication exige de nouveau une compagnie principale publiée, des descriptions
-françaises courte et longue publiables, et une provenance documentée des lieux et des
-représentations.
+republication exige de nouveau des descriptions françaises courte et longue publiables,
+et une provenance documentée des lieux et des représentations. La compagnie principale,
+les crédits, la durée et la langue sont importés lorsqu’ils existent mais leur absence
+dans la source ne bloque pas la fiche. Un visuel `metadata_only` reste une référence non
+affichée et n’entre pas dans le contrôle des droits des visuels publiés.
 
 Les tests doivent prouver la pagination, l'idempotence, les annulations, la disparition
 d'une image et le refus d'une copie sans droit. Le connecteur reste désactivé tant que

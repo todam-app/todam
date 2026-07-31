@@ -53,10 +53,13 @@ Une révision soumise reste invisible jusqu'à son approbation par Todam. La dé
 motif, les anciennes et nouvelles valeurs ainsi que la provenance sont conservés. Une
 version approuvée peut être restaurée par un rôle Todam autorisé.
 
-Une publication est bloquée tant que manquent la compagnie principale, les deux
-descriptions françaises et leurs droits, la durée, la langue, les crédits, une
-représentation non annulée, les sources du spectacle, des séances et des lieux, ou les
-informations de droits complètes d’un visuel lié.
+Une publication est bloquée tant que manquent les deux descriptions françaises et leurs
+droits, une représentation non annulée, les sources du spectacle, des séances et des
+lieux, ou les informations de droits complètes d’un visuel réellement affichable. La
+compagnie principale, la durée, la langue, les crédits, la présentation courte d’une
+compagnie et son site officiel enrichissent la fiche mais ne bloquent plus sa
+publication lorsqu’ils sont absents de la source. Un visuel conservé uniquement comme
+métadonnée (`metadata_only`) ne bloque pas la fiche et n’est pas affiché.
 
 ## Vie privée
 

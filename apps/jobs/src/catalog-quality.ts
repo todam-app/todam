@@ -129,57 +129,6 @@ try {
       union all
 
       select
-        'published_without_primary_company',
-        'production',
-        productions.id::text,
-        productions.title
-      from productions
-      where productions.is_active = true
-        and productions.publication_status = 'published'
-        and not exists (
-          select 1
-          from production_companies
-          join companies on companies.id = production_companies.company_id
-          where production_companies.production_id = productions.id
-            and production_companies.is_primary = true
-            and companies.publication_status = 'published'
-        )
-
-      union all
-
-      select
-        'published_without_duration_or_language',
-        'production',
-        productions.id::text,
-        productions.title
-      from productions
-      where productions.is_active = true
-        and productions.publication_status = 'published'
-        and (
-          productions.duration_minutes is null
-          or productions.duration_minutes <= 0
-          or nullif(btrim(productions.language), '') is null
-        )
-
-      union all
-
-      select
-        'published_without_credits',
-        'production',
-        productions.id::text,
-        productions.title
-      from productions
-      where productions.is_active = true
-        and productions.publication_status = 'published'
-        and not exists (
-          select 1
-          from production_credits
-          where production_credits.production_id = productions.id
-        )
-
-      union all
-
-      select
         'published_without_source',
         'production',
         productions.id::text,
@@ -332,6 +281,7 @@ try {
       where productions.is_active = true
         and productions.publication_status = 'published'
         and media_assets.is_active = true
+        and media_assets.storage_policy not in ('metadata_only', 'forbidden')
         and (
           nullif(btrim(media_assets.credit), '') is null
           or nullif(btrim(media_assets.copyright_holder), '') is null
@@ -375,20 +325,6 @@ try {
           select 1
           from company_sources
           where company_sources.company_id = companies.id
-        )
-
-      union all
-
-      select distinct
-        'published_company_incomplete',
-        'company',
-        companies.id::text,
-        companies.name
-      from companies
-      where companies.publication_status = 'published'
-        and (
-          nullif(btrim(companies.short_description), '') is null
-          or nullif(btrim(companies.official_url), '') is null
         )
 
       union all

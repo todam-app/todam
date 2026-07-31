@@ -809,8 +809,6 @@ export function createProfessionalService(database: TodamDatabase) {
     const missing: string[] = [];
     const productionRows = await executor
       .select({
-        durationMinutes: productions.durationMinutes,
-        language: productions.language,
         slug: productions.slug,
         title: productions.title,
       })
@@ -837,30 +835,6 @@ export function createProfessionalService(database: TodamDatabase) {
     if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/u.test(production.slug)) {
       missing.push("URL publique normalisée");
     }
-    if (!production.durationMinutes || production.durationMinutes <= 0) {
-      missing.push("durée");
-    }
-    if (!production.language?.trim()) missing.push("langue");
-    const primaryCompany = await executor
-      .select({ id: companies.id })
-      .from(productionCompanies)
-      .innerJoin(companies, eq(companies.id, productionCompanies.companyId))
-      .where(
-        and(
-          eq(productionCompanies.productionId, productionId),
-          eq(productionCompanies.isPrimary, true),
-          eq(companies.publicationStatus, "published"),
-        ),
-      )
-      .limit(1);
-    if (!primaryCompany[0]) missing.push("compagnie principale publiée");
-    const creditRows = await executor
-      .select({ id: productionCredits.artistId })
-      .from(productionCredits)
-      .where(eq(productionCredits.productionId, productionId))
-      .limit(1);
-    if (!creditRows[0]) missing.push("crédits artistiques");
-
     const descriptionRows = await executor
       .select({
         kind: productionDescriptions.kind,
@@ -988,7 +962,12 @@ export function createProfessionalService(database: TodamDatabase) {
         select distinct
           regexp_replace(lower(unaccent(target.title)), '[^a-z0-9]+', '', 'g')
             as normalized_title,
-          regexp_replace(lower(unaccent(target_company.name)), '[^a-z0-9]+', '', 'g')
+          regexp_replace(
+            lower(unaccent(coalesce(target_company.name, ''))),
+            '[^a-z0-9]+',
+            '',
+            'g'
+          )
             as normalized_company,
           target_venue.slug as venue_slug,
           case
@@ -998,10 +977,10 @@ export function createProfessionalService(database: TodamDatabase) {
           end as season_start,
           target_source.external_key as source_key
         from productions target
-        join production_companies target_company_link
+        left join production_companies target_company_link
           on target_company_link.production_id = target.id
          and target_company_link.is_primary = true
-        join companies target_company
+        left join companies target_company
           on target_company.id = target_company_link.company_id
         join performances target_performance
           on target_performance.production_id = target.id
@@ -1018,10 +997,10 @@ export function createProfessionalService(database: TodamDatabase) {
       )
       select duplicate.id::text as id
       from productions duplicate
-      join production_companies duplicate_company_link
+      left join production_companies duplicate_company_link
         on duplicate_company_link.production_id = duplicate.id
        and duplicate_company_link.is_primary = true
-      join companies duplicate_company
+      left join companies duplicate_company
         on duplicate_company.id = duplicate_company_link.company_id
       join performances duplicate_performance
         on duplicate_performance.production_id = duplicate.id
@@ -1038,7 +1017,12 @@ export function createProfessionalService(database: TodamDatabase) {
         on target_occurrence.normalized_title =
            regexp_replace(lower(unaccent(duplicate.title)), '[^a-z0-9]+', '', 'g')
        and target_occurrence.normalized_company =
-           regexp_replace(lower(unaccent(duplicate_company.name)), '[^a-z0-9]+', '', 'g')
+           regexp_replace(
+             lower(unaccent(coalesce(duplicate_company.name, ''))),
+             '[^a-z0-9]+',
+             '',
+             'g'
+           )
        and target_occurrence.venue_slug = duplicate_venue.slug
        and target_occurrence.season_start = case
          when extract(month from duplicate_performance.starts_at) >= 7
@@ -1079,22 +1063,23 @@ export function createProfessionalService(database: TodamDatabase) {
     if (
       linkedMedia.some(
         (asset) =>
-          !asset.credit?.trim() ||
-          !asset.copyrightHolder?.trim() ||
-          !(asset.termsUrl ?? asset.documentUrl)?.trim() ||
-          ![
-            "permission_granted",
-            "open_license",
-            "contractual_display",
-            "hotlink_only",
-            "todam_original",
-          ].includes(asset.rightsStatus) ||
-          (asset.storagePolicy === "mirror" &&
-            !["permission_granted", "open_license", "todam_original"].includes(
-              asset.rightsStatus,
-            )) ||
-          (asset.rightsStatus === "open_license" && !asset.license?.trim()) ||
-          (asset.validUntil !== null && asset.validUntil.getTime() <= now),
+          !["metadata_only", "forbidden"].includes(asset.storagePolicy) &&
+          (!asset.credit?.trim() ||
+            !asset.copyrightHolder?.trim() ||
+            !(asset.termsUrl ?? asset.documentUrl)?.trim() ||
+            ![
+              "permission_granted",
+              "open_license",
+              "contractual_display",
+              "hotlink_only",
+              "todam_original",
+            ].includes(asset.rightsStatus) ||
+            (asset.storagePolicy === "mirror" &&
+              !["permission_granted", "open_license", "todam_original"].includes(
+                asset.rightsStatus,
+              )) ||
+            (asset.rightsStatus === "open_license" && !asset.license?.trim()) ||
+            (asset.validUntil !== null && asset.validUntil.getTime() <= now)),
       )
     ) {
       missing.push("droits complets et valides pour chaque visuel");
@@ -1119,8 +1104,6 @@ export function createProfessionalService(database: TodamDatabase) {
       .select({
         name: companies.name,
         slug: companies.slug,
-        shortDescription: companies.shortDescription,
-        officialUrl: companies.officialUrl,
       })
       .from(companies)
       .where(eq(companies.id, companyId))
@@ -1131,8 +1114,6 @@ export function createProfessionalService(database: TodamDatabase) {
     if (company && !/^[a-z0-9]+(?:-[a-z0-9]+)*$/u.test(company.slug)) {
       missing.push("URL publique normalisée");
     }
-    if (!company?.shortDescription?.trim()) missing.push("présentation courte");
-    if (!company?.officialUrl) missing.push("site officiel");
     const sourceRows = await executor
       .select({ documentId: companySources.documentId })
       .from(companySources)
