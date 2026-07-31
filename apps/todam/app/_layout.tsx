@@ -26,14 +26,21 @@ export default function RootLayout() {
     <Providers>
       <Head>
         <title>{DEFAULT_WEB_TITLE}</title>
-        <link href="/favicon.svg?v=2" rel="icon" type="image/svg+xml" />
+        <link href="/favicon.svg?v=3" rel="icon" sizes="any" type="image/svg+xml" />
+        <link
+          href="/favicon-dark.svg?v=3"
+          media="(prefers-color-scheme: dark)"
+          rel="icon"
+          sizes="any"
+          type="image/svg+xml"
+        />
         <meta
-          content="Découvrez le théâtre, l’opéra et le ballet, puis gardez la mémoire de chaque spectacle dans votre journal Todam."
+          content="Retrouvez les spectacles que vous avez vus, notez-les et gardez-en une trace."
           name="description"
         />
-        <meta content="Todam — votre journal du spectacle vivant" property="og:title" />
+        <meta content="Todam — votre journal de spectacles" property="og:title" />
         <meta
-          content="Découvrez les spectacles, notez ce que vous avez vu et partagez vos listes."
+          content="Retrouvez les spectacles que vous avez vus, notez-les et gardez-en une trace."
           property="og:description"
         />
         <meta
@@ -45,12 +52,9 @@ export default function RootLayout() {
         <meta content="fr_FR" property="og:locale" />
         <meta content="website" property="og:type" />
         <meta content="summary_large_image" name="twitter:card" />
+        <meta content="Todam — votre journal de spectacles" name="twitter:title" />
         <meta
-          content="Todam — votre journal du spectacle vivant"
-          name="twitter:title"
-        />
-        <meta
-          content="Découvrez les spectacles, notez ce que vous avez vu et partagez vos listes."
+          content="Retrouvez les spectacles que vous avez vus, notez-les et gardez-en une trace."
           name="twitter:description"
         />
         <meta
@@ -97,7 +101,7 @@ export default function RootLayout() {
                 />
                 <Stack.Screen
                   name="ajouter-un-spectacle"
-                  options={{ headerTitle: "Ajouter un spectacle" }}
+                  options={{ headerTitle: "Ajouter un spectacle manquant" }}
                 />
                 <Stack.Screen
                   name="politique-editoriale"
@@ -117,6 +121,10 @@ export default function RootLayout() {
                 <Stack.Screen
                   name="conditions-utilisation"
                   options={{ headerTitle: "Conditions d'utilisation" }}
+                />
+                <Stack.Screen
+                  name="informations-legales"
+                  options={{ headerTitle: "Informations légales" }}
                 />
                 <Stack.Screen
                   name="email-verifie"

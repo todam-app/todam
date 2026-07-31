@@ -15,14 +15,14 @@ const horizontalLogo = require("../assets/brand/todam-logo-horizontal.svg");
 
 const informationLinks = [
   { href: "/les-coulisses", label: "Les coulisses" },
-  { href: "/conditions-utilisation", label: "Conditions d’utilisation" },
-  { href: "/confidentialite", label: "Confidentialité" },
-  { href: "/mentions-legales", label: "Mentions légales" },
+  { href: "/informations-legales", label: "Informations légales" },
 ] as const;
 const professionalLinks = [
   { href: "/pour-les-salles", label: "Pour les salles" },
   { href: "/pour-les-compagnies", label: "Pour les compagnies" },
 ] as const;
+
+export type LegalFooterVariant = "full" | "minimal";
 
 function FooterInternalLink({ href, label }: { href: Href; label: string }) {
   return (
@@ -34,7 +34,13 @@ function FooterInternalLink({ href, label }: { href: Href; label: string }) {
   );
 }
 
-export function LegalFooter({ alwaysVisible = false }: { alwaysVisible?: boolean }) {
+export function LegalFooter({
+  alwaysVisible = false,
+  variant = "full",
+}: {
+  alwaysVisible?: boolean;
+  variant?: LegalFooterVariant;
+}) {
   const session = authClient.useSession();
   const { width } = useWindowDimensions();
   const [mobileSection, setMobileSection] = useState<
@@ -43,13 +49,34 @@ export function LegalFooter({ alwaysVisible = false }: { alwaysVisible?: boolean
   if (!alwaysVisible && Platform.OS !== "web") return null;
 
   const compact = width < 640;
+  if (variant === "minimal") {
+    return (
+      <View
+        className="todam-web-footer mx-auto w-full max-w-content border-t border-line bg-paper px-5 py-2 md:px-8"
+        role="contentinfo"
+        testID="site-footer"
+      >
+        <View className="mx-auto w-full max-w-content flex-row flex-wrap items-center justify-between gap-3">
+          <Text className="text-xs text-muted">© 2026 Todam</Text>
+          <View className="flex-row flex-wrap items-center gap-4">
+            <FooterInternalLink
+              href="/informations-legales"
+              label="Informations légales"
+            />
+            <FooterInternalLink href="/contact" label="Nous contacter" />
+          </View>
+        </View>
+      </View>
+    );
+  }
+
   const productLinks = session.data
     ? [
-        { href: "/decouvrir" as const, label: "Découvrir" },
+        { href: "/search" as const, label: "Rechercher" },
         { href: "/journal" as const, label: "Mes spectacles" },
       ]
     : [
-        { href: "/decouvrir" as const, label: "Découvrir" },
+        { href: "/search" as const, label: "Rechercher" },
         { href: "/sign-in" as const, label: "Se connecter" },
         { href: "/sign-up" as const, label: "Créer un compte" },
       ];
@@ -111,7 +138,7 @@ export function LegalFooter({ alwaysVisible = false }: { alwaysVisible?: boolean
           })}
           <View className="min-h-11 flex-row items-center justify-between">
             <Text className="text-xs text-muted">© 2026 Todam</Text>
-            <FooterInternalLink href="/contact" label="Contact" />
+            <FooterInternalLink href="/contact" label="Nous contacter" />
           </View>
         </View>
       </View>
@@ -143,8 +170,7 @@ export function LegalFooter({ alwaysVisible = false }: { alwaysVisible?: boolean
               </Pressable>
             </Link>
             <Text className="text-sm leading-6 text-muted">
-              Le journal culturel qui relie les spectacles, les publics et les
-              professionnels.
+              Mon journal de spectacles
             </Text>
           </View>
           <View className="min-w-28 gap-1">
@@ -169,7 +195,7 @@ export function LegalFooter({ alwaysVisible = false }: { alwaysVisible?: boolean
           </View>
           <View className="min-w-36 gap-1">
             <Text className="text-base mb-2 font-semibold text-ink">Contact</Text>
-            <FooterInternalLink href="/contact" label="contact@todam.fr" />
+            <FooterInternalLink href="/contact" label="Nous contacter" />
           </View>
         </View>
         <View className="border-t border-line pt-5">

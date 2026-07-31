@@ -6,7 +6,6 @@ import Head from "expo-router/head";
 import { createElement, useState, type ChangeEvent } from "react";
 import { Linking, Platform, Pressable, Text, View } from "react-native";
 
-import { LegalFooter } from "../components/LegalFooter";
 import { PageScrollView } from "../components/PageScrollView";
 import { api } from "../lib/api";
 import { PUBLIC_WEB_URL } from "../lib/config";
@@ -82,31 +81,8 @@ export default function ContactPage() {
             </Text>
           </View>
 
-          <View className="gap-6 lg:flex-row lg:items-start">
-            <View className="todam-calm-panel gap-4 p-5 md:p-6 lg:w-72">
-              <Text
-                aria-level={2}
-                accessibilityRole="header"
-                className="font-serif text-2xl font-semibold text-ink"
-              >
-                Écrire directement
-              </Text>
-              <Pressable
-                accessibilityLabel="Écrire à contact@todam.fr"
-                accessibilityRole="link"
-                className="min-h-11 self-start justify-center"
-                onPress={() => void Linking.openURL("mailto:contact@todam.fr")}
-              >
-          <Text className="text-base font-semibold text-brand-text" selectable>
-                  contact@todam.fr
-                </Text>
-              </Pressable>
-              <Text className="text-base leading-6 text-muted">
-                Le formulaire et cette adresse arrivent au même endroit.
-              </Text>
-            </View>
-
-            <View className="min-w-0 flex-1">
+          <View className="mx-auto w-full max-w-3xl">
+            <View className="min-w-0">
               {contact.isSuccess ? (
                 <View
                   accessibilityLiveRegion="polite"
@@ -128,6 +104,19 @@ export default function ContactPage() {
                   >
                     Votre message
                   </Text>
+                  <Pressable
+                    accessibilityLabel="Écrire à contact@todam.fr"
+                    accessibilityRole="link"
+                    className="min-h-11 self-start justify-center"
+                    onPress={() => void Linking.openURL("mailto:contact@todam.fr")}
+                  >
+                    <Text className="text-base leading-6 text-muted">
+                      <Text className="font-semibold text-brand-text" selectable>
+                        contact@todam.fr
+                      </Text>{" "}
+                      pour nous joindre directement.
+                    </Text>
+                  </Pressable>
                   <TextField
                     autoCapitalize="words"
                     autoComplete="name"
@@ -231,7 +220,6 @@ export default function ContactPage() {
             </View>
           </View>
         </View>
-        <LegalFooter />
       </PageScrollView>
     </>
   );

@@ -60,11 +60,7 @@ function PreviewSection({
             </Text>
             <Text className="text-sm text-muted">{count}</Text>
           </View>
-          <Ionicons
-            color={tokens.color.muted}
-            name="chevron-forward"
-            size={22}
-          />
+          <Ionicons color={tokens.color.muted} name="chevron-forward" size={22} />
         </View>
         {items.length > 0 ? (
           <View className="flex-row gap-3">
@@ -118,50 +114,54 @@ export default function MyShowsOverviewRoute() {
   return (
     <>
       <PrivatePageHead title="Mes spectacles" />
-      <PageScrollView contentContainerClassName="mx-auto w-full max-w-4xl gap-5 px-4 py-6 md:px-8 md:py-10">
-        <View className="gap-2">
-          <Text
-            aria-level={1}
-            accessibilityRole="header"
-            className="font-serif text-4xl font-semibold text-ink"
+      <PageScrollView contentContainerClassName="flex-grow">
+        <View className="todam-page-before-footer mx-auto w-full max-w-4xl flex-1 gap-5 px-4 py-6 md:px-8 md:py-10">
+          <View className="gap-2">
+            <Text
+              aria-level={1}
+              accessibilityRole="header"
+              className="font-serif text-4xl font-semibold text-ink"
+            >
+              Mes spectacles
+            </Text>
+            <Text className="text-base leading-6 text-muted">
+              Retrouvez en un coup d’œil ce que vous voulez voir, avez vu et avez noté.
+            </Text>
+          </View>
+          <AsyncState
+            empty={false}
+            emptyMessage=""
+            error={dashboard.isError}
+            loading={dashboard.isPending}
+            onRetry={() => void dashboard.refetch()}
           >
-            Mes spectacles
-          </Text>
-          <Text className="text-base leading-6 text-muted">
-            Retrouvez en un coup d’œil ce que vous voulez voir, avez vu et avez noté.
-          </Text>
+            {dashboard.data ? (
+              <View className="gap-4">
+                <MyShowsNavigation counts={counts(dashboard.data)} />
+                <PreviewSection
+                  count={dashboard.data.counts.watchlist}
+                  href="/journal/a-voir"
+                  items={dashboard.data.watchlist}
+                  title="À voir"
+                />
+                <PreviewSection
+                  count={dashboard.data.counts.seen}
+                  href="/journal/vus"
+                  items={dashboard.data.recentDiary.map((entry) => entry.production)}
+                  title="Vus"
+                />
+                <PreviewSection
+                  count={dashboard.data.counts.ratings}
+                  href="/journal/notes"
+                  items={dashboard.data.recentRatings.map(
+                    (rating) => rating.production,
+                  )}
+                  title="Notés"
+                />
+              </View>
+            ) : null}
+          </AsyncState>
         </View>
-        <AsyncState
-          empty={false}
-          emptyMessage=""
-          error={dashboard.isError}
-          loading={dashboard.isPending}
-          onRetry={() => void dashboard.refetch()}
-        >
-          {dashboard.data ? (
-            <View className="gap-4">
-              <MyShowsNavigation counts={counts(dashboard.data)} />
-              <PreviewSection
-                count={dashboard.data.counts.watchlist}
-                href="/journal/a-voir"
-                items={dashboard.data.watchlist}
-                title="À voir"
-              />
-              <PreviewSection
-                count={dashboard.data.counts.seen}
-                href="/journal/vus"
-                items={dashboard.data.recentDiary.map((entry) => entry.production)}
-                title="Vus"
-              />
-              <PreviewSection
-                count={dashboard.data.counts.ratings}
-                href="/journal/notes"
-                items={dashboard.data.recentRatings.map((rating) => rating.production)}
-                title="Notés"
-              />
-            </View>
-          ) : null}
-        </AsyncState>
       </PageScrollView>
     </>
   );

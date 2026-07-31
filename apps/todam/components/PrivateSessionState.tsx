@@ -23,7 +23,7 @@ export function PrivateSessionRequired({
   const router = useRouter();
 
   return (
-    <PageScrollView contentContainerClassName="flex-grow">
+    <PageScrollView contentContainerClassName="flex-grow" footer="minimal">
       <View className="todam-page-before-footer mx-auto w-full max-w-xl flex-1 items-center justify-center px-5 py-12">
         <View className="todam-auth-panel w-full items-center gap-5 p-6 md:p-8">
           <Text

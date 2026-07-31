@@ -11,30 +11,30 @@ import {
   RatingLights,
   SectionTitle,
   TextField,
+  TicketButton,
   tokens,
 } from "@todam/design-system";
-import { Link, useLoaderData, useLocalSearchParams, useRouter } from "expo-router";
+import * as Clipboard from "expo-clipboard";
+import {
+  Link,
+  type Href,
+  useLoaderData,
+  useLocalSearchParams,
+  useRouter,
+} from "expo-router";
 import Head from "expo-router/head";
 import { createStaticLoader } from "expo-router/server";
 import { useEffect, useRef, useState } from "react";
-import {
-  ActivityIndicator,
-  Linking,
-  Platform,
-  Pressable,
-  Text,
-  View,
-} from "react-native";
+import { ActivityIndicator, Linking, Pressable, Text, View } from "react-native";
 
 import { AccessibleChoiceGroup } from "../../components/AccessibleChoiceGroup";
 import { AsyncState } from "../../components/AsyncState";
 import { CatalogSources } from "../../components/CatalogSources";
-import { LegalFooter } from "../../components/LegalFooter";
 import { PageScrollView } from "../../components/PageScrollView";
 import { ProductionActions } from "../../components/ProductionActions";
-import { ProductionListItem } from "../../components/ProductionListItem";
 import { ProductionPoster } from "../../components/ProductionPoster";
 import { RatingPicker } from "../../components/RatingPicker";
+import { RelatedProductionsCarousel } from "../../components/RelatedProductionsCarousel";
 import { SpoilerReviewText } from "../../components/SpoilerReviewText";
 import { api } from "../../lib/api";
 import { authClient } from "../../lib/auth-client";
@@ -149,7 +149,7 @@ function DescriptionProvenance({
           className="min-h-11 justify-center"
           onPress={() => void Linking.openURL(description.sourceUrl!)}
         >
-        <Text className="text-xs font-semibold text-brand-text">
+          <Text className="text-xs font-semibold text-brand-text">
             {description.sourceTitle ?? "Source"} ↗
           </Text>
         </Pressable>
@@ -200,20 +200,18 @@ function Schedule({
             ) : null}
             <Link href={`/lieu/${performance.venue.slug}`} asChild>
               <Pressable accessibilityRole="link" className="min-h-11 justify-center">
-              <Text className="text-base font-semibold text-brand-text">
+                <Text className="text-base font-semibold text-brand-text">
                   {performance.venue.name} · {performance.venue.locality}
                 </Text>
               </Pressable>
             </Link>
           </View>
           {performance.officialUrl ? (
-            <Pressable
+            <TicketButton
               accessibilityRole="link"
-              className="min-h-11 justify-center"
+              label="Billetterie officielle ↗"
               onPress={() => void Linking.openURL(performance.officialUrl!)}
-            >
-              <Text className="text-base font-semibold text-brand-text">Billetterie ↗</Text>
-            </Pressable>
+            />
           ) : null}
         </View>
       ))}
@@ -241,6 +239,7 @@ export default function ProductionScreen() {
   const [reviewVisibility, setReviewVisibility] = useState<"public" | "private">(
     "private",
   );
+  const [showReviewEditor, setShowReviewEditor] = useState(false);
   const [confirmingReviewDelete, setConfirmingReviewDelete] = useState(false);
   const [showLists, setShowLists] = useState(false);
   const [newListName, setNewListName] = useState("");
@@ -326,6 +325,8 @@ export default function ProductionScreen() {
         : api.removeFromWatchlist(productionId ?? ""),
     onSuccess: (state) => {
       updateState(state);
+      void queryClient.invalidateQueries({ queryKey: ["watchlist"] });
+      void queryClient.invalidateQueries({ queryKey: ["my-shows"] });
       setFeedback(state.watchlisted ? "Ajouté à « À voir »." : "Retiré de « À voir ».");
     },
     onError: () => setFeedback("La liste « À voir » n’a pas été mise à jour."),
@@ -368,6 +369,7 @@ export default function ProductionScreen() {
             : "Votre avis privé a été enregistré dans votre profil."
           : "Votre modification a été enregistrée. L’avis reste masqué jusqu’à une nouvelle décision de modération.",
       );
+      setShowReviewEditor(false);
       void production.refetch();
       void queryClient.invalidateQueries({ queryKey: ["my-reviews"] });
     },
@@ -385,6 +387,7 @@ export default function ProductionScreen() {
       setReviewBody("");
       setReviewSpoiler(false);
       setReviewVisibility("private");
+      setShowReviewEditor(false);
       updateState(state);
       setFeedback("Votre avis a été supprimé.");
       void production.refetch();
@@ -506,6 +509,19 @@ export default function ProductionScreen() {
   const fullDescription = production.data?.descriptions.find(
     (description) => description.kind === "full" && description.locale === "fr",
   );
+  const memberRatingCount = production.data?.ratingSummary.count ?? 0;
+  const memberRatingAverage =
+    memberRatingCount >= 5 ? (production.data?.ratingSummary.average ?? null) : null;
+  const memberRatingCountLabel = `${memberRatingCount} ${
+    memberRatingCount > 1 ? "notes" : "note"
+  }`;
+  const publicReviewCount = production.data?.reviews.length ?? 0;
+  const reviewsLinkLabel =
+    publicReviewCount > 0
+      ? "Lire les avis ↓"
+      : viewerState.data?.review
+        ? "Modifier mon avis ↓"
+        : "Écrire le premier avis ↓";
   const canonicalUrl = `${PUBLIC_WEB_URL}/production/${slug}`;
   const unavailable =
     production.error instanceof TodamApiError &&
@@ -553,8 +569,8 @@ export default function ProductionScreen() {
               {
                 "@type": "ListItem",
                 position: 1,
-                name: "Découvrir",
-                item: `${PUBLIC_WEB_URL}/decouvrir`,
+                name: "Rechercher",
+                item: `${PUBLIC_WEB_URL}/search`,
               },
               {
                 "@type": "ListItem",
@@ -568,24 +584,13 @@ export default function ProductionScreen() {
       }
     : null;
 
-  async function share() {
-    if (Platform.OS === "web" && navigator.share) {
-      try {
-        await navigator.share({
-          ...(production.data?.title ? { title: production.data.title } : {}),
-          text: `Découvrez ${production.data?.title} sur Todam.`,
-          url: canonicalUrl,
-        });
-        return;
-      } catch (error) {
-        if (error instanceof DOMException && error.name === "AbortError") return;
-      }
+  async function copyLink() {
+    try {
+      await Clipboard.setStringAsync(canonicalUrl);
+      setFeedback("Lien du spectacle copié.");
+    } catch {
+      setFeedback("Le lien n’a pas pu être copié.");
     }
-    await Linking.openURL(
-      `mailto:?subject=${encodeURIComponent(
-        production.data?.title ?? "Spectacle Todam",
-      )}&body=${encodeURIComponent(canonicalUrl)}`,
-    );
   }
 
   return (
@@ -648,8 +653,8 @@ export default function ProductionScreen() {
             empty={!production.isPending && (!production.data || unavailable)}
             emptyAction={
               <Button
-                label="Découvrir les spectacles"
-                onPress={() => router.push("/decouvrir")}
+                label="Rechercher un spectacle"
+                onPress={() => router.push("/search")}
                 variant="secondary"
               />
             }
@@ -674,14 +679,14 @@ export default function ProductionScreen() {
                     </Text>
                   </View>
                 ) : null}
-                <View className="flex-row flex-wrap gap-2">
-                  <Link href="/decouvrir" asChild>
+                <View className="flex-row flex-wrap items-center gap-2">
+                  <Link href="/search" asChild>
                     <Pressable
                       accessibilityRole="link"
                       className="min-h-11 justify-center"
                     >
-                  <Text className="text-sm font-semibold text-brand-text">
-                        Découvrir
+                      <Text className="text-sm font-semibold text-brand-text">
+                        Rechercher
                       </Text>
                     </Pressable>
                   </Link>
@@ -715,7 +720,7 @@ export default function ProductionScreen() {
                             void Linking.openURL(production.data!.posters[0]!.sourceUrl)
                           }
                         >
-                  <Text className="text-xs font-semibold text-brand-text">
+                          <Text className="text-xs font-semibold text-brand-text">
                             Source et droits du visuel ↗
                           </Text>
                         </Pressable>
@@ -758,12 +763,53 @@ export default function ProductionScreen() {
                             accessibilityRole="link"
                             className="min-h-11 self-start justify-center"
                           >
-                <Text className="text-lg font-semibold text-brand-text">
+                            <Text className="text-lg font-semibold text-brand-text">
                               {production.data.company.name}
                             </Text>
                           </Pressable>
                         </Link>
                       ) : null}
+                      <View className="flex-row flex-wrap items-center justify-between gap-x-6 gap-y-4 border-y border-line py-4">
+                        <View className="gap-2">
+                          <Text className="text-xs font-bold uppercase tracking-widest text-muted">
+                            Note des membres
+                          </Text>
+                          {memberRatingAverage !== null ? (
+                            <RatingLights showValue value={memberRatingAverage} />
+                          ) : (
+                            <Text className="font-serif text-2xl font-semibold text-ink">
+                              {memberRatingCount > 0
+                                ? memberRatingCountLabel
+                                : "Pas encore de note"}
+                            </Text>
+                          )}
+                        </View>
+                        <View className="items-start gap-2">
+                          {memberRatingAverage !== null ? (
+                            <Text className="text-sm text-muted">
+                              {memberRatingCountLabel}
+                            </Text>
+                          ) : null}
+                          <Link
+                            href={`/production/${slug}#avis-des-membres` as Href}
+                            onPress={() => {
+                              if (publicReviewCount === 0 && session.data) {
+                                setShowReviewEditor(true);
+                              }
+                            }}
+                            asChild
+                          >
+                            <Pressable
+                              accessibilityRole="link"
+                              className="min-h-11 justify-center"
+                            >
+                              <Text className="text-sm font-semibold text-brand-text">
+                                {reviewsLinkLabel}
+                              </Text>
+                            </Pressable>
+                          </Link>
+                        </View>
+                      </View>
                       {shortDescription ? (
                         <View className="gap-1">
                           <Text className="max-w-[72ch] text-lg leading-7 text-ink">
@@ -808,26 +854,23 @@ export default function ProductionScreen() {
                               accessibilityRole="link"
                               className="min-h-11 justify-center"
                             >
-                  <Text className="text-base font-semibold text-brand-text">
+                              <Text className="text-base font-semibold text-brand-text">
                                 {nextScheduledPerformance.venue.name} ·{" "}
                                 {nextScheduledPerformance.venue.locality}
                               </Text>
                             </Pressable>
                           </Link>
                           {nextScheduledPerformance.officialUrl ? (
-                            <Pressable
+                            <TicketButton
                               accessibilityRole="link"
-                              className="min-h-11 self-start justify-center"
+                              label="Billetterie officielle ↗"
                               onPress={() =>
                                 void Linking.openURL(
                                   nextScheduledPerformance.officialUrl!,
                                 )
                               }
-                            >
-                    <Text className="text-base font-semibold text-brand-text">
-                                Billetterie officielle ↗
-                              </Text>
-                            </Pressable>
+                              style={{ alignSelf: "flex-start" }}
+                            />
                           ) : null}
                         </View>
                       ) : (
@@ -867,8 +910,8 @@ export default function ProductionScreen() {
                           variant="secondary"
                         />
                         <Button
-                          label="Partager ce spectacle"
-                          onPress={() => void share()}
+                          label="Copier le lien"
+                          onPress={() => void copyLink()}
                           variant="ghost"
                         />
                         {production.data.officialUrl ? (
@@ -1075,22 +1118,54 @@ export default function ProductionScreen() {
                   ) : null}
                 </View>
 
-                <View className="gap-4">
-                  <View className="flex-row flex-wrap items-end justify-between gap-3">
+                <View className="gap-4" nativeID="avis-des-membres">
+                  <View className="flex-row flex-wrap items-center justify-between gap-3">
                     <SectionTitle>Avis des membres</SectionTitle>
-                    {production.data.ratingSummary.average ? (
-                      <View className="items-end gap-2">
-                        <RatingLights value={production.data.ratingSummary.average} />
-                        <Text className="text-sm text-muted">
-                          {production.data.ratingSummary.average}/10 ·{" "}
-                          {production.data.ratingSummary.count} note(s)
+                    {session.data ? (
+                      <Button
+                        accessibilityState={{ expanded: showReviewEditor }}
+                        aria-expanded={showReviewEditor}
+                        disabled={viewerState.isPending}
+                        label={
+                          showReviewEditor
+                            ? "Fermer"
+                            : viewerState.data?.review
+                              ? "Modifier mon avis"
+                              : "Noter ou écrire un avis"
+                        }
+                        onPress={() => setShowReviewEditor((value) => !value)}
+                        variant={showReviewEditor ? "quiet" : "secondary"}
+                      />
+                    ) : null}
+                  </View>
+                  {session.data &&
+                  !showReviewEditor &&
+                  (viewerState.data?.rating || viewerState.data?.review) ? (
+                    <View className="flex-row flex-wrap items-center justify-between gap-3 rounded-todam border border-line bg-paper px-4 py-3">
+                      <View className="gap-1">
+                        <Text className="text-xs font-bold uppercase tracking-widest text-muted">
+                          Ma contribution
+                        </Text>
+                        <Text className="text-sm leading-5 text-ink">
+                          {viewerState.data.rating
+                            ? `Ma note : ${viewerState.data.rating}/10`
+                            : "Aucune note"}
+                          {viewerState.data.review
+                            ? ` · Avis ${
+                                viewerState.data.review.status === "published"
+                                  ? viewerState.data.review.visibility === "public"
+                                    ? "public"
+                                    : "privé"
+                                  : viewerState.data.review.status === "rejected"
+                                    ? "refusé"
+                                    : "masqué"
+                              }`
+                            : " · Aucun avis"}
                         </Text>
                       </View>
-                    ) : (
-                      <Text className="text-sm text-muted">Pas encore de note</Text>
-                    )}
-                  </View>
-                  {session.data ? (
+                    </View>
+                  ) : null}
+                  {session.data && showReviewEditor ? (
                     <View className="todam-form-panel gap-4 p-5">
                       <View className="gap-2">
                         <Text className="text-base font-semibold text-ink">
@@ -1232,7 +1307,7 @@ export default function ProductionScreen() {
                         </View>
                       ) : null}
                     </View>
-                  ) : (
+                  ) : !session.data ? (
                     <Button
                       label="Se connecter pour noter ou écrire un avis"
                       onPress={() =>
@@ -1243,7 +1318,7 @@ export default function ProductionScreen() {
                       }
                       variant="secondary"
                     />
-                  )}
+                  ) : null}
                   {production.data.reviews.length > 0 ? (
                     <View className="border-t border-line">
                       {production.data.reviews.map((review) => (
@@ -1257,7 +1332,7 @@ export default function ProductionScreen() {
                                 accessibilityRole="link"
                                 className="min-h-11 justify-center"
                               >
-                          <Text className="text-base font-semibold text-brand-text">
+                                <Text className="text-base font-semibold text-brand-text">
                                   @{review.username}
                                 </Text>
                               </Pressable>
@@ -1297,9 +1372,9 @@ export default function ProductionScreen() {
                 {production.data.relatedProductions.length > 0 ? (
                   <View className="gap-4">
                     <SectionTitle>Spectacles liés</SectionTitle>
-                    {production.data.relatedProductions.map((related) => (
-                      <ProductionListItem key={related.id} production={related} />
-                    ))}
+                    <RelatedProductionsCarousel
+                      productions={production.data.relatedProductions}
+                    />
                   </View>
                 ) : null}
 
@@ -1350,7 +1425,6 @@ export default function ProductionScreen() {
             ) : null}
           </AsyncState>
         </View>
-        <LegalFooter />
       </PageScrollView>
     </>
   );

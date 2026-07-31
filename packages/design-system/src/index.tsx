@@ -155,6 +155,99 @@ export function Button({
   );
 }
 
+export type TicketButtonVariant = "porcelain" | "orchestra";
+
+export interface TicketButtonProps extends Omit<PressableProps, "children"> {
+  label: string;
+  variant?: TicketButtonVariant;
+}
+
+const ticketShapePath =
+  "M 13 1 H 163 Q 175 1 175 13 V 21 C 169 21 165 25 165 31 C 165 37 169 41 175 41 V 49 Q 175 61 163 61 H 13 Q 1 61 1 49 V 41 C 7 41 11 37 11 31 C 11 25 7 21 1 21 V 13 Q 1 1 13 1 Z";
+
+export function TicketButton({
+  label,
+  variant = "porcelain",
+  accessibilityRole = "button",
+  accessibilityState,
+  disabled,
+  onBlur,
+  onFocus,
+  style,
+  ...props
+}: TicketButtonProps) {
+  const [focused, setFocused] = useState(false);
+  const web = Platform.OS === "web";
+  const webTicketProps = web
+    ? ({
+        dataSet: {
+          todamTicketAction: variant,
+        },
+      } as unknown as PressableProps)
+    : {};
+
+  return (
+    <Pressable
+      accessibilityLabel={label}
+      accessibilityRole={accessibilityRole}
+      accessibilityState={{
+        ...accessibilityState,
+        disabled: Boolean(disabled || accessibilityState?.disabled),
+      }}
+      disabled={disabled}
+      onBlur={(event) => {
+        setFocused(false);
+        onBlur?.(event);
+      }}
+      onFocus={(event) => {
+        setFocused(true);
+        onFocus?.(event);
+      }}
+      style={(state) => [
+        styles.ticketButton,
+        web
+          ? styles.ticketButtonWeb
+          : variant === "orchestra"
+            ? styles.ticketButtonOrchestra
+            : styles.ticketButtonPorcelain,
+        state.pressed && styles.buttonPressed,
+        focused && !web && styles.buttonFocused,
+        disabled && styles.disabled,
+        typeof style === "function" ? style(state) : style,
+      ]}
+      {...props}
+      {...webTicketProps}
+    >
+      {web
+        ? createElement(
+            "svg",
+            {
+              "aria-hidden": true,
+              className: "todam-ticket-action-shape",
+              focusable: "false",
+              preserveAspectRatio: "none",
+              viewBox: "0 0 176 62",
+            },
+            createElement("path", {
+              className: "todam-ticket-action-outline",
+              d: ticketShapePath,
+            }),
+          )
+        : null}
+      <Text
+        numberOfLines={1}
+        style={[
+          styles.ticketButtonLabel,
+          variant === "orchestra" && styles.ticketButtonLabelOrchestra,
+          disabled && styles.buttonLabelDisabled,
+        ]}
+      >
+        {label}
+      </Text>
+    </Pressable>
+  );
+}
+
 export interface TextFieldProps extends TextInputProps {
   label: string;
   error?: string | undefined;
@@ -164,6 +257,7 @@ export interface TextFieldProps extends TextInputProps {
   trailingAction?:
     | {
         accessibilityLabel: string;
+        icon?: ReactNode;
         label: string;
         onPress: () => void;
       }
@@ -240,6 +334,7 @@ export function TextField({
           style={[
             styles.input,
             trailingAction && styles.inputWithTrailingAction,
+            Boolean(trailingAction?.icon) && styles.inputWithTrailingIcon,
             style,
             focused && styles.inputFocused,
             error && styles.inputError,
@@ -256,7 +351,9 @@ export function TextField({
             onPress={trailingAction.onPress}
             style={styles.trailingAction}
           >
-            <Text style={styles.trailingActionLabel}>{trailingAction.label}</Text>
+            {trailingAction.icon ?? (
+              <Text style={styles.trailingActionLabel}>{trailingAction.label}</Text>
+            )}
           </Pressable>
         ) : null}
       </View>
@@ -264,6 +361,22 @@ export function TextField({
         <Text accessibilityRole="alert" nativeID={errorId} style={styles.errorText}>
           {error}
         </Text>
+      ) : null}
+    </View>
+  );
+}
+
+function PasswordVisibilityIcon({ visible }: { visible: boolean }) {
+  return (
+    <View accessible={false} style={styles.passwordEyeIcon}>
+      <View style={styles.passwordEyeOutline}>
+        <View style={styles.passwordEyePupil} />
+      </View>
+      {!visible ? (
+        <>
+          <View style={styles.passwordEyeSlashMask} />
+          <View style={styles.passwordEyeSlash} />
+        </>
       ) : null}
     </View>
   );
@@ -279,6 +392,7 @@ export function PasswordField(props: Omit<TextFieldProps, "secureTextEntry">) {
         accessibilityLabel: visible
           ? "Masquer le mot de passe"
           : "Afficher le mot de passe",
+        icon: <PasswordVisibilityIcon visible={visible} />,
         label: visible ? "Masquer" : "Afficher",
         onPress: () => setVisible((value) => !value),
       }}
@@ -286,17 +400,378 @@ export function PasswordField(props: Omit<TextFieldProps, "secureTextEntry">) {
   );
 }
 
+type PosterDiscipline = "theatre" | "opera" | "ballet";
+
 export interface PosterPlaceholderProps {
   title: string;
-  discipline: "theatre" | "opera" | "ballet";
+  discipline: PosterDiscipline;
   compact?: boolean;
+  edgeToEdge?: boolean;
+  fill?: boolean;
+}
+
+function WebPosterPlaceholder({
+  accessibilityLabel,
+  compact,
+  discipline,
+  edgeToEdge,
+  fill,
+}: {
+  accessibilityLabel: string;
+  compact: boolean;
+  discipline: PosterDiscipline;
+  edgeToEdge: boolean;
+  fill: boolean;
+}) {
+  const frameStyle: CSSProperties = {
+    aspectRatio: fill ? "auto" : "148 / 210",
+    background:
+      discipline === "theatre"
+        ? `radial-gradient(circle at 23% 26%, rgba(243, 169, 149, 0.88), transparent 34%), radial-gradient(circle at 77% 76%, rgba(200, 184, 240, 0.5), transparent 39%), linear-gradient(150deg, #2B2427 0%, ${tokens.color.posterNightTheatre} 47%, #2D2930 100%)`
+        : discipline === "opera"
+          ? `radial-gradient(circle at 50% 20%, rgba(200, 184, 240, 0.72), transparent 35%), radial-gradient(circle at 50% 78%, rgba(243, 169, 149, 0.32), transparent 37%), linear-gradient(180deg, #232029 0%, ${tokens.color.posterNightOpera} 57%, #25202A 100%)`
+          : `radial-gradient(circle at 23% 74%, rgba(159, 216, 208, 0.7), transparent 36%), radial-gradient(circle at 76% 26%, rgba(200, 184, 240, 0.5), transparent 38%), linear-gradient(145deg, #172123 0%, ${tokens.color.posterNightBallet} 48%, #25242D 100%)`,
+    borderRadius: edgeToEdge ? 0 : tokens.radius.media,
+    boxSizing: "border-box",
+    isolation: "isolate",
+    height: fill ? "100%" : undefined,
+    minWidth: fill ? 0 : compact ? 68 : 150,
+    overflow: "hidden",
+    position: "relative",
+    width: fill ? "100%" : compact ? 68 : "100%",
+  };
+  const hiddenShape = { "aria-hidden": true };
+  const blur = (large: number, small: number) => `blur(${compact ? small : large}px)`;
+
+  const theatreShapes = [
+    createElement("span", {
+      ...hiddenShape,
+      key: "theatre-glow",
+      style: {
+        background: tokens.color.coral,
+        borderRadius: "50%",
+        bottom: "-17%",
+        filter: blur(22, 5),
+        height: "52%",
+        mixBlendMode: "screen",
+        opacity: 0.46,
+        position: "absolute",
+        right: "3%",
+        width: "72%",
+        zIndex: 2,
+      } satisfies CSSProperties,
+    }),
+    createElement("span", {
+      ...hiddenShape,
+      key: "theatre-beam",
+      style: {
+        background:
+          "linear-gradient(180deg, rgba(255, 253, 248, 0.8), transparent 72%)",
+        clipPath: "polygon(42% 0, 70% 0, 100% 100%, 0 100%)",
+        filter: blur(12, 3),
+        height: "128%",
+        left: "8%",
+        mixBlendMode: "screen",
+        position: "absolute",
+        top: "-14%",
+        transform: "rotate(14deg)",
+        transformOrigin: "top",
+        width: "31%",
+        zIndex: 3,
+      } satisfies CSSProperties,
+    }),
+    createElement("span", {
+      ...hiddenShape,
+      key: "theatre-veil",
+      style: {
+        background:
+          "linear-gradient(145deg, rgba(255, 253, 248, 0.15), transparent 68%)",
+        border: "1px solid rgba(255, 253, 248, 0.17)",
+        borderRadius: "50% 18% 50% 24%",
+        boxShadow: "inset 18px 12px 44px rgba(255, 253, 248, 0.025)",
+        height: "75%",
+        position: "absolute",
+        right: "7%",
+        top: "15%",
+        transform: "rotate(-12deg)",
+        width: "54%",
+        zIndex: 4,
+      } satisfies CSSProperties,
+    }),
+    createElement("span", {
+      ...hiddenShape,
+      key: "theatre-pin",
+      style: {
+        background: tokens.color.surface,
+        borderRadius: "50%",
+        boxShadow: compact
+          ? "0 0 5px 2px rgba(255, 253, 248, 0.32)"
+          : "0 0 20px 6px rgba(255, 253, 248, 0.32)",
+        height: compact ? 2 : 5,
+        position: "absolute",
+        right: "21%",
+        top: "31%",
+        width: compact ? 2 : 5,
+        zIndex: 5,
+      } satisfies CSSProperties,
+    }),
+  ];
+
+  const operaShapes = [
+    createElement("span", {
+      ...hiddenShape,
+      key: "opera-left-beam",
+      style: {
+        background:
+          "linear-gradient(180deg, rgba(255, 253, 248, 0.78), transparent 78%)",
+        clipPath: "polygon(30% 0, 48% 0, 100% 100%, 0 100%)",
+        filter: blur(8, 2),
+        height: "96%",
+        left: "-2%",
+        mixBlendMode: "screen",
+        opacity: 0.7,
+        position: "absolute",
+        top: "-10%",
+        transform: "rotate(-9deg)",
+        transformOrigin: "top",
+        width: "44%",
+        zIndex: 2,
+      } satisfies CSSProperties,
+    }),
+    createElement("span", {
+      ...hiddenShape,
+      key: "opera-right-beam",
+      style: {
+        background:
+          "linear-gradient(180deg, rgba(255, 253, 248, 0.78), transparent 78%)",
+        clipPath: "polygon(52% 0, 70% 0, 100% 100%, 0 100%)",
+        filter: blur(8, 2),
+        height: "96%",
+        mixBlendMode: "screen",
+        opacity: 0.7,
+        position: "absolute",
+        right: "-2%",
+        top: "-10%",
+        transform: "rotate(9deg)",
+        transformOrigin: "top",
+        width: "44%",
+        zIndex: 2,
+      } satisfies CSSProperties,
+    }),
+    createElement("span", {
+      ...hiddenShape,
+      key: "opera-halo",
+      style: {
+        aspectRatio: "1",
+        background: "rgba(200, 184, 240, 0.52)",
+        borderRadius: "50%",
+        filter: blur(28, 6),
+        left: "27%",
+        mixBlendMode: "screen",
+        position: "absolute",
+        top: "24%",
+        width: "46%",
+        zIndex: 3,
+      } satisfies CSSProperties,
+    }),
+    createElement(
+      "span",
+      {
+        ...hiddenShape,
+        key: "opera-arch",
+        style: {
+          background:
+            "linear-gradient(180deg, rgba(200, 184, 240, 0.11), transparent 46%), rgba(17, 18, 20, 0.18)",
+          border: "1px solid rgba(255, 253, 248, 0.21)",
+          borderRadius: "50% 50% 10px 10px / 27% 27% 10px 10px",
+          bottom: "11%",
+          boxShadow:
+            "inset 0 0 44px rgba(200, 184, 240, 0.08), 0 0 34px rgba(200, 184, 240, 0.06)",
+          left: "14%",
+          position: "absolute",
+          right: "14%",
+          top: "16%",
+          zIndex: 5,
+        } satisfies CSSProperties,
+      },
+      createElement("span", {
+        ...hiddenShape,
+        style: {
+          border: "1px solid rgba(200, 184, 240, 0.18)",
+          borderRadius: "50% 50% 7px 7px / 27% 27% 7px 7px",
+          bottom: "9%",
+          left: "8%",
+          position: "absolute",
+          right: "8%",
+          top: "7%",
+        } satisfies CSSProperties,
+      }),
+    ),
+    createElement(
+      "span",
+      {
+        ...hiddenShape,
+        key: "opera-footlights",
+        style: {
+          bottom: "10%",
+          display: "flex",
+          justifyContent: "space-between",
+          left: "18%",
+          position: "absolute",
+          right: "18%",
+          zIndex: 7,
+        } satisfies CSSProperties,
+      },
+      ...Array.from({ length: compact ? 5 : 7 }, (_, index) =>
+        createElement("span", {
+          ...hiddenShape,
+          key: index,
+          style: {
+            aspectRatio: "1",
+            background: tokens.color.surface,
+            borderRadius: "50%",
+            boxShadow: compact
+              ? "0 0 3px rgba(255, 253, 248, 0.66)"
+              : "0 0 12px rgba(255, 253, 248, 0.66)",
+            width: compact ? 2 : 5,
+          } satisfies CSSProperties,
+        }),
+      ),
+    ),
+  ];
+
+  const balletShapes = [
+    createElement("span", {
+      ...hiddenShape,
+      key: "ballet-glow",
+      style: {
+        background: tokens.color.aqua,
+        borderRadius: "50%",
+        bottom: "-12%",
+        filter: blur(27, 6),
+        height: "42%",
+        left: "6%",
+        mixBlendMode: "screen",
+        opacity: 0.56,
+        position: "absolute",
+        transform: "rotate(-10deg)",
+        width: "78%",
+        zIndex: 3,
+      } satisfies CSSProperties,
+    }),
+    createElement("span", {
+      ...hiddenShape,
+      key: "ballet-left-beam",
+      style: {
+        background:
+          "linear-gradient(180deg, rgba(255, 253, 248, 0.72), transparent 74%)",
+        clipPath: "polygon(34% 0, 60% 0, 100% 100%, 0 100%)",
+        filter: blur(9, 2),
+        height: "129%",
+        left: "1%",
+        mixBlendMode: "screen",
+        position: "absolute",
+        top: "-15%",
+        transform: "rotate(-22deg)",
+        transformOrigin: "top",
+        width: "29%",
+        zIndex: 2,
+      } satisfies CSSProperties,
+    }),
+    createElement("span", {
+      ...hiddenShape,
+      key: "ballet-right-beam",
+      style: {
+        background:
+          "linear-gradient(180deg, rgba(255, 253, 248, 0.72), transparent 74%)",
+        clipPath: "polygon(40% 0, 66% 0, 100% 100%, 0 100%)",
+        filter: blur(9, 2),
+        height: "129%",
+        mixBlendMode: "screen",
+        opacity: 0.54,
+        position: "absolute",
+        right: "3%",
+        top: "-15%",
+        transform: "rotate(18deg)",
+        transformOrigin: "top",
+        width: "29%",
+        zIndex: 2,
+      } satisfies CSSProperties,
+    }),
+    createElement("span", {
+      ...hiddenShape,
+      key: "ballet-first-ribbon",
+      style: {
+        background:
+          "linear-gradient(145deg, rgba(159, 216, 208, 0.1), transparent 68%)",
+        border: "1px solid rgba(255, 253, 248, 0.22)",
+        borderRadius: "58% 22% 56% 31%",
+        boxShadow: "inset 0 0 38px rgba(159, 216, 208, 0.06)",
+        height: "76%",
+        left: "24%",
+        position: "absolute",
+        top: "12%",
+        transform: "rotate(24deg)",
+        width: "45%",
+        zIndex: 5,
+      } satisfies CSSProperties,
+    }),
+    createElement("span", {
+      ...hiddenShape,
+      key: "ballet-second-ribbon",
+      style: {
+        background:
+          "linear-gradient(145deg, rgba(200, 184, 240, 0.08), transparent 70%)",
+        border: "1px solid rgba(200, 184, 240, 0.2)",
+        borderRadius: "24% 64% 30% 58%",
+        height: "57%",
+        left: "37%",
+        position: "absolute",
+        top: "29%",
+        transform: "rotate(-31deg)",
+        width: "31%",
+        zIndex: 5,
+      } satisfies CSSProperties,
+    }),
+  ];
+
+  return createElement(
+    "div",
+    {
+      "aria-label": accessibilityLabel,
+      "data-todam-poster-placeholder": discipline,
+      role: "img",
+      style: frameStyle,
+    },
+    ...(discipline === "theatre"
+      ? theatreShapes
+      : discipline === "opera"
+        ? operaShapes
+        : balletShapes),
+  );
 }
 
 export function PosterPlaceholder({
   title,
   discipline,
   compact = false,
+  edgeToEdge = false,
+  fill = false,
 }: PosterPlaceholderProps) {
+  const accessibilityLabel = `Affiche indisponible pour ${title}`;
+
+  if (Platform.OS === "web") {
+    return (
+      <WebPosterPlaceholder
+        accessibilityLabel={accessibilityLabel}
+        compact={compact}
+        discipline={discipline}
+        edgeToEdge={edgeToEdge}
+        fill={fill}
+      />
+    );
+  }
+
   const titleSeed = Array.from(title).reduce(
     (total, character) => (total + character.codePointAt(0)!) % 17,
     0,
@@ -310,54 +785,50 @@ export function PosterPlaceholder({
 
   return (
     <View
-      accessibilityLabel={`Affiche indisponible pour ${title}`}
+      accessibilityLabel={accessibilityLabel}
       accessibilityRole="image"
-      style={[styles.poster, compositionStyle, compact && styles.posterCompact]}
+      style={[
+        fill ? styles.posterFill : styles.poster,
+        compositionStyle,
+        compact && !fill && styles.posterCompact,
+        edgeToEdge && styles.posterEdgeToEdge,
+      ]}
     >
-      <View
-        style={[
-          styles.posterGlow,
-          discipline === "theatre"
-            ? styles.posterGlowTheatre
-            : discipline === "opera"
-              ? styles.posterGlowOpera
-              : styles.posterGlowBallet,
-          {
-            transform: [
-              { translateX: titleSeed - 8 },
-              { translateY: titleSeed - 6 },
-            ],
-          },
-        ]}
-      />
-      <View
-        style={[
-          styles.posterMist,
-          discipline === "theatre"
-            ? styles.posterMistTheatre
-            : discipline === "opera"
-              ? styles.posterMistOpera
-              : styles.posterMistBallet,
-          { transform: [{ rotate: `${titleSeed - 7}deg` }] },
-        ]}
-      />
-      <View style={[styles.posterBeam, styles.posterBeamLeft]} />
-      <View style={[styles.posterBeam, styles.posterBeamRight]} />
-      <View style={styles.posterStage}>
-        {Array.from({ length: compact ? 5 : 8 }, (_, index) => (
+      {discipline === "theatre" ? (
+        <>
           <View
-            key={index}
             style={[
-              styles.posterStageLight,
-              index % 3 === 0
-                ? styles.posterStageLightCoral
-                : index % 3 === 1
-                  ? styles.posterStageLightLilac
-                  : styles.posterStageLightAqua,
+              styles.posterTheatreGlow,
+              { transform: [{ translateY: titleSeed - 8 }] },
             ]}
           />
-        ))}
-      </View>
+          <View style={styles.posterTheatreBeam} />
+          <View style={styles.posterTheatreVeil} />
+          <View style={styles.posterTheatrePin} />
+        </>
+      ) : discipline === "opera" ? (
+        <>
+          <View style={[styles.posterOperaBeam, styles.posterOperaBeamLeft]} />
+          <View style={[styles.posterOperaBeam, styles.posterOperaBeamRight]} />
+          <View style={styles.posterOperaHalo} />
+          <View style={styles.posterOperaArch}>
+            <View style={styles.posterOperaArchInner} />
+          </View>
+          <View style={styles.posterStage}>
+            {Array.from({ length: compact ? 5 : 7 }, (_, index) => (
+              <View key={index} style={styles.posterStageLight} />
+            ))}
+          </View>
+        </>
+      ) : (
+        <>
+          <View style={styles.posterBalletGlow} />
+          <View style={[styles.posterBalletBeam, styles.posterBalletBeamLeft]} />
+          <View style={[styles.posterBalletBeam, styles.posterBalletBeamRight]} />
+          <View style={styles.posterBalletRibbonOne} />
+          <View style={styles.posterBalletRibbonTwo} />
+        </>
+      )}
     </View>
   );
 }
@@ -557,6 +1028,47 @@ const styles = StyleSheet.create({
   textActionPressed: {
     opacity: 0.72,
   },
+  ticketButton: {
+    alignItems: "center",
+    flexShrink: 1,
+    justifyContent: "center",
+    maxWidth: "100%",
+    minHeight: 56,
+    minWidth: 154,
+    overflow: "visible",
+    paddingHorizontal: 20,
+    position: "relative",
+  },
+  ticketButtonLabel: {
+    color: tokens.color.ink,
+    flexShrink: 1,
+    fontFamily: tokens.button.quiet.fontFamily,
+    fontSize: 15,
+    fontWeight: "600",
+    position: "relative",
+    textAlign: "center",
+    zIndex: 1,
+  },
+  ticketButtonLabelOrchestra: {
+    color: tokens.color.surface,
+  },
+  ticketButtonOrchestra: {
+    backgroundColor: tokens.color.ink,
+    borderColor: tokens.color.ink,
+    borderRadius: tokens.radius.medium,
+    borderWidth: 1,
+  },
+  ticketButtonPorcelain: {
+    backgroundColor: tokens.color.surface,
+    borderColor: tokens.color.coral,
+    borderRadius: tokens.radius.medium,
+    borderWidth: 1,
+  },
+  ticketButtonWeb: {
+    backgroundColor: "transparent",
+    borderWidth: 0,
+    isolation: "isolate",
+  },
   errorText: {
     color: tokens.color.error,
     fontSize: 13,
@@ -614,6 +1126,9 @@ const styles = StyleSheet.create({
   inputWithTrailingAction: {
     paddingRight: 92,
   },
+  inputWithTrailingIcon: {
+    paddingRight: 56,
+  },
   trailingAction: {
     alignItems: "center",
     bottom: 0,
@@ -629,6 +1144,41 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: "700",
   },
+  passwordEyeIcon: {
+    alignItems: "center",
+    height: 18,
+    justifyContent: "center",
+    width: 24,
+  },
+  passwordEyeOutline: {
+    alignItems: "center",
+    borderColor: tokens.color.brandText,
+    borderRadius: tokens.radius.round,
+    borderWidth: 1.75,
+    height: 14,
+    justifyContent: "center",
+    width: 22,
+  },
+  passwordEyePupil: {
+    backgroundColor: tokens.color.brandText,
+    borderRadius: tokens.radius.round,
+    height: 5,
+    width: 5,
+  },
+  passwordEyeSlashMask: {
+    backgroundColor: tokens.color.surface,
+    height: 4,
+    position: "absolute",
+    transform: [{ rotate: "38deg" }],
+    width: 27,
+  },
+  passwordEyeSlash: {
+    backgroundColor: tokens.color.brandText,
+    height: 1.75,
+    position: "absolute",
+    transform: [{ rotate: "38deg" }],
+    width: 27,
+  },
   poster: {
     alignItems: "center",
     aspectRatio: 148 / 210,
@@ -639,77 +1189,122 @@ const styles = StyleSheet.create({
     position: "relative",
     width: "100%",
   },
+  posterFill: {
+    alignItems: "center",
+    borderRadius: tokens.radius.media,
+    height: "100%",
+    justifyContent: "flex-end",
+    minWidth: 0,
+    overflow: "hidden",
+    position: "relative",
+    width: "100%",
+  },
   posterTheatre: {
-    backgroundColor: tokens.color.placeholderTheatre,
+    backgroundColor: tokens.color.posterNightTheatre,
   },
   posterOpera: {
-    backgroundColor: tokens.color.placeholderOpera,
+    backgroundColor: tokens.color.posterNightOpera,
   },
   posterBallet: {
-    backgroundColor: tokens.color.placeholderBallet,
+    backgroundColor: tokens.color.posterNightBallet,
   },
   posterCompact: {
     minWidth: 68,
     width: 68,
   },
-  posterGlow: {
+  posterEdgeToEdge: {
+    borderRadius: 0,
+  },
+  posterTheatreGlow: {
+    backgroundColor: "rgba(243, 169, 149, 0.52)",
     borderRadius: tokens.radius.round,
-    height: "56%",
-    opacity: 0.82,
+    height: "52%",
+    left: "-17%",
+    opacity: 0.7,
     position: "absolute",
-    right: "-18%",
-    top: "20%",
-    width: "84%",
+    top: "10%",
+    width: "78%",
   },
-  posterGlowTheatre: {
-    backgroundColor: tokens.color.lilac,
+  posterTheatreBeam: {
+    backgroundColor: "rgba(255, 253, 248, 0.28)",
+    height: "126%",
+    left: "9%",
+    opacity: 0.76,
+    position: "absolute",
+    top: "-15%",
+    transform: [{ rotate: "14deg" }],
+    width: "21%",
   },
-  posterGlowOpera: {
-    backgroundColor: tokens.color.aqua,
-  },
-  posterGlowBallet: {
-    backgroundColor: tokens.color.coral,
-  },
-  posterMist: {
-    backgroundColor: "rgba(255, 253, 248, 0.58)",
+  posterTheatreVeil: {
+    backgroundColor: "rgba(255, 253, 248, 0.04)",
+    borderColor: "rgba(255, 253, 248, 0.2)",
     borderRadius: tokens.radius.round,
-    height: "54%",
-    left: "-30%",
-    opacity: 0.84,
+    borderWidth: 1,
+    height: "75%",
     position: "absolute",
-    top: "34%",
-    width: "122%",
+    right: "7%",
+    top: "15%",
+    transform: [{ rotate: "-12deg" }],
+    width: "54%",
   },
-  posterMistTheatre: {
-    borderColor: "rgba(243, 169, 149, 0.44)",
-    borderWidth: 1,
+  posterTheatrePin: {
+    backgroundColor: tokens.color.surface,
+    borderRadius: tokens.radius.round,
+    height: 5,
+    position: "absolute",
+    right: "21%",
+    top: "31%",
+    width: 5,
   },
-  posterMistOpera: {
-    borderColor: "rgba(200, 184, 240, 0.46)",
-    borderWidth: 1,
-  },
-  posterMistBallet: {
-    borderColor: "rgba(159, 216, 208, 0.54)",
-    borderWidth: 1,
-  },
-  posterBeam: {
-    backgroundColor: "rgba(255, 253, 248, 0.68)",
+  posterOperaBeam: {
+    backgroundColor: "rgba(255, 253, 248, 0.24)",
     height: "96%",
+    opacity: 0.72,
     position: "absolute",
-    top: "-28%",
-    width: "24%",
+    top: "-10%",
+    width: "25%",
   },
-  posterBeamLeft: {
-    left: "18%",
-    transform: [{ rotate: "-19deg" }],
+  posterOperaBeamLeft: {
+    left: "10%",
+    transform: [{ rotate: "-9deg" }],
   },
-  posterBeamRight: {
-    right: "18%",
-    transform: [{ rotate: "19deg" }],
+  posterOperaBeamRight: {
+    right: "10%",
+    transform: [{ rotate: "9deg" }],
+  },
+  posterOperaHalo: {
+    aspectRatio: 1,
+    backgroundColor: "rgba(200, 184, 240, 0.34)",
+    borderRadius: tokens.radius.round,
+    left: "27%",
+    position: "absolute",
+    top: "24%",
+    width: "46%",
+  },
+  posterOperaArch: {
+    backgroundColor: "rgba(17, 18, 20, 0.18)",
+    borderColor: "rgba(255, 253, 248, 0.24)",
+    borderRadius: tokens.radius.round,
+    borderWidth: 1,
+    bottom: "11%",
+    left: "14%",
+    position: "absolute",
+    right: "14%",
+    top: "16%",
+  },
+  posterOperaArchInner: {
+    borderColor: "rgba(200, 184, 240, 0.22)",
+    borderRadius: tokens.radius.round,
+    borderWidth: 1,
+    bottom: "9%",
+    left: "8%",
+    position: "absolute",
+    right: "8%",
+    top: "7%",
   },
   posterStage: {
     alignItems: "center",
-    bottom: "7%",
+    bottom: "10%",
     flexDirection: "row",
     gap: 5,
     justifyContent: "center",
@@ -717,19 +1312,61 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   posterStageLight: {
+    backgroundColor: tokens.color.surface,
     borderRadius: tokens.radius.round,
     height: 5,
     opacity: 0.9,
     width: 5,
   },
-  posterStageLightAqua: {
-    backgroundColor: tokens.color.aqua,
+  posterBalletGlow: {
+    backgroundColor: "rgba(159, 216, 208, 0.46)",
+    borderRadius: tokens.radius.round,
+    bottom: "-12%",
+    height: "42%",
+    left: "6%",
+    position: "absolute",
+    transform: [{ rotate: "-10deg" }],
+    width: "78%",
   },
-  posterStageLightCoral: {
-    backgroundColor: tokens.color.coral,
+  posterBalletBeam: {
+    backgroundColor: "rgba(255, 253, 248, 0.24)",
+    height: "129%",
+    position: "absolute",
+    top: "-15%",
+    width: "20%",
   },
-  posterStageLightLilac: {
-    backgroundColor: tokens.color.lilac,
+  posterBalletBeamLeft: {
+    left: "5%",
+    transform: [{ rotate: "-22deg" }],
+  },
+  posterBalletBeamRight: {
+    opacity: 0.62,
+    right: "7%",
+    transform: [{ rotate: "18deg" }],
+  },
+  posterBalletRibbonOne: {
+    backgroundColor: "rgba(159, 216, 208, 0.05)",
+    borderColor: "rgba(255, 253, 248, 0.24)",
+    borderRadius: tokens.radius.round,
+    borderWidth: 1,
+    height: "76%",
+    left: "24%",
+    position: "absolute",
+    top: "12%",
+    transform: [{ rotate: "24deg" }],
+    width: "45%",
+  },
+  posterBalletRibbonTwo: {
+    backgroundColor: "rgba(200, 184, 240, 0.04)",
+    borderColor: "rgba(200, 184, 240, 0.22)",
+    borderRadius: tokens.radius.round,
+    borderWidth: 1,
+    height: "57%",
+    left: "37%",
+    position: "absolute",
+    top: "29%",
+    transform: [{ rotate: "-31deg" }],
+    width: "31%",
   },
   ratingLightsGroup: {
     alignItems: "flex-start",

@@ -167,7 +167,7 @@ function ReviewSummary({ item }: { item: MyShowItem }) {
   return (
     <View className="todam-form-panel gap-3 p-4">
       <View className="flex-row flex-wrap items-center gap-2">
-          <Text className="text-xs font-bold uppercase tracking-wide text-brand-text">
+        <Text className="text-xs font-bold uppercase tracking-wide text-brand-text">
           Mon avis
         </Text>
         <Text className="text-xs text-muted">
@@ -333,73 +333,75 @@ export function MyShowsSectionScreen({ section }: { section: MyShowsSection }) {
     <>
       <PrivatePageHead title={`${copy.title} · Mes spectacles`} />
       <PageScrollView
-        contentContainerClassName="mx-auto w-full max-w-4xl gap-6 px-4 py-6 md:px-8 md:py-10"
+        contentContainerClassName="flex-grow"
         keyboardShouldPersistTaps="handled"
       >
-        <View className="gap-2">
-          <Text
-            aria-level={1}
-            accessibilityRole="header"
-            className="font-serif text-4xl font-semibold text-ink"
-          >
-            {copy.title}
-          </Text>
-          <Text className="text-base leading-6 text-muted">
-            Recherchez et filtrez uniquement les spectacles de cette section.
-          </Text>
-        </View>
-        <MyShowsNavigation counts={navigationCounts(dashboard.data)} />
-        <MyShowsFilters
-          facets={firstPage?.facets ?? emptyFacets}
-          key={query.q}
-          onChange={replaceQuery}
-          onClear={clearQuery}
-          query={query}
-          section={section}
-        />
-        <Text
-          accessibilityLiveRegion="polite"
-          className="text-base font-semibold text-ink"
-        >
-          {firstPage?.total ?? 0} résultat
-          {(firstPage?.total ?? 0) > 1 ? "s" : ""}
-        </Text>
-        <AsyncState
-          empty={!shows.isPending && !shows.isError && items.length === 0}
-          emptyMessage={copy.empty}
-          error={shows.isError}
-          loading={shows.isPending}
-          onRetry={() => void shows.refetch()}
-        >
-          <View className="gap-5">
-            {items.map((item) => (
-              <ShowResult
-                item={item}
-                key={`${section}-${item.production.id}`}
-                showReview={section === "rated"}
-              />
-            ))}
-            {shows.hasNextPage ? (
-              <View className="items-center">
-                <Button
-                  label="Afficher plus"
-                  loading={shows.isFetchingNextPage}
-                  onPress={() => void shows.fetchNextPage()}
-                  variant="quiet"
-                />
-              </View>
-            ) : null}
+        <View className="todam-page-before-footer mx-auto w-full max-w-4xl flex-1 gap-6 px-4 py-6 md:px-8 md:py-10">
+          <View className="gap-2">
+            <Text
+              aria-level={1}
+              accessibilityRole="header"
+              className="font-serif text-4xl font-semibold text-ink"
+            >
+              {copy.title}
+            </Text>
+            <Text className="text-base leading-6 text-muted">
+              Recherchez et filtrez uniquement les spectacles de cette section.
+            </Text>
           </View>
-        </AsyncState>
-        {section === "rated" ? (
-          <Link href="/journal/avis" asChild>
-            <Button
-              accessibilityRole="link"
-              label="Voir uniquement mes avis écrits"
-              variant="secondary"
-            />
-          </Link>
-        ) : null}
+          <MyShowsNavigation counts={navigationCounts(dashboard.data)} />
+          <MyShowsFilters
+            facets={firstPage?.facets ?? emptyFacets}
+            key={query.q}
+            onChange={replaceQuery}
+            onClear={clearQuery}
+            query={query}
+            section={section}
+          />
+          <Text
+            accessibilityLiveRegion="polite"
+            className="text-base font-semibold text-ink"
+          >
+            {firstPage?.total ?? 0} résultat
+            {(firstPage?.total ?? 0) > 1 ? "s" : ""}
+          </Text>
+          <AsyncState
+            empty={!shows.isPending && !shows.isError && items.length === 0}
+            emptyMessage={copy.empty}
+            error={shows.isError}
+            loading={shows.isPending}
+            onRetry={() => void shows.refetch()}
+          >
+            <View className="gap-5">
+              {items.map((item) => (
+                <ShowResult
+                  item={item}
+                  key={`${section}-${item.production.id}`}
+                  showReview={section === "rated"}
+                />
+              ))}
+              {shows.hasNextPage ? (
+                <View className="items-center">
+                  <Button
+                    label="Afficher plus"
+                    loading={shows.isFetchingNextPage}
+                    onPress={() => void shows.fetchNextPage()}
+                    variant="quiet"
+                  />
+                </View>
+              ) : null}
+            </View>
+          </AsyncState>
+          {section === "rated" ? (
+            <Link href="/journal/avis" asChild>
+              <Button
+                accessibilityRole="link"
+                label="Voir uniquement mes avis écrits"
+                variant="secondary"
+              />
+            </Link>
+          ) : null}
+        </View>
       </PageScrollView>
     </>
   );

@@ -4,7 +4,6 @@ import Constants from "expo-constants";
 import Head from "expo-router/head";
 import { Linking, Platform, Pressable, StyleSheet, Text, View } from "react-native";
 
-import { LegalFooter } from "../components/LegalFooter";
 import { PageScrollView } from "../components/PageScrollView";
 import { api } from "../lib/api";
 import { resolveBuildInfo } from "../lib/build-info";
@@ -139,19 +138,19 @@ export default function BehindTheScenesScreen() {
       <Head>
         <title>Les coulisses de Todam | Coût, code et fonctionnement</title>
         <meta
-          content="Les coulisses de Todam : coût mensuel, code open source, licences, stack Docker, version publique, sauvegardes, supervision et limites actuelles."
+          content="Les coulisses de Todam : chiffres clés, salles référencées, coût mensuel, code open source, licences et stack technique."
           name="description"
         />
         <link href={`${PUBLIC_WEB_URL}/les-coulisses`} rel="canonical" />
         <meta content="Les coulisses de Todam" property="og:title" />
         <meta
-          content="Coût mensuel, code open source, licences, stack technique et état opérationnel du projet."
+          content="Chiffres clés, salles référencées, coût mensuel, code open source et stack technique."
           property="og:description"
         />
         <meta content={`${PUBLIC_WEB_URL}/les-coulisses`} property="og:url" />
         <meta content="Les coulisses de Todam" name="twitter:title" />
         <meta
-          content="Coût mensuel, code open source, licences, stack technique et état opérationnel du projet."
+          content="Chiffres clés, salles référencées, coût mensuel, code open source et stack technique."
           name="twitter:description"
         />
       </Head>
@@ -177,9 +176,8 @@ export default function BehindTheScenesScreen() {
                 Todam, côté coulisses
               </Text>
               <Text className="max-w-3xl text-lg leading-8 text-ink">
-                Todam est un jeune projet open source. Nous préférons montrer ce qui
-                existe vraiment : le catalogue, la communauté, la technologie, le coût
-                et le code qui fait fonctionner Todam.
+                Jetez un œil derrière le rideau : découvrez les chiffres, les coûts et
+                le code qui font tourner Todam.
               </Text>
             </View>
             {buildInfo.commitUrl ? (
@@ -219,8 +217,8 @@ export default function BehindTheScenesScreen() {
                 value={statValue(stats.data?.activeProductions)}
               />
               <StatTicket
-                label="Représentations à venir"
-                value={statValue(stats.data?.upcomingPerformances)}
+                label="Salles de théâtre, d’opéra et de ballet"
+                value={statValue(stats.data?.activeVenues)}
               />
             </View>
             {stats.isError ? (
@@ -352,79 +350,19 @@ export default function BehindTheScenesScreen() {
             </View>
           </View>
 
-          <View className="gap-7 border-y border-line py-8">
-            <View className="max-w-4xl gap-3">
-          <Text className="text-xs font-bold uppercase tracking-widest text-brand-text">
-                Fiabilité opérationnelle
-              </Text>
-              <Text
-                aria-level={2}
-                accessibilityRole="header"
-                className="font-serif text-3xl font-bold text-ink"
-              >
-                Ce qui est disponible, et ce qui reste à prouver
-              </Text>
-              <Text className="max-w-[72ch] text-base leading-7 text-muted">
-                Todam distingue volontairement les mécanismes présents dans le code des
-                protections effectivement vérifiées en production.
-              </Text>
-            </View>
-            <View className="flex-row flex-wrap gap-4">
-              <View className="todam-calm-panel min-w-64 flex-1 gap-3 p-5">
-                <Text className="text-base font-semibold text-ink">Sauvegardes</Text>
-                <Text className="text-base leading-6 text-muted">
-                  La sauvegarde automatisée de la machine est comprise dans le budget.
-                  Une sauvegarde PostgreSQL quotidienne externalisée vers R2, avec au
-                  moins 14 jours de rétention, reste un prérequis du lancement public.
-                  Elle ne sera annoncée comme opérationnelle qu’après un exercice de
-                  restauration documenté.
-                </Text>
-              </View>
-              <View className="todam-calm-panel min-w-64 flex-1 gap-3 p-5">
-                <Text className="text-base font-semibold text-ink">Supervision</Text>
-                <Text className="text-base leading-6 text-muted">
-                  Le Web et l’API exposent des contrôles de disponibilité et de
-                  connexion à la base. La surveillance extérieure au serveur et les
-                  alertes CPU, mémoire et disque font partie de la checklist de mise en
-                  production ; leur état doit rester explicitement vérifiable.
-                </Text>
-              </View>
-            </View>
-          </View>
-
-          <View className="todam-calm-panel flex-row flex-wrap gap-8 p-6 md:p-8">
-            <View className="min-w-64 flex-1 gap-4">
-              <Text
-                aria-level={2}
-                accessibilityRole="header"
-                className="font-serif text-3xl font-bold text-ink"
-              >
-                Corriger une information
-              </Text>
-              <Text className="text-base leading-7 text-muted">
-                Chaque fiche de spectacle, lieu ou compagnie propose un formulaire de
-                signalement. La correction est vérifiée avec sa source avant
-                publication. Les compagnies validées passent par un brouillon relu par
-                Todam : la version publique ne change pas tant que la révision n’est pas
-                approuvée.
-              </Text>
-            </View>
-            <View className="min-w-64 flex-1 gap-4">
-              <Text
-                aria-level={2}
-                accessibilityRole="header"
-                className="font-serif text-3xl font-bold text-ink"
-              >
-                Limites actuelles
-              </Text>
-              <Text className="text-base leading-7 text-muted">
-                Todam est une bêta en construction. Le catalogue pilote se limite au
-                théâtre, à l’opéra et au ballet. Les visuels ne sont publiés que lorsque
-                les droits sont documentés. La couverture géographique et l’historique
-                peuvent être incomplets, et aucune disponibilité continue n’est encore
-                garantie.
-              </Text>
-            </View>
+          <View className="todam-calm-panel gap-4 p-6 md:p-8">
+            <Text
+              aria-level={2}
+              accessibilityRole="header"
+              className="font-serif text-3xl font-bold text-ink"
+            >
+              Aidez-nous
+            </Text>
+            <Text className="max-w-4xl text-base leading-7 text-muted">
+              Vous pouvez nous aider simplement : ajoutez des spectacles et parlez de
+              Todam autour de vous pour inviter d’autres personnes à essayer
+              l’application.
+            </Text>
           </View>
 
           <View className="gap-4 rounded-todam bg-ink p-6 md:p-8">
@@ -449,7 +387,6 @@ export default function BehindTheScenesScreen() {
             Informations techniques mises à jour le 27 juillet 2026.
           </Text>
         </View>
-        <LegalFooter />
       </PageScrollView>
     </>
   );

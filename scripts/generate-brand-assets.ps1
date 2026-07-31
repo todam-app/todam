@@ -98,6 +98,37 @@ function Save-Png {
   $Bitmap.Save($publicPath, [System.Drawing.Imaging.ImageFormat]::Png)
 }
 
+function Set-OpaqueBackground {
+  param(
+    [string]$Path,
+    [System.Drawing.Color]$Background
+  )
+
+  if (-not [System.IO.File]::Exists($Path)) {
+    return
+  }
+
+  $loaded = New-Object System.Drawing.Bitmap($Path)
+  $result = New-Object System.Drawing.Bitmap(
+    $loaded.Width,
+    $loaded.Height,
+    [System.Drawing.Imaging.PixelFormat]::Format24bppRgb
+  )
+  $graphics = [System.Drawing.Graphics]::FromImage($result)
+  $temporaryPath = "$Path.opaque.png"
+  try {
+    $graphics.Clear($Background)
+    $graphics.DrawImageUnscaled($loaded, 0, 0)
+    $result.Save($temporaryPath, [System.Drawing.Imaging.ImageFormat]::Png)
+  } finally {
+    $graphics.Dispose()
+    $result.Dispose()
+    $loaded.Dispose()
+  }
+
+  Move-Item -Force -LiteralPath $temporaryPath -Destination $Path
+}
+
 function New-OpaqueLogo {
   param(
     [System.Drawing.Bitmap]$Source,
@@ -140,6 +171,7 @@ function New-OpaqueLogo {
 @(
   "todam-app-icon.png",
   "todam-app-icon-foreground.png",
+  "todam-favicon-dark.png",
   "todam-favicon.png",
   "todam-logo-horizontal.png",
   "todam-logo-horizontal-source.png",
@@ -148,6 +180,26 @@ function New-OpaqueLogo {
 ) | ForEach-Object {
   Set-BrandAccent -Path (Join-Path $assetDirectory $_) -AccentColor $accent
 }
+
+Set-OpaqueBackground `
+  -Path (Join-Path $assetDirectory "todam-favicon.png") `
+  -Background $ivory
+Set-OpaqueBackground `
+  -Path (Join-Path $assetDirectory "todam-favicon-dark.png") `
+  -Background $ink
+
+Copy-Item -Force `
+  -LiteralPath (Join-Path $assetDirectory "todam-favicon.svg") `
+  -Destination (Join-Path $appRootPath "public\favicon.svg")
+Copy-Item -Force `
+  -LiteralPath (Join-Path $assetDirectory "todam-favicon-dark.svg") `
+  -Destination (Join-Path $appRootPath "public\favicon-dark.svg")
+Copy-Item -Force `
+  -LiteralPath (Join-Path $assetDirectory "todam-favicon.png") `
+  -Destination (Join-Path $appRootPath "public\favicon.png")
+Copy-Item -Force `
+  -LiteralPath (Join-Path $assetDirectory "todam-favicon-dark.png") `
+  -Destination (Join-Path $appRootPath "public\favicon-dark.png")
 
 $sourceLogo = New-Object System.Drawing.Bitmap(
   (Join-Path $assetDirectory "todam-logo-horizontal.png")
@@ -205,11 +257,11 @@ try {
   $emailLogo = New-Object System.Drawing.Bitmap(
     304,
     92,
-    [System.Drawing.Imaging.PixelFormat]::Format32bppArgb
+    [System.Drawing.Imaging.PixelFormat]::Format24bppRgb
   )
   $emailLogoGraphics = [System.Drawing.Graphics]::FromImage($emailLogo)
   try {
-    $emailLogoGraphics.Clear([System.Drawing.Color]::Transparent)
+    $emailLogoGraphics.Clear($paper)
     $emailLogoGraphics.InterpolationMode =
       [System.Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic
     $emailLogoGraphics.SmoothingMode =

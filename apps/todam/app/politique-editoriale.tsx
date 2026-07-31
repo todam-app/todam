@@ -2,7 +2,6 @@ import { SectionTitle } from "@todam/design-system";
 import Head from "expo-router/head";
 import { Text, View } from "react-native";
 
-import { LegalFooter } from "../components/LegalFooter";
 import { PageScrollView } from "../components/PageScrollView";
 
 const rules = [
@@ -69,7 +68,6 @@ export default function EditorialPolicyPage() {
             Signaler ou corriger » de chaque fiche.
           </Text>
         </View>
-        <LegalFooter />
       </PageScrollView>
     </>
   );

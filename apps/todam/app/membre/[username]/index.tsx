@@ -6,7 +6,6 @@ import Head from "expo-router/head";
 import { Linking, Platform, Pressable, Text, View } from "react-native";
 
 import { AsyncState } from "../../../components/AsyncState";
-import { LegalFooter } from "../../../components/LegalFooter";
 import { PageScrollView } from "../../../components/PageScrollView";
 import { ProductionListItem } from "../../../components/ProductionListItem";
 import { SpoilerReviewText } from "../../../components/SpoilerReviewText";
@@ -88,8 +87,8 @@ export default function PublicMemberPage() {
             empty={!profile.isPending && (!profile.data || unavailable)}
             emptyAction={
               <Button
-                label="Découvrir les spectacles"
-                onPress={() => router.push("/decouvrir")}
+                label="Rechercher un spectacle"
+                onPress={() => router.push("/search")}
                 variant="secondary"
               />
             }
@@ -182,8 +181,8 @@ export default function PublicMemberPage() {
                     empty={!journal.isPending && entries.length === 0}
                     emptyAction={
                       <Button
-                        label="Découvrir les spectacles"
-                        onPress={() => router.push("/decouvrir")}
+                        label="Rechercher un spectacle"
+                        onPress={() => router.push("/search")}
                         variant="secondary"
                       />
                     }
@@ -259,7 +258,6 @@ export default function PublicMemberPage() {
             ) : null}
           </AsyncState>
         </View>
-        <LegalFooter />
       </PageScrollView>
     </>
   );

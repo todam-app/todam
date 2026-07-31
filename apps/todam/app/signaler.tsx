@@ -7,7 +7,6 @@ import { useMemo, useState } from "react";
 import { Image, Pressable, Text, View } from "react-native";
 
 import { AccessibleChoiceGroup } from "../components/AccessibleChoiceGroup";
-import { LegalFooter } from "../components/LegalFooter";
 import { PageScrollView } from "../components/PageScrollView";
 import { api } from "../lib/api";
 
@@ -118,8 +117,8 @@ export default function ContentReportPage() {
               </Text>
               <View className="self-start">
                 <Button
-                  label="Retour à la découverte"
-                  onPress={() => router.replace("/decouvrir")}
+                  label="Retour à la recherche"
+                  onPress={() => router.replace("/search")}
                   variant="quiet"
                 />
               </View>
@@ -230,7 +229,6 @@ export default function ContentReportPage() {
             </View>
           )}
         </View>
-        <LegalFooter />
       </PageScrollView>
     </>
   );

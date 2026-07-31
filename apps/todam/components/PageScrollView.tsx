@@ -1,4 +1,4 @@
-import { usePathname } from "expo-router";
+import { useIsFocused, usePathname } from "expo-router";
 import {
   createContext,
   useContext,
@@ -19,6 +19,7 @@ import {
 } from "react-native";
 
 import { isPrimaryMobilePath } from "../lib/navigation";
+import { LegalFooter, type LegalFooterVariant } from "./LegalFooter";
 
 type WebPageScrollContextValue = {
   isScrolled: boolean;
@@ -55,12 +56,19 @@ export function useWebPageScrolled(): boolean {
 }
 
 export function PageScrollView({
+  children,
   className,
+  footer = "full",
+  footerAlwaysVisible = false,
   nativeID,
   onScroll,
   scrollEventThrottle,
   ...props
-}: ScrollViewProps) {
+}: ScrollViewProps & {
+  footer?: LegalFooterVariant | "none";
+  footerAlwaysVisible?: boolean;
+}) {
+  const isFocused = useIsFocused();
   const pathname = usePathname();
   const scrollViewRef = useRef<ScrollView>(null);
   const { setIsScrolled } = useContext(WebPageScrollContext);
@@ -98,7 +106,14 @@ export function PageScrollView({
       nativeID={nativeID ?? "contenu-principal"}
       ref={scrollViewRef}
       scrollEventThrottle={scrollEventThrottle ?? 16}
-    />
+    >
+      {children}
+      {isFocused &&
+      footer !== "none" &&
+      (Platform.OS === "web" || footerAlwaysVisible) ? (
+        <LegalFooter alwaysVisible={footerAlwaysVisible} variant={footer} />
+      ) : null}
+    </ScrollView>
   );
 }
 

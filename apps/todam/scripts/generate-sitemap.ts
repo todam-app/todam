@@ -9,7 +9,6 @@ const sitemapPath = join(publicDirectory, "sitemap.xml");
 
 const staticPaths = [
   "/",
-  "/decouvrir",
   "/pour-les-salles",
   "/pour-les-compagnies",
   "/les-coulisses",

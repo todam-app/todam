@@ -13,7 +13,6 @@ import { Platform, Pressable, Text, View } from "react-native";
 
 import { AccessibleChoiceGroup } from "../components/AccessibleChoiceGroup";
 import { AsyncState } from "../components/AsyncState";
-import { LegalFooter } from "../components/LegalFooter";
 import { PageScrollView, PageStaticView } from "../components/PageScrollView";
 import { api } from "../lib/api";
 import { authClient } from "../lib/auth-client";
@@ -41,6 +40,22 @@ interface PerformanceDraft {
   countryCode: string;
   timezone: string;
   officialUrl: string;
+}
+
+interface PerformanceValidationErrors {
+  startsAt: string | undefined;
+  endsAt: string | undefined;
+  venueName: string | undefined;
+  addressLine1: string | undefined;
+  postalCode: string | undefined;
+  locality: string | undefined;
+  officialUrl: string | undefined;
+}
+
+interface FormIssue {
+  field: string;
+  message: string;
+  summary: string;
 }
 
 function emptyPerformance(): PerformanceDraft {
@@ -90,11 +105,13 @@ function isoDateTime(value: string): string | null {
 
 function VenueEditor({
   draft,
+  errors,
   onChange,
   onRemove,
   removable,
 }: {
   draft: PerformanceDraft;
+  errors?: PerformanceValidationErrors;
   onChange: (next: PerformanceDraft) => void;
   onRemove: () => void;
   removable: boolean;
@@ -126,6 +143,7 @@ function VenueEditor({
       <View className="gap-3 md:flex-row">
         <View className="min-w-0 flex-1">
           <TextField
+            error={errors?.startsAt}
             label="Date et heure de début"
             onChangeText={(startsAt) => onChange({ ...draft, startsAt })}
             placeholder="2026-07-15T20:00"
@@ -136,6 +154,7 @@ function VenueEditor({
         </View>
         <View className="min-w-0 flex-1">
           <TextField
+            error={errors?.endsAt}
             label="Date et heure de fin"
             onChangeText={(endsAt) => onChange({ ...draft, endsAt })}
             placeholder="Facultatif"
@@ -145,6 +164,7 @@ function VenueEditor({
         </View>
       </View>
       <TextField
+        error={errors?.venueName}
         label="Lieu"
         onChangeText={(venueName) => onChange({ ...draft, venueName, venueId: null })}
         placeholder="Nom de la salle ou du lieu"
@@ -185,7 +205,7 @@ function VenueEditor({
                 })
               }
             >
-                  <Text className="text-sm font-semibold text-brand-text">
+              <Text className="text-sm font-semibold text-brand-text">
                 {venue.name} · {venue.locality}
               </Text>
             </Pressable>
@@ -198,6 +218,7 @@ function VenueEditor({
             Si le lieu n’existe pas, complétez ses informations pour le créer.
           </Text>
           <TextField
+            error={errors?.addressLine1}
             label="Adresse"
             onChangeText={(addressLine1) => onChange({ ...draft, addressLine1 })}
             required
@@ -206,6 +227,7 @@ function VenueEditor({
           <View className="gap-3 md:flex-row">
             <View className="w-full md:max-w-40">
               <TextField
+                error={errors?.postalCode}
                 label="Code postal"
                 onChangeText={(postalCode) => onChange({ ...draft, postalCode })}
                 required
@@ -214,6 +236,7 @@ function VenueEditor({
             </View>
             <View className="min-w-0 flex-1">
               <TextField
+                error={errors?.locality}
                 label="Ville"
                 onChangeText={(locality) => onChange({ ...draft, locality })}
                 required
@@ -222,6 +245,7 @@ function VenueEditor({
             </View>
           </View>
           <TextField
+            error={errors?.officialUrl}
             label="Site officiel du lieu"
             onChangeText={(officialUrl) => onChange({ ...draft, officialUrl })}
             placeholder="Facultatif"
@@ -256,10 +280,12 @@ export default function AddCommunityProductionPage() {
   const [posterUrl, setPosterUrl] = useState("");
   const [posterCredit, setPosterCredit] = useState("");
   const [posterFile, setPosterFile] = useState<File | null>(null);
+  const [posterInputKey, setPosterInputKey] = useState(0);
   const [performances, setPerformances] = useState<PerformanceDraft[]>([
     emptyPerformance(),
   ]);
   const [localError, setLocalError] = useState<string | null>(null);
+  const [validationAttempted, setValidationAttempted] = useState(false);
 
   const companySearch = useQuery({
     queryKey: ["community-company-search", companyName],
@@ -405,7 +431,7 @@ export default function AddCommunityProductionPage() {
     return (
       <>
         <Head>
-          <title>Ajouter un spectacle | Todam</title>
+          <title>Ajouter un spectacle manquant | Todam</title>
           <meta content="noindex,nofollow" name="robots" />
         </Head>
         <PageStaticView className="flex-1">
@@ -426,12 +452,11 @@ export default function AddCommunityProductionPage() {
             L’ajout communautaire d’un spectacle est actuellement proposé sur todam.fr.
           </Text>
           <Button
-            label="Revenir à la découverte"
-            onPress={() => router.replace("/decouvrir")}
+            label="Revenir à la recherche"
+            onPress={() => router.replace("/search")}
             variant="quiet"
           />
         </View>
-        <LegalFooter />
       </PageScrollView>
     );
   }
@@ -440,7 +465,7 @@ export default function AddCommunityProductionPage() {
     return (
       <>
         <Head>
-          <title>Ajouter un spectacle | Todam</title>
+          <title>Ajouter un spectacle manquant | Todam</title>
           <meta content="noindex,nofollow" name="robots" />
         </Head>
         <PageScrollView contentContainerClassName="flex-grow">
@@ -461,7 +486,6 @@ export default function AddCommunityProductionPage() {
               }
             />
           </View>
-          <LegalFooter />
         </PageScrollView>
       </>
     );
@@ -482,37 +506,212 @@ export default function AddCommunityProductionPage() {
               Vérifiez votre adresse e-mail avant de publier un spectacle.
             </Text>
             <Button
-              label="Revenir à la découverte"
-              onPress={() => router.replace("/decouvrir")}
+              label="Revenir à la recherche"
+              onPress={() => router.replace("/search")}
               variant="quiet"
             />
           </View>
-          <LegalFooter />
         </PageScrollView>
       </>
     );
   }
 
   const companies = companySearch.data?.companies ?? [];
-  const formComplete =
-    title.trim().length >= 2 &&
-    companyName.trim().length >= 2 &&
-    validHttpUrl(officialUrl) &&
-    performances.every(
-      (performance) =>
-        isoDateTime(performance.startsAt) &&
-        performance.venueName.trim().length >= 2 &&
-        (performance.venueId ||
-          (performance.addressLine1.trim() &&
-            performance.postalCode.trim() &&
-            performance.locality.trim())),
-    ) &&
-    !exactDuplicate;
+  const formIssues: FormIssue[] = [];
+  const addIssue = (field: string, message: string, summary: string) => {
+    formIssues.push({ field, message, summary });
+  };
+
+  if (title.trim().length < 2) {
+    addIssue(
+      "title",
+      "Indiquez un titre d’au moins 2 caractères.",
+      "Titre : indiquez au moins 2 caractères.",
+    );
+  }
+  if (!companyId && companyName.trim().length < 2) {
+    addIssue(
+      "companyName",
+      "Indiquez un nom d’au moins 2 caractères.",
+      "Compagnie : indiquez un nom d’au moins 2 caractères.",
+    );
+  }
+  if (!companyId && companyOfficialUrl.trim() && !validHttpUrl(companyOfficialUrl)) {
+    addIssue(
+      "companyOfficialUrl",
+      "Utilisez une adresse commençant par http:// ou https://.",
+      "Site de la compagnie : utilisez une adresse HTTP ou HTTPS valide.",
+    );
+  }
+  if (!officialUrl.trim()) {
+    addIssue(
+      "officialUrl",
+      "Ajoutez le lien officiel du spectacle.",
+      "Lien officiel : ajoutez la page officielle du spectacle.",
+    );
+  } else if (!validHttpUrl(officialUrl)) {
+    addIssue(
+      "officialUrl",
+      "Utilisez une adresse commençant par http:// ou https://.",
+      "Lien officiel : utilisez une adresse HTTP ou HTTPS valide.",
+    );
+  }
+  if (performances.length > 50) {
+    addIssue(
+      "performances",
+      "Ajoutez au maximum 50 représentations.",
+      "Représentations : 50 dates maximum peuvent être publiées à la fois.",
+    );
+  }
+  performances.forEach((performance, index) => {
+    const fieldPrefix = `performance.${performance.key}`;
+    const summaryPrefix = `Représentation ${index + 1}`;
+    const startsAt = performance.startsAt ? isoDateTime(performance.startsAt) : null;
+    const endsAt = performance.endsAt ? isoDateTime(performance.endsAt) : null;
+
+    if (!performance.startsAt.trim()) {
+      addIssue(
+        `${fieldPrefix}.startsAt`,
+        "Indiquez la date et l’heure de début.",
+        `${summaryPrefix} : indiquez la date et l’heure de début.`,
+      );
+    } else if (!startsAt) {
+      addIssue(
+        `${fieldPrefix}.startsAt`,
+        "Saisissez une date et une heure valides.",
+        `${summaryPrefix} : la date et l’heure de début sont invalides.`,
+      );
+    }
+    if (performance.endsAt && !endsAt) {
+      addIssue(
+        `${fieldPrefix}.endsAt`,
+        "Saisissez une date et une heure valides.",
+        `${summaryPrefix} : la date et l’heure de fin sont invalides.`,
+      );
+    } else if (
+      startsAt &&
+      endsAt &&
+      new Date(endsAt).getTime() <= new Date(startsAt).getTime()
+    ) {
+      addIssue(
+        `${fieldPrefix}.endsAt`,
+        "La fin doit être postérieure au début.",
+        `${summaryPrefix} : la fin doit être postérieure au début.`,
+      );
+    }
+    if (!performance.venueId && performance.venueName.trim().length < 2) {
+      addIssue(
+        `${fieldPrefix}.venueName`,
+        "Indiquez un nom de lieu d’au moins 2 caractères.",
+        `${summaryPrefix} : indiquez le nom du lieu.`,
+      );
+    }
+    if (!performance.venueId) {
+      if (performance.addressLine1.trim().length < 2) {
+        addIssue(
+          `${fieldPrefix}.addressLine1`,
+          "Indiquez l’adresse du lieu.",
+          `${summaryPrefix} : indiquez l’adresse du lieu.`,
+        );
+      }
+      if (performance.postalCode.trim().length < 2) {
+        addIssue(
+          `${fieldPrefix}.postalCode`,
+          "Indiquez le code postal du lieu.",
+          `${summaryPrefix} : indiquez le code postal du lieu.`,
+        );
+      }
+      if (performance.locality.trim().length < 2) {
+        addIssue(
+          `${fieldPrefix}.locality`,
+          "Indiquez la ville du lieu.",
+          `${summaryPrefix} : indiquez la ville du lieu.`,
+        );
+      }
+      if (performance.officialUrl.trim() && !validHttpUrl(performance.officialUrl)) {
+        addIssue(
+          `${fieldPrefix}.officialUrl`,
+          "Utilisez une adresse commençant par http:// ou https://.",
+          `${summaryPrefix} : le site du lieu n’est pas une adresse valide.`,
+        );
+      }
+    }
+  });
+  if (minimumAge.trim()) {
+    const value = Number(minimumAge);
+    if (!Number.isInteger(value) || value < 0 || value > 99) {
+      addIssue(
+        "minimumAge",
+        "Indiquez un âge entier compris entre 0 et 99.",
+        "Âge minimum : indiquez un nombre entier compris entre 0 et 99.",
+      );
+    }
+  }
+  if (durationMinutes.trim()) {
+    const value = Number(durationMinutes);
+    if (!Number.isInteger(value) || value < 1 || value > 1440) {
+      addIssue(
+        "durationMinutes",
+        "Indiquez une durée entière comprise entre 1 et 1 440 minutes.",
+        "Durée : indiquez un nombre entier compris entre 1 et 1 440 minutes.",
+      );
+    }
+  }
+  if (language.trim() && language.trim().length < 2) {
+    addIssue(
+      "language",
+      "Indiquez au moins 2 caractères.",
+      "Langue : indiquez au moins 2 caractères.",
+    );
+  }
+  if (posterUrl.trim() && !validHttpsUrl(posterUrl)) {
+    addIssue(
+      "posterUrl",
+      "Utilisez une adresse HTTPS directe.",
+      "Affiche : l’URL doit être une adresse HTTPS directe.",
+    );
+  }
+  if (posterUrl.trim() && posterFile) {
+    addIssue(
+      "posterSource",
+      "Gardez soit l’URL, soit le fichier chargé.",
+      "Affiche : choisissez une URL ou un fichier, pas les deux.",
+    );
+  }
+  if (exactDuplicate) {
+    addIssue(
+      "duplicate",
+      "Ce spectacle existe déjà dans Todam.",
+      "Doublon : ce spectacle existe déjà dans Todam.",
+    );
+  }
+
+  const errorFor = (field: string): string | undefined =>
+    validationAttempted
+      ? formIssues.find((issue) => issue.field === field)?.message
+      : undefined;
+  const performanceErrors = (
+    performance: PerformanceDraft,
+  ): PerformanceValidationErrors => ({
+    startsAt: errorFor(`performance.${performance.key}.startsAt`),
+    endsAt: errorFor(`performance.${performance.key}.endsAt`),
+    venueName: errorFor(`performance.${performance.key}.venueName`),
+    addressLine1: errorFor(`performance.${performance.key}.addressLine1`),
+    postalCode: errorFor(`performance.${performance.key}.postalCode`),
+    locality: errorFor(`performance.${performance.key}.locality`),
+    officialUrl: errorFor(`performance.${performance.key}.officialUrl`),
+  });
+  const submitProduction = () => {
+    setValidationAttempted(true);
+    setLocalError(null);
+    if (formIssues.length > 0) return;
+    createProduction.mutate();
+  };
 
   return (
     <>
       <Head>
-        <title>Ajouter un spectacle | Todam</title>
+        <title>Ajouter un spectacle manquant | Todam</title>
         <meta content="noindex,nofollow" name="robots" />
       </Head>
       <PageScrollView
@@ -522,7 +721,7 @@ export default function AddCommunityProductionPage() {
         <View className="todam-page-before-footer mx-auto w-full max-w-3xl flex-1 gap-8 px-5 py-10 md:px-8 md:py-14">
           <View className="gap-4">
             <SectionTitle eyebrow="Catalogue communautaire" level={1}>
-              Ajouter un spectacle
+              Ajouter un spectacle manquant
             </SectionTitle>
             <Text className="max-w-[70ch] text-base leading-7 text-muted">
               Recherchez les correspondances proposées avant de créer la fiche. Elle
@@ -532,6 +731,7 @@ export default function AddCommunityProductionPage() {
 
           <View className="gap-6">
             <TextField
+              error={errorFor("title")}
               label="Titre"
               maxLength={240}
               onChangeText={setTitle}
@@ -563,7 +763,7 @@ export default function AddCommunityProductionPage() {
                 </Text>
                 {similarProductions.slice(0, 4).map((production) => (
                   <Link href={`/production/${production.slug}`} key={production.id}>
-                  <Text className="text-sm font-semibold text-brand-text">
+                    <Text className="text-sm font-semibold text-brand-text">
                       {production.title}
                       {production.company ? ` · ${production.company.name}` : ""}
                     </Text>
@@ -577,7 +777,9 @@ export default function AddCommunityProductionPage() {
                 Compagnie
               </Text>
               <TextField
+                error={errorFor("companyName")}
                 label="Nom de la compagnie"
+                maxLength={240}
                 onChangeText={(value) => {
                   setCompanyName(value);
                   setCompanyId(null);
@@ -613,7 +815,7 @@ export default function AddCommunityProductionPage() {
                         setCompanyOfficialUrl(company.officialUrl ?? "");
                       }}
                     >
-                    <Text className="text-sm font-semibold text-brand-text">
+                      <Text className="text-sm font-semibold text-brand-text">
                         {company.name}
                       </Text>
                     </Pressable>
@@ -622,6 +824,7 @@ export default function AddCommunityProductionPage() {
               ) : null}
               {!companyId ? (
                 <TextField
+                  error={errorFor("companyOfficialUrl")}
                   label="Site officiel de la compagnie"
                   onChangeText={setCompanyOfficialUrl}
                   placeholder="Facultatif"
@@ -631,6 +834,7 @@ export default function AddCommunityProductionPage() {
             </View>
 
             <TextField
+              error={errorFor("officialUrl")}
               label="Lien officiel du spectacle"
               onChangeText={setOfficialUrl}
               placeholder="https://…"
@@ -655,6 +859,7 @@ export default function AddCommunityProductionPage() {
               {performances.map((performance) => (
                 <VenueEditor
                   draft={performance}
+                  errors={performanceErrors(performance)}
                   key={performance.key}
                   onChange={(next) =>
                     setPerformances((current) =>
@@ -685,6 +890,7 @@ export default function AddCommunityProductionPage() {
               <View className="gap-3 md:flex-row">
                 <View className="min-w-0 flex-1">
                   <TextField
+                    error={errorFor("minimumAge")}
                     keyboardType="number-pad"
                     label="Âge minimum"
                     onChangeText={setMinimumAge}
@@ -693,6 +899,7 @@ export default function AddCommunityProductionPage() {
                 </View>
                 <View className="min-w-0 flex-1">
                   <TextField
+                    error={errorFor("durationMinutes")}
                     keyboardType="number-pad"
                     label="Durée en minutes"
                     onChangeText={setDurationMinutes}
@@ -701,7 +908,9 @@ export default function AddCommunityProductionPage() {
                 </View>
                 <View className="min-w-0 flex-1">
                   <TextField
+                    error={errorFor("language")}
                     label="Langue"
+                    maxLength={80}
                     onChangeText={setLanguage}
                     placeholder="fr"
                     value={language}
@@ -727,7 +936,7 @@ export default function AddCommunityProductionPage() {
                 Affiche facultative
               </Text>
               <TextField
-                editable={!posterFile}
+                error={errorFor("posterUrl") ?? errorFor("posterSource")}
                 label="URL HTTPS directe de l’affiche"
                 onChangeText={setPosterUrl}
                 placeholder="https://…/affiche.webp"
@@ -736,6 +945,7 @@ export default function AddCommunityProductionPage() {
               {posterUrl.trim() ? (
                 <TextField
                   label="Crédit de l’affiche"
+                  maxLength={240}
                   onChangeText={setPosterCredit}
                   placeholder="Facultatif"
                   value={posterCredit}
@@ -745,7 +955,7 @@ export default function AddCommunityProductionPage() {
                 ? createElement("input", {
                     accept: "image/jpeg,image/png,image/webp",
                     "aria-label": "Charger une affiche",
-                    disabled: Boolean(posterUrl.trim()),
+                    key: posterInputKey,
                     onChange: (event: Event) => {
                       const input = event.currentTarget as HTMLInputElement;
                       const file = input.files?.[0] ?? null;
@@ -767,6 +977,21 @@ export default function AddCommunityProductionPage() {
                     type: "file",
                   })
                 : null}
+              {posterFile ? (
+                <View className="flex-row flex-wrap items-center justify-between gap-3 border-l-2 border-accent pl-4">
+                  <Text className="text-sm font-semibold text-ink">
+                    Fichier sélectionné : {posterFile.name}
+                  </Text>
+                  <Button
+                    label="Retirer le fichier"
+                    onPress={() => {
+                      setPosterFile(null);
+                      setPosterInputKey((value) => value + 1);
+                    }}
+                    variant="ghost"
+                  />
+                </View>
+              ) : null}
               <Text className="text-sm leading-5 text-muted">
                 JPEG, PNG ou WebP · 2 Mo maximum · largeur minimale de 300 px.
               </Text>
@@ -778,7 +1003,7 @@ export default function AddCommunityProductionPage() {
             <Text className="rounded-todam border border-selected-border bg-selected p-4 text-sm leading-6 text-muted">
               Merci de respecter notre{" "}
               <Link href="/politique-editoriale">
-              <Text className="font-semibold text-ink">politique éditoriale</Text>
+                <Text className="font-semibold text-ink">politique éditoriale</Text>
               </Link>
               .
             </Text>
@@ -791,17 +1016,37 @@ export default function AddCommunityProductionPage() {
                 {localError}
               </Text>
             ) : null}
+            {validationAttempted && formIssues.length > 0 ? (
+              <View
+                accessibilityLiveRegion="assertive"
+                className="gap-3 rounded-todam border border-error bg-error-soft p-4"
+              >
+                <Text
+                  accessibilityRole="alert"
+                  className="text-base font-semibold leading-6 text-error"
+                >
+                  {formIssues.length === 1
+                    ? "Un point reste à corriger avant la publication."
+                    : `${formIssues.length} points restent à corriger avant la publication.`}
+                </Text>
+                <View className="gap-1">
+                  {formIssues.map((issue) => (
+                    <Text className="text-sm leading-5 text-error" key={issue.field}>
+                      {`• ${issue.summary}`}
+                    </Text>
+                  ))}
+                </View>
+              </View>
+            ) : null}
             <View className="self-start">
               <Button
-                disabled={!formComplete}
                 label="Publier le spectacle"
                 loading={createProduction.isPending}
-                onPress={() => createProduction.mutate()}
+                onPress={submitProduction}
               />
             </View>
           </View>
         </View>
-        <LegalFooter />
       </PageScrollView>
     </>
   );

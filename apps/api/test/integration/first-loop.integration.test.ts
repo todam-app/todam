@@ -1731,7 +1731,7 @@ describe("première boucle API sur PostgreSQL/PostGIS", () => {
     expect(revoked.statusCode).toBe(401);
   });
 
-  it("publie uniquement les comptes vérifiés et le catalogue actif à venir", async () => {
+  it("publie uniquement les comptes vérifiés, les salles et le catalogue actifs", async () => {
     await signUp("verifiee@example.test", "compte-verifie");
     await db.insert(user).values({
       id: "compte-non-verifie",
@@ -1745,6 +1745,16 @@ describe("première boucle API sur PostgreSQL/PostGIS", () => {
       termsAcceptedAt: new Date(),
       privacyNoticeVersion: CURRENT_PRIVACY_NOTICE_VERSION,
       registrationChannel: "web",
+    });
+    await db.insert(venues).values({
+      slug: "salle-inactive-statistiques",
+      name: "Salle inactive",
+      addressLine1: "1 rue des Tests",
+      postalCode: "38000",
+      locality: "Grenoble",
+      countryCode: "FR",
+      timezone: "Europe/Paris",
+      isActive: false,
     });
 
     const [activeProduction, inactiveProduction] = await db
@@ -1816,6 +1826,7 @@ describe("première boucle API sur PostgreSQL/PostGIS", () => {
       verifiedUsers: 1,
       activeProductions: 2,
       upcomingPerformances: 1,
+      activeVenues: 1,
     });
     expect(new Date(response.json().generatedAt).toString()).not.toBe("Invalid Date");
   });

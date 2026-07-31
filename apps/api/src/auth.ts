@@ -20,7 +20,9 @@ import { eq } from "drizzle-orm";
 import type { FastifyReply, FastifyRequest } from "fastify";
 
 import {
+  createAccountDeletionEmail,
   createEmailChangeVerificationEmail,
+  createPasswordResetEmail,
   createVerificationEmail,
   createWelcomeEmail,
 } from "./auth-emails.js";
@@ -62,11 +64,12 @@ export function createAuth(database: TodamDatabase, emailSender: EmailSender) {
       revokeSessionsOnPasswordReset: true,
       sendResetPassword: async ({ user: target, url }) => {
         await emailSender.send({
+          ...createPasswordResetEmail({
+            displayName: target.name,
+            publicWebUrl: publicWebUrl(),
+            resetUrl: url,
+          }),
           to: target.email,
-          subject: "Réinitialisez votre mot de passe Todam",
-          text:
-            "Utilisez ce lien dans l'heure pour choisir un nouveau mot de passe : " +
-            `${url}\n\nSi vous n'êtes pas à l'origine de cette demande, ignorez cet e-mail.`,
         });
       },
     },
@@ -124,7 +127,7 @@ export function createAuth(database: TodamDatabase, emailSender: EmailSender) {
                 pdfUrl: documents.privacyNotice.pdfUrl,
                 version: profile.privacyNoticeVersion,
               },
-              profileUrl: `${webAppUrl.replace(/\/+$/u, "")}/profile`,
+              journalUrl: `${webAppUrl.replace(/\/+$/u, "")}/journal`,
               publicWebUrl: publicWebUrl(),
               terms: {
                 acceptedAt: profile.termsAcceptedAt,
@@ -195,11 +198,12 @@ export function createAuth(database: TodamDatabase, emailSender: EmailSender) {
         deleteTokenExpiresIn: 24 * 60 * 60,
         sendDeleteAccountVerification: async ({ user: target, url }) => {
           await emailSender.send({
+            ...createAccountDeletionEmail({
+              deletionUrl: url,
+              displayName: target.name,
+              publicWebUrl: publicWebUrl(),
+            }),
             to: target.email,
-            subject: "Confirmez la suppression de votre compte Todam",
-            text:
-              "Confirmez la suppression définitive de votre compte dans les 24 heures : " +
-              `${url}\n\nSi vous n'êtes pas à l'origine de cette demande, ignorez cet e-mail.`,
           });
         },
       },

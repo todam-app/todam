@@ -21,6 +21,10 @@ import {
 import type { EmailSender } from "@todam/domain";
 import { and, eq, gt, ne } from "drizzle-orm";
 
+import {
+  createAccountDeletionEmail,
+  createEmailChangeRequestedEmail,
+} from "./auth-emails.js";
 import { HttpProblem } from "./errors.js";
 import { publicWebUrl } from "./legal.js";
 
@@ -228,13 +232,15 @@ export function createAccountService(
 
     async notifyEmailChangeRequested(userId: string, newEmail: string): Promise<void> {
       const identity = await this.getIdentity(userId);
+      const webUrl = publicWebUrl().replace(/\/+$/u, "");
       await emailSender.send({
+        ...createEmailChangeRequestedEmail({
+          displayName: identity.username,
+          newEmail,
+          publicWebUrl: webUrl,
+          securityUrl: `${webUrl}/mot-de-passe-oublie`,
+        }),
         to: identity.email,
-        subject: "Demande de changement d’adresse e-mail — Todam",
-        text:
-          `Une demande a été faite pour remplacer l’adresse e-mail de ton compte Todam par ${newEmail}.\n\n` +
-          "Ton adresse actuelle reste active tant que la nouvelle n’a pas été confirmée.\n\n" +
-          "Si tu n’es pas à l’origine de cette demande, change immédiatement ton mot de passe.",
       });
     },
 
@@ -533,7 +539,7 @@ export function createAccountService(
 
     async requestDeletion(email: string): Promise<void> {
       const rows = await database
-        .select({ id: user.id, email: user.email })
+        .select({ id: user.id, email: user.email, username: user.username })
         .from(user)
         .where(eq(user.email, email.trim()))
         .limit(1);
@@ -551,14 +557,15 @@ export function createAccountService(
           expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1_000),
         });
       });
-      const url = `${publicWebUrl()}/suppression-compte?token=${encodeURIComponent(token)}`;
+      const webUrl = publicWebUrl().replace(/\/+$/u, "");
+      const url = `${webUrl}/suppression-compte?token=${encodeURIComponent(token)}`;
       await emailSender.send({
+        ...createAccountDeletionEmail({
+          deletionUrl: url,
+          displayName: profile.username,
+          publicWebUrl: webUrl,
+        }),
         to: profile.email,
-        subject: "Confirmez la suppression de votre compte Todam",
-        text:
-          "Vous avez demandé la suppression de votre compte Todam. " +
-          `Confirmez-la dans les 24 heures : ${url}\n\n` +
-          "Si vous n'êtes pas à l'origine de cette demande, ignorez cet e-mail.",
       });
     },
 

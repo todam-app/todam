@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="16.5 68 370 370" role="img" aria-labelledby="title">
-  <title id="title">Icône Todam</title>
-  <g fill="none" stroke="#151515" stroke-width="16" stroke-linecap="round" stroke-linejoin="round">
+  <title id="title">Icône Todam sur fond ivoire</title>
+  <rect x="16.5" y="68" width="370" height="370" fill="#FCF8F2"/>
+  <g fill="none" stroke="#151515" stroke-width="22" stroke-linecap="round" stroke-linejoin="round">
     <path d="M 38 116
              C 82 80, 123 91, 175 108
              C 223 124, 276 124, 365 104"/>
@@ -15,5 +16,5 @@
     <path d="M 176 310
              C 194 331, 211 356, 224 371"/>
   </g>
-  <circle cx="288" cy="167" r="28" fill="#ED2215"/>
+  <circle cx="288" cy="167" r="31" fill="#ED2215"/>
 </svg>

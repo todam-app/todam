@@ -2,19 +2,14 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { UsernameSchema } from "@todam/contracts";
 import { Button, RatingLights, TextField, tokens } from "@todam/design-system";
-import {
-  Link,
-  Redirect,
-  type Href,
-  useLocalSearchParams,
-  useRouter,
-} from "expo-router";
+import { Redirect, type Href, useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Text, View } from "react-native";
 
 import { AccountSettingsContent } from "../../components/AccountSettingsContent";
 import { AccessibleTabs } from "../../components/AccessibleTabs";
 import { AsyncState } from "../../components/AsyncState";
+import { MyShowsNavigation } from "../../components/MyShowsNavigation";
 import { PageScrollView } from "../../components/PageScrollView";
 import { PrivatePageHead } from "../../components/PrivatePageHead";
 import {
@@ -42,36 +37,6 @@ const legacyTabs: Record<string, Href> = {
 
 function first(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value;
-}
-
-function StatTile({
-  href,
-  label,
-  value,
-}: {
-  href?: Href;
-  label: string;
-  value: string | number;
-}) {
-  const content = (
-    <Pressable
-      accessibilityLabel={`${label} : ${value}`}
-      accessibilityRole={href ? "link" : undefined}
-      className="todam-interactive-card min-h-16 min-w-[96px] flex-1 items-center justify-center gap-1 rounded-todam px-3 py-2"
-      disabled={!href}
-    >
-      <Text className="font-serif text-2xl font-semibold text-ink">{value}</Text>
-      <Text className="text-center text-xs font-semibold text-muted">{label}</Text>
-    </Pressable>
-  );
-
-  return href ? (
-    <Link href={href} asChild>
-      {content}
-    </Link>
-  ) : (
-    content
-  );
 }
 
 function ProfileContent() {
@@ -187,282 +152,266 @@ function ProfileContent() {
     <>
       <PrivatePageHead title="Profil" />
       <PageScrollView
-        contentContainerClassName="mx-auto w-full max-w-6xl gap-6 px-4 py-6 md:px-8 md:py-10"
+        contentContainerClassName="flex-grow"
         keyboardShouldPersistTaps="handled"
       >
-        <AsyncState
-          empty={false}
-          emptyMessage=""
-          error={profile.isError || dashboard.isError}
-          loading={profile.isPending || dashboard.isPending}
-          onRetry={() => {
-            void profile.refetch();
-            void dashboard.refetch();
-          }}
-        >
-          {profile.data && dashboard.data ? (
-            <>
-              <View className="gap-5 rounded-panel border border-line bg-paper p-5 shadow-soft md:flex-row md:items-center md:p-6">
-                <View className="h-20 w-20 items-center justify-center self-center rounded-full border border-line bg-canvas md:self-auto">
-                  <Ionicons
-                    accessibilityElementsHidden
-                    color={tokens.color.muted}
-                    importantForAccessibility="no"
-                    name="person-outline"
-                    size={46}
-                  />
-                </View>
-                <View className="min-w-0 flex-1 items-center gap-1 md:items-start">
-                  <Text
-                    aria-level={1}
-                    accessibilityRole="header"
-                    className="font-serif text-3xl font-semibold text-ink"
-                  >
-                    {profile.data.username}
-                  </Text>
-                  <Text className="text-sm font-semibold text-muted">
-                    Profil{" "}
-                    {profile.data.profileVisibility === "public" ? "public" : "privé"}
-                    {" · "}
-                    Membre depuis{" "}
-                    {new Intl.DateTimeFormat("fr-FR", {
-                      month: "long",
-                      year: "numeric",
-                    }).format(new Date(profile.data.memberSince))}
-                  </Text>
-                  {profile.data.bio ? (
-                    <Text
-                      className="pt-1 text-center text-base leading-6 text-ink md:text-left"
-                      numberOfLines={2}
-                    >
-                      {profile.data.bio}
-                    </Text>
-                  ) : null}
-                </View>
-                <View className="flex-row flex-wrap justify-center gap-3 md:justify-end">
-                  <Button
-                    label={editing ? "Fermer la modification" : "Modifier mon profil"}
-                    onPress={() => {
-                      setEditing((value) => !value);
-                      setFeedback(null);
-                    }}
-                    variant={editing ? "quiet" : "primary"}
-                  />
-                  <Button
-                    label="Se déconnecter"
-                    onPress={() => void signOut()}
-                    variant="quiet"
-                  />
-                </View>
-              </View>
-
-              {editing ? (
-                <View className="todam-form-panel gap-4 p-5">
-                  <TextField
-                    autoCapitalize="none"
-                    autoComplete="off"
-                    label="Nom d'utilisateur"
-                    maxLength={30}
-                    onChangeText={setUsernameDraft}
-                    required
-                    value={username}
-                    webName="profile-username"
-                  />
-                  {!usernameValid ? (
-                    <Text accessibilityRole="alert" className="text-sm text-danger">
-                      Utilisez 3 à 30 lettres, chiffres, points, tirets ou underscores.
-                    </Text>
-                  ) : null}
-                  <TextField
-                    autoComplete="off"
-                    label="Présentation"
-                    maxLength={500}
-                    multiline
-                    onChangeText={setBioDraft}
-                    value={bio}
-                    webName="profile-bio"
-                  />
-                  <Button
-                    disabled={!usernameValid}
-                    label="Enregistrer"
-                    loading={updateProfile.isPending}
-                    onPress={() => updateProfile.mutate()}
-                  />
-                </View>
-              ) : null}
-
-              {feedback ? (
-                <Text
-                  accessibilityLiveRegion="polite"
-                  className="text-center text-sm text-muted"
-                >
-                  {feedback}
-                </Text>
-              ) : null}
-
-              <View
-                accessibilityLabel="Activité du profil"
-                className="flex-row flex-wrap gap-2 rounded-panel border border-line bg-paper p-2 shadow-soft"
-              >
-                <StatTile
-                  href="/journal/a-voir"
-                  label="À voir"
-                  value={dashboard.data.counts.watchlist}
-                />
-                <StatTile
-                  href="/journal/vus"
-                  label="Vus"
-                  value={dashboard.data.counts.seen}
-                />
-                <StatTile
-                  href="/journal/notes"
-                  label="Notés"
-                  value={dashboard.data.counts.ratings}
-                />
-                <StatTile
-                  href="/journal/avis"
-                  label="Avis"
-                  value={dashboard.data.counts.reviews}
-                />
-                <StatTile
-                  href="/journal/listes"
-                  label="Listes"
-                  value={dashboard.data.counts.lists}
-                />
-              </View>
-
-              <AccessibleTabs
-                appearance="underline"
-                compactOnMobile
-                label="Sections du profil"
-                onChange={selectSection}
-                tabs={profileSections}
-                testIdPrefix="profile-section"
-                value={section}
-              />
-
-              {section === "information" ? (
-                <View className="gap-4">
-                  <Text
-                    aria-level={2}
-                    accessibilityRole="header"
-                    className="font-serif text-2xl font-semibold text-ink"
-                  >
-                    Informations
-                  </Text>
-                  <View className="todam-form-panel gap-4 p-5">
-                    <View className="gap-1">
-                      <Text className="text-sm font-semibold text-muted">
-                        Nom d'utilisateur
-                      </Text>
-                      <Text className="text-base text-ink">
-                        {profile.data.username}
-                      </Text>
-                    </View>
-                    <View className="gap-1">
-                      <Text className="text-sm font-semibold text-muted">
-                        Présentation
-                      </Text>
-                      <Text className="text-base leading-6 text-ink">
-                        {profile.data.bio || "Aucune présentation renseignée."}
-                      </Text>
-                    </View>
-                    <View className="gap-1">
-                      <Text className="text-sm font-semibold text-muted">
-                        Inscription
-                      </Text>
-                      <Text className="text-base text-ink">
-                        {new Intl.DateTimeFormat("fr-FR", {
-                          dateStyle: "long",
-                        }).format(new Date(profile.data.memberSince))}
-                      </Text>
-                    </View>
-                    <View className="gap-1">
-                      <Text className="text-sm font-semibold text-muted">
-                        Visibilité
-                      </Text>
-                      <Text className="text-base text-ink">
-                        {profile.data.profileVisibility === "public"
-                          ? "Profil public"
-                          : "Profil privé"}
-                      </Text>
-                    </View>
+        <View className="todam-page-before-footer mx-auto w-full max-w-6xl flex-1 gap-6 px-4 py-6 md:px-8 md:py-10">
+          <AsyncState
+            empty={false}
+            emptyMessage=""
+            error={profile.isError || dashboard.isError}
+            loading={profile.isPending || dashboard.isPending}
+            onRetry={() => {
+              void profile.refetch();
+              void dashboard.refetch();
+            }}
+          >
+            {profile.data && dashboard.data ? (
+              <>
+                <View className="gap-5 rounded-panel border border-line bg-paper p-5 shadow-soft md:flex-row md:items-center md:p-6">
+                  <View className="h-20 w-20 items-center justify-center self-center rounded-full border border-line bg-canvas md:self-auto">
+                    <Ionicons
+                      accessibilityElementsHidden
+                      color={tokens.color.muted}
+                      importantForAccessibility="no"
+                      name="person-outline"
+                      size={46}
+                    />
                   </View>
-                </View>
-              ) : null}
-
-              {section === "statistics" ? (
-                <View className="gap-6 md:flex-row md:items-start">
-                  <View className="todam-form-panel w-full items-center justify-center gap-3 p-6 md:w-72">
+                  <View className="min-w-0 flex-1 items-center gap-1 md:items-start">
                     <Text
-                      aria-level={2}
+                      aria-level={1}
                       accessibilityRole="header"
-                      className="text-lg font-bold text-ink"
+                      className="font-serif text-3xl font-semibold text-ink"
                     >
-                      Moyenne personnelle
+                      {profile.data.username}
                     </Text>
-                    <View className="items-center gap-2">
-                      <RatingLights showValue value={averageRating} />
-                      <Text className="text-center text-sm font-semibold text-muted">
-                        {ratingCount > 0
-                          ? `${ratingCount} ${ratingCount > 1 ? "notes" : "note"}`
-                          : "Aucune note"}
+                    <Text className="text-sm font-semibold text-muted">
+                      Profil{" "}
+                      {profile.data.profileVisibility === "public" ? "public" : "privé"}
+                      {" · "}
+                      Membre depuis{" "}
+                      {new Intl.DateTimeFormat("fr-FR", {
+                        month: "long",
+                        year: "numeric",
+                      }).format(new Date(profile.data.memberSince))}
+                    </Text>
+                    {profile.data.bio ? (
+                      <Text
+                        className="pt-1 text-center text-base leading-6 text-ink md:text-left"
+                        numberOfLines={2}
+                      >
+                        {profile.data.bio}
                       </Text>
-                    </View>
+                    ) : null}
                   </View>
-                  <View className="todam-form-panel min-w-0 flex-1 gap-4 p-5 md:p-6">
+                  <View className="flex-row flex-wrap justify-center gap-3 md:justify-end">
+                    <Button
+                      label={editing ? "Fermer la modification" : "Modifier mon profil"}
+                      onPress={() => {
+                        setEditing((value) => !value);
+                        setFeedback(null);
+                      }}
+                      variant={editing ? "quiet" : "primary"}
+                    />
+                    <Button
+                      label="Se déconnecter"
+                      onPress={() => void signOut()}
+                      variant="quiet"
+                    />
+                  </View>
+                </View>
+
+                {editing ? (
+                  <View className="todam-form-panel gap-4 p-5">
+                    <TextField
+                      autoCapitalize="none"
+                      autoComplete="off"
+                      label="Nom d'utilisateur"
+                      maxLength={30}
+                      onChangeText={setUsernameDraft}
+                      required
+                      value={username}
+                      webName="profile-username"
+                    />
+                    {!usernameValid ? (
+                      <Text accessibilityRole="alert" className="text-sm text-danger">
+                        Utilisez 3 à 30 lettres, chiffres, points, tirets ou
+                        underscores.
+                      </Text>
+                    ) : null}
+                    <TextField
+                      autoComplete="off"
+                      label="Présentation"
+                      maxLength={500}
+                      multiline
+                      onChangeText={setBioDraft}
+                      value={bio}
+                      webName="profile-bio"
+                    />
+                    <Button
+                      disabled={!usernameValid}
+                      label="Enregistrer"
+                      loading={updateProfile.isPending}
+                      onPress={() => updateProfile.mutate()}
+                    />
+                  </View>
+                ) : null}
+
+                {feedback ? (
+                  <Text
+                    accessibilityLiveRegion="polite"
+                    className="text-center text-sm text-muted"
+                  >
+                    {feedback}
+                  </Text>
+                ) : null}
+
+                <MyShowsNavigation
+                  accessibilityLabel="Activité du profil"
+                  counts={{
+                    watchlist: dashboard.data.counts.watchlist,
+                    seen: dashboard.data.counts.seen,
+                    ratings: dashboard.data.counts.ratings,
+                    reviews: dashboard.data.counts.reviews,
+                    lists: dashboard.data.counts.lists,
+                  }}
+                />
+
+                <AccessibleTabs
+                  appearance="underline"
+                  compactOnMobile
+                  label="Sections du profil"
+                  onChange={selectSection}
+                  tabs={profileSections}
+                  testIdPrefix="profile-section"
+                  value={section}
+                />
+
+                {section === "information" ? (
+                  <View className="gap-4">
                     <Text
                       aria-level={2}
                       accessibilityRole="header"
                       className="font-serif text-2xl font-semibold text-ink"
                     >
-                      Distribution des notes
+                      Informations
                     </Text>
-                    {Array.from({ length: 10 }, (_, index) => 10 - index).map(
-                      (value) => {
-                        const count =
-                          distribution.find((item) => item.value === value)?.count ?? 0;
-                        return (
-                          <View
-                            accessibilityLabel={`${value} sur 10 : ${count}`}
-                            className="flex-row items-center gap-3"
-                            key={value}
-                          >
-                            <Text className="w-10 text-sm font-semibold text-ink">
-                              {value}/10
-                            </Text>
-                            <View className="h-3 min-w-0 flex-1 overflow-hidden rounded-full bg-canvas">
-                              <View
-                                className="h-full rounded-full bg-accent"
-                                style={{
-                                  width: `${(count / maxDistribution) * 100}%`,
-                                }}
-                              />
-                            </View>
-                            <Text className="w-8 text-right text-sm text-muted">
-                              {count}
-                            </Text>
-                          </View>
-                        );
-                      },
-                    )}
+                    <View className="todam-form-panel gap-4 p-5">
+                      <View className="gap-1">
+                        <Text className="text-sm font-semibold text-muted">
+                          {"Nom d'utilisateur"}
+                        </Text>
+                        <Text className="text-base text-ink">
+                          {profile.data.username}
+                        </Text>
+                      </View>
+                      <View className="gap-1">
+                        <Text className="text-sm font-semibold text-muted">
+                          Présentation
+                        </Text>
+                        <Text className="text-base leading-6 text-ink">
+                          {profile.data.bio || "Aucune présentation renseignée."}
+                        </Text>
+                      </View>
+                      <View className="gap-1">
+                        <Text className="text-sm font-semibold text-muted">
+                          Inscription
+                        </Text>
+                        <Text className="text-base text-ink">
+                          {new Intl.DateTimeFormat("fr-FR", {
+                            dateStyle: "long",
+                          }).format(new Date(profile.data.memberSince))}
+                        </Text>
+                      </View>
+                      <View className="gap-1">
+                        <Text className="text-sm font-semibold text-muted">
+                          Visibilité
+                        </Text>
+                        <Text className="text-base text-ink">
+                          {profile.data.profileVisibility === "public"
+                            ? "Profil public"
+                            : "Profil privé"}
+                        </Text>
+                      </View>
+                    </View>
                   </View>
-                </View>
-              ) : null}
+                ) : null}
 
-              {section === "settings" ? (
-                <AccountSettingsContent
-                  onRatingVisibilityChange={(value) =>
-                    updateRatingVisibility.mutate(value)
-                  }
-                  onVisibilityChange={(value) => updateVisibility.mutate(value)}
-                  profileVisibility={profile.data.profileVisibility}
-                  ratingVisibility={profile.data.ratingVisibility}
-                />
-              ) : null}
-            </>
-          ) : null}
-        </AsyncState>
+                {section === "statistics" ? (
+                  <View className="gap-6 md:flex-row md:items-start">
+                    <View className="todam-form-panel w-full items-center justify-center gap-3 p-6 md:w-72">
+                      <Text
+                        aria-level={2}
+                        accessibilityRole="header"
+                        className="text-lg font-bold text-ink"
+                      >
+                        Moyenne personnelle
+                      </Text>
+                      <View className="items-center gap-2">
+                        <RatingLights showValue value={averageRating} />
+                        <Text className="text-center text-sm font-semibold text-muted">
+                          {ratingCount > 0
+                            ? `${ratingCount} ${ratingCount > 1 ? "notes" : "note"}`
+                            : "Aucune note"}
+                        </Text>
+                      </View>
+                    </View>
+                    <View className="todam-form-panel min-w-0 flex-1 gap-4 p-5 md:p-6">
+                      <Text
+                        aria-level={2}
+                        accessibilityRole="header"
+                        className="font-serif text-2xl font-semibold text-ink"
+                      >
+                        Distribution des notes
+                      </Text>
+                      {Array.from({ length: 10 }, (_, index) => 10 - index).map(
+                        (value) => {
+                          const count =
+                            distribution.find((item) => item.value === value)?.count ??
+                            0;
+                          return (
+                            <View
+                              accessibilityLabel={`${value} sur 10 : ${count}`}
+                              className="flex-row items-center gap-3"
+                              key={value}
+                            >
+                              <Text className="w-10 text-sm font-semibold text-ink">
+                                {value}/10
+                              </Text>
+                              <View className="h-3 min-w-0 flex-1 overflow-hidden rounded-full bg-canvas">
+                                <View
+                                  className="h-full rounded-full bg-accent"
+                                  style={{
+                                    width: `${(count / maxDistribution) * 100}%`,
+                                  }}
+                                />
+                              </View>
+                              <Text className="w-8 text-right text-sm text-muted">
+                                {count}
+                              </Text>
+                            </View>
+                          );
+                        },
+                      )}
+                    </View>
+                  </View>
+                ) : null}
+
+                {section === "settings" ? (
+                  <AccountSettingsContent
+                    onRatingVisibilityChange={(value) =>
+                      updateRatingVisibility.mutate(value)
+                    }
+                    onVisibilityChange={(value) => updateVisibility.mutate(value)}
+                    profileVisibility={profile.data.profileVisibility}
+                    ratingVisibility={profile.data.ratingVisibility}
+                  />
+                ) : null}
+              </>
+            ) : null}
+          </AsyncState>
+        </View>
       </PageScrollView>
     </>
   );

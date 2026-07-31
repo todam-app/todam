@@ -19,9 +19,13 @@ const disciplineClasses: Record<ProductionCard["discipline"], string> = {
 export function ProductionListItem({
   headingLevel = 3,
   production,
+  showCompany = true,
+  showVenue = true,
 }: {
   headingLevel?: 2 | 3;
   production: ProductionCard;
+  showCompany?: boolean;
+  showVenue?: boolean;
 }) {
   return (
     <Link href={`/production/${production.slug}`} asChild>
@@ -54,11 +58,11 @@ export function ProductionListItem({
           >
             {production.title}
           </Text>
-          {production.company ? (
+          {showCompany && production.company ? (
             <Text className="text-sm font-semibold text-ink">
               {production.company.name}
             </Text>
-          ) : production.primaryCredit ? (
+          ) : !production.company && production.primaryCredit ? (
             <Text className="text-sm text-muted">{production.primaryCredit}</Text>
           ) : null}
           {production.nextPerformance && production.nextVenue ? (
@@ -67,10 +71,11 @@ export function ProductionListItem({
                 production.nextPerformance,
                 production.nextVenue.timezone,
               )}
-              {" · "}
-              {production.nextVenue.name}, {production.nextVenue.locality}
+              {showVenue
+                ? ` · ${production.nextVenue.name}, ${production.nextVenue.locality}`
+                : ""}
             </Text>
-          ) : production.venueNames.length > 0 ? (
+          ) : showVenue && production.venueNames.length > 0 ? (
             <Text className="text-sm text-muted">
               {production.venueNames.join(" · ")}
             </Text>

@@ -3,7 +3,6 @@ import { Link } from "expo-router";
 import Head from "expo-router/head";
 import { Text, View } from "react-native";
 
-import { LegalFooter } from "../components/LegalFooter";
 import { PageScrollView } from "../components/PageScrollView";
 
 export default function NotFoundPage() {
@@ -31,8 +30,8 @@ export default function NotFoundPage() {
               pouvez reprendre votre exploration depuis le catalogue.
             </Text>
             <View className="flex-row flex-wrap gap-3">
-              <Link href="/decouvrir" asChild>
-                <Button accessibilityRole="link" label="Découvrir les spectacles" />
+              <Link href="/search" asChild>
+                <Button accessibilityRole="link" label="Rechercher un spectacle" />
               </Link>
               <Link href="/" asChild>
                 <Button
@@ -44,7 +43,6 @@ export default function NotFoundPage() {
             </View>
           </View>
         </View>
-        <LegalFooter />
       </PageScrollView>
     </>
   );

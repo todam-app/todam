@@ -79,6 +79,7 @@
   --todam-color-brand-text: #d9271a;
   --todam-color-focus: #c34e42;
   --todam-color-focus-halo: rgba(243, 169, 149, 0.52);
+  --todam-color-focus-halo-compact: rgba(243, 169, 149, 0.22);
   --todam-color-line: #e2d9cd;
   --todam-color-coral: #f3a995;
   --todam-color-coral-soft: #fceae2;
@@ -223,6 +224,46 @@ body {
   border-radius: 16px;
 }
 
+.todam-search-layout {
+  align-items: start;
+  display: grid;
+  gap: 24px;
+  grid-template-columns: minmax(0, 1fr);
+  min-width: 0;
+}
+
+.todam-search-filter-sidebar {
+  border-right: 1px solid var(--todam-color-line);
+  min-width: 0;
+  padding-right: 20px;
+}
+
+.todam-search-results {
+  min-width: 0;
+}
+
+.todam-search-result-toolbar {
+  border-bottom: 1px solid var(--todam-color-line);
+  padding-bottom: 12px;
+}
+
+@media (min-width: 960px) {
+  .todam-search-layout {
+    grid-template-columns: 220px minmax(0, 1fr);
+  }
+
+  .todam-search-filter-sidebar {
+    max-height: calc(100dvh - var(--todam-web-header-height) - 40px);
+    overflow-y: auto;
+    position: sticky;
+    top: calc(var(--todam-web-header-height) + 20px);
+  }
+
+  .todam-search-results .todam-production-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
 .todam-result-list-card {
   background: rgba(255, 253, 248, 0.78);
   border: 1px solid var(--todam-color-line);
@@ -265,9 +306,7 @@ body {
 }
 
 .todam-ticket::before,
-.todam-ticket::after,
-.todam-login-ticket::before,
-.todam-login-ticket::after {
+.todam-ticket::after {
   background: var(--todam-color-canvas);
   border: 1px solid var(--todam-color-line);
   border-radius: 999px;
@@ -279,20 +318,12 @@ body {
   z-index: 2;
 }
 
-.todam-ticket::before,
-.todam-login-ticket::before {
+.todam-ticket::before {
   left: -7px;
 }
 
-.todam-ticket::after,
-.todam-login-ticket::after {
+.todam-ticket::after {
   right: -7px;
-}
-
-.todam-login-ticket {
-  box-shadow: var(--todam-shadow-coral);
-  overflow: hidden;
-  position: relative;
 }
 
 .todam-mobile-nav {
@@ -400,6 +431,75 @@ textarea:focus-visible,
   outline-offset: 3px;
 }
 
+button:focus-visible,
+[role="button"]:focus-visible,
+.todam-cta-standard:focus-visible,
+[data-todam-cta]:focus-visible {
+  box-shadow: 0 0 0 3px var(--todam-color-focus-halo-compact) !important;
+  outline: 2px solid var(--todam-color-focus) !important;
+  outline-offset: 2px;
+}
+
+[data-todam-ticket-action] {
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  isolation: isolate;
+  overflow: visible !important;
+  position: relative;
+}
+
+.todam-ticket-action-shape {
+  filter: drop-shadow(0 7px 8px rgba(102, 81, 184, 0.1));
+  height: 100%;
+  inset: 0;
+  overflow: visible;
+  pointer-events: none;
+  position: absolute;
+  transition:
+    filter 160ms ease,
+    transform 160ms ease;
+  width: 100%;
+  z-index: -1;
+}
+
+.todam-ticket-action-outline {
+  fill: var(--todam-color-paper);
+  stroke: rgba(195, 78, 66, 0.42);
+  stroke-width: 1.25;
+  transition:
+    fill 160ms ease,
+    stroke 160ms ease,
+    stroke-width 160ms ease;
+  vector-effect: non-scaling-stroke;
+}
+
+[data-todam-ticket-action="orchestra"] .todam-ticket-action-shape {
+  filter: drop-shadow(0 9px 10px rgba(21, 21, 21, 0.18))
+    drop-shadow(0 0 4px rgba(200, 184, 240, 0.12));
+}
+
+[data-todam-ticket-action="orchestra"] .todam-ticket-action-outline {
+  fill: #201e1f;
+  stroke: #201e1f;
+}
+
+[data-todam-ticket-action]:focus-visible {
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+[data-todam-ticket-action]:focus-visible .todam-ticket-action-shape {
+  filter: drop-shadow(0 0 1px rgba(195, 78, 66, 0.72))
+    drop-shadow(0 0 3px var(--todam-color-focus-halo-compact));
+}
+
+[data-todam-ticket-action]:focus-visible .todam-ticket-action-outline {
+  stroke: var(--todam-color-focus);
+  stroke-width: 2;
+}
+
 .todam-profile-button {
   background-color: var(--todam-color-ink) !important;
   border: 0;
@@ -412,16 +512,8 @@ textarea:focus-visible,
 
 .todam-profile-button::before {
   background:
-    radial-gradient(
-      circle at 25% 26%,
-      rgba(200, 184, 240, 0.72),
-      transparent 48%
-    ),
-    radial-gradient(
-      circle at 78% 76%,
-      rgba(159, 216, 208, 0.68),
-      transparent 48%
-    );
+    radial-gradient(circle at 25% 26%, rgba(200, 184, 240, 0.72), transparent 48%),
+    radial-gradient(circle at 78% 76%, rgba(159, 216, 208, 0.68), transparent 48%);
   border-radius: inherit;
   content: "";
   filter: blur(4px);
@@ -469,12 +561,14 @@ textarea:focus-visible,
       transform 140ms ease;
   }
 
-  a:not(.todam-cta-standard):not([data-todam-cta]):not(.todam-interactive-card):not(
-      .todam-icon-button
-    ):not(.todam-profile-button):hover,
-  [role="link"]:not(.todam-cta-standard):not([data-todam-cta]):not(
+  a:not(.todam-cta-standard):not([data-todam-cta]):not([data-todam-ticket-action]):not(
       .todam-interactive-card
-    ):not(.todam-icon-button):not(.todam-profile-button):hover {
+    ):not(.todam-icon-button):not(.todam-profile-button):hover,
+  [role="link"]:not(.todam-cta-standard):not([data-todam-cta]):not(
+      [data-todam-ticket-action]
+    ):not(.todam-interactive-card):not(.todam-icon-button):not(
+      .todam-profile-button
+    ):hover {
     opacity: 0.82;
   }
 
@@ -502,10 +596,32 @@ textarea:focus-visible,
     filter: none;
   }
 
-  .todam-login-ticket:hover {
-    background-color: var(--todam-color-coral-soft) !important;
-    border-color: var(--todam-color-coral) !important;
-    box-shadow: var(--todam-shadow-coral);
+  [data-todam-ticket-action="porcelain"]:not([aria-disabled="true"]):hover
+    .todam-ticket-action-outline {
+    fill: var(--todam-color-coral-soft);
+    stroke: var(--todam-color-coral);
+  }
+
+  [data-todam-ticket-action="orchestra"]:not([aria-disabled="true"]):hover
+    .todam-ticket-action-outline {
+    fill: #272326;
+    stroke: #272326;
+  }
+
+  [data-todam-ticket-action]:not([aria-disabled="true"]):hover {
+    transform: translateY(-2px);
+  }
+
+  [data-todam-ticket-action="porcelain"]:not([aria-disabled="true"]):hover
+    .todam-ticket-action-shape {
+    filter: drop-shadow(0 10px 11px rgba(102, 81, 184, 0.15))
+      drop-shadow(0 0 4px rgba(243, 169, 149, 0.2));
+  }
+
+  [data-todam-ticket-action="orchestra"]:not([aria-disabled="true"]):hover
+    .todam-ticket-action-shape {
+    filter: drop-shadow(0 12px 12px rgba(21, 21, 21, 0.22))
+      drop-shadow(0 0 6px rgba(200, 184, 240, 0.18));
   }
 
   [data-todam-cta="featured"]:not([aria-disabled="true"]):hover {
@@ -555,11 +671,11 @@ textarea:focus-visible,
   }
 
   button:not(:disabled):not(.todam-cta-standard):not([data-todam-cta]):not(
-      .todam-icon-button
-    ):hover,
+      [data-todam-ticket-action]
+    ):not(.todam-icon-button):hover,
   [role="button"]:not([aria-disabled="true"]):not(.todam-cta-standard):not(
       [data-todam-cta]
-    ):not(.todam-icon-button):hover,
+    ):not([data-todam-ticket-action]):not(.todam-icon-button):hover,
   [role="tab"]:not([aria-disabled="true"]):hover,
   [role="radio"]:not([aria-disabled="true"]):hover,
   [role="checkbox"]:not([aria-disabled="true"]):hover {
@@ -586,13 +702,19 @@ textarea:focus-visible,
   transform: scale(0.96);
 }
 
-button:not(:disabled):not([data-todam-cta]):not(.todam-icon-button):active,
-[role="button"]:not([aria-disabled="true"]):not([data-todam-cta]):not(
+button:not(:disabled):not([data-todam-cta]):not([data-todam-ticket-action]):not(
     .todam-icon-button
   ):active,
+[role="button"]:not([aria-disabled="true"]):not([data-todam-cta]):not(
+    [data-todam-ticket-action]
+  ):not(.todam-icon-button):active,
 [role="tab"]:not([aria-disabled="true"]):active,
 [role="radio"]:not([aria-disabled="true"]):active,
 [role="checkbox"]:not([aria-disabled="true"]):active {
+  transform: translateY(1px);
+}
+
+[data-todam-ticket-action]:not([aria-disabled="true"]):active {
   transform: translateY(1px);
 }
 
@@ -626,7 +748,12 @@ button:not(:disabled):not([data-todam-cta]):not(.todam-icon-button):active,
 .todam-modal-panel {
   background:
     linear-gradient(rgba(255, 253, 248, 0.94), rgba(255, 253, 248, 0.94)),
-    linear-gradient(125deg, var(--todam-color-coral), var(--todam-color-lilac), var(--todam-color-aqua));
+    linear-gradient(
+      125deg,
+      var(--todam-color-coral),
+      var(--todam-color-lilac),
+      var(--todam-color-aqua)
+    );
   border: 1px solid var(--todam-color-line);
   border-radius: 18px;
   box-shadow: var(--todam-shadow-soft);
@@ -736,8 +863,26 @@ input:-webkit-autofill:focus {
     --todam-web-header-height: 62px;
   }
 
+  html {
+    background: var(--todam-color-page);
+  }
+
   .todam-web-page-scroll {
+    background: var(--todam-color-page) !important;
     padding-bottom: 74px;
+  }
+
+  .todam-connected-home {
+    padding-top: 0 !important;
+  }
+
+  .todam-connected-home .todam-connected-hero {
+    border: 0;
+    border-bottom: 1px solid rgba(226, 217, 205, 0.82);
+    border-radius: 0;
+    box-shadow: none;
+    margin-inline: -20px;
+    padding: 32px 20px 34px;
   }
 
   .todam-discover-filter-bar {
@@ -818,6 +963,391 @@ input:-webkit-autofill:focus {
   }
 }
 
+/* Carte-affiche en forme de ticket — Web */
+.todam-production-ticket {
+  box-shadow: none;
+  color: var(--todam-color-ink);
+  container-type: inline-size;
+  min-width: 0;
+  position: relative;
+  width: 100%;
+}
+
+.todam-production-ticket__body {
+  filter: drop-shadow(0 13px 18px rgba(43, 34, 27, 0.09));
+  position: relative;
+}
+
+.todam-production-ticket__definitions {
+  height: 0;
+  left: 0;
+  overflow: hidden;
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  width: 0;
+}
+
+.todam-production-ticket__poster {
+  aspect-ratio: 148 / 210;
+  position: relative;
+  width: 100%;
+}
+
+.todam-production-ticket__poster-surface {
+  background: #f0e9df;
+  inset: 0;
+  overflow: hidden;
+  position: absolute;
+}
+
+.todam-production-ticket__poster-surface > * {
+  border-radius: 0 !important;
+}
+
+.todam-production-ticket__info {
+  box-sizing: border-box;
+  height: 178px;
+  min-width: 0;
+  position: relative;
+}
+
+.todam-production-ticket__info-surface {
+  background: var(--todam-color-paper);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  inset: 0;
+  min-width: 0;
+  padding: 17px 18px 16px;
+  position: absolute;
+}
+
+.todam-production-ticket__outline {
+  height: 100%;
+  inset: 0;
+  overflow: visible;
+  pointer-events: none;
+  position: absolute;
+  width: 100%;
+  z-index: 1;
+}
+
+.todam-production-ticket__edge {
+  fill: none;
+  stroke: rgba(195, 78, 66, 0.52);
+  stroke-linecap: butt;
+  stroke-linejoin: round;
+  stroke-width: 1.2;
+  vector-effect: non-scaling-stroke;
+}
+
+.todam-production-ticket__perforation {
+  fill: none;
+  stroke: rgba(195, 78, 66, 0.74);
+  stroke-dasharray: 5 5;
+  stroke-linecap: butt;
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.todam-production-ticket__discipline,
+.todam-production-ticket__title,
+.todam-production-ticket__credit,
+.todam-production-ticket__location {
+  margin: 0;
+}
+
+.todam-production-ticket__discipline {
+  color: var(--todam-color-brand-text);
+  font-family: "Work Sans", system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.35px;
+  line-height: 15px;
+  text-transform: uppercase;
+}
+
+.todam-production-ticket__title {
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  display: -webkit-box;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: clamp(18px, 8.2cqw, 22px);
+  font-weight: 600;
+  line-height: 1.08;
+  margin-top: 5px;
+  max-height: 2.16em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.todam-production-ticket__credit {
+  color: var(--todam-color-muted);
+  font-family: "Work Sans", system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  margin-top: 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.todam-production-ticket__location {
+  align-items: start;
+  color: var(--todam-color-muted);
+  display: grid;
+  font-family: "Work Sans", system-ui, sans-serif;
+  font-size: 14px;
+  gap: 6px;
+  grid-template-columns: 15px minmax(0, 1fr);
+  line-height: 19px;
+  margin-top: auto;
+  min-width: 0;
+  padding-top: 7px;
+}
+
+.todam-production-ticket__location > svg {
+  margin-top: 2px;
+}
+
+.todam-production-ticket__location-copy,
+.todam-production-ticket__venue {
+  min-width: 0;
+}
+
+.todam-production-ticket__location--inline .todam-production-ticket__location-copy {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.todam-production-ticket__location--stacked .todam-production-ticket__location-copy {
+  display: flex;
+  flex-direction: column;
+}
+
+.todam-production-ticket__location--stacked .todam-production-ticket__venue {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.todam-production-ticket__city {
+  color: var(--todam-color-muted);
+  font-weight: 700;
+}
+
+.todam-production-ticket__link {
+  inset: 0;
+  outline: none !important;
+  position: absolute;
+  z-index: 2;
+}
+
+.todam-production-ticket__link:hover {
+  opacity: 1 !important;
+}
+
+.todam-ticket-bookmark {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  color: var(--todam-color-ink);
+  cursor: pointer;
+  height: 60px;
+  outline: none !important;
+  overflow: visible;
+  padding: 0;
+  position: absolute;
+  right: clamp(10px, 3.8cqw, 14px);
+  top: -1px;
+  transform: none !important;
+  transform-origin: top center;
+  width: 44px;
+  z-index: 3;
+}
+
+.todam-ticket-bookmark__ribbon {
+  filter: drop-shadow(0 7px 7px rgba(21, 21, 21, 0.16));
+  height: 100%;
+  inset: 0;
+  overflow: visible;
+  pointer-events: none;
+  position: absolute;
+  width: 100%;
+}
+
+.todam-ticket-bookmark__surface {
+  fill: rgba(255, 253, 248, 0.95);
+}
+
+.todam-ticket-bookmark__selected-surface {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.todam-ticket-bookmark__edge {
+  fill: none;
+  stroke: rgba(226, 217, 205, 0.96);
+  stroke-linecap: square;
+  stroke-linejoin: round;
+  stroke-width: 0.75;
+  vector-effect: non-scaling-stroke;
+}
+
+.todam-ticket-bookmark__glyph {
+  align-items: center;
+  display: flex;
+  height: 22px;
+  justify-content: center;
+  left: 11px;
+  pointer-events: none;
+  position: absolute;
+  top: 12px;
+  width: 22px;
+  z-index: 1;
+}
+
+.todam-ticket-bookmark[aria-pressed="true"] .todam-ticket-bookmark__ribbon {
+  filter: drop-shadow(0 8px 10px rgba(21, 21, 21, 0.14))
+    drop-shadow(0 0 8px rgba(243, 169, 149, 0.2));
+}
+
+.todam-ticket-bookmark[aria-pressed="true"] .todam-ticket-bookmark__surface {
+  fill: rgba(255, 253, 248, 0.78);
+}
+
+.todam-ticket-bookmark[aria-pressed="true"] .todam-ticket-bookmark__selected-surface {
+  opacity: 1;
+}
+
+.todam-ticket-bookmark[aria-pressed="true"] .todam-ticket-bookmark__edge {
+  stroke: rgba(195, 78, 66, 0.58);
+}
+
+.todam-ticket-bookmark:disabled {
+  cursor: wait;
+  opacity: 0.68;
+}
+
+.todam-production-ticket:has(.todam-production-ticket__link:focus-visible)
+  .todam-production-ticket__edge {
+  stroke: var(--todam-color-focus);
+  stroke-width: 2.2;
+}
+
+.todam-production-ticket:has(.todam-production-ticket__link:focus-visible)
+  .todam-production-ticket__body {
+  filter: drop-shadow(0 0 2px rgba(195, 78, 66, 0.82))
+    drop-shadow(0 0 7px var(--todam-color-focus-halo))
+    drop-shadow(0 14px 20px rgba(43, 34, 27, 0.1));
+}
+
+.todam-ticket-bookmark:focus-visible .todam-ticket-bookmark__ribbon {
+  filter: drop-shadow(0 0 2px rgba(195, 78, 66, 0.88))
+    drop-shadow(0 0 7px rgba(243, 169, 149, 0.76))
+    drop-shadow(0 7px 7px rgba(21, 21, 21, 0.14));
+}
+
+.todam-ticket-bookmark:focus-visible .todam-ticket-bookmark__edge {
+  stroke: var(--todam-color-focus);
+  stroke-width: 2.2;
+}
+
+@container (max-width: 210px) {
+  .todam-production-ticket__info {
+    height: 184px;
+  }
+
+  .todam-production-ticket__info-surface {
+    padding-inline: 16px;
+  }
+
+  .todam-production-ticket__credit,
+  .todam-production-ticket__location {
+    font-size: 13px;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .todam-production-ticket:hover {
+    transform: translateY(-2px);
+  }
+
+  .todam-production-ticket:hover .todam-production-ticket__body {
+    filter: drop-shadow(0 19px 21px rgba(43, 34, 27, 0.12))
+      drop-shadow(0 0 6px rgba(243, 169, 149, 0.16));
+  }
+
+  .todam-ticket-bookmark:not(:disabled):hover {
+    color: var(--todam-color-accent);
+    transform: none !important;
+  }
+
+  .todam-ticket-bookmark:not(:disabled):hover .todam-ticket-bookmark__surface {
+    fill: var(--todam-color-coral-soft);
+  }
+
+  .todam-ticket-bookmark:not(:disabled):hover .todam-ticket-bookmark__edge {
+    stroke: var(--todam-color-coral);
+  }
+
+  .todam-ticket-bookmark[aria-pressed="true"]:not(:disabled):hover
+    .todam-ticket-bookmark__surface {
+    fill: rgba(255, 253, 248, 0.78);
+  }
+}
+
+.todam-production-ticket:has(.todam-production-ticket__link:active) {
+  transform: translateY(1px) scale(0.992);
+}
+
+.todam-ticket-bookmark:not(:disabled):active {
+  transform: scale(0.96) !important;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .todam-production-ticket {
+    transition: transform 160ms ease;
+  }
+
+  .todam-production-ticket__body,
+  .todam-production-ticket__edge,
+  .todam-ticket-bookmark,
+  .todam-ticket-bookmark__ribbon,
+  .todam-ticket-bookmark__surface,
+  .todam-ticket-bookmark__selected-surface,
+  .todam-ticket-bookmark__edge {
+    transition-duration: 160ms;
+    transition-timing-function: ease;
+  }
+
+  .todam-production-ticket__body,
+  .todam-ticket-bookmark__ribbon {
+    transition-property: filter;
+  }
+
+  .todam-production-ticket__edge,
+  .todam-ticket-bookmark__edge {
+    transition-property: stroke, stroke-width;
+  }
+
+  .todam-ticket-bookmark {
+    transition-property: color, transform;
+  }
+
+  .todam-ticket-bookmark__surface {
+    transition-property: fill;
+  }
+
+  .todam-ticket-bookmark__selected-surface {
+    transition-property: opacity;
+  }
+}
+
 @media (pointer: fine) {
   * {
     scrollbar-color: #b9b0a4 transparent;
@@ -849,6 +1379,71 @@ input:-webkit-autofill:focus {
   min-height: calc(
     100vh - var(--todam-page-header-offset, var(--todam-web-header-height))
   );
+}
+
+/* Liste personnelle : affiche bord à bord et commandes secondaires compactes. */
+.todam-managed-list-item {
+  box-shadow: 0 10px 28px rgba(43, 34, 27, 0.065);
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.todam-managed-list-item__link:hover {
+  opacity: 1 !important;
+}
+
+.todam-list-item-actions {
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  background: rgba(255, 253, 248, 0.9) !important;
+  box-shadow: 0 8px 22px rgba(43, 34, 27, 0.1);
+  transition:
+    box-shadow 160ms ease,
+    opacity 160ms ease;
+}
+
+.todam-list-item-action {
+  background: transparent !important;
+  border-bottom: 0 !important;
+  border-right: 0 !important;
+  border-top: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  transition:
+    background-color 140ms ease,
+    transform 140ms ease;
+}
+
+.todam-list-item-action:disabled {
+  cursor: not-allowed;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .todam-list-item-actions {
+    opacity: 0.72;
+  }
+
+  .todam-managed-list-item:hover,
+  .todam-managed-list-item:focus-within {
+    border-color: var(--todam-color-coral);
+    box-shadow: var(--todam-shadow-coral);
+  }
+
+  .todam-managed-list-item:hover .todam-list-item-actions,
+  .todam-managed-list-item:focus-within .todam-list-item-actions {
+    opacity: 1;
+  }
+
+  .todam-list-item-action:not(:disabled):hover {
+    background: var(--todam-color-coral-soft) !important;
+    transform: translateY(-1px);
+  }
+
+  .todam-list-item-action--remove:not(:disabled):hover svg {
+    color: var(--todam-color-error, #a1261a) !important;
+  }
 }
 
 @supports (height: 100dvh) {

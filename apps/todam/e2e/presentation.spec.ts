@@ -383,6 +383,7 @@ async function mockPresentationApi(page: Page, role: PresentationRole) {
       verifiedUsers: 24,
       activeProductions: 128,
       upcomingPerformances: 346,
+      activeVenues: 346,
       generatedAt: verifiedAt,
     }),
   );
@@ -752,6 +753,13 @@ async function attachViewportSlices(page: Page, testInfo: TestInfo, prefix: stri
   await expect(scroller).toBeVisible();
   await page.evaluate(() => document.fonts.ready);
 
+  async function expectRenderedPage() {
+    await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+    await expect(page.getByRole("progressbar")).toHaveCount(0);
+    await expect(page.getByText("Bundling...", { exact: false })).toHaveCount(0);
+  }
+
   let previousHeight = -1;
   let stableMeasurements = 0;
   await expect
@@ -791,7 +799,15 @@ async function attachViewportSlices(page: Page, testInfo: TestInfo, prefix: stri
       await page.getByTestId("site-footer").scrollIntoViewIfNeeded();
       await page.waitForTimeout(100);
     }
+    await page.evaluate(
+      () =>
+        new Promise<void>((resolve) => {
+          requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+        }),
+    );
+    await expectRenderedPage();
     const screenshot = await page.screenshot({ animations: "disabled" });
+    await expectRenderedPage();
     await mkdir(reviewScreenshotDirectory, { recursive: true });
     await writeFile(
       path.join(reviewScreenshotDirectory, `${prefix}-${position}.png`),
@@ -831,33 +847,27 @@ const routes = [
     role: "member",
   },
   {
-    name: "decouvrir",
-    path: "/decouvrir",
-    heading: "Découvrir les spectacles",
-    role: false,
-  },
-  {
     name: "recherche",
     path: "/search?q=Grenoble",
-    heading: "Rechercher dans Todam",
+    heading: "Résultats de recherche",
     role: false,
   },
   {
     name: "recherche-lieux",
     path: "/search?q=Grenoble&type=venues",
-    heading: "Rechercher dans Todam",
+    heading: "Résultats de recherche",
     role: false,
   },
   {
     name: "recherche-compagnies",
     path: "/search?q=Grenoble&type=companies",
-    heading: "Rechercher dans Todam",
+    heading: "Résultats de recherche",
     role: false,
   },
   {
     name: "recherche-membres",
     path: "/search?q=Grenoble&type=members",
-    heading: "Rechercher dans Todam",
+    heading: "Résultats de recherche",
     role: false,
   },
   {
@@ -1061,7 +1071,7 @@ const routes = [
   },
 ] as const;
 
-test("les CTA compagnies reprennent exactement le bouton Todam 01", async ({
+test("les CTA compagnies respectent la hiérarchie actuelle des boutons Todam", async ({
   page,
 }) => {
   await mockPresentationApi(page, false);
@@ -1103,20 +1113,29 @@ test("les CTA compagnies reprennent exactement le bouton Todam 01", async ({
   );
 
   expect(styles[0]).toEqual({
+    backgroundColor: "rgb(21, 21, 21)",
+    borderColor: "rgb(21, 21, 21)",
+    borderRadius: "10px",
+    borderWidth: "1px",
+    boxSizing: "border-box",
+    fontFamily: "Work Sans",
+    fontWeight: "600",
+  });
+  expect(styles[1]).toEqual({
     backgroundColor: "rgb(255, 253, 248)",
-    borderColor: "rgb(196, 61, 40)",
-    borderRadius: "4px",
+    borderColor: "rgb(21, 21, 21)",
+    borderRadius: "10px",
     borderWidth: "1px",
     boxSizing: "border-box",
     fontFamily: "Work Sans",
     fontWeight: "500",
   });
-  expect(styles[1]).toEqual(styles[0]);
   await expect(companyLink).toHaveAttribute("data-todam-cta", "standard");
+  await expect(contactButton).toHaveAttribute("data-todam-cta", "quiet");
 
   await companyLink.hover();
-  await expect(companyLink).toHaveCSS("background-color", "rgb(196, 61, 40)");
-  await expect(companyLink).toHaveCSS("border-color", "rgb(196, 61, 40)");
+  await expect(companyLink).toHaveCSS("background-color", "rgb(21, 21, 21)");
+  await expect(companyLink).toHaveCSS("border-color", "rgb(243, 169, 149)");
   await expect(companyLink).toHaveCSS("filter", "none");
   await expect(companyLink).toHaveCSS("opacity", "1");
   await expect(companyLink.locator(":scope > *").first()).toHaveCSS(
@@ -1125,10 +1144,10 @@ test("les CTA compagnies reprennent exactement le bouton Todam 01", async ({
   );
 
   await companyLink.focus();
-  await expect(companyLink).toHaveCSS("outline-width", "3px");
+  await expect(companyLink).toHaveCSS("outline-width", "2px");
 });
 
-test("la découverte vivante expose son CTA vedette, sa grille et ses filtres avancés", async ({
+test("la recherche expose son CTA vedette, sa grille et ses filtres avancés", async ({
   page,
 }) => {
   await mockPresentationApi(page, false);
@@ -1145,15 +1164,18 @@ test("la découverte vivante expose son CTA vedette, sa grille et ses filtres av
     exact: true,
     name: "Créer mon journal",
   });
-  await expect(featuredLink).toHaveAttribute("data-todam-cta", "featured");
-  await expect(featuredLink).toHaveCSS("background-color", "rgb(21, 21, 21)");
-  await expect(featuredLink).toHaveCSS("border-radius", "4px");
+  await expect(featuredLink).toHaveAttribute("data-todam-ticket-action", "orchestra");
+  await expect(featuredLink.locator(".todam-ticket-action-shape")).toHaveCount(1);
   await featuredLink.hover();
-  await expect(featuredLink).toHaveCSS("background-color", "rgb(196, 61, 40)");
   await featuredLink.focus();
-  await expect(featuredLink).toHaveCSS("outline-width", "3px");
+  await expect(featuredLink).toBeFocused();
 
   const header = page.locator(".todam-web-header").first();
+  const loginTicket = header.getByRole("link", {
+    exact: true,
+    name: "Se connecter",
+  });
+  await expect(loginTicket).toHaveAttribute("data-todam-ticket-action", "porcelain");
   await expect(header).toHaveCSS("backdrop-filter", "blur(16px)");
   await page
     .locator(".todam-web-page-scroll")
@@ -1161,18 +1183,10 @@ test("la découverte vivante expose son CTA vedette, sa grille et ses filtres av
   await expect(header).toHaveClass(/todam-web-header--scrolled/);
   await expect(header).not.toHaveCSS("box-shadow", "none");
 
-  await page.goto("/decouvrir");
-  await expect(
-    page.getByRole("heading", { level: 1, name: "Découvrir les spectacles" }),
-  ).toBeVisible();
-  const filters = page.getByRole("button", { name: "Filtres (0)" });
-  await expect(filters).toHaveAttribute("aria-expanded", "false");
-  await expect(page.getByTestId("discover-advanced-filters-panel")).toHaveCount(0);
-  await filters.focus();
-  await filters.press("Enter");
-  await expect(filters).toHaveAttribute("aria-expanded", "true");
+  await page.goto("/search?q=Grenoble");
+  await expect(page.getByTestId("discover-filter-sidebar")).toBeVisible();
   await page.getByLabel("Ville ou proximité").fill("Grenoble");
-  await expect(page.getByRole("button", { name: "Filtres (1)" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Effacer" })).toBeVisible();
 
   const productionGrid = page.locator(".todam-production-grid").first();
   await expect(productionGrid.locator(".todam-production-card")).toHaveCount(
@@ -1182,8 +1196,13 @@ test("la découverte vivante expose son CTA vedette, sa grille et ses filtres av
     getComputedStyle(element).gridTemplateColumns.split(" ").filter(Boolean),
   );
   expect(gridColumns).toHaveLength(4);
-  await expect(productionGrid.locator(".todam-production-card").first()).toContainText(
-    "Visuel non publié",
+  const posterPlaceholders = productionGrid.locator(
+    '[data-todam-poster-placeholder="theatre"]',
+  );
+  await expect(posterPlaceholders).toHaveCount(venueCards.length);
+  await expect(posterPlaceholders.first()).toHaveAttribute(
+    "aria-label",
+    `Affiche indisponible pour ${venueCards[0]!.title}`,
   );
   const filterBar = page.locator(".todam-discover-filter-bar");
   await expect(filterBar).toHaveCSS("position", "sticky");
@@ -1205,7 +1224,87 @@ test("la fiche spectacle traite son hero et sa prochaine date comme un billet", 
     page.getByRole("heading", { level: 1, name: primaryCard.title }),
   ).toBeVisible();
   await expect(page.locator(".todam-production-hero--theatre")).toBeVisible();
-  await expect(page.locator(".todam-ticket")).toContainText("Prochaine représentation");
+  await expect(page.getByText("Note des membres", { exact: true })).toBeVisible();
+  await expect(page.getByText("8,4/10", { exact: true })).toBeVisible();
+  await expect(page.getByText("17 notes", { exact: true })).toBeVisible();
+  const reviewsLink = page.getByRole("link", {
+    exact: true,
+    name: "Lire les avis ↓",
+  });
+  await expect(reviewsLink).toBeVisible();
+  const nextPerformanceTicket = page
+    .locator(".todam-ticket")
+    .filter({ hasText: "Prochaine représentation" });
+  await expect(nextPerformanceTicket).toContainText("Prochaine représentation");
+  await expect(
+    nextPerformanceTicket.getByRole("link", {
+      exact: true,
+      name: "Billetterie officielle ↗",
+    }),
+  ).toHaveAttribute("data-todam-ticket-action", "porcelain");
+
+  await reviewsLink.click();
+  await expect(page).toHaveURL(/#avis-des-membres$/);
+  await expect(
+    page.getByRole("heading", { exact: true, name: "Avis des membres" }),
+  ).toBeVisible();
+});
+
+test("la fiche spectacle masque la moyenne avant cinq notes", async ({ page }) => {
+  await mockPresentationApi(page, false);
+  await page.unroute("**/v1/productions/jetais-partie-pardon-mind-the-gap");
+  await page.route("**/v1/productions/jetais-partie-pardon-mind-the-gap", (route) =>
+    fulfillJson(route, {
+      ...productionDetail,
+      ratingSummary: { average: 8, count: 1 },
+      reviews: [],
+    }),
+  );
+
+  await page.goto("/production/jetais-partie-pardon-mind-the-gap");
+  await expect(page.getByText("Note des membres", { exact: true })).toBeVisible();
+  await expect(page.getByText("1 note", { exact: true })).toBeVisible();
+  await expect(page.getByText("8/10", { exact: true })).toHaveCount(0);
+  await expect(
+    page.getByRole("link", { exact: true, name: "Écrire le premier avis ↓" }),
+  ).toBeVisible();
+});
+
+test("la fiche spectacle replie la contribution personnelle jusqu’à son ouverture", async ({
+  page,
+}) => {
+  await mockPresentationApi(page, "member");
+  await page.goto("/production/jetais-partie-pardon-mind-the-gap");
+
+  await expect(page.getByText("Ma contribution", { exact: true })).toBeVisible();
+  await expect(
+    page.getByText("Ma note : 8/10 · Avis public", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("textbox", { exact: true, name: "Modifier mon avis" }),
+  ).toHaveCount(0);
+  await expect(
+    page.getByText(
+      "Une proposition très tenue, avec un vrai sens du rythme et de l’espace.",
+      { exact: true },
+    ),
+  ).toBeVisible();
+
+  const editReview = page.getByRole("button", {
+    exact: true,
+    name: "Modifier mon avis",
+  });
+  await expect(editReview).toHaveAttribute("aria-expanded", "false");
+  await editReview.click();
+  await expect(
+    page.getByRole("textbox", { exact: true, name: "Modifier mon avis" }),
+  ).toBeVisible();
+  const closeEditor = page.getByRole("button", { exact: true, name: "Fermer" });
+  await expect(closeEditor).toHaveAttribute("aria-expanded", "true");
+  await closeEditor.click();
+  await expect(
+    page.getByRole("textbox", { exact: true, name: "Modifier mon avis" }),
+  ).toHaveCount(0);
 });
 
 test("les affiches publiées restent affichées et la fiche gère l’absence de prochaine date", async ({
@@ -1246,6 +1345,46 @@ test("les affiches publiées restent affichées et la fiche gère l’absence de
   ).toBeVisible();
 });
 
+test("le marque-page de grille ajoute et retire un spectacle de « À voir »", async ({
+  page,
+}) => {
+  await mockPresentationApi(page, "member");
+  const methods: string[] = [];
+  await page.route(`**/v1/me/watchlist/${primaryCard.id}`, async (route) => {
+    const method = route.request().method();
+    methods.push(method);
+    await fulfillJson(route, {
+      state: {
+        productionId: primaryCard.id,
+        seen: true,
+        rating: 8,
+        watchlisted: method === "PUT",
+        review: null,
+      },
+    });
+  });
+
+  await page.goto("/search?q=Grenoble");
+  const removeBookmark = page.getByRole("button", {
+    exact: true,
+    name: `Retirer ${primaryCard.title} de « À voir »`,
+  });
+  await expect(removeBookmark).toHaveAttribute("aria-pressed", "true");
+  await expect(
+    removeBookmark.evaluate((element) => element.closest("a")),
+  ).resolves.toBeNull();
+
+  await removeBookmark.click();
+  const addBookmark = page.getByRole("button", {
+    exact: true,
+    name: `Ajouter ${primaryCard.title} à « À voir »`,
+  });
+  await expect(addBookmark).toHaveAttribute("aria-pressed", "false");
+  await addBookmark.click();
+  await expect(removeBookmark).toHaveAttribute("aria-pressed", "true");
+  expect(methods).toEqual(["DELETE", "PUT"]);
+});
+
 test("la pagination de la grille ajoute les résultats sans perdre les filtres", async ({
   page,
 }) => {
@@ -1265,7 +1404,7 @@ test("la pagination de la grille ajoute les résultats sans perdre les filtres",
       suggestion: null,
     });
   });
-  await page.goto("/decouvrir");
+  await page.goto("/search?q=spectacle");
   await expect(
     page.locator(".todam-production-grid .todam-production-card"),
   ).toHaveCount(2);
@@ -1273,7 +1412,13 @@ test("la pagination de la grille ajoute les résultats sans perdre les filtres",
   await expect(
     page.locator(".todam-production-grid .todam-production-card"),
   ).toHaveCount(3);
-  await expect(page.getByRole("button", { name: "Filtres (0)" })).toBeVisible();
+  await expect(page.getByTestId("discover-filter-sidebar")).toBeVisible();
+});
+
+test("l’ancienne page Découvrir redirige vers la recherche", async ({ page }) => {
+  await mockPresentationApi(page, false);
+  await page.goto("/decouvrir?q=Grenoble&type=companies");
+  await expect(page).toHaveURL(/\/search\?(?=.*q=Grenoble)(?=.*type=companies)/u);
 });
 
 test("le footer de l’accueil reste atteignable au scroll maximal", async ({ page }) => {
@@ -1331,6 +1476,35 @@ test("les actions de service et destructives annoncent clairement leur rôle", a
 
   await expect(deleteButton).toHaveAttribute("data-todam-cta", "danger");
   await expect(deleteButton).toHaveCSS("background-color", "rgb(161, 38, 26)");
+});
+
+test("les fiches compagnie et lieu gardent leur contexte utile et de vrais liens officiels", async ({
+  page,
+}) => {
+  await mockPresentationApi(page, false);
+
+  await page.goto("/compagnie/collectif-mind-the-gap");
+  await expect(
+    page.getByRole("heading", { level: 1, name: company.name }),
+  ).toBeVisible();
+  await expect(page.getByText(company.name, { exact: true })).toHaveCount(1);
+  await expect(page.getByText("Grenoble · France", { exact: true })).toBeVisible();
+  const companyOfficialLink = page.getByRole("link", {
+    exact: true,
+    name: "Site officiel de la compagnie ↗",
+  });
+  await expect(companyOfficialLink).toHaveAttribute("href", company.officialUrl);
+  await expect(companyOfficialLink).toHaveAttribute("target", "_blank");
+
+  await page.goto("/lieu/hexagone-scene-nationale");
+  await expect(page.getByRole("heading", { level: 1, name: venue.name })).toBeVisible();
+  await expect(page.getByText(venue.name, { exact: true })).toHaveCount(1);
+  const venueOfficialLink = page.getByRole("link", {
+    exact: true,
+    name: "Site officiel du lieu ↗",
+  });
+  await expect(venueOfficialLink).toHaveAttribute("href", venue.officialUrl);
+  await expect(venueOfficialLink).toHaveAttribute("target", "_blank");
 });
 
 for (const route of routes) {

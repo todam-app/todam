@@ -442,149 +442,154 @@ export function MyReviewsScreen() {
   return (
     <>
       <PrivatePageHead title="Mes avis" />
-      <PageScrollView contentContainerClassName="mx-auto w-full max-w-4xl gap-6 px-4 py-6 md:px-8 md:py-10">
-        <View className="gap-2">
-          <Text
-            aria-level={1}
-            accessibilityRole="header"
-            className="font-serif text-4xl font-semibold text-ink"
-          >
-            Mes avis
-          </Text>
-          <Text className="text-base leading-6 text-muted">
-            Retrouvez les avis écrits sur vos spectacles notés.
-          </Text>
-        </View>
-        <MyShowsNavigation counts={counts} />
-        <ScrollView
-          contentContainerStyle={styles.chips}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-        >
-          {filterKeys.map((key) => {
-            const options = countOptions(allReviews, query, key);
-            const selected = options.find(
-              (option) => option.value === (query[key] ?? "recent"),
-            );
-            const activeLabel =
-              key === "sort" && !query.sort ? sortOptions[0] : selected;
-            return (
-              <SelectionChip
-                indicator="chevron"
-                key={key}
-                label={
-                  query[key]
-                    ? (activeLabel?.label ?? filterLabels[key])
-                    : filterLabels[key]
-                }
-                onPress={() => {
-                  lastFilterTrigger.current = key;
-                  setActive(key);
-                }}
-                rounded
-                selected={Boolean(query[key])}
-                testID={`review-filter-${key}`}
-              />
-            );
-          })}
-        </ScrollView>
-        <View className="flex-row items-center justify-between">
-          <Text
-            accessibilityLiveRegion="polite"
-            className="text-base font-semibold text-ink"
-          >
-            {filtered.length} avis
-          </Text>
-          <Pressable
-            accessibilityLabel="Ouvrir tous les filtres"
-            accessibilityRole="button"
-            className="todam-icon-button h-11 w-11 items-center justify-center rounded-todam border border-control bg-paper"
-            onPress={() => setAllOpen(true)}
-          >
-            <Ionicons color={tokens.color.ink} name="options-outline" size={22} />
-          </Pressable>
-        </View>
-        <AsyncState
-          empty={!reviews.isPending && !reviews.isError && filtered.length === 0}
-          emptyMessage="Aucun avis ne correspond à ces critères."
-          error={reviews.isError}
-          loading={reviews.isPending}
-          onRetry={() => void reviews.refetch()}
-        >
-          <View className="gap-6">
-            {filtered.map((review) => (
-              <ReviewCard key={review.id} review={review} />
-            ))}
+      <PageScrollView contentContainerClassName="flex-grow">
+        <View className="todam-page-before-footer mx-auto w-full max-w-4xl flex-1 gap-6 px-4 py-6 md:px-8 md:py-10">
+          <View className="gap-2">
+            <Text
+              aria-level={1}
+              accessibilityRole="header"
+              className="font-serif text-4xl font-semibold text-ink"
+            >
+              Mes avis
+            </Text>
+            <Text className="text-base leading-6 text-muted">
+              Retrouvez les avis écrits sur vos spectacles notés.
+            </Text>
           </View>
-        </AsyncState>
-
-        <Overlay
-          onClose={() => setActive(null)}
-          sidePanel={false}
-          title={active ? filterLabels[active] : ""}
-          visible={active !== null}
-        >
-          <ScrollView>
-            {active ? (
-              <Options
-                onSelect={(value) => {
-                  if (Platform.OS === "web") {
-                    window.sessionStorage.setItem("todam-review-filter-focus", active);
+          <MyShowsNavigation counts={counts} />
+          <ScrollView
+            contentContainerStyle={styles.chips}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+          >
+            {filterKeys.map((key) => {
+              const options = countOptions(allReviews, query, key);
+              const selected = options.find(
+                (option) => option.value === (query[key] ?? "recent"),
+              );
+              const activeLabel =
+                key === "sort" && !query.sort ? sortOptions[0] : selected;
+              return (
+                <SelectionChip
+                  indicator="chevron"
+                  key={key}
+                  label={
+                    query[key]
+                      ? (activeLabel?.label ?? filterLabels[key])
+                      : filterLabels[key]
                   }
-                  replace(active, value);
-                  setActive(null);
-                }}
-                options={countOptions(allReviews, query, active)}
-                selected={query[active]}
-              />
-            ) : null}
+                  onPress={() => {
+                    lastFilterTrigger.current = key;
+                    setActive(key);
+                  }}
+                  rounded
+                  selected={Boolean(query[key])}
+                  testID={`review-filter-${key}`}
+                />
+              );
+            })}
           </ScrollView>
-        </Overlay>
-        <Overlay
-          onClose={() => setAllOpen(false)}
-          sidePanel
-          title="Tous les filtres"
-          visible={allOpen}
-        >
-          <ScrollView>
-            {filterKeys.map((key) => (
-              <View className="border-b border-line" key={key}>
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityState={{ expanded: expanded === key }}
-                  className="min-h-16 flex-row items-center justify-between px-5"
-                  onPress={() => setExpanded(expanded === key ? null : key)}
-                >
-                  <Text className="text-base font-semibold text-ink">
-                    {filterLabels[key]}
-                  </Text>
-                  <Ionicons
-                    color={tokens.color.muted}
-                    name={expanded === key ? "chevron-up" : "chevron-down"}
-                    size={22}
-                  />
-                </Pressable>
-                {expanded === key ? (
-                  <Options
-                    onSelect={(value) => replace(key, value)}
-                    options={countOptions(allReviews, query, key)}
-                    selected={query[key]}
-                  />
-                ) : null}
-              </View>
-            ))}
-          </ScrollView>
-          <View className="border-t border-line p-4">
-            <Button
-              label="Tout effacer"
-              onPress={() => {
-                router.replace("/journal/avis");
-                setAllOpen(false);
-              }}
-              variant="ghost"
-            />
+          <View className="flex-row items-center justify-between">
+            <Text
+              accessibilityLiveRegion="polite"
+              className="text-base font-semibold text-ink"
+            >
+              {filtered.length} avis
+            </Text>
+            <Pressable
+              accessibilityLabel="Ouvrir tous les filtres"
+              accessibilityRole="button"
+              className="todam-icon-button h-11 w-11 items-center justify-center rounded-todam border border-control bg-paper"
+              onPress={() => setAllOpen(true)}
+            >
+              <Ionicons color={tokens.color.ink} name="options-outline" size={22} />
+            </Pressable>
           </View>
-        </Overlay>
+          <AsyncState
+            empty={!reviews.isPending && !reviews.isError && filtered.length === 0}
+            emptyMessage="Aucun avis ne correspond à ces critères."
+            error={reviews.isError}
+            loading={reviews.isPending}
+            onRetry={() => void reviews.refetch()}
+          >
+            <View className="gap-6">
+              {filtered.map((review) => (
+                <ReviewCard key={review.id} review={review} />
+              ))}
+            </View>
+          </AsyncState>
+
+          <Overlay
+            onClose={() => setActive(null)}
+            sidePanel={false}
+            title={active ? filterLabels[active] : ""}
+            visible={active !== null}
+          >
+            <ScrollView>
+              {active ? (
+                <Options
+                  onSelect={(value) => {
+                    if (Platform.OS === "web") {
+                      window.sessionStorage.setItem(
+                        "todam-review-filter-focus",
+                        active,
+                      );
+                    }
+                    replace(active, value);
+                    setActive(null);
+                  }}
+                  options={countOptions(allReviews, query, active)}
+                  selected={query[active]}
+                />
+              ) : null}
+            </ScrollView>
+          </Overlay>
+          <Overlay
+            onClose={() => setAllOpen(false)}
+            sidePanel
+            title="Tous les filtres"
+            visible={allOpen}
+          >
+            <ScrollView>
+              {filterKeys.map((key) => (
+                <View className="border-b border-line" key={key}>
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityState={{ expanded: expanded === key }}
+                    className="min-h-16 flex-row items-center justify-between px-5"
+                    onPress={() => setExpanded(expanded === key ? null : key)}
+                  >
+                    <Text className="text-base font-semibold text-ink">
+                      {filterLabels[key]}
+                    </Text>
+                    <Ionicons
+                      color={tokens.color.muted}
+                      name={expanded === key ? "chevron-up" : "chevron-down"}
+                      size={22}
+                    />
+                  </Pressable>
+                  {expanded === key ? (
+                    <Options
+                      onSelect={(value) => replace(key, value)}
+                      options={countOptions(allReviews, query, key)}
+                      selected={query[key]}
+                    />
+                  ) : null}
+                </View>
+              ))}
+            </ScrollView>
+            <View className="border-t border-line p-4">
+              <Button
+                label="Tout effacer"
+                onPress={() => {
+                  router.replace("/journal/avis");
+                  setAllOpen(false);
+                }}
+                variant="ghost"
+              />
+            </View>
+          </Overlay>
+        </View>
       </PageScrollView>
     </>
   );

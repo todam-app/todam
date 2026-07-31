@@ -8,17 +8,19 @@ import { Button, SectionTitle } from "@todam/design-system";
 import { Link, useLoaderData, useLocalSearchParams } from "expo-router";
 import Head from "expo-router/head";
 import { createStaticLoader } from "expo-router/server";
-import { Linking, Pressable, Text, View } from "react-native";
+import { useMemo } from "react";
+import { Pressable, Text, View } from "react-native";
 
 import { AsyncState } from "../../components/AsyncState";
 import { CatalogSources } from "../../components/CatalogSources";
-import { LegalFooter } from "../../components/LegalFooter";
+import { ExternalLink } from "../../components/ExternalLink";
 import { PageScrollView } from "../../components/PageScrollView";
 import { ProductionListItem } from "../../components/ProductionListItem";
 import { api } from "../../lib/api";
+import { groupCompanyTouringDates } from "../../lib/company-touring-dates";
 import { API_URL, PUBLIC_WEB_URL } from "../../lib/config";
+import { formatLocation, formatPerformance } from "../../lib/format";
 import { serializeJsonLd } from "../../lib/json-ld";
-import { formatPerformance } from "../../lib/format";
 import {
   areRouteLoadersDisabled,
   getPublishedCatalogSlugs,
@@ -75,6 +77,14 @@ export default function CompanyPage() {
   const canonicalUrl = `${PUBLIC_WEB_URL}/compagnie/${slug}`;
   const unavailable =
     company.error instanceof TodamApiError && company.error.problem.status === 404;
+  const touringGroups = useMemo(
+    () => groupCompanyTouringDates(company.data?.touringDates ?? []),
+    [company.data?.touringDates],
+  );
+  const location = formatLocation(
+    company.data?.locality ?? null,
+    company.data?.countryCode ?? null,
+  );
   const jsonLd = company.data
     ? {
         "@context": "https://schema.org",
@@ -100,8 +110,8 @@ export default function CompanyPage() {
               {
                 "@type": "ListItem",
                 position: 1,
-                name: "Découvrir",
-                item: `${PUBLIC_WEB_URL}/decouvrir`,
+                name: "Rechercher",
+                item: `${PUBLIC_WEB_URL}/search`,
               },
               {
                 "@type": "ListItem",
@@ -162,11 +172,11 @@ export default function CompanyPage() {
         ) : null}
       </Head>
       <PageScrollView contentContainerClassName="flex-grow">
-        <View className="todam-page-before-footer mx-auto w-full max-w-content flex-1 px-5 py-8 md:px-8 md:py-12">
+        <View className="todam-page-before-footer mx-auto w-full max-w-content flex-1 px-5 py-6 md:px-8 md:py-12">
           <AsyncState
             empty={!company.isPending && (!company.data || unavailable)}
             emptyAction={
-              <Link href="/decouvrir?type=companies" asChild>
+              <Link href="/search?type=companies" asChild>
                 <Button
                   accessibilityRole="link"
                   label="Rechercher une compagnie"
@@ -180,23 +190,23 @@ export default function CompanyPage() {
             onRetry={() => void company.refetch()}
           >
             {company.data ? (
-              <View className="gap-10">
-                <View className="gap-6 border-b border-line pb-8">
-                  <View className="flex-row flex-wrap gap-2">
-                    <Link href="/decouvrir" asChild>
+              <View className="gap-8 md:gap-10">
+                <View className="gap-4 border-b border-line pb-6 md:gap-6 md:pb-8">
+                  <View className="flex-row flex-wrap items-center gap-2">
+                    <Link href="/search" asChild>
                       <Pressable
                         accessibilityRole="link"
                         className="min-h-11 justify-center"
                       >
-                  <Text className="text-sm font-semibold text-brand-text">
-                          Découvrir
+                        <Text className="text-sm font-semibold text-brand-text">
+                          Rechercher
                         </Text>
                       </Pressable>
                     </Link>
                     <Text className="text-sm text-muted">/ Compagnies</Text>
                   </View>
                   <View className="max-w-3xl gap-3">
-          <Text className="text-xs font-bold uppercase tracking-widest text-brand-text">
+                    <Text className="text-xs font-bold uppercase tracking-widest text-brand-text">
                       Compagnie
                     </Text>
                     <Text
@@ -206,6 +216,9 @@ export default function CompanyPage() {
                     >
                       {company.data.name}
                     </Text>
+                    {location ? (
+                      <Text className="text-base leading-6 text-muted">{location}</Text>
+                    ) : null}
                     {company.data.shortDescription ? (
                       <Text className="text-lg leading-7 text-ink">
                         {company.data.shortDescription}
@@ -217,15 +230,15 @@ export default function CompanyPage() {
                       </Text>
                     ) : null}
                     {company.data.officialUrl ? (
-                      <Pressable
-                        accessibilityRole="link"
-                        className="min-h-11 self-start justify-center"
-                        onPress={() => void Linking.openURL(company.data!.officialUrl!)}
+                      <ExternalLink
+                        accessibilityLabel="Site officiel de la compagnie ↗"
+                        className="flex min-h-11 self-start justify-center"
+                        href={company.data.officialUrl}
                       >
-            <Text className="text-base font-semibold text-brand-text">
+                        <Text className="text-base font-semibold text-brand-text">
                           Site officiel de la compagnie ↗
                         </Text>
-                      </Pressable>
+                      </ExternalLink>
                     ) : null}
                   </View>
                 </View>
@@ -234,7 +247,11 @@ export default function CompanyPage() {
                   <SectionTitle>Productions actuelles</SectionTitle>
                   {company.data.currentProductions.length > 0 ? (
                     company.data.currentProductions.map((production) => (
-                      <ProductionListItem key={production.id} production={production} />
+                      <ProductionListItem
+                        key={production.id}
+                        production={production}
+                        showCompany={false}
+                      />
                     ))
                   ) : (
                     <View className="todam-editorial-empty justify-center p-5">
@@ -245,46 +262,55 @@ export default function CompanyPage() {
                   )}
                 </View>
 
-                {company.data.touringDates.length > 0 ? (
+                {touringGroups.length > 0 ? (
                   <View className="gap-4">
                     <SectionTitle>Dates de tournée</SectionTitle>
                     <View className="border-t border-line">
-                      {company.data.touringDates.map((performance) => (
+                      {touringGroups.map((group) => (
                         <View
-                          className="gap-2 border-b border-line py-4 md:flex-row md:items-center md:justify-between"
-                          key={performance.id}
+                          className="gap-3 border-b border-line py-5"
+                          key={group.production.id}
                         >
-                          <View className="gap-1">
-                            <Text className="text-base font-semibold text-ink">
-                              {formatPerformance(
-                                performance.startsAt,
-                                performance.venue.timezone,
-                              )}
-                            </Text>
-                            <Link
-                              href={`/production/${performance.production.slug}`}
-                              asChild
-                            >
-                              <Pressable
-                                accessibilityRole="link"
-                                className="min-h-11 justify-center"
-                              >
-                    <Text className="font-serif text-lg font-semibold text-brand-text">
-                                  {performance.production.title}
-                                </Text>
-                              </Pressable>
-                            </Link>
-                          </View>
-                          <Link href={`/lieu/${performance.venue.slug}`} asChild>
+                          <Link href={`/production/${group.production.slug}`} asChild>
                             <Pressable
                               accessibilityRole="link"
                               className="min-h-11 justify-center"
                             >
-                    <Text className="text-base font-semibold text-brand-text">
-                                {performance.venue.name}, {performance.venue.locality}
+                              <Text className="font-serif text-xl font-semibold text-brand-text">
+                                {group.production.title}
                               </Text>
                             </Pressable>
                           </Link>
+                          {group.venues.map((venueGroup) => (
+                            <View
+                              className="gap-1 md:flex-row md:items-start md:gap-8"
+                              key={venueGroup.venue.id}
+                            >
+                              <Link href={`/lieu/${venueGroup.venue.slug}`} asChild>
+                                <Pressable
+                                  accessibilityRole="link"
+                                  className="min-h-11 justify-center md:w-72"
+                                >
+                                  <Text className="text-base font-semibold text-brand-text">
+                                    {venueGroup.venue.name}, {venueGroup.venue.locality}
+                                  </Text>
+                                </Pressable>
+                              </Link>
+                              <View className="min-w-0 flex-1 gap-1 pb-2">
+                                {venueGroup.performances.map((performance) => (
+                                  <Text
+                                    className="text-sm leading-5 text-muted"
+                                    key={performance.id}
+                                  >
+                                    {formatPerformance(
+                                      performance.startsAt,
+                                      performance.venue.timezone,
+                                    )}
+                                  </Text>
+                                ))}
+                              </View>
+                            </View>
+                          ))}
                         </View>
                       ))}
                     </View>
@@ -315,7 +341,11 @@ export default function CompanyPage() {
                   <View className="gap-4">
                     <SectionTitle>Archives</SectionTitle>
                     {company.data.archives.map((production) => (
-                      <ProductionListItem key={production.id} production={production} />
+                      <ProductionListItem
+                        key={production.id}
+                        production={production}
+                        showCompany={false}
+                      />
                     ))}
                   </View>
                 ) : null}
@@ -366,7 +396,6 @@ export default function CompanyPage() {
             ) : null}
           </AsyncState>
         </View>
-        <LegalFooter />
       </PageScrollView>
     </>
   );

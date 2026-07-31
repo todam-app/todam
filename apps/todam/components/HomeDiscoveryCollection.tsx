@@ -52,6 +52,7 @@ export function HomeDiscoveryCollection({
             locality={performance?.locality}
             priority={index < 2}
             production={production}
+            showWatchlistAction
             startsAt={performance?.startsAt ?? production.nextPerformance}
             venueName={
               performance?.venueName ??
@@ -130,6 +131,7 @@ export function HomeDiscoveryCollection({
             locality={performance?.locality}
             priority={index === 0}
             production={production}
+            showWatchlistAction
             startsAt={performance?.startsAt ?? production.nextPerformance}
             venueName={
               performance?.venueName ??

@@ -15,7 +15,6 @@ import { Image, Linking, Pressable, Text, View } from "react-native";
 import { AsyncState } from "../components/AsyncState";
 import { AccessibleChoiceGroup } from "../components/AccessibleChoiceGroup";
 import { AccessibleTabs } from "../components/AccessibleTabs";
-import { LegalFooter } from "../components/LegalFooter";
 import { PageScrollView, PageStaticView } from "../components/PageScrollView";
 import { PrivatePageHead } from "../components/PrivatePageHead";
 import { api } from "../lib/api";
@@ -829,7 +828,6 @@ export default function ModerationPage() {
               }
             />
           </View>
-          <LegalFooter />
         </PageScrollView>
       </>
     );
@@ -996,7 +994,6 @@ export default function ModerationPage() {
             </>
           )}
         </View>
-        <LegalFooter />
       </PageScrollView>
     </>
   );

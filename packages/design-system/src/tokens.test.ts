@@ -29,7 +29,9 @@ describe("tokens accessibles", () => {
   });
 
   it("garde le texte de marque au niveau WCAG AA sur les fonds neutres", () => {
-    expect(contrast(tokens.color.brandText, tokens.color.background)).toBeGreaterThan(4.5);
+    expect(contrast(tokens.color.brandText, tokens.color.background)).toBeGreaterThan(
+      4.5,
+    );
     expect(contrast(tokens.color.brandText, tokens.color.surface)).toBeGreaterThan(4.5);
   });
 
@@ -107,6 +109,9 @@ describe("tokens accessibles", () => {
       coral: tokens.color.coral,
       lilac: tokens.color.lilac,
       aqua: tokens.color.aqua,
+      posterNightTheatre: tokens.color.posterNightTheatre,
+      posterNightOpera: tokens.color.posterNightOpera,
+      posterNightBallet: tokens.color.posterNightBallet,
       panel: tokens.radius.panel,
       media: tokens.radius.media,
       glass: tokens.surface.glass,
@@ -117,6 +122,9 @@ describe("tokens accessibles", () => {
       coral: "#F3A995",
       lilac: "#C8B8F0",
       aqua: "#9FD8D0",
+      posterNightTheatre: "#1B1719",
+      posterNightOpera: "#15131A",
+      posterNightBallet: "#11191A",
       panel: 18,
       media: 16,
       glass: "rgba(255, 253, 248, 0.86)",

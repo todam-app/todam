@@ -7,7 +7,7 @@ import {
 
 async function expectFooterBelowViewport(page: Page) {
   const footer = page.getByTestId("site-footer");
-  const pageScroller = page.locator(".todam-web-page-scroll");
+  const pageScroller = page.locator(".todam-web-page-scroll").filter({ has: footer });
   await expect(footer).toHaveCount(1);
   await pageScroller.evaluate((element) => {
     element.scrollTop = 0;
@@ -42,6 +42,17 @@ async function expectFooterBelowViewport(page: Page) {
   await expect
     .poll(() => pageScroller.evaluate((element) => element.scrollTop))
     .toBe(0);
+}
+
+async function scrollFooterIntoView(page: Page) {
+  const footer = page.getByTestId("site-footer");
+  const pageScroller = page.locator(".todam-web-page-scroll").filter({ has: footer });
+  await expect(footer).toHaveCount(1);
+  await pageScroller.evaluate((element) => {
+    element.scrollTop = element.scrollHeight;
+  });
+  await expect(footer).toBeVisible();
+  return footer;
 }
 
 async function mockAuthenticatedProfile(
@@ -154,6 +165,22 @@ async function mockAuthenticatedProfile(
       body: JSON.stringify({ items: [] }),
     });
   });
+  await page.route("**/v1/me/lists/*", async (route) => {
+    await route.fulfill({
+      contentType: "application/json",
+      body: JSON.stringify({
+        id: "00000000-0000-4000-8000-000000000001",
+        slug: "ma-liste",
+        name: "Ma liste",
+        description: null,
+        visibility: "private",
+        itemCount: 0,
+        updatedAt: now,
+        username: "spectatrice-test",
+        items: [],
+      }),
+    });
+  });
   await page.route("**/v1/me/watchlist", async (route) => {
     await route.fulfill({
       contentType: "application/json",
@@ -209,7 +236,12 @@ test("l'accueil présente Todam simplement et ouvre l'inscription", async ({ pag
 
   await expect(page).toHaveTitle("Todam — votre journal de spectacles");
   await expect(
-    page.locator('link[rel="icon"][href="/favicon.svg?v=2"][type="image/svg+xml"]'),
+    page.locator('link[rel="icon"][href="/favicon.svg?v=3"][type="image/svg+xml"]'),
+  ).toHaveCount(1);
+  await expect(
+    page.locator(
+      'link[rel="icon"][href="/favicon-dark.svg?v=3"][media="(prefers-color-scheme: dark)"]',
+    ),
   ).toHaveCount(1);
   await expect(
     page.getByRole("link", { name: "Todam, accueil" }).first(),
@@ -236,15 +268,18 @@ test("l'accueil présente Todam simplement et ouvre l'inscription", async ({ pag
   ).toBeVisible();
 });
 
-test("l'accueil connecté place la découverte locale au premier écran", async ({
-  page,
-}) => {
+test("l'accueil connecté place le journal au premier écran", async ({ page }) => {
   await mockAuthenticatedProfile(page);
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/");
 
   await expect(
-    page.getByRole("heading", { exact: true, name: "À l’affiche en ce moment" }),
+    page.getByRole("heading", { exact: true, name: "Mon journal de spectacles" }),
+  ).toBeVisible();
+  await expect(
+    page.getByText(
+      "Retrouvez les spectacles que vous avez vus, notez-les et gardez-en une trace.",
+    ),
   ).toBeVisible();
   await expect(page.getByText("Journal en cours · 0/5")).toBeVisible();
   await expect(page.getByRole("button", { name: "Créer mon journal" })).toHaveCount(0);
@@ -252,7 +287,7 @@ test("l'accueil connecté place la découverte locale au premier écran", async 
     page.getByText("Choisir une ville pour personnaliser l’affiche →"),
   ).toBeVisible();
   await expect(
-    page.getByRole("link", { exact: true, name: "Ajouter un spectacle" }),
+    page.getByRole("link", { exact: true, name: "Commencer mon journal" }),
   ).toBeVisible();
   await expect(page.getByRole("link", { name: "Une pièce" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Ouvrir mes spectacles" })).toBeVisible();
@@ -268,6 +303,23 @@ test("l'accueil connecté place la découverte locale au premier écran", async 
 
   await page.setViewportSize({ width: 375, height: 800 });
   await expect(page.getByText("Journal en cours · 0/5")).toBeVisible();
+  const mobileHero = page.locator(".todam-connected-hero");
+  const mobileHeroBox = await mobileHero.boundingBox();
+  expect(mobileHeroBox).not.toBeNull();
+  expect(mobileHeroBox!.x).toBeCloseTo(0, 0);
+  expect(mobileHeroBox!.width).toBeCloseTo(375, 0);
+  await expect(mobileHero).toHaveCSS("border-radius", "0px");
+  await expect(mobileHero).toHaveCSS("border-left-width", "0px");
+  await expect(mobileHero).toHaveCSS("border-right-width", "0px");
+  await expect(mobileHero).toHaveCSS("box-shadow", "none");
+  await expect(page.locator(".todam-web-page-scroll")).toHaveCSS(
+    "background-color",
+    "rgb(252, 248, 242)",
+  );
+  await expect(page.locator(".todam-web-page-scroll")).toHaveCSS(
+    "background-image",
+    "none",
+  );
   const hasHorizontalOverflow = await page.evaluate(
     () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
   );
@@ -295,7 +347,10 @@ test("l'accueil masque la progression terminée et les listes vides restent expl
   });
   await page.goto("/");
   await expect(
-    page.getByRole("heading", { exact: true, name: "À l’affiche en ce moment" }),
+    page.getByRole("heading", { exact: true, name: "Mon journal de spectacles" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("link", { exact: true, name: "Noter un spectacle" }),
   ).toBeVisible();
   await expect(page.getByText(/Journal en cours/)).toHaveCount(0);
 
@@ -455,6 +510,15 @@ test("l'inscription présente l'âge et les documents sans checkbox", async ({
   await expect(
     page.getByRole("link", { name: "Politique de confidentialité" }),
   ).toBeVisible();
+  await expect(page.getByText("À savoir", { exact: true })).toBeVisible();
+  await expect(
+    page.getByText(
+      /Tes listes, ta liste « À voir » et tes notes sans avis public sont privées par défaut/,
+    ),
+  ).toBeVisible();
+  await expect(
+    page.getByText(/Chaque nouvelle liste et chaque nouvel avis/),
+  ).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Créer mon compte" })).toBeEnabled();
 
   const [legalPage] = await Promise.all([
@@ -474,12 +538,20 @@ test("l'inscription présente l'âge et les documents sans checkbox", async ({
       name: "Conditions d'utilisation",
     }),
   ).toHaveCount(0);
-  await expect(legalPage.getByText(/Date d'effet : 28 juillet 2026/)).toBeVisible();
+  const effectiveDate = new Intl.DateTimeFormat("fr-FR", {
+    dateStyle: "long",
+    timeZone: "UTC",
+  }).format(new Date(`${LEGAL_EFFECTIVE_DATE}T00:00:00Z`));
+  await expect(
+    legalPage.getByText(
+      `Version ${CURRENT_TERMS_VERSION} — Date d'effet : ${effectiveDate}`,
+    ),
+  ).toBeVisible();
   await expectFooterBelowViewport(legalPage);
   await expect(
     legalPage
       .getByRole("link", {
-        name: "contact@todam.fr",
+        name: "Nous contacter",
       })
       .first(),
   ).toBeVisible();
@@ -501,7 +573,7 @@ test("l'inscription présente l'âge et les documents sans checkbox", async ({
 
 test("le footer commence sous le premier écran des pages courtes", async ({ page }) => {
   const pages = [
-    { path: "/search", heading: "Rechercher dans Todam" },
+    { path: "/search", heading: "Résultats de recherche" },
     { path: "/page-qui-n-existe-pas", heading: "Cette page n’est pas à l’affiche." },
   ];
 
@@ -512,6 +584,80 @@ test("le footer commence sous le premier écran des pages courtes", async ({ pag
     ).toBeVisible();
     await expectFooterBelowViewport(page);
   }
+});
+
+test("les pages d’authentification utilisent le footer minimal", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/sign-in");
+
+  await expect(
+    page.getByRole("heading", { exact: true, name: "Bon retour" }),
+  ).toBeVisible();
+  await expectFooterBelowViewport(page);
+
+  const footer = page.getByTestId("site-footer");
+  await expect(
+    footer.getByRole("link", { exact: true, name: "Informations légales" }),
+  ).toBeVisible();
+  await expect(
+    footer.getByRole("link", { exact: true, name: "Nous contacter" }),
+  ).toBeVisible();
+  await expect(footer.getByText("Professionnels", { exact: true })).toHaveCount(0);
+});
+
+test("le footer partagé couvre le profil, le journal et les listes", async ({
+  page,
+}) => {
+  await mockAuthenticatedProfile(page);
+  await page.setViewportSize({ width: 1440, height: 900 });
+
+  const pages = [
+    { path: "/profile", heading: "spectatrice-test" },
+    { path: "/journal", heading: "Mes spectacles" },
+    { path: "/journal/a-voir", heading: "À voir" },
+    { path: "/journal/vus", heading: "Vus" },
+    { path: "/journal/notes", heading: "Notés" },
+    { path: "/journal/avis", heading: "Mes avis" },
+    { path: "/journal/listes", heading: "Mes listes" },
+    {
+      path: "/journal/listes/00000000-0000-4000-8000-000000000001",
+      heading: "Ma liste",
+    },
+  ];
+
+  for (const item of pages) {
+    await page.goto(item.path);
+    await expect(
+      page.getByRole("heading", { exact: true, name: item.heading }).first(),
+    ).toBeVisible();
+    await expectFooterBelowViewport(page);
+  }
+});
+
+test("la fiche de liste masque le formulaire jusqu’à la modification", async ({
+  page,
+}) => {
+  await mockAuthenticatedProfile(page);
+  await page.goto("/journal/listes/00000000-0000-4000-8000-000000000001");
+
+  await expect(
+    page.getByRole("heading", { exact: true, level: 1, name: "Ma liste" }),
+  ).toBeVisible();
+  await expect(page.getByRole("textbox", { name: "Nom *" })).toHaveCount(0);
+  await expect(page.getByRole("textbox", { name: "Description" })).toHaveCount(0);
+
+  await page
+    .getByRole("button", { exact: true, name: "Modifier le titre et la description" })
+    .click();
+  await expect(
+    page.getByRole("heading", { exact: true, name: "Modifier la liste" }),
+  ).toBeVisible();
+  await expect(page.getByRole("textbox", { name: "Nom *" })).toHaveValue("Ma liste");
+  await expect(page.getByRole("textbox", { name: "Description" })).toBeVisible();
+
+  await page.getByRole("button", { exact: true, name: "Annuler" }).click();
+  await expect(page.getByRole("textbox", { name: "Nom *" })).toHaveCount(0);
+  await expect(page.getByRole("textbox", { name: "Description" })).toHaveCount(0);
 });
 
 test("les pages juridiques utilisent le fond Web commun", async ({ page }) => {
@@ -554,6 +700,63 @@ test("les pages juridiques utilisent le fond Web commun", async ({ page }) => {
   });
   expect(htmlBackground.color).toBe("rgb(240, 234, 225)");
   expect(htmlBackground.image).toContain("linear-gradient");
+});
+
+test("le footer regroupe les informations légales sur une seule page", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/");
+  await expect(
+    page.getByRole("heading", {
+      name: "Les spectacles passent. Votre journal reste.",
+    }),
+  ).toBeVisible();
+
+  const footer = await scrollFooterIntoView(page);
+  await expect(footer.getByText("Mon journal de spectacles")).toBeVisible();
+  await expect(
+    footer.getByRole("link", { exact: true, name: "Informations légales" }),
+  ).toBeVisible();
+  await expect(
+    footer.getByRole("link", { exact: true, name: "Conditions d’utilisation" }),
+  ).toHaveCount(0);
+  await expect(
+    footer.getByRole("link", { exact: true, name: "Confidentialité" }),
+  ).toHaveCount(0);
+  await expect(
+    footer.getByRole("link", { exact: true, name: "Mentions légales" }),
+  ).toHaveCount(0);
+
+  await footer.getByRole("link", { exact: true, name: "Informations légales" }).click();
+  await expect(page).toHaveURL("/informations-legales");
+  await expect(
+    page.getByRole("heading", { exact: true, name: "Informations légales" }),
+  ).toBeVisible();
+  await expect(page).toHaveTitle("Informations légales — Todam");
+  await expect(
+    page.getByRole("heading", {
+      exact: true,
+      name: "Conditions générales d'utilisation de Todam",
+    }),
+  ).toBeVisible();
+
+  await page.getByRole("tab", { exact: true, name: "Confidentialité" }).click();
+  await expect(
+    page.getByRole("heading", {
+      exact: true,
+      name: "Politique de confidentialité de Todam",
+    }),
+  ).toBeVisible();
+
+  await page.getByRole("tab", { exact: true, name: "Mentions légales" }).click();
+  await expect(
+    page.getByRole("heading", { exact: true, name: "Mentions légales de Todam" }),
+  ).toBeVisible();
+  await expect(page.locator('meta[name="robots"]')).toHaveAttribute(
+    "content",
+    "noindex,nofollow,noarchive,nosnippet",
+  );
 });
 
 test("le profil sépare les informations, statistiques et paramètres du compte", async ({
@@ -823,7 +1026,14 @@ test("la recherche reste dans l'en-tête et se contrôle à la souris", async ({
 
   await expect(page).toHaveURL(/\/search\?q=Muses$/);
   await expect(
-    page.getByRole("heading", { name: "Rechercher dans Todam" }),
+    page.getByRole("heading", { level: 1, name: "Résultats de recherche" }),
+  ).toBeVisible();
+  await expect(searchField).toHaveCount(1);
+  await expect(page.getByText("Catalogue", { exact: true })).toHaveCount(0);
+  await expect(page.getByText("Rechercher dans Todam", { exact: true })).toHaveCount(0);
+  await expect(page.getByTestId("discover-filter-sidebar")).toBeVisible();
+  await expect(
+    page.getByRole("heading", { level: 2, name: "0 résultat pour « Muses »" }),
   ).toBeVisible();
   await expect(
     page.getByText(
@@ -832,14 +1042,24 @@ test("la recherche reste dans l'en-tête et se contrôle à la souris", async ({
   ).toBeVisible();
 
   await page.getByRole("button", { name: "Effacer la recherche" }).click();
-  await expect(page).toHaveURL(/\/search\?type=productions$/);
+  await expect(page).toHaveURL(/\/search$/);
   await expect(searchField).toHaveValue("");
   await expect(
-    page.getByRole("heading", { name: "Rechercher dans Todam" }),
+    page.getByRole("heading", { level: 1, name: "Résultats de recherche" }),
   ).toBeVisible();
   await expect(
-    page.getByText("Saisissez au moins deux caractères pour lancer la recherche."),
+    page.getByText("Recherchez un spectacle, un lieu, une compagnie ou un membre."),
   ).toBeVisible();
+
+  await page.setViewportSize({ width: 375, height: 800 });
+  await page.goto("/search?q=Muses");
+  await expect(page.getByTestId("discover-filter-sidebar")).toHaveCount(0);
+  const filters = page.getByTestId("discover-advanced-filters-toggle");
+  await expect(filters).toBeVisible();
+  await filters.click();
+  await expect(page.getByTestId("discover-advanced-filters-panel")).toBeVisible();
+  await page.getByTestId("discover-advanced-filters-panel-close").click();
+  await expect(page.getByTestId("discover-advanced-filters-panel")).toHaveCount(0);
 
   await page.goto("/sign-in");
   await expect(page.getByLabel("Titre, compagnie, lieu ou membre")).toHaveCount(0);
@@ -856,6 +1076,16 @@ test("les formulaires d'authentification déclarent leurs champs au navigateur",
   await expect(identifier).toHaveAttribute("type", "text");
   await expect(currentPassword).toHaveAttribute("autocomplete", "current-password");
   await expect(currentPassword).toHaveAttribute("type", "password");
+
+  const passwordVisibility = page.getByRole("button", {
+    name: "Afficher le mot de passe",
+  });
+  await expect(passwordVisibility).toHaveText("");
+  await passwordVisibility.click();
+  await expect(currentPassword).toHaveJSProperty("type", "text");
+  await expect(
+    page.getByRole("button", { name: "Masquer le mot de passe" }),
+  ).toHaveText("");
 
   await page.goto("/sign-up");
 
@@ -1101,8 +1331,8 @@ test("le footer ouvre la page Contact et le formulaire confirme son envoi", asyn
   });
 
   await page.goto("/");
-  await page.getByTestId("site-footer").scrollIntoViewIfNeeded();
-  await page.getByRole("link", { name: "contact@todam.fr" }).click();
+  await scrollFooterIntoView(page);
+  await page.getByRole("link", { name: "Nous contacter" }).click();
 
   await expect(page).toHaveURL("/contact");
   await expect(
@@ -1133,7 +1363,7 @@ test("le footer ouvre la page Contact et le formulaire confirme son envoi", asyn
   await page.getByLabel("Adresse e-mail").fill("camille@example.test");
   await page.getByLabel("Objet").fill("Une question");
   await page
-    .getByLabel("Message")
+    .getByRole("textbox", { name: "Message *" })
     .fill("Bonjour, voici ma question à propos de Todam.");
   await page.getByRole("button", { name: "Envoyer le message" }).click();
 
@@ -1148,8 +1378,8 @@ test("le footer ouvre la page Contact et le formulaire confirme son envoi", asyn
 
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
-  await page.getByTestId("site-footer").scrollIntoViewIfNeeded();
-  await page.getByRole("link", { exact: true, name: "Contact" }).click();
+  await scrollFooterIntoView(page);
+  await page.getByRole("link", { exact: true, name: "Nous contacter" }).click();
   await expect(page).toHaveURL("/contact");
 });
 

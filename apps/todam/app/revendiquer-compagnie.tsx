@@ -7,7 +7,6 @@ import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
 
 import { AsyncState } from "../components/AsyncState";
-import { LegalFooter } from "../components/LegalFooter";
 import { PageScrollView, PageStaticView } from "../components/PageScrollView";
 import { PrivatePageHead } from "../components/PrivatePageHead";
 import { api } from "../lib/api";
@@ -107,7 +106,6 @@ export default function ClaimCompanyPage() {
               }
             />
           </View>
-          <LegalFooter />
         </PageScrollView>
       </>
     );
@@ -140,7 +138,7 @@ export default function ClaimCompanyPage() {
               <View className="self-start">
                 <Button
                   label="Rechercher une compagnie"
-                  onPress={() => router.push("/decouvrir?type=companies")}
+                  onPress={() => router.push("/search?type=companies")}
                 />
               </View>
             </View>
@@ -288,7 +286,6 @@ export default function ClaimCompanyPage() {
             </View>
           ) : null}
         </View>
-        <LegalFooter />
       </PageScrollView>
     </>
   );

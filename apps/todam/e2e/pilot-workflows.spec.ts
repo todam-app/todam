@@ -266,7 +266,13 @@ test("une salle ouvre sa programmation puis une fiche spectacle alimentée par l
 
   await page.goto("/lieu/hexagone-scene-nationale");
   await expect(page.getByRole("heading", { level: 1, name: venue.name })).toBeVisible();
-  await expect(page.getByText("Visuel non publié").first()).toBeVisible();
+  await expect(
+    page
+      .getByRole("img", {
+        name: `Affiche indisponible pour ${firstCard.title}`,
+      })
+      .first(),
+  ).toBeVisible();
   await expect(page.getByText("Archives")).toBeVisible();
 
   await page.getByRole("link", { name: firstCard.title }).first().click();

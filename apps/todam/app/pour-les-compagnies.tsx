@@ -3,7 +3,6 @@ import { Link } from "expo-router";
 import Head from "expo-router/head";
 import { Linking, Text, View } from "react-native";
 
-import { LegalFooter } from "../components/LegalFooter";
 import { PageScrollView } from "../components/PageScrollView";
 import { PUBLIC_WEB_URL } from "../lib/config";
 
@@ -47,7 +46,7 @@ export default function ForCompaniesPage() {
               sourcées et prévisualisez chaque changement avant sa validation par Todam.
             </Text>
             <View className="flex-row flex-wrap gap-3">
-              <Link href="/decouvrir?type=companies" asChild>
+              <Link href="/search?type=companies" asChild>
                 <Button accessibilityRole="link" label="Trouver ma compagnie" />
               </Link>
               <Button
@@ -153,7 +152,7 @@ export default function ForCompaniesPage() {
               instantanément : la validation Todam reste obligatoire.
             </Text>
             <View className="self-start">
-              <Link href="/decouvrir?type=companies" asChild>
+              <Link href="/search?type=companies" asChild>
                 <Button
                   accessibilityRole="link"
                   label="Commencer par rechercher ma compagnie"
@@ -162,7 +161,6 @@ export default function ForCompaniesPage() {
             </View>
           </View>
         </View>
-        <LegalFooter />
       </PageScrollView>
     </>
   );

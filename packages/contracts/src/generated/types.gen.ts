@@ -154,6 +154,7 @@ export type GetV1PublicStatsResponses = {
     verifiedUsers: number;
     activeProductions: number;
     upcomingPerformances: number;
+    activeVenues: number;
     generatedAt: string;
   };
 };

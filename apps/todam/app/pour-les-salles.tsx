@@ -6,7 +6,6 @@ import Head from "expo-router/head";
 import { createStaticLoader } from "expo-router/server";
 import { Linking, Pressable, Text, View } from "react-native";
 
-import { LegalFooter } from "../components/LegalFooter";
 import { PageScrollView } from "../components/PageScrollView";
 import { ProductionListItem } from "../components/ProductionListItem";
 import { AsyncState } from "../components/AsyncState";
@@ -265,7 +264,6 @@ export default function ForVenuesPage() {
             </View>
           </View>
         </View>
-        <LegalFooter />
       </PageScrollView>
     </>
   );

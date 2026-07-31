@@ -52,6 +52,69 @@ async function mockVerifiedSession(page: Page) {
   );
 }
 
+test("la publication reste cliquable et explique tous les champs manquants", async ({
+  page,
+}) => {
+  await mockVerifiedSession(page);
+
+  await page.goto("/ajouter-un-spectacle");
+  await expect(
+    page.getByRole("heading", {
+      level: 1,
+      name: "Ajouter un spectacle manquant",
+    }),
+  ).toBeVisible({ timeout: 30_000 });
+
+  const publishButton = page.getByRole("button", { name: "Publier le spectacle" });
+  await expect(publishButton).toBeEnabled();
+  await publishButton.click();
+
+  await expect(
+    page.getByText("8 points restent à corriger avant la publication."),
+  ).toBeVisible();
+  await expect(
+    page.getByText("• Titre : indiquez au moins 2 caractères."),
+  ).toBeVisible();
+  await expect(
+    page.getByText("• Compagnie : indiquez un nom d’au moins 2 caractères."),
+  ).toBeVisible();
+  await expect(
+    page.getByText("• Lien officiel : ajoutez la page officielle du spectacle."),
+  ).toBeVisible();
+  await expect(
+    page.getByText("• Représentation 1 : indiquez la date et l’heure de début."),
+  ).toBeVisible();
+  await expect(
+    page.getByText("• Représentation 1 : indiquez le nom du lieu."),
+  ).toBeVisible();
+  await expect(
+    page.getByText("• Représentation 1 : indiquez l’adresse du lieu."),
+  ).toBeVisible();
+  await expect(
+    page.getByText("• Représentation 1 : indiquez le code postal du lieu."),
+  ).toBeVisible();
+  await expect(
+    page.getByText("• Représentation 1 : indiquez la ville du lieu."),
+  ).toBeVisible();
+
+  const titleField = page.getByRole("textbox", { name: "Titre *", exact: true });
+  await expect(titleField).toHaveAttribute("aria-invalid", "true");
+  await titleField.fill("Un spectacle");
+  await expect(titleField).not.toHaveAttribute("aria-invalid", "true");
+  await expect(page.getByText("• Titre : indiquez au moins 2 caractères.")).toHaveCount(
+    0,
+  );
+
+  const officialUrlField = page.getByRole("textbox", {
+    name: "Lien officiel du spectacle *",
+    exact: true,
+  });
+  await officialUrlField.fill("todam.fr/spectacle");
+  await expect(
+    page.getByText("Utilisez une adresse commençant par http:// ou https://."),
+  ).toBeVisible();
+});
+
 test("recherche vide, création communautaire, publication puis signalement unique", async ({
   page,
 }) => {
@@ -163,10 +226,13 @@ test("recherche vide, création communautaire, publication puis signalement uniq
 
   await page.goto("/search?q=Spectacle%20introuvable&type=productions");
   await expect(page.getByText("Aucun résultat.")).toBeVisible();
-  await page.getByRole("button", { name: "Ajouter ce spectacle" }).click();
+  await page.getByRole("button", { name: "Ajouter un spectacle manquant" }).click();
 
   await expect(
-    page.getByRole("heading", { level: 1, name: "Ajouter un spectacle" }),
+    page.getByRole("heading", {
+      level: 1,
+      name: "Ajouter un spectacle manquant",
+    }),
   ).toBeVisible();
   await page.getByLabel("Nom de la compagnie").fill("Compagnie nouvelle");
   await page

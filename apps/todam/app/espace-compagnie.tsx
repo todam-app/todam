@@ -22,7 +22,6 @@ import { Image, Platform, Pressable, Text, View } from "react-native";
 
 import { AccessibleChoiceGroup } from "../components/AccessibleChoiceGroup";
 import { AsyncState } from "../components/AsyncState";
-import { LegalFooter } from "../components/LegalFooter";
 import { PageScrollView, PageStaticView } from "../components/PageScrollView";
 import { PrivatePageHead } from "../components/PrivatePageHead";
 import { api } from "../lib/api";
@@ -2100,7 +2099,6 @@ export default function CompanyWorkspacePage() {
               }
             />
           </View>
-          <LegalFooter />
         </PageScrollView>
       </>
     );
@@ -2487,7 +2485,6 @@ export default function CompanyWorkspacePage() {
             </View>
           ) : null}
         </View>
-        <LegalFooter />
       </PageScrollView>
     </>
   );

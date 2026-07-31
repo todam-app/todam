@@ -26,6 +26,7 @@ export interface ProductionDiscoveryCardProps {
   locality?: string | null | undefined;
   priority?: boolean;
   production: ProductionCard;
+  showWatchlistAction?: boolean;
   startsAt?: string | null | undefined;
   venueName?: string | null | undefined;
   width?: number;

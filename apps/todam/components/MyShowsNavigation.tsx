@@ -5,19 +5,25 @@ const items = [
   { href: "/journal/a-voir", label: "À voir", count: "watchlist" },
   { href: "/journal/vus", label: "Vus", count: "seen" },
   { href: "/journal/notes", label: "Notés", count: "ratings" },
-  { href: "/journal/listes", label: "Listes", count: "lists" },
   { href: "/journal/avis", label: "Avis", count: "reviews" },
+  { href: "/journal/listes", label: "Listes", count: "lists" },
 ] as const;
 
 export type MyShowsCounts = Record<(typeof items)[number]["count"], number>;
 
-export function MyShowsNavigation({ counts }: { counts: MyShowsCounts }) {
+export function MyShowsNavigation({
+  accessibilityLabel = "Sections de Mes spectacles",
+  counts,
+}: {
+  accessibilityLabel?: string;
+  counts: MyShowsCounts;
+}) {
   const pathname = usePathname();
 
   return (
     <View
-      accessibilityLabel="Sections de Mes spectacles"
-      className="flex-row border-y border-line bg-paper"
+      accessibilityLabel={accessibilityLabel}
+      className="flex-row flex-wrap gap-2 rounded-panel border border-line bg-paper p-2 shadow-soft"
       role="navigation"
       testID="my-shows-navigation"
     >
@@ -29,23 +35,12 @@ export function MyShowsNavigation({ counts }: { counts: MyShowsCounts }) {
               accessibilityLabel={`${item.label}, ${counts[item.count]}`}
               accessibilityRole="link"
               aria-current={active ? "page" : undefined}
-              className={`min-h-[68px] min-w-0 flex-1 items-center justify-center border-accent px-0.5 ${
-                active ? "border-b-2 border-selected-border bg-selected" : ""
-              }`}
+              className="todam-interactive-card min-h-16 min-w-[96px] flex-1 items-center justify-center gap-1 rounded-todam px-3 py-2"
             >
-              <Text
-                className={`text-lg font-bold ${active ? "text-accent" : "text-ink"}`}
-              >
+              <Text className="font-serif text-2xl font-semibold text-ink">
                 {counts[item.count]}
               </Text>
-              <Text
-                adjustsFontSizeToFit
-                className={`text-[10px] font-semibold ${
-                  active ? "text-accent" : "text-muted"
-                }`}
-                minimumFontScale={0.8}
-                numberOfLines={1}
-              >
+              <Text className="text-center text-xs font-semibold text-muted">
                 {item.label}
               </Text>
             </Pressable>

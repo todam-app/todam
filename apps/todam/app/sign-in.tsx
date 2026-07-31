@@ -63,68 +63,76 @@ export default function SignInScreen() {
     <>
       <PrivatePageHead title="Connexion" />
       <PageScrollView
-        contentContainerClassName="todam-auth-panel mx-auto my-8 w-[calc(100%_-_2.5rem)] max-w-lg gap-6 p-6 md:my-12 md:p-8"
+        contentContainerClassName="flex-grow"
+        footer="minimal"
         keyboardShouldPersistTaps="handled"
       >
-        <View className="gap-2">
-          <Text
-            aria-level={1}
-            accessibilityRole="header"
-            className="font-serif text-4xl font-bold text-ink"
-          >
-            Bon retour
-          </Text>
-          <Text className="text-base text-muted">Retrouve ton journal Todam.</Text>
+        <View className="todam-page-before-footer w-full flex-1 justify-center py-8 md:py-12">
+          <View className="todam-auth-panel mx-auto w-[calc(100%_-_2.5rem)] max-w-lg gap-6 p-6 md:p-8">
+            <View className="gap-2">
+              <Text
+                aria-level={1}
+                accessibilityRole="header"
+                className="font-serif text-4xl font-bold text-ink"
+              >
+                Bon retour
+              </Text>
+              <Text className="text-base text-muted">Retrouve ton journal Todam.</Text>
+            </View>
+            <TextField
+              autoCapitalize="none"
+              autoComplete="username"
+              inputMode="text"
+              label="Email ou nom d'utilisateur"
+              onChangeText={setIdentifier}
+              required
+              value={identifier}
+              webName="identifier"
+            />
+            <PasswordField
+              autoComplete="current-password"
+              label="Mot de passe"
+              onChangeText={setPassword}
+              onSubmitEditing={() => void submit()}
+              required
+              returnKeyType="go"
+              value={password}
+              webName="password"
+            />
+            {error ? (
+              <Text
+                accessibilityRole="alert"
+                className="text-base leading-6 text-error"
+              >
+                {error}
+              </Text>
+            ) : null}
+            <Button
+              disabled={!identifier.trim() || password.length < 8}
+              label="Se connecter"
+              loading={pending}
+              onPress={() => void submit()}
+            />
+            <Link href="/mot-de-passe-oublie" asChild>
+              <Button label="Mot de passe oublié" variant="ghost" />
+            </Link>
+            <Link
+              href={{
+                pathname: "/sign-up",
+                params: {
+                  ...(params.returnTo
+                    ? { returnTo: safeInternalPath(parameter(params.returnTo)) }
+                    : {}),
+                  ...(params.action ? { action: parameter(params.action) } : {}),
+                  ...(params.rating ? { rating: parameter(params.rating) } : {}),
+                },
+              }}
+              asChild
+            >
+              <Button label="Créer un compte" variant="ghost" />
+            </Link>
+          </View>
         </View>
-        <TextField
-          autoCapitalize="none"
-          autoComplete="username"
-          inputMode="text"
-          label="Email ou nom d'utilisateur"
-          onChangeText={setIdentifier}
-          required
-          value={identifier}
-          webName="identifier"
-        />
-        <PasswordField
-          autoComplete="current-password"
-          label="Mot de passe"
-          onChangeText={setPassword}
-          onSubmitEditing={() => void submit()}
-          required
-          returnKeyType="go"
-          value={password}
-          webName="password"
-        />
-        {error ? (
-          <Text accessibilityRole="alert" className="text-base leading-6 text-error">
-            {error}
-          </Text>
-        ) : null}
-        <Button
-          disabled={!identifier.trim() || password.length < 8}
-          label="Se connecter"
-          loading={pending}
-          onPress={() => void submit()}
-        />
-        <Link href="/mot-de-passe-oublie" asChild>
-          <Button label="Mot de passe oublié" variant="ghost" />
-        </Link>
-        <Link
-          href={{
-            pathname: "/sign-up",
-            params: {
-              ...(params.returnTo
-                ? { returnTo: safeInternalPath(parameter(params.returnTo)) }
-                : {}),
-              ...(params.action ? { action: parameter(params.action) } : {}),
-              ...(params.rating ? { rating: parameter(params.rating) } : {}),
-            },
-          }}
-          asChild
-        >
-          <Button label="Créer un compte" variant="ghost" />
-        </Link>
       </PageScrollView>
     </>
   );

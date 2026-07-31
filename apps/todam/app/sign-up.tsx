@@ -6,7 +6,7 @@ import * as Linking from "expo-linking";
 import { useState, type ReactNode } from "react";
 import { Platform, Text, View } from "react-native";
 
-import { PageScrollView, PageStaticView } from "../components/PageScrollView";
+import { PageScrollView } from "../components/PageScrollView";
 import { PrivatePageHead } from "../components/PrivatePageHead";
 import { api } from "../lib/api";
 import { authClient } from "../lib/auth-client";
@@ -124,34 +124,38 @@ export default function SignUpScreen() {
     return (
       <>
         <PrivatePageHead title="Confirmer l’adresse e-mail" />
-        <PageStaticView className="todam-auth-panel mx-auto my-8 w-[calc(100%_-_2.5rem)] max-w-lg flex-1 items-center justify-center gap-5 p-6 md:my-12 md:p-8">
-          <Text
-            aria-level={1}
-            accessibilityRole="header"
-            className="text-center font-serif text-4xl font-bold text-ink"
-          >
-            Confirme ton adresse e-mail
-          </Text>
-          <Text className="text-center text-base leading-6 text-muted">
-            Un lien valable 24 heures a été envoyé à {email.trim()}. Ton compte sera
-            activé après cette vérification.
-          </Text>
-          <Link
-            href={{
-              pathname: "/sign-in",
-              params: {
-                ...(params.returnTo
-                  ? { returnTo: safeInternalPath(parameter(params.returnTo)) }
-                  : {}),
-                ...(params.action ? { action: parameter(params.action) } : {}),
-                ...(params.rating ? { rating: parameter(params.rating) } : {}),
-              },
-            }}
-            asChild
-          >
-            <Button label="Revenir à la connexion" variant="quiet" />
-          </Link>
-        </PageStaticView>
+        <PageScrollView contentContainerClassName="flex-grow" footer="minimal">
+          <View className="todam-page-before-footer w-full flex-1 justify-center py-8 md:py-12">
+            <View className="todam-auth-panel mx-auto w-[calc(100%_-_2.5rem)] max-w-lg items-center gap-5 p-6 md:p-8">
+              <Text
+                aria-level={1}
+                accessibilityRole="header"
+                className="text-center font-serif text-4xl font-bold text-ink"
+              >
+                Confirme ton adresse e-mail
+              </Text>
+              <Text className="text-center text-base leading-6 text-muted">
+                Un lien valable 24 heures a été envoyé à {email.trim()}. Ton compte sera
+                activé après cette vérification.
+              </Text>
+              <Link
+                href={{
+                  pathname: "/sign-in",
+                  params: {
+                    ...(params.returnTo
+                      ? { returnTo: safeInternalPath(parameter(params.returnTo)) }
+                      : {}),
+                    ...(params.action ? { action: parameter(params.action) } : {}),
+                    ...(params.rating ? { rating: parameter(params.rating) } : {}),
+                  },
+                }}
+                asChild
+              >
+                <Button label="Revenir à la connexion" variant="quiet" />
+              </Link>
+            </View>
+          </View>
+        </PageScrollView>
       </>
     );
   }
@@ -167,145 +171,148 @@ export default function SignUpScreen() {
     <>
       <PrivatePageHead title="Créer un compte" />
       <PageScrollView
-        contentContainerClassName="todam-auth-panel mx-auto my-8 w-[calc(100%_-_2.5rem)] max-w-lg gap-6 p-6 md:my-12 md:p-8"
+        contentContainerClassName="flex-grow"
+        footer="minimal"
         keyboardShouldPersistTaps="handled"
       >
-        <View className="gap-2">
-          <Text
-            aria-level={1}
-            accessibilityRole="header"
-            className="font-serif text-4xl font-bold text-ink"
-          >
-            Créer ton journal
-          </Text>
-        </View>
-        <TextField
-          autoCapitalize="none"
-          autoComplete="email"
-          error={
-            email && !validEmail(email.trim())
-              ? "Saisis une adresse e-mail valide."
-              : undefined
-          }
-          inputMode="email"
-          keyboardType="email-address"
-          label="E-mail"
-          onChangeText={setEmail}
-          required
-          value={email}
-          webName="email"
-        />
-        <TextField
-          autoCapitalize="none"
-          autoComplete="username"
-          error={
-            username && !validUsername
-              ? "Utilise 3 à 30 lettres, chiffres, points, tirets ou underscores."
-              : undefined
-          }
-          inputMode="text"
-          label="Nom d'utilisateur"
-          maxLength={30}
-          onChangeText={setUsername}
-          required
-          value={username}
-          webName="username"
-        />
-        <PasswordField
-          autoComplete="new-password"
-          error={
-            password && password.length < 8
-              ? "Le mot de passe doit contenir au moins 8 caractères."
-              : undefined
-          }
-          label="Mot de passe (8 caractères minimum)"
-          onChangeText={setPassword}
-          onSubmitEditing={() => {
-            if (canSubmit) void submit();
-          }}
-          required
-          returnKeyType="go"
-          value={password}
-          webName="new-password"
-        />
-        <View className="gap-2 rounded-todam border border-selected-border bg-selected p-4">
-          <Text className="text-base font-semibold text-ink">
-            Visibilité de ton journal
-          </Text>
-          <Text className="text-base leading-6 text-muted">
-            Ton profil sous ton nom d'utilisateur et ton journal sont publics par défaut
-            pour pouvoir
-            être partagés. Ton e-mail et tes données de compte ne le sont jamais. Tu
-            pourras rendre tout le profil privé — ce qui masque aussi les listes et avis
-            publics. Chaque nouvelle liste et chaque nouvel avis sont privés par défaut,
-            puis peuvent être rendus publics séparément.
-          </Text>
-        </View>
-        <Text className="text-base leading-6 text-muted">
-          En créant mon compte, je déclare avoir au moins 15 ans, j’accepte les{" "}
-          <LegalLink href="/conditions-utilisation">
-            Conditions générales d’utilisation
-          </LegalLink>{" "}
-          et je reconnais avoir pris connaissance de la{" "}
-          <LegalLink href="/confidentialite">Politique de confidentialité</LegalLink>.
-        </Text>
-        {legal.isError ? (
-          <View className="gap-2">
-            <Text accessibilityRole="alert" className="text-base text-error">
-              Les documents juridiques ne sont pas disponibles.
-            </Text>
-            <View className="self-start">
-              <Button
-                label="Réessayer"
-                onPress={() => void legal.refetch()}
-                variant="quiet"
-              />
+        <View className="todam-page-before-footer w-full flex-1 justify-center py-8 md:py-12">
+          <View className="todam-auth-panel mx-auto w-[calc(100%_-_2.5rem)] max-w-lg gap-6 p-6 md:p-8">
+            <View className="gap-2">
+              <Text
+                aria-level={1}
+                accessibilityRole="header"
+                className="font-serif text-4xl font-bold text-ink"
+              >
+                Créer ton journal
+              </Text>
             </View>
-          </View>
-        ) : legal.isPending ? (
-          <Text accessibilityLiveRegion="polite" className="text-base text-muted">
-            Chargement des documents juridiques…
-          </Text>
-        ) : null}
-        {error ? (
-          <Text accessibilityRole="alert" className="text-base text-error">
-            {error}
-          </Text>
-        ) : null}
-        {duplicateEmail ? (
-          <View className="todam-calm-panel gap-2 p-4">
-            <Text className="text-sm leading-5 text-muted">
-              Retrouve ton compte existant :
+            <TextField
+              autoCapitalize="none"
+              autoComplete="email"
+              error={
+                email && !validEmail(email.trim())
+                  ? "Saisis une adresse e-mail valide."
+                  : undefined
+              }
+              inputMode="email"
+              keyboardType="email-address"
+              label="E-mail"
+              onChangeText={setEmail}
+              required
+              value={email}
+              webName="email"
+            />
+            <TextField
+              autoCapitalize="none"
+              autoComplete="username"
+              error={
+                username && !validUsername
+                  ? "Utilise 3 à 30 lettres, chiffres, points, tirets ou underscores."
+                  : undefined
+              }
+              inputMode="text"
+              label="Nom d'utilisateur"
+              maxLength={30}
+              onChangeText={setUsername}
+              required
+              value={username}
+              webName="username"
+            />
+            <PasswordField
+              autoComplete="new-password"
+              error={
+                password && password.length < 8
+                  ? "Le mot de passe doit contenir au moins 8 caractères."
+                  : undefined
+              }
+              label="Mot de passe (8 caractères minimum)"
+              onChangeText={setPassword}
+              onSubmitEditing={() => {
+                if (canSubmit) void submit();
+              }}
+              required
+              returnKeyType="go"
+              value={password}
+              webName="new-password"
+            />
+            <View className="gap-1 rounded-todam border border-selected-border bg-selected p-4">
+              <Text className="text-base font-semibold text-ink">À savoir</Text>
+              <Text className="text-base leading-6 text-muted">
+                Ton profil et ton journal sont publics. Tes listes, ta liste « À voir »
+                et tes notes sans avis public sont privées par défaut. Ces notes
+                comptent quand même dans la moyenne.
+              </Text>
+            </View>
+            <Text className="text-base leading-6 text-muted">
+              En créant mon compte, je déclare avoir au moins 15 ans, j’accepte les{" "}
+              <LegalLink href="/conditions-utilisation">
+                Conditions générales d’utilisation
+              </LegalLink>{" "}
+              et je reconnais avoir pris connaissance de la{" "}
+              <LegalLink href="/confidentialite">
+                Politique de confidentialité
+              </LegalLink>
+              .
             </Text>
-            <Link href="/sign-in" asChild>
-              <Button label="Se connecter" variant="secondary" />
-            </Link>
-            <Link href="/mot-de-passe-oublie" asChild>
-              <Button label="Mot de passe oublié" variant="ghost" />
+            {legal.isError ? (
+              <View className="gap-2">
+                <Text accessibilityRole="alert" className="text-base text-error">
+                  Les documents juridiques ne sont pas disponibles.
+                </Text>
+                <View className="self-start">
+                  <Button
+                    label="Réessayer"
+                    onPress={() => void legal.refetch()}
+                    variant="quiet"
+                  />
+                </View>
+              </View>
+            ) : legal.isPending ? (
+              <Text accessibilityLiveRegion="polite" className="text-base text-muted">
+                Chargement des documents juridiques…
+              </Text>
+            ) : null}
+            {error ? (
+              <Text accessibilityRole="alert" className="text-base text-error">
+                {error}
+              </Text>
+            ) : null}
+            {duplicateEmail ? (
+              <View className="todam-calm-panel gap-2 p-4">
+                <Text className="text-sm leading-5 text-muted">
+                  Retrouve ton compte existant :
+                </Text>
+                <Link href="/sign-in" asChild>
+                  <Button label="Se connecter" variant="secondary" />
+                </Link>
+                <Link href="/mot-de-passe-oublie" asChild>
+                  <Button label="Mot de passe oublié" variant="ghost" />
+                </Link>
+              </View>
+            ) : null}
+            <Button
+              disabled={!canSubmit}
+              label="Créer mon compte"
+              loading={pending}
+              onPress={() => void submit()}
+            />
+            <Link
+              href={{
+                pathname: "/sign-in",
+                params: {
+                  ...(params.returnTo
+                    ? { returnTo: safeInternalPath(parameter(params.returnTo)) }
+                    : {}),
+                  ...(params.action ? { action: parameter(params.action) } : {}),
+                  ...(params.rating ? { rating: parameter(params.rating) } : {}),
+                },
+              }}
+              asChild
+            >
+              <Button label="J'ai déjà un compte" variant="ghost" />
             </Link>
           </View>
-        ) : null}
-        <Button
-          disabled={!canSubmit}
-          label="Créer mon compte"
-          loading={pending}
-          onPress={() => void submit()}
-        />
-        <Link
-          href={{
-            pathname: "/sign-in",
-            params: {
-              ...(params.returnTo
-                ? { returnTo: safeInternalPath(parameter(params.returnTo)) }
-                : {}),
-              ...(params.action ? { action: parameter(params.action) } : {}),
-              ...(params.rating ? { rating: parameter(params.rating) } : {}),
-            },
-          }}
-          asChild
-        >
-          <Button label="J'ai déjà un compte" variant="ghost" />
-        </Link>
+        </View>
       </PageScrollView>
     </>
   );

@@ -1,9 +1,9 @@
 import { Button, PasswordField } from "@todam/design-system";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
-import { Text } from "react-native";
+import { Text, View } from "react-native";
 
-import { PageStaticView } from "../components/PageScrollView";
+import { PageScrollView } from "../components/PageScrollView";
 import { PrivatePageHead } from "../components/PrivatePageHead";
 import { authClient } from "../lib/auth-client";
 
@@ -43,37 +43,41 @@ export default function ResetPasswordScreen() {
   return (
     <>
       <PrivatePageHead title="Nouveau mot de passe" />
-      <PageStaticView className="todam-auth-panel mx-auto my-8 w-[calc(100%_-_2.5rem)] max-w-lg flex-1 justify-center gap-5 p-6 md:my-12 md:p-8">
-        <Text
-          aria-level={1}
-          accessibilityRole="header"
-          className="font-serif text-4xl font-bold text-ink"
-        >
-          Nouveau mot de passe
-        </Text>
-        <PasswordField
-          autoComplete="new-password"
-          error={
-            error ??
-            (password && password.length < 8
-              ? "Le mot de passe doit contenir au moins 8 caractères."
-              : undefined)
-          }
-          label="Mot de passe (8 caractères minimum)"
-          onChangeText={setPassword}
-          onSubmitEditing={() => void submit()}
-          required
-          returnKeyType="go"
-          value={password}
-          webName="new-password"
-        />
-        <Button
-          disabled={!token || password.length < 8}
-          label="Enregistrer le mot de passe"
-          loading={pending}
-          onPress={() => void submit()}
-        />
-      </PageStaticView>
+      <PageScrollView contentContainerClassName="flex-grow" footer="minimal">
+        <View className="todam-page-before-footer w-full flex-1 justify-center py-8 md:py-12">
+          <View className="todam-auth-panel mx-auto w-[calc(100%_-_2.5rem)] max-w-lg gap-5 p-6 md:p-8">
+            <Text
+              aria-level={1}
+              accessibilityRole="header"
+              className="font-serif text-4xl font-bold text-ink"
+            >
+              Nouveau mot de passe
+            </Text>
+            <PasswordField
+              autoComplete="new-password"
+              error={
+                error ??
+                (password && password.length < 8
+                  ? "Le mot de passe doit contenir au moins 8 caractères."
+                  : undefined)
+              }
+              label="Mot de passe (8 caractères minimum)"
+              onChangeText={setPassword}
+              onSubmitEditing={() => void submit()}
+              required
+              returnKeyType="go"
+              value={password}
+              webName="new-password"
+            />
+            <Button
+              disabled={!token || password.length < 8}
+              label="Enregistrer le mot de passe"
+              loading={pending}
+              onPress={() => void submit()}
+            />
+          </View>
+        </View>
+      </PageScrollView>
     </>
   );
 }

@@ -92,7 +92,7 @@ const legalRobotsHeader =
   'add_header X-Robots-Tag "noindex, nofollow, noarchive, nosnippet" always;';
 const protectedLegalLocations = [
   "location ~* ^/legal/.+\\.pdf$ {",
-  "location ~ ^/(?:conditions-utilisation|confidentialite|mentions-legales|suppression-compte)/?$ {",
+  "location ~ ^/(?:conditions-utilisation|confidentialite|informations-legales|mentions-legales|suppression-compte)/?$ {",
 ];
 const legalLocationsProtected = protectedLegalLocations.every((location) => {
   const locationStart = nginxConfig.indexOf(location);

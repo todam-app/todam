@@ -6,7 +6,6 @@ import Head from "expo-router/head";
 import { Linking, Platform, Pressable, Text, View } from "react-native";
 
 import { AsyncState } from "../../../../components/AsyncState";
-import { LegalFooter } from "../../../../components/LegalFooter";
 import { PageScrollView } from "../../../../components/PageScrollView";
 import { ProductionListItem } from "../../../../components/ProductionListItem";
 import { api } from "../../../../lib/api";
@@ -74,8 +73,8 @@ export default function PublicListPage() {
             empty={!list.isPending && (!list.data || unavailable)}
             emptyAction={
               <Button
-                label="Découvrir les spectacles"
-                onPress={() => router.push("/decouvrir")}
+                label="Rechercher un spectacle"
+                onPress={() => router.push("/search")}
                 variant="secondary"
               />
             }
@@ -143,8 +142,8 @@ export default function PublicListPage() {
                       Cette liste est encore vide.
                     </Text>
                     <Button
-                      label="Découvrir les spectacles"
-                      onPress={() => router.push("/decouvrir")}
+                      label="Rechercher un spectacle"
+                      onPress={() => router.push("/search")}
                       variant="secondary"
                     />
                   </View>
@@ -153,7 +152,6 @@ export default function PublicListPage() {
             ) : null}
           </AsyncState>
         </View>
-        <LegalFooter />
       </PageScrollView>
     </>
   );

@@ -7,6 +7,7 @@ import {
 import {
   Button,
   SectionTitle,
+  TicketButton,
   tokens,
 } from "@todam/design-system";
 import { Link, useLoaderData } from "expo-router";
@@ -16,7 +17,6 @@ import { Pressable, Text, useWindowDimensions, View } from "react-native";
 
 import { AsyncState } from "../../components/AsyncState";
 import { HomeDiscoveryCollection } from "../../components/HomeDiscoveryCollection";
-import { LegalFooter } from "../../components/LegalFooter";
 import { PageScrollView } from "../../components/PageScrollView";
 import { ProductionDiscoveryCard } from "../../components/ProductionDiscoveryCard";
 import { api } from "../../lib/api";
@@ -35,7 +35,6 @@ function Page({ children }: { children: React.ReactNode }) {
       contentInsetAdjustmentBehavior="automatic"
     >
       {children}
-      <LegalFooter />
     </PageScrollView>
   );
 }
@@ -45,7 +44,7 @@ function LinkedSectionTitle({
   href,
 }: {
   children: React.ReactNode;
-  href: "/decouvrir" | "/profile";
+  href: "/search" | "/profile";
 }) {
   return (
     <View className="flex-row flex-wrap items-end justify-between gap-3">
@@ -164,16 +163,16 @@ function MarketingHome({
               </Text>
               <View className="flex-row flex-wrap gap-3">
                 <Link href="/sign-up" asChild>
-                  <Button
+                  <TicketButton
                     accessibilityRole="link"
                     label="Créer mon journal"
-                    variant="featured"
+                    variant="orchestra"
                   />
                 </Link>
-                <Link href="/decouvrir" asChild>
+                <Link href="/search" asChild>
                   <Button
                     accessibilityRole="link"
-                    label="Découvrir les spectacles"
+                    label="Rechercher un spectacle"
                     variant="secondary"
                   />
                 </Link>
@@ -201,7 +200,7 @@ function MarketingHome({
           </View>
 
           <View className="gap-5">
-            <LinkedSectionTitle href="/decouvrir">
+            <LinkedSectionTitle href="/search">
               À l’affiche
             </LinkedSectionTitle>
             <AsyncState
@@ -209,10 +208,10 @@ function MarketingHome({
                 !catalog.isPending && (catalog.data?.productions.length ?? 0) === 0
               }
               emptyAction={
-                <Link href="/decouvrir" asChild>
+                <Link href="/search" asChild>
                   <Button
                     accessibilityRole="link"
-                    label="Explorer le catalogue"
+                    label="Rechercher un spectacle"
                     variant="secondary"
                   />
                 </Link>
@@ -238,9 +237,9 @@ function MarketingHome({
               {[
                 {
                   number: "01",
-                  title: "Découvrez",
+                  title: "Recherchez",
                   body: "Cherchez un spectacle, un lieu ou une compagnie.",
-                  href: "/decouvrir" as const,
+                  href: "/search" as const,
                 },
                 {
                   number: "02",
@@ -307,27 +306,6 @@ function MarketingHome({
             </View>
           </View>
 
-          <View className="gap-6 bg-paper p-6 md:p-8">
-            <SectionTitle eyebrow="Catalogue responsable">
-              Des informations reliées à leurs sources
-            </SectionTitle>
-            <Text className="max-w-[72ch] text-base leading-7 text-muted">
-              Todam distingue les métadonnées factuelles, les descriptions et les
-              visuels. Une affiche n’est publiée que lorsque ses droits d’affichage sont
-              confirmés ; sinon, un placeholder neutre l’indique clairement.
-            </Text>
-            <Link href="/les-coulisses" asChild>
-              <Pressable
-                accessibilityRole="link"
-                className="min-h-11 self-start justify-center"
-              >
-                <Text className="text-base font-semibold text-brand-text">
-                  Découvrir les coulisses de Todam →
-                </Text>
-              </Pressable>
-            </Link>
-          </View>
-
           <View className="gap-7 border-t border-line pt-12">
             <SectionTitle eyebrow="Professionnels">
               Construisons le premier pilote ensemble
@@ -381,12 +359,12 @@ function ConnectedHome() {
 
   return (
     <Page>
-      <View className="todam-page-before-footer mx-auto w-full max-w-content flex-1 px-5 py-8 md:px-8 md:py-12">
+      <View className="todam-connected-home todam-page-before-footer mx-auto w-full max-w-content flex-1 px-5 py-8 md:px-8 md:py-12">
         <AsyncState
           empty={!home.data}
           emptyAction={
-            <Link href="/decouvrir" asChild>
-              <Button accessibilityRole="link" label="Découvrir le catalogue" />
+            <Link href="/search" asChild>
+              <Button accessibilityRole="link" label="Rechercher un spectacle" />
             </Link>
           }
           emptyMessage="Votre accueil est prêt, mais son contenu est encore vide."
@@ -406,19 +384,21 @@ function ConnectedHome() {
                     accessibilityRole="header"
                     className="font-serif text-4xl font-semibold leading-[44px] text-ink md:text-5xl md:leading-[56px]"
                   >
-                    {home.data.homeCity
-                      ? `À l’affiche près de ${home.data.homeCity.label}`
-                      : "À l’affiche en ce moment"}
+                    Mon journal de spectacles
                   </Text>
                   <Text className="max-w-2xl text-base leading-6 text-muted">
-                    Les prochaines dates publiées et les nouveaux spectacles à garder
-                    dans votre journal.
+                    Retrouvez les spectacles que vous avez vus, notez-les et gardez-en
+                    une trace.
                   </Text>
                   <View className="self-start">
-                    <Link href="/ajouter-un-spectacle" asChild>
+                    <Link href="/search" asChild>
                       <Button
                         accessibilityRole="link"
-                        label="Ajouter un spectacle"
+                        label={
+                          home.data.progress.current === 0
+                            ? "Commencer mon journal"
+                            : "Noter un spectacle"
+                        }
                         variant="featured"
                       />
                     </Link>
@@ -441,7 +421,7 @@ function ConnectedHome() {
                       Journal en cours · {home.data.progress.current}/
                       {home.data.progress.target}
                     </Text>
-                    <Link href="/decouvrir" asChild>
+                    <Link href="/search" asChild>
                       <Pressable
                         accessibilityRole="link"
                         className="min-h-11 justify-center"
@@ -485,7 +465,7 @@ function ConnectedHome() {
               ) : null}
 
               <View className="gap-5">
-                <LinkedSectionTitle href="/decouvrir">
+                <LinkedSectionTitle href="/search">
                   Nouveautés dans Todam
                 </LinkedSectionTitle>
                 <HomeDiscoveryCollection

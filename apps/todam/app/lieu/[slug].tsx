@@ -10,12 +10,12 @@ import { Link, useLoaderData, useLocalSearchParams } from "expo-router";
 import Head from "expo-router/head";
 import { createStaticLoader } from "expo-router/server";
 import { useMemo, useState } from "react";
-import { Linking, Pressable, Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 
 import { AsyncState } from "../../components/AsyncState";
 import { AccessibleChoiceGroup } from "../../components/AccessibleChoiceGroup";
 import { CatalogSources } from "../../components/CatalogSources";
-import { LegalFooter } from "../../components/LegalFooter";
+import { ExternalLink } from "../../components/ExternalLink";
 import { PageScrollView } from "../../components/PageScrollView";
 import { ProductionListItem } from "../../components/ProductionListItem";
 import { api } from "../../lib/api";
@@ -208,8 +208,8 @@ export default function VenuePage() {
               {
                 "@type": "ListItem",
                 position: 1,
-                name: "Découvrir",
-                item: `${PUBLIC_WEB_URL}/decouvrir`,
+                name: "Rechercher",
+                item: `${PUBLIC_WEB_URL}/search`,
               },
               {
                 "@type": "ListItem",
@@ -264,11 +264,11 @@ export default function VenuePage() {
         ) : null}
       </Head>
       <PageScrollView contentContainerClassName="flex-grow">
-        <View className="todam-page-before-footer mx-auto w-full max-w-content flex-1 px-5 py-8 md:px-8 md:py-12">
+        <View className="todam-page-before-footer mx-auto w-full max-w-content flex-1 px-5 py-6 md:px-8 md:py-12">
           <AsyncState
             empty={!venue.isPending && (!venue.data || unavailable)}
             emptyAction={
-              <Link href="/decouvrir?type=venues" asChild>
+              <Link href="/search?type=venues" asChild>
                 <Button
                   accessibilityRole="link"
                   label="Rechercher un lieu"
@@ -282,16 +282,16 @@ export default function VenuePage() {
             onRetry={() => void venue.refetch()}
           >
             {venue.data ? (
-              <View className="gap-10">
-                <View className="gap-6 border-b border-line pb-8">
-                  <View className="flex-row flex-wrap gap-2">
-                    <Link href="/decouvrir" asChild>
+              <View className="gap-8 md:gap-10">
+                <View className="gap-4 border-b border-line pb-6 md:gap-6 md:pb-8">
+                  <View className="flex-row flex-wrap items-center gap-2">
+                    <Link href="/search" asChild>
                       <Pressable
                         accessibilityRole="link"
                         className="min-h-11 justify-center"
                       >
-                  <Text className="text-sm font-semibold text-brand-text">
-                          Découvrir
+                        <Text className="text-sm font-semibold text-brand-text">
+                          Rechercher
                         </Text>
                       </Pressable>
                     </Link>
@@ -299,7 +299,7 @@ export default function VenuePage() {
                     <Text className="text-sm text-muted">Lieux</Text>
                   </View>
                   <View className="max-w-3xl gap-3">
-          <Text className="text-xs font-bold uppercase tracking-widest text-brand-text">
+                    <Text className="text-xs font-bold uppercase tracking-widest text-brand-text">
                       Lieu de spectacle
                     </Text>
                     <Text
@@ -314,15 +314,15 @@ export default function VenuePage() {
                       {venue.data.locality}
                     </Text>
                     {venue.data.officialUrl ? (
-                      <Pressable
-                        accessibilityRole="link"
-                        className="min-h-11 self-start justify-center"
-                        onPress={() => void Linking.openURL(venue.data!.officialUrl!)}
+                      <ExternalLink
+                        accessibilityLabel="Site officiel du lieu ↗"
+                        className="flex min-h-11 self-start justify-center"
+                        href={venue.data.officialUrl}
                       >
-            <Text className="text-base font-semibold text-brand-text">
+                        <Text className="text-base font-semibold text-brand-text">
                           Site officiel du lieu ↗
                         </Text>
-                      </Pressable>
+                      </ExternalLink>
                     ) : null}
                   </View>
                 </View>
@@ -380,9 +380,10 @@ export default function VenuePage() {
                                       nextPerformance: item.dates[0] ?? null,
                                       nextVenue: venue.data ?? null,
                                     }}
+                                    showVenue={false}
                                   />
                                   {item.dates.length > 1 ? (
-                                    <Text className="pb-3 pl-[76px] text-sm leading-5 text-muted">
+                                    <Text className="pb-3 text-sm leading-5 text-muted md:pl-[76px]">
                                       {item.dates.length} représentations :{" "}
                                       {item.dates
                                         .map((date) =>
@@ -443,7 +444,6 @@ export default function VenuePage() {
             ) : null}
           </AsyncState>
         </View>
-        <LegalFooter />
       </PageScrollView>
     </>
   );

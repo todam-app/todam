@@ -54,6 +54,9 @@ export function mobileContextForPath(pathname: string): {
   if (pathname.startsWith("/supprimer-mon-compte")) {
     return { fallback: "/parametres-compte", title: "Supprimer mon compte" };
   }
+  if (pathname.startsWith("/informations-legales")) {
+    return { fallback: "/", title: "Informations légales" };
+  }
   if (pathname.startsWith("/confidentialite")) {
     return { fallback: "/", title: "Confidentialité" };
   }
@@ -62,9 +65,6 @@ export function mobileContextForPath(pathname: string): {
   }
   if (pathname.startsWith("/conditions-utilisation")) {
     return { fallback: "/", title: "Conditions d’utilisation" };
-  }
-  if (pathname.startsWith("/decouvrir")) {
-    return { fallback: "/", title: "Découvrir" };
   }
   return { fallback: "/", title: "Todam" };
 }

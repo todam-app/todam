@@ -1,5 +1,5 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { tokens } from "@todam/design-system";
+import { TicketButton, tokens } from "@todam/design-system";
 import {
   Link,
   type Href,
@@ -106,8 +106,18 @@ export function WebNavigation() {
   const authShell = isAuthPath(pathname);
   const searchParameter = pathname.startsWith("/search") ? parameter(params.q) : "";
   const searchType = pathname.startsWith("/search") ? parameter(params.type) : "";
-  const navigation = session.data ? memberNavigation : [];
-  const sessionUser = session.data?.user as
+  const sessionData = session.data as unknown as
+    | {
+        user?: {
+          displayUsername?: string | null;
+          name?: string | null;
+          username?: string | null;
+        };
+      }
+    | null
+    | undefined;
+  const navigation = sessionData ? memberNavigation : [];
+  const sessionUser = sessionData?.user as
     | {
         displayUsername?: string | null;
         name?: string | null;
@@ -206,12 +216,12 @@ export function WebNavigation() {
             </Link>
 
             <View style={styles.search}>
-              {!pathname.startsWith("/search") ? (
-                <HeaderSearch
-                  initialValue={searchParameter}
-                  key={`${pathname}?q=${searchParameter}`}
-                />
-              ) : null}
+              <HeaderSearch
+                initialValue={searchParameter}
+                key={`${pathname}?q=${searchParameter}&type=${searchType}`}
+                searchType={searchType}
+                syncSearchRoute={pathname.startsWith("/search")}
+              />
             </View>
             <View
               accessibilityLabel="Navigation du compte"
@@ -240,25 +250,18 @@ export function WebNavigation() {
                   </Link>
                 );
               })}
-              <Link href={session.data ? "/profile" : "/sign-in"} asChild>
-                <Pressable
-                  accessibilityLabel={
-                    session.data
-                      ? username
+              {sessionData ? (
+                <Link href="/profile" asChild>
+                  <Pressable
+                    accessibilityLabel={
+                      username
                         ? `Ouvrir mon profil — @${username}`
                         : "Ouvrir mon profil"
-                      : "Se connecter"
-                  }
-                  accessibilityRole="link"
-                  className={`ml-1 h-11 min-w-11 items-center justify-center ${
-                    session.data
-                      ? "todam-profile-button w-11 rounded-full"
-                      : "todam-login-ticket"
-                  }`}
-                  style={session.data ? undefined : styles.loginTicket}
-                >
-                  {session.data ? (
-                    profileInitial ? (
+                    }
+                    accessibilityRole="link"
+                    className="todam-profile-button ml-1 h-11 w-11 min-w-11 items-center justify-center rounded-full"
+                  >
+                    {profileInitial ? (
                       <Text className="todam-profile-initial text-lg font-semibold text-paper">
                         {profileInitial}
                       </Text>
@@ -268,12 +271,18 @@ export function WebNavigation() {
                         name="person-outline"
                         size={20}
                       />
-                    )
-                  ) : (
-                    <Text style={styles.loginTicketLabel}>Se connecter</Text>
-                  )}
-                </Pressable>
-              </Link>
+                    )}
+                  </Pressable>
+                </Link>
+              ) : (
+                <Link href="/sign-in" asChild>
+                  <TicketButton
+                    accessibilityRole="link"
+                    label="Se connecter"
+                    style={styles.loginTicket}
+                  />
+                </Link>
+              )}
             </View>
           </View>
         </View>
@@ -319,10 +328,10 @@ export function WebNavigation() {
               />
             </View>
 
-            <Link href={session.data ? "/profile" : "/sign-in"} asChild>
+            <Link href={sessionData ? "/profile" : "/sign-in"} asChild>
               <Pressable
                 accessibilityLabel={
-                  session.data
+                  sessionData
                     ? username
                       ? `Ouvrir mon profil — @${username}`
                       : "Ouvrir mon profil"
@@ -330,12 +339,12 @@ export function WebNavigation() {
                 }
                 accessibilityRole="link"
                 className={`h-11 w-11 items-center justify-center rounded-full ${
-                  session.data
+                  sessionData
                     ? "todam-profile-button"
                     : "todam-icon-button border border-control bg-paper"
                 }`}
               >
-                {session.data ? (
+                {sessionData ? (
                   profileInitial ? (
                     <Text className="todam-profile-initial text-lg font-semibold text-paper">
                       {profileInitial}
@@ -481,17 +490,7 @@ const styles = StyleSheet.create({
     width: 38,
   },
   loginTicket: {
-    backgroundColor: tokens.button.quiet.background,
-    borderColor: tokens.color.border,
-    borderRadius: tokens.button.quiet.radius,
-    borderWidth: tokens.button.quiet.borderWidth,
-    boxSizing: "border-box",
+    marginLeft: 4,
     minWidth: 120,
-  },
-  loginTicketLabel: {
-    color: tokens.button.quiet.text,
-    fontFamily: tokens.button.quiet.fontFamily,
-    fontSize: 16,
-    fontWeight: tokens.button.quiet.fontWeight,
   },
 });
