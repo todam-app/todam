@@ -17,6 +17,7 @@
     "catalog:import": "pnpm --filter @todam/jobs catalog:import",
     "catalog:media:mirror": "pnpm --filter @todam/jobs catalog:media:mirror",
     "catalog:quality": "pnpm --filter @todam/jobs catalog:quality",
+    "catalog:replace": "pnpm --filter @todam/jobs catalog:replace",
     "catalog:seed:hexagone": "pnpm --filter @todam/jobs catalog:seed:hexagone",
     "catalog:status": "pnpm --filter @todam/jobs catalog:status",
     "catalog:sync": "pnpm --filter @todam/jobs catalog:sync",

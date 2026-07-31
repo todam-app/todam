@@ -8,6 +8,7 @@ export default defineConfig({
     "src/catalog-discover-openagenda.ts",
     "src/index.ts",
     "src/catalog-import.ts",
+    "src/catalog-replace.ts",
     "src/catalog-media-mirror.ts",
     "src/catalog-status.ts",
     "src/catalog-sync.ts",

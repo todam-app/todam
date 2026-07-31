@@ -9,12 +9,15 @@ import {
   mediaAssets,
   productionCompanies,
   productionDescriptions,
+  productionSources,
   productions,
+  sourceDocuments,
 } from "@todam/database";
-import { and, asc, count, eq } from "drizzle-orm";
+import { and, asc, count, eq, like } from "drizzle-orm";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
 import { applyCatalog } from "../../src/importer.js";
+import { replaceCatalogs, stageCatalogs } from "../../src/catalog-replacement.js";
 
 const fixturePath = resolve(
   process.cwd(),
@@ -50,6 +53,22 @@ async function cleanDatabase() {
 async function loadFixture(): Promise<CatalogImport> {
   const raw = await readFile(fixturePath, "utf8");
   return CatalogImportSchema.parse(JSON.parse(raw) as unknown);
+}
+
+function asSeparateSource(catalog: CatalogImport, suffix: string): CatalogImport {
+  const result = structuredClone(catalog);
+  result.source.externalKey = `fixture.${suffix}`;
+  result.source.name = `Fixture ${suffix}`;
+  for (const item of [
+    ...result.works,
+    ...result.venues,
+    ...result.companies,
+    ...result.artists,
+    ...result.productions,
+  ]) {
+    item.slug = `${item.slug}-${suffix}`;
+  }
+  return result;
 }
 
 describe("import PostgreSQL réel", () => {
@@ -302,5 +321,61 @@ describe("import PostgreSQL réel", () => {
 
     expect(productionRows).toEqual([{ isActive: false }]);
     expect(report.deactivated).toBeGreaterThanOrEqual(2);
+  });
+
+  it("importe les nouvelles sources puis masque automatiquement les anciennes", async () => {
+    const previous = await loadFixture();
+    await applyCatalog(db, previous);
+    const replacement = asSeparateSource(previous, "replacement");
+
+    const staged = await stageCatalogs(db, [replacement]);
+    await db
+      .update(productions)
+      .set({ publicationStatus: "published", reviewedAt: new Date() })
+      .where(like(productions.slug, "%-replacement"));
+    const first = await replaceCatalogs(db, [replacement]);
+    const second = await replaceCatalogs(db, [replacement]);
+    const rows = await db
+      .select({
+        isActive: productions.isActive,
+        sourceKey: catalogSources.externalKey,
+      })
+      .from(productions)
+      .innerJoin(productionSources, eq(productionSources.entityId, productions.id))
+      .innerJoin(sourceDocuments, eq(sourceDocuments.id, productionSources.documentId))
+      .innerJoin(catalogSources, eq(catalogSources.id, sourceDocuments.sourceId))
+      .orderBy(asc(catalogSources.externalKey), asc(productions.slug));
+
+    expect(staged.deactivatedProductions).toBe(0);
+    expect(first.deactivatedProductions).toBe(2);
+    expect(second.deactivatedProductions).toBe(0);
+    expect(rows).toEqual([
+      { isActive: false, sourceKey: "fixture.theatre-des-muses" },
+      { isActive: false, sourceKey: "fixture.theatre-des-muses" },
+      { isActive: true, sourceKey: "fixture.replacement" },
+      { isActive: true, sourceKey: "fixture.replacement" },
+    ]);
+  });
+
+  it("annule tous les imports si un fichier du remplacement échoue", async () => {
+    const previous = await loadFixture();
+    await applyCatalog(db, previous);
+    const valid = asSeparateSource(previous, "replacement-valid");
+    const invalid = asSeparateSource(previous, "replacement-invalid");
+    invalid.productions[0]!.sourceDocumentKey = "document.manquant";
+
+    await expect(stageCatalogs(db, [valid, invalid])).rejects.toThrow(
+      "Document de production introuvable",
+    );
+    const sources = await db
+      .select({ key: catalogSources.externalKey })
+      .from(catalogSources)
+      .orderBy(asc(catalogSources.externalKey));
+    const productionRows = await db
+      .select({ isActive: productions.isActive })
+      .from(productions);
+
+    expect(sources).toEqual([{ key: "fixture.theatre-des-muses" }]);
+    expect(productionRows).toEqual([{ isActive: true }, { isActive: true }]);
   });
 });
