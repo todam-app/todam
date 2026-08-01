@@ -289,6 +289,12 @@ jobs:
       COOLIFY_TOKEN: ${{ secrets.COOLIFY_TOKEN }}
       COOLIFY_WEB_WEBHOOK: ${{ secrets.COOLIFY_WEB_WEBHOOK }}
     steps:
+      - name: Récupérer le dépôt
+        uses: actions/checkout@v7
+      - name: Configurer Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
       - name: Relancer la ressource Web Coolify
         shell: bash
         run: |
@@ -303,3 +309,28 @@ jobs:
             --silent \
             --header "Authorization: Bearer $COOLIFY_TOKEN" \
             "$COOLIFY_WEB_WEBHOOK"
+      - name: Vérifier le déploiement public et le domaine canonique
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          for _ in $(seq 1 60); do
+            if node scripts/check-web-seo.mjs \
+              --runtime-only \
+              --live \
+              --base-url=https://todam.fr \
+              >/dev/null 2>&1
+            then
+              node scripts/check-web-seo.mjs \
+                --runtime-only \
+                --live \
+                --base-url=https://todam.fr
+              exit 0
+            fi
+            sleep 5
+          done
+
+          node scripts/check-web-seo.mjs \
+            --runtime-only \
+            --live \
+            --base-url=https://todam.fr

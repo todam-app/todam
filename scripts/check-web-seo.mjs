@@ -12,6 +12,8 @@ const baseUrlArgument = process.argv.find((argument) =>
   argument.startsWith("--base-url="),
 );
 const runtimeBaseUrl = baseUrlArgument?.slice("--base-url=".length).replace(/\/$/, "");
+const runtimeOnly = process.argv.includes("--runtime-only");
+const liveMode = process.argv.includes("--live");
 
 const staticPages = [
   { file: "index.html", path: "/" },
@@ -226,9 +228,11 @@ async function checkRuntime() {
   );
   assert.match(privateResponse.headers.get("x-robots-tag") ?? "", /noindex/i);
 
-  const wwwResponse = await fetchWithoutRedirect("/contact?source=seo", {
-    headers: { host: "www.todam.fr" },
-  });
+  const wwwResponse = liveMode
+    ? await fetch("https://www.todam.fr/contact?source=seo", { redirect: "manual" })
+    : await fetchWithoutRedirect("/contact?source=seo", {
+        headers: { host: "www.todam.fr" },
+      });
   assert.equal(
     wwwResponse.status,
     308,
@@ -239,9 +243,11 @@ async function checkRuntime() {
     "https://todam.fr/contact?source=seo",
   );
 
-  const httpResponse = await fetchWithoutRedirect("/les-coulisses?source=seo", {
-    headers: { host: "todam.fr", "x-forwarded-proto": "http" },
-  });
+  const httpResponse = liveMode
+    ? await fetch("http://todam.fr/les-coulisses?source=seo", { redirect: "manual" })
+    : await fetchWithoutRedirect("/les-coulisses?source=seo", {
+        headers: { host: "todam.fr", "x-forwarded-proto": "http" },
+      });
   assert.equal(
     httpResponse.status,
     308,
@@ -255,5 +261,9 @@ async function checkRuntime() {
   console.log("SEO Nginx valide : statuts, noindex et redirections contrôlés.");
 }
 
-await checkBuildArtifact();
-if (runtimeBaseUrl) await checkRuntime();
+if (!runtimeOnly) await checkBuildArtifact();
+if (runtimeBaseUrl) {
+  await checkRuntime();
+} else if (runtimeOnly) {
+  throw new Error("--runtime-only exige --base-url.");
+}
