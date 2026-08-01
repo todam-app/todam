@@ -7,7 +7,21 @@
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "icon": "./assets/brand/todam-app-icon.png",
-    "plugins": ["expo-router", "expo-secure-store"],
+    "plugins": [
+      [
+        "expo-router",
+        {
+          "origin": "https://todam.fr",
+          "asyncRoutes": {
+            "web": true,
+            "default": "development"
+          },
+          "unstable_useServerDataLoaders": true,
+          "unstable_useServerRendering": true
+        }
+      ],
+      "expo-secure-store"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "app.todam.mobile"
@@ -16,12 +30,12 @@
       "package": "app.todam.mobile",
       "adaptiveIcon": {
         "foregroundImage": "./assets/brand/todam-app-icon-foreground.png",
-        "backgroundColor": "#F7F3EC"
+        "backgroundColor": "#FCF8F2"
       }
     },
     "web": {
       "bundler": "metro",
-      "output": "single",
+      "output": "static",
       "favicon": "./assets/brand/todam-favicon.png",
       "name": "Todam - Journal de spectacles",
       "shortName": "Todam"

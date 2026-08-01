@@ -6,16 +6,14 @@ import {
   DisciplineSchema,
   PerformanceStatusSchema,
 } from "./catalog.js";
+import { RightsStatusSchema } from "./rights.js";
 
-export const RightsStatusSchema = z.enum([
-  "review_required",
-  "factual_metadata_only",
-  "permission_granted",
-  "open_license",
-  "contractual_display",
-  "hotlink_only",
-]);
-export type RightsStatus = z.infer<typeof RightsStatusSchema>;
+const HttpUrlSchema = z
+  .string()
+  .url()
+  .refine((value) => ["http:", "https:"].includes(new URL(value).protocol), {
+    message: "L’URL doit utiliser HTTP ou HTTPS.",
+  });
 
 export const SourceConnectorKindSchema = z.enum([
   "file",
@@ -45,10 +43,16 @@ export const ExternalKeySchema = z
   .max(160)
   .regex(/^[a-z0-9][a-z0-9._:-]*$/);
 
+const ImportSlugSchema = z
+  .string()
+  .min(1)
+  .max(240)
+  .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
+
 const SourceDocumentSchema = z.object({
   externalKey: ExternalKeySchema,
-  title: z.string().min(1).max(240),
-  url: z.string().url(),
+  title: z.string().trim().min(1).max(240),
+  url: HttpUrlSchema,
   retrievedAt: z.string().datetime({ offset: true }),
   rightsStatus: RightsStatusSchema,
   license: z.string().max(120).nullable().default(null),
@@ -57,56 +61,97 @@ const SourceDocumentSchema = z.object({
 const WorkImportSchema = z.object({
   externalKey: ExternalKeySchema,
   sourceDocumentKey: ExternalKeySchema,
-  title: z.string().min(1).max(240),
-  slug: z.string().min(1).max(240),
+  title: z.string().trim().min(1).max(240),
+  slug: ImportSlugSchema,
   discipline: DisciplineSchema,
 });
 
 const VenueImportSchema = z.object({
   externalKey: ExternalKeySchema,
   sourceDocumentKey: ExternalKeySchema,
-  name: z.string().min(1).max(240),
-  slug: z.string().min(1).max(240),
-  addressLine1: z.string().min(1).max(240),
-  postalCode: z.string().min(1).max(24),
-  locality: z.string().min(1).max(120),
+  name: z.string().trim().min(1).max(240),
+  slug: ImportSlugSchema,
+  addressLine1: z.string().trim().min(1).max(240),
+  postalCode: z.string().trim().min(1).max(24),
+  locality: z.string().trim().min(1).max(120),
   countryCode: z
     .string()
     .length(2)
     .transform((value) => value.toUpperCase()),
-  timezone: z.string().min(1).max(80),
+  timezone: z.string().trim().min(1).max(80),
+  officialUrl: HttpUrlSchema.nullable().default(null),
   latitude: z.number().min(-90).max(90).nullable().default(null),
   longitude: z.number().min(-180).max(180).nullable().default(null),
+});
+
+const CompanyImportSchema = z.object({
+  externalKey: ExternalKeySchema,
+  sourceDocumentKey: ExternalKeySchema,
+  name: z.string().trim().min(1).max(240),
+  slug: ImportSlugSchema,
+  shortDescription: z.string().trim().min(1).max(700).nullable().default(null),
+  description: z.string().trim().min(1).max(8000).nullable().default(null),
+  officialUrl: HttpUrlSchema.nullable().default(null),
+  locality: z.string().trim().min(1).max(120).nullable().default(null),
+  countryCode: z
+    .string()
+    .length(2)
+    .transform((value) => value.toUpperCase())
+    .nullable()
+    .default(null),
 });
 
 const ArtistImportSchema = z.object({
   externalKey: ExternalKeySchema,
   sourceDocumentKey: ExternalKeySchema,
-  name: z.string().min(1).max(240),
-  slug: z.string().min(1).max(240),
+  name: z.string().trim().min(1).max(240),
+  slug: ImportSlugSchema,
 });
 
 const ProductionImportSchema = z.object({
   externalKey: ExternalKeySchema,
   sourceDocumentKey: ExternalKeySchema,
   workExternalKey: ExternalKeySchema.nullable().default(null),
-  title: z.string().min(1).max(240),
-  slug: z.string().min(1).max(240),
+  title: z.string().trim().min(1).max(240),
+  slug: ImportSlugSchema,
   discipline: DisciplineSchema,
   audience: AudienceSchema.default("general"),
+  minimumAge: z.number().int().min(0).max(99).nullable().default(null),
   durationMinutes: z.number().int().positive().max(1440).nullable().default(null),
-  language: z.string().max(80).nullable().default(null),
-  officialUrl: z.string().url().nullable().default(null),
+  language: z.string().trim().min(1).max(80).nullable().default(null),
+  officialUrl: HttpUrlSchema.nullable().default(null),
+  companies: z
+    .array(
+      z.object({
+        companyExternalKey: ExternalKeySchema,
+        isPrimary: z.boolean().default(false),
+        position: z.number().int().nonnegative().default(0),
+      }),
+    )
+    .default([]),
   credits: z
     .array(
       z.object({
         artistExternalKey: ExternalKeySchema,
         role: CreditRoleSchema,
-        label: z.string().max(120).nullable().default(null),
+        label: z.string().trim().min(1).max(120).nullable().default(null),
         position: z.number().int().nonnegative(),
       }),
     )
     .default([]),
+});
+
+const ProductionDescriptionImportSchema = z.object({
+  externalKey: ExternalKeySchema,
+  sourceDocumentKey: ExternalKeySchema,
+  productionExternalKey: ExternalKeySchema,
+  locale: z.string().trim().min(2).max(35).default("fr"),
+  kind: z.enum(["short", "full"]),
+  body: z.string().trim().min(1).max(8000),
+  sourceUrl: HttpUrlSchema.nullable().default(null),
+  rightsStatus: RightsStatusSchema,
+  license: z.string().trim().min(1).max(240).nullable().default(null),
+  lastVerifiedAt: z.string().datetime({ offset: true }),
 });
 
 const PerformanceImportSchema = z.object({
@@ -117,7 +162,7 @@ const PerformanceImportSchema = z.object({
   startsAt: z.string().datetime({ offset: true }),
   endsAt: z.string().datetime({ offset: true }).nullable().default(null),
   status: PerformanceStatusSchema.default("completed"),
-  officialUrl: z.string().url().nullable().default(null),
+  officialUrl: HttpUrlSchema.nullable().default(null),
 });
 
 const MediaImportSchema = z.object({
@@ -126,13 +171,13 @@ const MediaImportSchema = z.object({
   productionExternalKey: ExternalKeySchema,
   performanceExternalKey: ExternalKeySchema.nullable().default(null),
   kind: MediaKindSchema,
-  url: z.string().url(),
-  alt: z.string().max(500).nullable().default(null),
-  credit: z.string().min(1).max(500),
-  copyrightHolder: z.string().max(240).nullable().default(null),
+  url: HttpUrlSchema,
+  alt: z.string().trim().min(1).max(500).nullable().default(null),
+  credit: z.string().trim().min(1).max(500),
+  copyrightHolder: z.string().trim().min(1).max(240).nullable().default(null),
   rightsStatus: RightsStatusSchema,
   license: z.string().max(120).nullable().default(null),
-  termsUrl: z.string().url().nullable().default(null),
+  termsUrl: HttpUrlSchema.nullable().default(null),
   storagePolicy: MediaStoragePolicySchema,
   width: z.number().int().positive().nullable().default(null),
   height: z.number().int().positive().nullable().default(null),
@@ -146,9 +191,9 @@ const MediaImportSchema = z.object({
 const ExclusionImportSchema = z.object({
   externalKey: ExternalKeySchema,
   sourceDocumentKey: ExternalKeySchema,
-  title: z.string().min(1).max(240),
-  category: z.string().min(1).max(80),
-  reason: z.string().min(1).max(500),
+  title: z.string().trim().min(1).max(240),
+  category: z.string().trim().min(1).max(80),
+  reason: z.string().trim().min(1).max(500),
 });
 
 export const CatalogImportSchema = z
@@ -157,7 +202,7 @@ export const CatalogImportSchema = z
     source: z.object({
       externalKey: ExternalKeySchema,
       name: z.string().min(1).max(240),
-      homepageUrl: z.string().url(),
+      homepageUrl: HttpUrlSchema,
       connectorKind: SourceConnectorKindSchema.default("file"),
       metadataLicense: z.string().max(120).nullable().default(null),
       defaultMediaPolicy: MediaStoragePolicySchema.default("metadata_only"),
@@ -189,14 +234,44 @@ export const CatalogImportSchema = z
     documents: z.array(SourceDocumentSchema).min(1),
     works: z.array(WorkImportSchema).default([]),
     venues: z.array(VenueImportSchema).default([]),
+    companies: z.array(CompanyImportSchema).default([]),
     artists: z.array(ArtistImportSchema).default([]),
     productions: z.array(ProductionImportSchema).default([]),
+    descriptions: z.array(ProductionDescriptionImportSchema).default([]),
     performances: z.array(PerformanceImportSchema).default([]),
     media: z.array(MediaImportSchema).default([]),
     withdrawnProductionExternalKeys: z.array(ExternalKeySchema).default([]),
     exclusions: z.array(ExclusionImportSchema).default([]),
   })
   .superRefine((catalog, context) => {
+    const reportDuplicateExternalKeys = (
+      items: readonly { externalKey: string }[],
+      collection: string,
+    ) => {
+      const seen = new Set<string>();
+      items.forEach((item, index) => {
+        if (seen.has(item.externalKey)) {
+          context.addIssue({
+            code: "custom",
+            message: `Identifiant externe dupliqué : ${item.externalKey}`,
+            path: [collection, index, "externalKey"],
+          });
+        }
+        seen.add(item.externalKey);
+      });
+    };
+
+    reportDuplicateExternalKeys(catalog.documents, "documents");
+    reportDuplicateExternalKeys(catalog.works, "works");
+    reportDuplicateExternalKeys(catalog.venues, "venues");
+    reportDuplicateExternalKeys(catalog.companies, "companies");
+    reportDuplicateExternalKeys(catalog.artists, "artists");
+    reportDuplicateExternalKeys(catalog.productions, "productions");
+    reportDuplicateExternalKeys(catalog.descriptions, "descriptions");
+    reportDuplicateExternalKeys(catalog.performances, "performances");
+    reportDuplicateExternalKeys(catalog.media, "media");
+    reportDuplicateExternalKeys(catalog.exclusions, "exclusions");
+
     if (catalog.schemaVersion === 2 && !("countryCodes" in catalog.coverage)) {
       context.addIssue({
         code: "custom",
@@ -217,10 +292,20 @@ export const CatalogImportSchema = z
         path: [],
       });
     }
+    if (catalog.coverage.startsOn > catalog.coverage.endsOn) {
+      context.addIssue({
+        code: "custom",
+        message: "La fin de la couverture doit suivre son début.",
+        path: ["coverage", "endsOn"],
+      });
+    }
     const documentKeys = new Set(
       catalog.documents.map((document) => document.externalKey),
     );
     const venueKeys = new Set(catalog.venues.map((venue) => venue.externalKey));
+    const companyKeys = new Set(
+      catalog.companies.map((company) => company.externalKey),
+    );
     const workKeys = new Set(catalog.works.map((work) => work.externalKey));
     const artistKeys = new Set(catalog.artists.map((artist) => artist.externalKey));
     const productionKeys = new Set(
@@ -246,6 +331,13 @@ export const CatalogImportSchema = z
     catalog.venues.forEach((venue, index) =>
       requireDocument(venue.sourceDocumentKey, ["venues", index, "sourceDocumentKey"]),
     );
+    catalog.companies.forEach((company, index) =>
+      requireDocument(company.sourceDocumentKey, [
+        "companies",
+        index,
+        "sourceDocumentKey",
+      ]),
+    );
     catalog.artists.forEach((artist, index) =>
       requireDocument(artist.sourceDocumentKey, [
         "artists",
@@ -269,6 +361,39 @@ export const CatalogImportSchema = z
           path: ["productions", index, "workExternalKey"],
         });
       }
+      production.companies.forEach((company, companyIndex) => {
+        if (!companyKeys.has(company.companyExternalKey)) {
+          context.addIssue({
+            code: "custom",
+            message: `Compagnie inconnue : ${company.companyExternalKey}`,
+            path: [
+              "productions",
+              index,
+              "companies",
+              companyIndex,
+              "companyExternalKey",
+            ],
+          });
+        }
+      });
+      const linkedCompanyKeys = new Set<string>();
+      production.companies.forEach((company, companyIndex) => {
+        if (linkedCompanyKeys.has(company.companyExternalKey)) {
+          context.addIssue({
+            code: "custom",
+            message: `Compagnie rattachée plusieurs fois : ${company.companyExternalKey}`,
+            path: ["productions", index, "companies", companyIndex],
+          });
+        }
+        linkedCompanyKeys.add(company.companyExternalKey);
+      });
+      if (production.companies.filter((company) => company.isPrimary).length > 1) {
+        context.addIssue({
+          code: "custom",
+          message: "Une production ne peut avoir qu’une compagnie principale.",
+          path: ["productions", index, "companies"],
+        });
+      }
       production.credits.forEach((credit, creditIndex) => {
         if (!artistKeys.has(credit.artistExternalKey)) {
           context.addIssue({
@@ -278,6 +403,42 @@ export const CatalogImportSchema = z
           });
         }
       });
+    });
+    catalog.descriptions.forEach((description, index) => {
+      if (!documentKeys.has(description.sourceDocumentKey)) {
+        context.addIssue({
+          code: "custom",
+          message: `Document de description inconnu : ${description.sourceDocumentKey}`,
+          path: ["descriptions", index, "sourceDocumentKey"],
+        });
+      }
+      if (!productionKeys.has(description.productionExternalKey)) {
+        context.addIssue({
+          code: "custom",
+          message: `Production de description inconnue : ${description.productionExternalKey}`,
+          path: ["descriptions", index, "productionExternalKey"],
+        });
+      }
+      if (description.rightsStatus === "open_license" && description.license === null) {
+        context.addIssue({
+          code: "custom",
+          message: "Une description sous licence ouverte doit nommer sa licence.",
+          path: ["descriptions", index, "license"],
+        });
+      }
+    });
+    const descriptionIdentities = new Set<string>();
+    catalog.descriptions.forEach((description, index) => {
+      const identity = `${description.productionExternalKey}:${description.locale.toLocaleLowerCase("fr")}:${description.kind}`;
+      if (descriptionIdentities.has(identity)) {
+        context.addIssue({
+          code: "custom",
+          message:
+            "Une seule description par production, langue et type est autorisée.",
+          path: ["descriptions", index],
+        });
+      }
+      descriptionIdentities.add(identity);
     });
     catalog.performances.forEach((performance, index) => {
       requireDocument(performance.sourceDocumentKey, [
@@ -297,6 +458,17 @@ export const CatalogImportSchema = z
           code: "custom",
           message: `Lieu inconnu : ${performance.venueExternalKey}`,
           path: ["performances", index, "venueExternalKey"],
+        });
+      }
+      if (
+        performance.endsAt !== null &&
+        new Date(performance.endsAt).getTime() <=
+          new Date(performance.startsAt).getTime()
+      ) {
+        context.addIssue({
+          code: "custom",
+          message: "La fin d’une représentation doit suivre strictement son début.",
+          path: ["performances", index, "endsAt"],
         });
       }
     });
@@ -328,12 +500,14 @@ export const CatalogImportSchema = z
       }
       if (
         media.storagePolicy === "mirror" &&
-        !["open_license", "permission_granted"].includes(media.rightsStatus)
+        !["open_license", "permission_granted", "todam_original"].includes(
+          media.rightsStatus,
+        )
       ) {
         context.addIssue({
           code: "custom",
           message:
-            "La copie d'une affiche exige une licence ouverte ou une permission.",
+            "La copie d'une affiche exige une licence ouverte, une permission ou un visuel original Todam.",
           path: ["media", index, "storagePolicy"],
         });
       }
@@ -344,7 +518,35 @@ export const CatalogImportSchema = z
           path: ["media", index, "license"],
         });
       }
+      if (
+        media.validFrom !== null &&
+        media.validUntil !== null &&
+        new Date(media.validUntil).getTime() <= new Date(media.validFrom).getTime()
+      ) {
+        context.addIssue({
+          code: "custom",
+          message:
+            "La date de fin des droits doit suivre strictement leur date de début.",
+          path: ["media", index, "validUntil"],
+        });
+      }
     });
+    const primaryMediaByProduction = new Map<string, number>();
+    catalog.media.forEach((media) => {
+      if (!media.isPrimary) return;
+      primaryMediaByProduction.set(
+        media.productionExternalKey,
+        (primaryMediaByProduction.get(media.productionExternalKey) ?? 0) + 1,
+      );
+    });
+    for (const [productionExternalKey, count] of primaryMediaByProduction) {
+      if (count <= 1) continue;
+      context.addIssue({
+        code: "custom",
+        message: `La production ${productionExternalKey} ne peut avoir qu’un seul visuel principal dans un import.`,
+        path: ["media"],
+      });
+    }
   });
 
 export type CatalogImport = z.infer<typeof CatalogImportSchema>;
@@ -357,8 +559,10 @@ export const ImportReportSchema = z.object({
     documents: z.number().int().nonnegative(),
     works: z.number().int().nonnegative(),
     venues: z.number().int().nonnegative(),
+    companies: z.number().int().nonnegative(),
     artists: z.number().int().nonnegative(),
     productions: z.number().int().nonnegative(),
+    descriptions: z.number().int().nonnegative(),
     performances: z.number().int().nonnegative(),
     media: z.number().int().nonnegative(),
     withdrawnProductions: z.number().int().nonnegative(),

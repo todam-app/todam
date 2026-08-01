@@ -63,7 +63,7 @@ export function legalPdfUrl(id: LegalDocumentId): string {
     terms: `cgu-todam-v${CURRENT_TERMS_VERSION}.pdf`,
     privacy: `confidentialite-todam-v${CURRENT_PRIVACY_NOTICE_VERSION}.pdf`,
     notices: "mentions-legales-todam-v1.0.0.pdf",
-    deletion: "suppression-compte-todam-v1.0.0.pdf",
+    deletion: "suppression-compte-todam-v1.0.2.pdf",
   };
   return `${base}/legal/${filenames[id]}`;
 }

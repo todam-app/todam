@@ -1,0 +1,1053 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <title>Todam — faisceau nocturne par discipline</title>
+    <style>
+      @font-face {
+        font-family: "Work Sans";
+        src: url("../../apps/todam/public/fonts/work-sans-latin-400-normal.woff2")
+          format("woff2");
+        font-style: normal;
+        font-weight: 400;
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: "Work Sans";
+        src: url("../../apps/todam/public/fonts/work-sans-latin-500-normal.woff2")
+          format("woff2");
+        font-style: normal;
+        font-weight: 500;
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: "Work Sans";
+        src: url("../../apps/todam/public/fonts/work-sans-latin-600-normal.woff2")
+          format("woff2");
+        font-style: normal;
+        font-weight: 600;
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: "Playfair Display";
+        src: url("../../apps/todam/public/fonts/playfair-display-latin-600-normal.woff2")
+          format("woff2");
+        font-style: normal;
+        font-weight: 600;
+        font-display: swap;
+      }
+
+      :root {
+        color-scheme: light;
+        --canvas: #fcf8f2;
+        --paper: #fffdf8;
+        --gutter: #f0eae1;
+        --ink: #151515;
+        --muted: #6f6b64;
+        --line: #e2d9cd;
+        --coral: #f3a995;
+        --coral-dark: #c34e42;
+        --lilac: #c8b8f0;
+        --lilac-dark: #6651b8;
+        --aqua: #9fd8d0;
+        --aqua-dark: #176c68;
+        --brand: #ed2215;
+        --shadow: 0 16px 42px rgba(43, 34, 27, 0.09);
+        --shadow-lift: 0 22px 54px rgba(65, 48, 92, 0.13);
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      html {
+        background: var(--gutter);
+      }
+
+      body {
+        min-width: 320px;
+        min-height: 100vh;
+        margin: 0;
+        color: var(--ink);
+        background:
+          linear-gradient(90deg, rgba(243, 169, 149, 0.42), transparent 14%),
+          linear-gradient(270deg, rgba(159, 216, 208, 0.32), transparent 14%),
+          var(--gutter);
+        font-family: "Work Sans", Arial, sans-serif;
+      }
+
+      button {
+        font: inherit;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .page {
+        width: min(1180px, 100%);
+        min-height: 100vh;
+        margin: 0 auto;
+        background:
+          radial-gradient(
+            circle at 88% 5%,
+            rgba(200, 184, 240, 0.17),
+            transparent 25rem
+          ),
+          var(--canvas);
+        box-shadow: 0 0 0 1px rgba(43, 34, 27, 0.06);
+      }
+
+      .site-header {
+        min-height: 82px;
+        display: grid;
+        grid-template-columns: 180px minmax(240px, 1fr) auto;
+        align-items: center;
+        gap: 34px;
+        padding: 16px clamp(24px, 4.7vw, 56px);
+        border-bottom: 1px solid rgba(226, 217, 205, 0.82);
+        background: rgba(255, 253, 248, 0.86);
+        backdrop-filter: blur(16px);
+      }
+
+      .brand {
+        margin: 0;
+        font-family: "Playfair Display", Georgia, serif;
+        font-size: 37px;
+        font-weight: 600;
+        line-height: 1;
+        letter-spacing: -0.045em;
+      }
+
+      .brand-dot {
+        color: var(--brand);
+      }
+
+      .search-shell {
+        min-height: 46px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 0 17px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        color: var(--muted);
+        background: rgba(255, 253, 248, 0.72);
+        font-size: 14px;
+      }
+
+      .search-shell svg {
+        flex: 0 0 18px;
+      }
+
+      .ticket-button {
+        position: relative;
+        min-width: 130px;
+        min-height: 46px;
+        padding: 0 20px;
+        border: 1px solid rgba(195, 78, 66, 0.34);
+        border-radius: 10px;
+        color: var(--ink);
+        background: var(--paper);
+        box-shadow: 0 10px 22px rgba(43, 34, 27, 0.06);
+        font-size: 13px;
+        font-weight: 600;
+      }
+
+      .ticket-button::before,
+      .ticket-button::after {
+        position: absolute;
+        top: 50%;
+        width: 10px;
+        height: 18px;
+        border: 1px solid rgba(195, 78, 66, 0.34);
+        background: var(--canvas);
+        content: "";
+        transform: translateY(-50%);
+      }
+
+      .ticket-button::before {
+        left: -1px;
+        border-left: 0;
+        border-radius: 0 12px 12px 0;
+      }
+
+      .ticket-button::after {
+        right: -1px;
+        border-right: 0;
+        border-radius: 12px 0 0 12px;
+      }
+
+      .ticket-button:focus-visible,
+      .bookmark:focus-visible,
+      .choice-button:focus-visible {
+        outline: 2px solid var(--coral-dark);
+        outline-offset: 2px;
+        box-shadow: 0 0 0 3px rgba(243, 169, 149, 0.22);
+      }
+
+      main {
+        padding: clamp(48px, 7vw, 82px) clamp(24px, 4.7vw, 56px) 80px;
+      }
+
+      .intro {
+        max-width: 840px;
+        margin-bottom: 48px;
+      }
+
+      .eyebrow,
+      .discipline,
+      .direction-label,
+      .note-label {
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.11em;
+        text-transform: uppercase;
+      }
+
+      .eyebrow {
+        margin: 0 0 14px;
+        color: var(--brand);
+      }
+
+      h1,
+      h2,
+      h3 {
+        font-family: "Playfair Display", Georgia, serif;
+        font-weight: 600;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(44px, 6.3vw, 70px);
+        line-height: 0.99;
+        letter-spacing: -0.048em;
+      }
+
+      .intro-copy {
+        max-width: 720px;
+        margin: 22px 0 0;
+        color: var(--muted);
+        font-size: 16px;
+        line-height: 1.65;
+      }
+
+      .directions {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 24px;
+        align-items: start;
+      }
+
+      .direction {
+        min-width: 0;
+      }
+
+      .direction-head {
+        min-height: 148px;
+        padding: 0 4px 22px;
+      }
+
+      .direction-label {
+        margin: 0 0 10px;
+      }
+
+      .direction--theatre .direction-label,
+      .direction--theatre .discipline,
+      .direction--theatre .note-label {
+        color: var(--coral-dark);
+      }
+
+      .direction--opera .direction-label,
+      .direction--opera .discipline,
+      .direction--opera .note-label {
+        color: var(--lilac-dark);
+      }
+
+      .direction--ballet .direction-label,
+      .direction--ballet .discipline,
+      .direction--ballet .note-label {
+        color: var(--aqua-dark);
+      }
+
+      .direction h2 {
+        margin: 0;
+        font-size: 30px;
+        line-height: 1.05;
+        letter-spacing: -0.035em;
+      }
+
+      .direction-description {
+        margin: 10px 0 0;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.52;
+      }
+
+      .production-card {
+        position: relative;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--paper);
+        box-shadow: var(--shadow);
+        transition:
+          transform 180ms ease,
+          box-shadow 180ms ease;
+      }
+
+      .production-card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-lift);
+      }
+
+      .poster {
+        position: relative;
+        isolation: isolate;
+        aspect-ratio: 148 / 210;
+        width: 100%;
+        overflow: hidden;
+        background: #171819;
+      }
+
+      .poster::after {
+        position: absolute;
+        z-index: 30;
+        inset: 0;
+        box-shadow: inset 0 0 0 1px rgba(255, 253, 248, 0.12);
+        content: "";
+        pointer-events: none;
+      }
+
+      /* Théâtre — tension chaude, présence et profondeur */
+      .poster-theatre {
+        background:
+          radial-gradient(
+            circle at 23% 26%,
+            rgba(243, 169, 149, 0.88),
+            transparent 34%
+          ),
+          radial-gradient(circle at 77% 76%, rgba(200, 184, 240, 0.5), transparent 39%),
+          linear-gradient(150deg, #2b2427 0%, #151617 47%, #2d2930 100%);
+      }
+
+      .theatre-beam {
+        position: absolute;
+        z-index: 3;
+        top: -14%;
+        left: 8%;
+        width: 31%;
+        height: 128%;
+        clip-path: polygon(42% 0, 70% 0, 100% 100%, 0 100%);
+        background: linear-gradient(180deg, rgba(255, 253, 248, 0.8), transparent 72%);
+        filter: blur(12px);
+        mix-blend-mode: screen;
+        transform: rotate(14deg);
+        transform-origin: top;
+      }
+
+      .theatre-veil {
+        position: absolute;
+        z-index: 4;
+        top: 15%;
+        right: 7%;
+        width: 54%;
+        height: 75%;
+        border: 1px solid rgba(255, 253, 248, 0.17);
+        border-radius: 50% 18% 50% 24%;
+        background: linear-gradient(145deg, rgba(255, 253, 248, 0.15), transparent 68%);
+        box-shadow: inset 18px 12px 44px rgba(255, 253, 248, 0.025);
+        transform: rotate(-12deg);
+      }
+
+      .theatre-glow {
+        position: absolute;
+        z-index: 2;
+        right: 3%;
+        bottom: -17%;
+        width: 72%;
+        height: 52%;
+        border-radius: 50%;
+        background: var(--coral);
+        filter: blur(22px);
+        mix-blend-mode: screen;
+        opacity: 0.46;
+      }
+
+      .theatre-pin {
+        position: absolute;
+        z-index: 5;
+        top: 31%;
+        right: 21%;
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: var(--paper);
+        box-shadow: 0 0 20px 6px rgba(255, 253, 248, 0.32);
+      }
+
+      /* Opéra — ampleur symétrique et profondeur lyrique */
+      .poster-opera {
+        background:
+          radial-gradient(
+            circle at 50% 20%,
+            rgba(200, 184, 240, 0.72),
+            transparent 35%
+          ),
+          radial-gradient(
+            circle at 50% 78%,
+            rgba(243, 169, 149, 0.32),
+            transparent 37%
+          ),
+          linear-gradient(180deg, #232029 0%, #111214 57%, #25202a 100%);
+      }
+
+      .opera-beam {
+        position: absolute;
+        z-index: 2;
+        top: -10%;
+        width: 44%;
+        height: 96%;
+        background: linear-gradient(180deg, rgba(255, 253, 248, 0.78), transparent 78%);
+        filter: blur(8px);
+        mix-blend-mode: screen;
+        opacity: 0.7;
+        transform-origin: top;
+      }
+
+      .opera-beam--left {
+        left: -2%;
+        clip-path: polygon(30% 0, 48% 0, 100% 100%, 0 100%);
+        transform: rotate(-9deg);
+      }
+
+      .opera-beam--right {
+        right: -2%;
+        clip-path: polygon(52% 0, 70% 0, 100% 100%, 0 100%);
+        transform: rotate(9deg);
+      }
+
+      .opera-arch {
+        position: absolute;
+        z-index: 5;
+        inset: 16% 14% 11%;
+        border: 1px solid rgba(255, 253, 248, 0.21);
+        border-radius: 50% 50% 10px 10px / 27% 27% 10px 10px;
+        background:
+          linear-gradient(180deg, rgba(200, 184, 240, 0.11), transparent 46%),
+          rgba(17, 18, 20, 0.18);
+        box-shadow:
+          inset 0 0 44px rgba(200, 184, 240, 0.08),
+          0 0 34px rgba(200, 184, 240, 0.06);
+      }
+
+      .opera-arch::before {
+        position: absolute;
+        inset: 7% 8% 9%;
+        border: 1px solid rgba(200, 184, 240, 0.18);
+        border-radius: 50% 50% 7px 7px / 27% 27% 7px 7px;
+        content: "";
+      }
+
+      .opera-halo {
+        position: absolute;
+        z-index: 3;
+        top: 24%;
+        left: 50%;
+        width: 46%;
+        aspect-ratio: 1;
+        border-radius: 50%;
+        background: rgba(200, 184, 240, 0.52);
+        filter: blur(28px);
+        mix-blend-mode: screen;
+        transform: translateX(-50%);
+      }
+
+      .opera-footlights {
+        position: absolute;
+        z-index: 7;
+        right: 18%;
+        bottom: 10%;
+        left: 18%;
+        display: flex;
+        justify-content: space-between;
+      }
+
+      .opera-footlights i {
+        width: 5px;
+        aspect-ratio: 1;
+        border-radius: 50%;
+        background: var(--paper);
+        box-shadow: 0 0 12px rgba(255, 253, 248, 0.66);
+      }
+
+      /* Ballet — trajectoire, légèreté et lumière froide */
+      .poster-ballet {
+        background:
+          radial-gradient(circle at 23% 74%, rgba(159, 216, 208, 0.7), transparent 36%),
+          radial-gradient(circle at 76% 26%, rgba(200, 184, 240, 0.5), transparent 38%),
+          linear-gradient(145deg, #172123 0%, #111516 48%, #25242d 100%);
+      }
+
+      .ballet-beam {
+        position: absolute;
+        z-index: 2;
+        top: -15%;
+        width: 29%;
+        height: 129%;
+        background: linear-gradient(180deg, rgba(255, 253, 248, 0.72), transparent 74%);
+        filter: blur(9px);
+        mix-blend-mode: screen;
+        transform-origin: top;
+      }
+
+      .ballet-beam--left {
+        left: 1%;
+        clip-path: polygon(34% 0, 60% 0, 100% 100%, 0 100%);
+        transform: rotate(-22deg);
+      }
+
+      .ballet-beam--right {
+        right: 3%;
+        clip-path: polygon(40% 0, 66% 0, 100% 100%, 0 100%);
+        opacity: 0.54;
+        transform: rotate(18deg);
+      }
+
+      .ballet-ribbon {
+        position: absolute;
+        z-index: 5;
+        border: 1px solid rgba(255, 253, 248, 0.22);
+        background: linear-gradient(145deg, rgba(159, 216, 208, 0.1), transparent 68%);
+        box-shadow: inset 0 0 38px rgba(159, 216, 208, 0.06);
+      }
+
+      .ballet-ribbon--one {
+        top: 12%;
+        left: 24%;
+        width: 45%;
+        height: 76%;
+        border-radius: 58% 22% 56% 31%;
+        transform: rotate(24deg);
+      }
+
+      .ballet-ribbon--two {
+        top: 29%;
+        left: 37%;
+        width: 31%;
+        height: 57%;
+        border-color: rgba(200, 184, 240, 0.2);
+        border-radius: 24% 64% 30% 58%;
+        background: linear-gradient(145deg, rgba(200, 184, 240, 0.08), transparent 70%);
+        transform: rotate(-31deg);
+      }
+
+      .ballet-glow {
+        position: absolute;
+        z-index: 3;
+        bottom: -12%;
+        left: 6%;
+        width: 78%;
+        height: 42%;
+        border-radius: 50%;
+        background: var(--aqua);
+        filter: blur(27px);
+        mix-blend-mode: screen;
+        opacity: 0.56;
+        transform: rotate(-10deg);
+      }
+
+      .card-content {
+        position: relative;
+        min-height: 208px;
+        display: flex;
+        flex-direction: column;
+        padding: 20px 20px 18px;
+      }
+
+      .discipline {
+        margin: 0 0 10px;
+      }
+
+      .show-title {
+        min-height: 58px;
+        margin: 0;
+        font-size: 25px;
+        line-height: 1.08;
+        letter-spacing: -0.025em;
+      }
+
+      .credit,
+      .venue {
+        margin: 10px 0 0;
+        font-size: 13px;
+        line-height: 1.45;
+      }
+
+      .venue {
+        margin-top: auto;
+        padding-top: 18px;
+        color: var(--muted);
+      }
+
+      .bookmark {
+        position: absolute;
+        right: 15px;
+        bottom: 14px;
+        width: 44px;
+        height: 44px;
+        display: grid;
+        place-items: center;
+        cursor: pointer;
+        border: 0;
+        color: var(--ink);
+        background: transparent;
+      }
+
+      .bookmark svg {
+        width: 20px;
+        height: 24px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 1.4;
+      }
+
+      .direction-note {
+        min-height: 110px;
+        margin: 14px 0 0;
+        padding: 15px 16px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        color: var(--muted);
+        background: rgba(255, 253, 248, 0.64);
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
+      .note-label {
+        display: block;
+        margin-bottom: 5px;
+      }
+
+      .choice-button {
+        width: 100%;
+        min-height: 44px;
+        margin-top: 10px;
+        padding: 10px 14px;
+        cursor: pointer;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        color: var(--ink);
+        background: var(--paper);
+        font-size: 13px;
+        font-weight: 600;
+        transition: 150ms ease;
+      }
+
+      .choice-button:hover {
+        border-color: var(--coral);
+        background: #fceae2;
+      }
+
+      .choice-button[aria-pressed="true"] {
+        border-color: var(--coral-dark);
+        background: #fceae2;
+        box-shadow: inset 0 -3px 0 var(--coral-dark);
+      }
+
+      .selection-status {
+        min-height: 24px;
+        margin: 28px 0 0;
+        color: var(--muted);
+        font-size: 13px;
+        text-align: center;
+      }
+
+      .selection-status strong {
+        color: var(--ink);
+      }
+
+      .principle-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 28px;
+        margin-top: 28px;
+        padding: 22px 24px;
+        border: 1px solid rgba(226, 217, 205, 0.9);
+        border-radius: 16px;
+        background:
+          linear-gradient(rgba(255, 253, 248, 0.91), rgba(255, 253, 248, 0.91)),
+          linear-gradient(90deg, var(--coral), var(--lilac), var(--aqua));
+        box-shadow: var(--shadow);
+      }
+
+      .principle-bar h2 {
+        flex: 0 0 290px;
+        margin: 0;
+        font-size: 27px;
+        line-height: 1.08;
+      }
+
+      .principles {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 8px;
+      }
+
+      .principle {
+        padding: 7px 10px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        color: var(--muted);
+        background: var(--paper);
+        font-size: 11px;
+        font-weight: 500;
+      }
+
+      @media (max-width: 900px) {
+        .site-header {
+          grid-template-columns: 1fr auto;
+        }
+
+        .search-shell {
+          display: none;
+        }
+
+        .directions {
+          gap: 18px;
+        }
+
+        .direction-head {
+          min-height: 170px;
+        }
+
+        .direction h2 {
+          font-size: 25px;
+        }
+
+        .card-content {
+          min-height: 224px;
+          padding: 17px 16px;
+        }
+
+        .show-title {
+          font-size: 21px;
+        }
+      }
+
+      @media (max-width: 680px) {
+        body {
+          background:
+            linear-gradient(90deg, rgba(243, 169, 149, 0.22), transparent 18%),
+            var(--gutter);
+        }
+
+        .site-header {
+          min-height: 72px;
+          padding-inline: 20px;
+        }
+
+        .brand {
+          font-size: 32px;
+        }
+
+        .ticket-button {
+          min-width: 118px;
+          min-height: 44px;
+        }
+
+        main {
+          padding-inline: 20px;
+        }
+
+        .directions {
+          display: flex;
+          width: calc(100% + 20px);
+          gap: 14px;
+          padding-right: 20px;
+          overflow-x: auto;
+          scroll-snap-type: x mandatory;
+          scrollbar-width: thin;
+        }
+
+        .direction {
+          flex: 0 0 min(82vw, 330px);
+          scroll-snap-align: start;
+        }
+
+        .direction-head {
+          min-height: 156px;
+        }
+
+        .direction-note {
+          min-height: 124px;
+        }
+
+        .principle-bar {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+
+        .principle-bar h2 {
+          flex-basis: auto;
+        }
+
+        .principles {
+          justify-content: flex-start;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          scroll-behavior: auto !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <header class="site-header">
+        <p class="brand" aria-label="Todam">todam<span class="brand-dot">.</span></p>
+        <div class="search-shell" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none">
+            <circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.6" />
+            <path
+              d="m16 16 4 4"
+              stroke="currentColor"
+              stroke-width="1.6"
+              stroke-linecap="round"
+            />
+          </svg>
+          <span>Rechercher un spectacle, une compagnie…</span>
+        </div>
+        <button class="ticket-button" type="button">Se connecter</button>
+      </header>
+
+      <main>
+        <section class="intro" aria-labelledby="page-title">
+          <p class="eyebrow">Direction retenue · faisceau nocturne</p>
+          <h1 id="page-title">Une nuit différente pour chaque scène.</h1>
+          <p class="intro-copy">
+            Les trois affiches absentes partagent la même profondeur sombre. Leur
+            lumière, leur rythme et leur composition changent pour évoquer le théâtre,
+            l’opéra ou le ballet sans fabriquer une fausse affiche de spectacle.
+          </p>
+        </section>
+
+        <section class="directions" aria-label="Déclinaisons du faisceau nocturne">
+          <article class="direction direction--theatre">
+            <header class="direction-head">
+              <p class="direction-label">01 · Théâtre</p>
+              <h2>La présence</h2>
+              <p class="direction-description">
+                Un faisceau chaud et décentré révèle une forme presque humaine, sans la
+                figer.
+              </p>
+            </header>
+
+            <div class="production-card">
+              <div
+                class="poster poster-theatre"
+                role="img"
+                aria-label="Affiche non disponible — composition nocturne générique pour le théâtre"
+              >
+                <span class="theatre-beam" aria-hidden="true"></span>
+                <span class="theatre-veil" aria-hidden="true"></span>
+                <span class="theatre-glow" aria-hidden="true"></span>
+                <span class="theatre-pin" aria-hidden="true"></span>
+              </div>
+              <div class="card-content">
+                <p class="discipline">Théâtre</p>
+                <h3 class="show-title">Faire troupeau</h3>
+                <p class="credit">Collectif Mind The Gap</p>
+                <p class="venue">Hexagone Scène nationale, Meylan</p>
+                <button
+                  class="bookmark"
+                  type="button"
+                  aria-label="Ajouter Faire troupeau à mon journal"
+                >
+                  <svg viewBox="0 0 24 28" aria-hidden="true">
+                    <path d="M4.5 2.5h15v23l-7.5-5-7.5 5v-23Z" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <p class="direction-note">
+              <span class="note-label">Intention</span>
+              Chaleur corail, tension dramatique et présence. C’est la version la plus
+              proche du faisceau nocturne initial.
+            </p>
+            <button
+              class="choice-button"
+              type="button"
+              aria-pressed="false"
+              data-choice="théâtre"
+            >
+              Retenir pour le théâtre
+            </button>
+          </article>
+
+          <article class="direction direction--opera">
+            <header class="direction-head">
+              <p class="direction-label">02 · Opéra</p>
+              <h2>La voûte lyrique</h2>
+              <p class="direction-description">
+                Deux lumières symétriques ouvrent un espace ample, profond et plus
+                cérémoniel.
+              </p>
+            </header>
+
+            <div class="production-card">
+              <div
+                class="poster poster-opera"
+                role="img"
+                aria-label="Affiche non disponible — composition nocturne générique pour l’opéra"
+              >
+                <span class="opera-beam opera-beam--left" aria-hidden="true"></span>
+                <span class="opera-beam opera-beam--right" aria-hidden="true"></span>
+                <span class="opera-halo" aria-hidden="true"></span>
+                <span class="opera-arch" aria-hidden="true"></span>
+                <span class="opera-footlights" aria-hidden="true">
+                  <i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+                </span>
+              </div>
+              <div class="card-content">
+                <p class="discipline">Opéra</p>
+                <h3 class="show-title">La Traviata</h3>
+                <p class="credit">Giuseppe Verdi</p>
+                <p class="venue">Opéra de Lyon</p>
+                <button
+                  class="bookmark"
+                  type="button"
+                  aria-label="Ajouter La Traviata à mon journal"
+                >
+                  <svg viewBox="0 0 24 28" aria-hidden="true">
+                    <path d="M4.5 2.5h15v23l-7.5-5-7.5 5v-23Z" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <p class="direction-note">
+              <span class="note-label">Intention</span>
+              Profondeur lilas, composition frontale et architecture de scène. La plus
+              ample et solennelle des trois.
+            </p>
+            <button
+              class="choice-button"
+              type="button"
+              aria-pressed="false"
+              data-choice="opéra"
+            >
+              Retenir pour l’opéra
+            </button>
+          </article>
+
+          <article class="direction direction--ballet">
+            <header class="direction-head">
+              <p class="direction-label">03 · Ballet</p>
+              <h2>La trajectoire</h2>
+              <p class="direction-description">
+                Des faisceaux croisés et deux rubans translucides suggèrent le
+                mouvement.
+              </p>
+            </header>
+
+            <div class="production-card">
+              <div
+                class="poster poster-ballet"
+                role="img"
+                aria-label="Affiche non disponible — composition nocturne générique pour le ballet"
+              >
+                <span class="ballet-beam ballet-beam--left" aria-hidden="true"></span>
+                <span class="ballet-beam ballet-beam--right" aria-hidden="true"></span>
+                <span
+                  class="ballet-ribbon ballet-ribbon--one"
+                  aria-hidden="true"
+                ></span>
+                <span
+                  class="ballet-ribbon ballet-ribbon--two"
+                  aria-hidden="true"
+                ></span>
+                <span class="ballet-glow" aria-hidden="true"></span>
+              </div>
+              <div class="card-content">
+                <p class="discipline">Ballet</p>
+                <h3 class="show-title">Blake Works I</h3>
+                <p class="credit">William Forsythe</p>
+                <p class="venue">Maison de la Danse, Lyon</p>
+                <button
+                  class="bookmark"
+                  type="button"
+                  aria-label="Ajouter Blake Works I à mon journal"
+                >
+                  <svg viewBox="0 0 24 28" aria-hidden="true">
+                    <path d="M4.5 2.5h15v23l-7.5-5-7.5 5v-23Z" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <p class="direction-note">
+              <span class="note-label">Intention</span>
+              Lumière aqua, diagonales et lignes suspendues. La plus légère et
+              dynamique, sans dessiner de corps.
+            </p>
+            <button
+              class="choice-button"
+              type="button"
+              aria-pressed="false"
+              data-choice="ballet"
+            >
+              Retenir pour le ballet
+            </button>
+          </article>
+        </section>
+
+        <p
+          class="selection-status"
+          id="selection-status"
+          role="status"
+          aria-live="polite"
+        >
+          Les boutons servent uniquement à noter ton choix dans la maquette.
+        </p>
+
+        <section class="principle-bar" aria-labelledby="principle-title">
+          <h2 id="principle-title">Une même famille, trois gestes de scène.</h2>
+          <div class="principles" aria-label="Principes communs">
+            <span class="principle">ratio A5 · 148 / 210</span>
+            <span class="principle">fond nocturne commun</span>
+            <span class="principle">aucun titre dans l’image</span>
+            <span class="principle">libellé accessible explicite</span>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script>
+      const choiceButtons = document.querySelectorAll(".choice-button");
+      const selectionStatus = document.querySelector("#selection-status");
+
+      choiceButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          const willSelect = button.getAttribute("aria-pressed") !== "true";
+          button.setAttribute("aria-pressed", String(willSelect));
+          selectionStatus.innerHTML = willSelect
+            ? `<strong>Choix noté :</strong> conserver cette direction pour ${button.dataset.choice}.`
+            : `Direction ${button.dataset.choice} retirée de la sélection.`;
+        });
+      });
+    </script>
+  </body>
+</html>

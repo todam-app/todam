@@ -3,6 +3,10 @@ export interface TransactionalEmail {
   subject: string;
   text: string;
   html?: string;
+  replyTo?: {
+    email: string;
+    name?: string;
+  };
 }
 
 export interface EmailSender {
@@ -38,6 +42,14 @@ class BrevoEmailSender implements EmailSender {
         subject: message.subject,
         textContent: message.text,
         ...(message.html ? { htmlContent: message.html } : {}),
+        ...(message.replyTo
+          ? {
+              replyTo: {
+                email: message.replyTo.email,
+                ...(message.replyTo.name ? { name: message.replyTo.name } : {}),
+              },
+            }
+          : {}),
       }),
     });
 

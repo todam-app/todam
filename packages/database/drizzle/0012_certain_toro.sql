@@ -1,0 +1,2 @@
+ALTER TABLE "media_assets" DROP CONSTRAINT "media_assets_storage_rights";--> statement-breakpoint
+ALTER TABLE "media_assets" ADD CONSTRAINT "media_assets_storage_rights" CHECK ("media_assets"."storage_policy" <> 'mirror' or "media_assets"."rights_status" in ('open_license', 'permission_granted', 'todam_original'));

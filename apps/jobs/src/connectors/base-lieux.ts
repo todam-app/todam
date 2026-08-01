@@ -1,6 +1,7 @@
 import { CatalogImportSchema } from "@todam/contracts";
 
 import {
+  absoluteUrl,
   asArray,
   asRecord,
   externalKey,
@@ -114,6 +115,14 @@ export async function pullBaseLieux(
     const longitude = numberValue(
       record.longitude ?? record.Longitude ?? geo?.lon ?? geo?.longitude,
     );
+    const officialUrl = absoluteUrl(
+      record.site_internet ??
+        record.url ??
+        record.URL ??
+        record.site_web ??
+        record["Site internet"] ??
+        record["Adresse du site internet"],
+    );
     return [
       {
         externalKey: externalKey("base-lieux.venue", identifier),
@@ -131,6 +140,7 @@ export async function pullBaseLieux(
         locality,
         countryCode: "FR" as const,
         timezone: "Europe/Paris",
+        officialUrl,
         latitude,
         longitude,
       },

@@ -61,5 +61,27 @@ jobs:
         run: pnpm validate:openapi
       - name: Build all workspaces, including Expo Web
         run: pnpm build
+      - name: Check the generated SEO and Nginx contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          container_name="todam-seo-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          trap 'docker rm -f "$container_name" >/dev/null 2>&1 || true' EXIT
+          docker run --detach --name "$container_name" \
+            --publish 127.0.0.1:18082:8080 \
+            --volume "$PWD/apps/todam/dist:/usr/share/nginx/html:ro" \
+            --volume "$PWD/deploy/nginx.conf:/etc/nginx/conf.d/default.conf:ro" \
+            nginx:1.29-alpine
+
+          ready="false"
+          for _ in $(seq 1 20); do
+            if curl --fail --silent http://127.0.0.1:18082/health/live >/dev/null; then
+              ready="true"
+              break
+            fi
+            sleep 1
+          done
+          test "$ready" = "true"
+          pnpm seo:check -- --base-url=http://127.0.0.1:18082
       - name: Check licences
         run: pnpm check:licenses

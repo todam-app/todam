@@ -1,63 +1,159 @@
-import { Link } from "expo-router";
-import { Image, Linking, Platform, Pressable, Text, View } from "react-native";
+import { Link, type Href } from "expo-router";
+import { useState } from "react";
+import {
+  Image,
+  Platform,
+  Pressable,
+  Text,
+  useWindowDimensions,
+  View,
+} from "react-native";
+
+import { authClient } from "../lib/auth-client";
 
 const horizontalLogo = require("../assets/brand/todam-logo-horizontal.svg");
 
-const productLinks = [
-  { href: "/", label: "Accueil" },
-  { href: "/search", label: "Rechercher" },
-  { href: "/sign-up", label: "Créer un compte" },
-] as const;
-
 const informationLinks = [
-  { href: "/transparence", label: "Transparence & open source" },
-  { href: "/conditions-utilisation", label: "Conditions d'utilisation" },
-  { href: "/confidentialite", label: "Confidentialité" },
-  { href: "/mentions-legales", label: "Mentions légales" },
-  { href: "/suppression-compte", label: "Supprimer un compte" },
+  { href: "/les-coulisses", label: "Les coulisses" },
+  { href: "/informations-legales", label: "Informations légales" },
+] as const;
+const professionalLinks = [
+  { href: "/pour-les-salles", label: "Pour les salles" },
+  { href: "/pour-les-compagnies", label: "Pour les compagnies" },
 ] as const;
 
-function FooterInternalLink({
-  href,
-  label,
-}: {
-  href:
-    (typeof productLinks)[number]["href"] | (typeof informationLinks)[number]["href"];
-  label: string;
-}) {
+export type LegalFooterVariant = "full" | "minimal";
+
+function FooterInternalLink({ href, label }: { href: Href; label: string }) {
   return (
     <Link href={href} asChild>
-      <Pressable accessibilityRole="link" className="min-h-10 justify-center">
-        <Text className="text-sm text-muted">{label}</Text>
+      <Pressable accessibilityRole="link" className="min-h-11 justify-center">
+        <Text className="text-sm leading-5 text-muted">{label}</Text>
       </Pressable>
     </Link>
   );
 }
 
-function FooterEmail({ address }: { address: string }) {
-  return (
-    <Pressable
-      accessibilityLabel={`Contact : ${address}`}
-      accessibilityRole="link"
-      className="min-h-10 justify-center"
-      onPress={() => void Linking.openURL(`mailto:${address}`)}
-    >
-      <Text className="text-sm text-muted">{address}</Text>
-    </Pressable>
-  );
-}
-
-export function LegalFooter({ alwaysVisible = false }: { alwaysVisible?: boolean }) {
+export function LegalFooter({
+  alwaysVisible = false,
+  variant = "full",
+}: {
+  alwaysVisible?: boolean;
+  variant?: LegalFooterVariant;
+}) {
+  const session = authClient.useSession();
+  const { width } = useWindowDimensions();
+  const [mobileSection, setMobileSection] = useState<
+    "product" | "professional" | "information" | null
+  >(null);
   if (!alwaysVisible && Platform.OS !== "web") return null;
+
+  const compact = width < 640;
+  if (variant === "minimal") {
+    return (
+      <View
+        className="todam-web-footer mx-auto w-full max-w-content border-t border-line bg-paper px-5 py-2 md:px-8"
+        role="contentinfo"
+        testID="site-footer"
+      >
+        <View className="mx-auto w-full max-w-content flex-row flex-wrap items-center justify-between gap-3">
+          <Text className="text-xs text-muted">© 2026 Todam</Text>
+          <View className="flex-row flex-wrap items-center gap-4">
+            <FooterInternalLink
+              href="/informations-legales"
+              label="Informations légales"
+            />
+            <FooterInternalLink href="/contact" label="Nous contacter" />
+          </View>
+        </View>
+      </View>
+    );
+  }
+
+  const productLinks = session.data
+    ? [
+        { href: "/search" as const, label: "Rechercher" },
+        { href: "/journal" as const, label: "Mes spectacles" },
+      ]
+    : [
+        { href: "/search" as const, label: "Rechercher" },
+        { href: "/sign-in" as const, label: "Se connecter" },
+        { href: "/sign-up" as const, label: "Créer un compte" },
+      ];
+
+  if (compact) {
+    const sections = [
+      { key: "product", label: "Todam", items: productLinks },
+      {
+        key: "professional",
+        label: "Professionnels",
+        items: professionalLinks,
+      },
+      {
+        key: "information",
+        label: "Informations",
+        items: informationLinks,
+      },
+    ] as const;
+    return (
+      <View
+        className="todam-web-footer mx-auto w-full max-w-content border-t border-line bg-paper px-5 py-2"
+        role="contentinfo"
+        testID="site-footer"
+      >
+        <View className="mx-auto w-full max-w-content">
+          {sections.map((section) => {
+            const expanded = mobileSection === section.key;
+            return (
+              <View className="border-b border-line" key={section.key}>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityState={{ expanded }}
+                  className="min-h-11 flex-row items-center justify-between"
+                  onPress={() =>
+                    setMobileSection((current) =>
+                      current === section.key ? null : section.key,
+                    )
+                  }
+                >
+                  <Text className="text-sm font-bold text-ink">{section.label}</Text>
+                  <Text
+                    accessibilityElementsHidden
+                    className="text-lg font-semibold text-accent"
+                  >
+                    {expanded ? "−" : "+"}
+                  </Text>
+                </Pressable>
+                {expanded ? (
+                  <View className="flex-row flex-wrap pb-1">
+                    {section.items.map((item) => (
+                      <View className="w-1/2 pr-2" key={item.href}>
+                        <FooterInternalLink {...item} />
+                      </View>
+                    ))}
+                  </View>
+                ) : null}
+              </View>
+            );
+          })}
+          <View className="min-h-11 flex-row items-center justify-between">
+            <Text className="text-xs text-muted">© 2026 Todam</Text>
+            <FooterInternalLink href="/contact" label="Nous contacter" />
+          </View>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View
-      className="mx-auto w-full max-w-content border-t border-line bg-paper px-5 py-10 md:px-8"
+      className="todam-web-footer mx-auto w-full max-w-content border-t border-line bg-paper px-8 py-10"
+      role="contentinfo"
       testID="site-footer"
     >
-      <View className="mx-auto w-full max-w-content gap-10">
-        <View className="flex-row flex-wrap justify-between gap-10">
-          <View className="min-w-56 max-w-xs gap-3">
+      <View className="mx-auto w-full max-w-content gap-8">
+        <View className="flex-row flex-wrap justify-between gap-6">
+          <View className="min-w-48 max-w-[260px] gap-3">
             <Link href="/" asChild>
               <Pressable
                 accessibilityLabel="Todam, accueil"
@@ -69,35 +165,39 @@ export function LegalFooter({ alwaysVisible = false }: { alwaysVisible?: boolean
                   accessible={false}
                   resizeMode="contain"
                   source={horizontalLogo}
-                  style={{ height: 44, width: 145 }}
+                  style={{ height: 40, width: 132 }}
                 />
               </Pressable>
             </Link>
             <Text className="text-sm leading-6 text-muted">
-              Votre journal de spectacles.
+              Mon journal de spectacles
             </Text>
           </View>
-
-          <View className="min-w-36 gap-1">
-            <Text className="mb-2 font-semibold text-ink">Todam</Text>
+          <View className="min-w-28 gap-1">
+            <Text className="text-base mb-2 font-semibold text-ink">Todam</Text>
             {productLinks.map((item) => (
               <FooterInternalLink {...item} key={item.href} />
             ))}
           </View>
-
-          <View className="min-w-44 gap-1">
-            <Text className="mb-2 font-semibold text-ink">Informations</Text>
+          <View className="min-w-36 gap-1">
+            <Text className="text-base mb-2 font-semibold text-ink">
+              Professionnels
+            </Text>
+            {professionalLinks.map((item) => (
+              <FooterInternalLink {...item} key={item.href} />
+            ))}
+          </View>
+          <View className="min-w-40 gap-1">
+            <Text className="text-base mb-2 font-semibold text-ink">Informations</Text>
             {informationLinks.map((item) => (
               <FooterInternalLink {...item} key={item.href} />
             ))}
           </View>
-
-          <View className="min-w-52 gap-1">
-            <Text className="mb-2 font-semibold text-ink">Contact</Text>
-            <FooterEmail address="contact@todam.fr" />
+          <View className="min-w-36 gap-1">
+            <Text className="text-base mb-2 font-semibold text-ink">Contact</Text>
+            <FooterInternalLink href="/contact" label="Nous contacter" />
           </View>
         </View>
-
         <View className="border-t border-line pt-5">
           <Text className="text-xs text-muted">© 2026 Todam</Text>
         </View>

@@ -62,7 +62,7 @@ describe("rapport hebdomadaire des comptes", () => {
 
     expect(message.text).toContain("Comptes vérifiés : 31");
     expect(message.text).toContain("Nouveaux comptes sur 7 jours : 8");
-    expect(message.text).not.toContain("pseudonyme");
+    expect(message.text).not.toContain("nom d'utilisateur");
     expect(message.text).not.toContain("adresse e-mail utilisateur");
   });
 

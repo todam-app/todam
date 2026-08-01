@@ -4,9 +4,9 @@ import { getHomeGreeting, getHomeProgressPercentage } from "../lib/home";
 
 describe("présentation de l'accueil connecté", () => {
   it("salue le nom d'utilisateur complet sans ponctuation promotionnelle", () => {
-    const pseudonym = "spectatrice-avec-un-nom-long-30";
+    const username = "spectatrice-avec-un-nom-long-30";
 
-    expect(getHomeGreeting(pseudonym)).toBe(`Bonjour, ${pseudonym}`);
+    expect(getHomeGreeting(username)).toBe(`Bonjour, ${username}`);
   });
 
   it("borne la progression entre zéro et cent", () => {

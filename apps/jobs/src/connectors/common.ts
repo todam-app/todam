@@ -68,9 +68,9 @@ export function localizedText(value: unknown): string | null {
 export function classifyDiscipline(value: unknown): Discipline | null {
   const text = localizedText(value)?.toLocaleLowerCase("fr") ?? "";
   if (/\b(op[eé]ra|art lyrique|lyrique)\b/u.test(text)) return "opera";
-  if (/\b(ballet|danse classique|chor[eé]graph)/u.test(text)) return "ballet";
+  if (/\b(ballet|danse classique)\b/u.test(text)) return "ballet";
   if (
-    /\b(th[eé][aâ]tre|spectacle vivant|pi[eè]ce|seul en sc[eè]ne|com[eé]die)\b/u.test(
+    /\b(th[eé][aâ]tre|pi[eè]ce de th[eé][aâ]tre|seul en sc[eè]ne|com[eé]die th[eé][aâ]trale)\b/u.test(
       text,
     )
   ) {
@@ -94,7 +94,8 @@ export function absoluteUrl(value: unknown): string | null {
   const text = localizedText(value);
   if (!text) return null;
   try {
-    return new URL(text).toString();
+    const url = new URL(text);
+    return ["http:", "https:"].includes(url.protocol) ? url.toString() : null;
   } catch {
     return null;
   }

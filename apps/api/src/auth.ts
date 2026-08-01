@@ -3,6 +3,7 @@ import { expo } from "@better-auth/expo";
 import {
   CURRENT_PRIVACY_NOTICE_VERSION,
   CURRENT_TERMS_VERSION,
+  UsernameSchema,
 } from "@todam/contracts";
 import {
   account,
@@ -19,7 +20,9 @@ import { eq } from "drizzle-orm";
 import type { FastifyReply, FastifyRequest } from "fastify";
 
 import {
+  createAccountDeletionEmail,
   createEmailChangeVerificationEmail,
+  createPasswordResetEmail,
   createVerificationEmail,
   createWelcomeEmail,
 } from "./auth-emails.js";
@@ -61,11 +64,12 @@ export function createAuth(database: TodamDatabase, emailSender: EmailSender) {
       revokeSessionsOnPasswordReset: true,
       sendResetPassword: async ({ user: target, url }) => {
         await emailSender.send({
+          ...createPasswordResetEmail({
+            displayName: target.name,
+            publicWebUrl: publicWebUrl(),
+            resetUrl: url,
+          }),
           to: target.email,
-          subject: "Réinitialisez votre mot de passe Todam",
-          text:
-            "Utilisez ce lien dans l'heure pour choisir un nouveau mot de passe : " +
-            `${url}\n\nSi vous n'êtes pas à l'origine de cette demande, ignorez cet e-mail.`,
         });
       },
     },
@@ -103,7 +107,7 @@ export function createAuth(database: TodamDatabase, emailSender: EmailSender) {
         const rows = await database
           .select({
             email: user.email,
-            pseudonym: user.pseudonym,
+            username: user.username,
             termsVersion: user.termsVersion,
             privacyNoticeVersion: user.privacyNoticeVersion,
             termsAcceptedAt: user.termsAcceptedAt,
@@ -118,12 +122,12 @@ export function createAuth(database: TodamDatabase, emailSender: EmailSender) {
         try {
           await emailSender.send({
             ...createWelcomeEmail({
-              displayName: profile.pseudonym,
+              displayName: profile.username,
               privacyNotice: {
                 pdfUrl: documents.privacyNotice.pdfUrl,
                 version: profile.privacyNoticeVersion,
               },
-              profileUrl: `${webAppUrl.replace(/\/+$/u, "")}/profile`,
+              journalUrl: `${webAppUrl.replace(/\/+$/u, "")}/journal`,
               publicWebUrl: publicWebUrl(),
               terms: {
                 acceptedAt: profile.termsAcceptedAt,
@@ -194,11 +198,12 @@ export function createAuth(database: TodamDatabase, emailSender: EmailSender) {
         deleteTokenExpiresIn: 24 * 60 * 60,
         sendDeleteAccountVerification: async ({ user: target, url }) => {
           await emailSender.send({
+            ...createAccountDeletionEmail({
+              deletionUrl: url,
+              displayName: target.name,
+              publicWebUrl: publicWebUrl(),
+            }),
             to: target.email,
-            subject: "Confirmez la suppression de votre compte Todam",
-            text:
-              "Confirmez la suppression définitive de votre compte dans les 24 heures : " +
-              `${url}\n\nSi vous n'êtes pas à l'origine de cette demande, ignorez cet e-mail.`,
           });
         },
       },
@@ -209,11 +214,11 @@ export function createAuth(database: TodamDatabase, emailSender: EmailSender) {
           before: async (candidate) => {
             const usernameValue =
               typeof candidate.username === "string" ? candidate.username.trim() : "";
-            if (usernameValue.length < 3 || usernameValue.length > 30) {
+            if (!UsernameSchema.safeParse(usernameValue).success) {
               throw new HttpProblem(
                 400,
-                "INVALID_PSEUDONYM",
-                "Le nom d'utilisateur doit contenir entre 3 et 30 caractères.",
+                "INVALID_USERNAME",
+                "Le nom d'utilisateur doit contenir 3 à 30 lettres, chiffres, points, tirets ou underscores.",
               );
             }
             if (candidate.age15OrOlder !== true) {
@@ -265,13 +270,16 @@ export function createAuth(database: TodamDatabase, emailSender: EmailSender) {
       username({
         minUsernameLength: 3,
         maxUsernameLength: 30,
+        // Les nouveaux noms d'utilisateur sont contrôlés par le hook ci-dessus.
+        // Ce validateur reste permissif afin de ne pas bloquer la connexion
+        // d’un éventuel compte historique avec un ancien format.
         usernameValidator: () => true,
         usernameNormalization: (value) => value.trim(),
         displayUsernameNormalization: (value) => value.trim(),
         schema: {
           user: {
             fields: {
-              username: "pseudonym",
+              username: "username",
               displayUsername: "name",
             },
           },
@@ -315,17 +323,25 @@ export async function getRequiredUserId(
   auth: TodamAuth,
   request: FastifyRequest,
 ): Promise<string> {
-  const current = await auth.api.getSession({
-    headers: toWebHeaders(request),
-  });
-  if (!current?.user.id) {
+  const userId = await getOptionalUserId(auth, request);
+  if (!userId) {
     throw new HttpProblem(
       401,
       "AUTHENTICATION_REQUIRED",
       "Connecte-toi pour effectuer cette action.",
     );
   }
-  return current.user.id;
+  return userId;
+}
+
+export async function getOptionalUserId(
+  auth: TodamAuth,
+  request: FastifyRequest,
+): Promise<string | null> {
+  const current = await auth.api.getSession({
+    headers: toWebHeaders(request),
+  });
+  return current?.user.id ?? null;
 }
 
 export async function handleAuthRequest(

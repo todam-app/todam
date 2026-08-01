@@ -29,6 +29,9 @@ HTTP et par le client généré depuis `packages/contracts`.
   personnelle réelle dans Git.
 - Les affiches et données importées exigent une provenance et une licence
   documentées.
+- Le contrat visuel officiel des CTA Web est documenté dans
+  `packages/design-system/README.md` ; préserver le bouton « 01 — filet brique »,
+  ses tokens et ses exceptions fonctionnelles sauf demande produit explicite.
 - Le français est la langue principale du produit et de la documentation.
 - Utiliser des commits DCO avec `git commit -s`.
 

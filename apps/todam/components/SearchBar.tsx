@@ -1,6 +1,7 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { tokens } from "@todam/design-system";
 import {
+  Platform,
   Pressable,
   StyleSheet,
   TextInput,
@@ -15,6 +16,7 @@ interface SearchBarProps {
   onSubmit: () => void;
   placeholder: string;
   value: string;
+  webName?: string;
 }
 
 export function SearchBar({
@@ -24,6 +26,7 @@ export function SearchBar({
   onSubmit,
   placeholder,
   value,
+  webName = "search",
 }: SearchBarProps) {
   const searchDisabled = value.trim().length < 2;
 
@@ -35,6 +38,13 @@ export function SearchBar({
 
   return (
     <View className="todam-search-bar" style={styles.container}>
+      <View
+        accessibilityElementsHidden
+        importantForAccessibility="no"
+        style={styles.leading}
+      >
+        <Ionicons color={tokens.color.ink} name="search-outline" size={20} />
+      </View>
       <TextInput
         accessibilityLabel={accessibilityLabel}
         autoCapitalize="none"
@@ -48,6 +58,9 @@ export function SearchBar({
         returnKeyType="search"
         style={styles.input}
         value={value}
+        {...(Platform.OS === "web"
+          ? ({ name: webName } as unknown as TextInputProps)
+          : {})}
       />
       {value.length > 0 ? (
         <Pressable
@@ -81,9 +94,9 @@ export function SearchBar({
       >
         <Ionicons
           accessibilityElementsHidden
-          color={tokens.color.ink}
+          color={searchDisabled ? tokens.color.muted : tokens.color.ink}
           importantForAccessibility="no"
-          name="search"
+          name="arrow-forward"
           size={21}
         />
       </Pressable>
@@ -99,7 +112,7 @@ const styles = StyleSheet.create({
     width: tokens.minimumTouchTarget,
   },
   actionDisabled: {
-    opacity: 0.4,
+    opacity: 0.45,
   },
   actionPressed: {
     opacity: 0.65,
@@ -121,7 +134,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     minHeight: tokens.minimumTouchTarget - 2,
     minWidth: 0,
-    paddingHorizontal: 14,
+    paddingHorizontal: 4,
     paddingVertical: 8,
+  },
+  leading: {
+    alignItems: "center",
+    height: tokens.minimumTouchTarget,
+    justifyContent: "center",
+    width: tokens.minimumTouchTarget,
   },
 });

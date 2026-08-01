@@ -6,6 +6,25 @@ export function formatPerformance(startsAt: string, timezone: string): string {
   }).format(new Date(startsAt));
 }
 
+export function formatLocation(
+  locality: string | null,
+  countryCode: string | null,
+): string {
+  let country = countryCode;
+
+  if (countryCode) {
+    try {
+      country =
+        new Intl.DisplayNames(["fr-FR"], { type: "region" }).of(countryCode) ??
+        countryCode;
+    } catch {
+      country = countryCode;
+    }
+  }
+
+  return [locality, country].filter(Boolean).join(" · ");
+}
+
 export type AsyncPresentation = "loading" | "error" | "empty" | "content";
 
 export function getAsyncPresentation(

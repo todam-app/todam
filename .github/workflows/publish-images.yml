@@ -55,6 +55,28 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Vérifier le monorepo
         run: pnpm check
+      - name: Vérifier le contrat SEO servi par Nginx
+        shell: bash
+        run: |
+          set -euo pipefail
+          container_name="todam-seo-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          trap 'docker rm -f "$container_name" >/dev/null 2>&1 || true' EXIT
+          docker run --detach --name "$container_name" \
+            --publish 127.0.0.1:18082:8080 \
+            --volume "$PWD/apps/todam/dist:/usr/share/nginx/html:ro" \
+            --volume "$PWD/deploy/nginx.conf:/etc/nginx/conf.d/default.conf:ro" \
+            nginx:1.29-alpine
+
+          ready="false"
+          for _ in $(seq 1 20); do
+            if curl --fail --silent http://127.0.0.1:18082/health/live >/dev/null; then
+              ready="true"
+              break
+            fi
+            sleep 1
+          done
+          test "$ready" = "true"
+          pnpm seo:check -- --base-url=http://127.0.0.1:18082
       - name: Migrer une base vide
         run: pnpm db:migrate
       - name: Exécuter les tests PostgreSQL
@@ -97,9 +119,77 @@ jobs:
           cache-from: type=gha,scope=${{ matrix.component }}
           cache-to: type=gha,mode=max,scope=${{ matrix.component }},ignore-error=true
 
+  prepare-production-api:
+    name: Déployer et attendre l’API de production
+    needs:
+      - server-images
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      COOLIFY_TOKEN: ${{ secrets.COOLIFY_TOKEN }}
+      COOLIFY_API_WEBHOOK: ${{ secrets.COOLIFY_API_WEBHOOK }}
+      COOLIFY_JOBS_WEBHOOK: ${{ secrets.COOLIFY_JOBS_WEBHOOK }}
+    steps:
+      - name: Déployer l’API et les Jobs avant le Web
+        if:
+          ${{ (github.event_name == 'workflow_dispatch' && inputs.deploy) ||
+          github.event_name == 'push' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$COOLIFY_TOKEN"
+
+          components=("API" "Jobs")
+          webhooks=("$COOLIFY_API_WEBHOOK" "$COOLIFY_JOBS_WEBHOOK")
+
+          for index in "${!webhooks[@]}"; do
+            webhook="${webhooks[$index]}"
+            test -n "$webhook"
+            printf 'Déclenchement Coolify : %s\n' "${components[$index]}"
+            curl \
+              --request POST \
+              --fail-with-body \
+              --retry 3 \
+              --show-error \
+              --silent \
+              --header "Authorization: Bearer $COOLIFY_TOKEN" \
+              "$webhook"
+          done
+      - name: Attendre le contrat catalogue requis par le build Web
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          for _ in $(seq 1 60); do
+            if curl \
+              --fail \
+              --show-error \
+              --silent \
+              "https://api.todam.fr/v1/search?type=companies&limit=1" \
+              | node -e '
+                  let body = "";
+                  process.stdin.on("data", (chunk) => (body += chunk));
+                  process.stdin.on("end", () => {
+                    const value = JSON.parse(body);
+                    if (value.type !== "companies" || !Array.isArray(value.companies)) {
+                      process.exitCode = 1;
+                    }
+                  });
+                '
+            then
+              exit 0
+            fi
+            sleep 5
+          done
+
+          echo "L’API de production n’expose pas le contrat catalogue attendu." >&2
+          exit 1
+
   web-image:
     name: Construire le Web et les archives juridiques
-    needs: quality
+    needs:
+      - quality
+      - prepare-production-api
     runs-on: ubuntu-latest
     environment: production
     env:
@@ -186,45 +276,61 @@ jobs:
           cache-from: type=gha,scope=web
           cache-to: type=gha,mode=max,scope=web,ignore-error=true
 
-  deploy:
-    name: Déclencher Coolify
+  deploy-web:
+    name: Déployer le Web
     if:
       ${{ (github.event_name == 'workflow_dispatch' && inputs.deploy) ||
       github.event_name == 'push' }}
     needs:
-      - server-images
       - web-image
     runs-on: ubuntu-latest
     environment: production
     env:
       COOLIFY_TOKEN: ${{ secrets.COOLIFY_TOKEN }}
-      COOLIFY_API_WEBHOOK: ${{ secrets.COOLIFY_API_WEBHOOK }}
-      COOLIFY_JOBS_WEBHOOK: ${{ secrets.COOLIFY_JOBS_WEBHOOK }}
       COOLIFY_WEB_WEBHOOK: ${{ secrets.COOLIFY_WEB_WEBHOOK }}
     steps:
-      - name: Relancer les trois ressources Coolify
+      - name: Récupérer le dépôt
+        uses: actions/checkout@v7
+      - name: Configurer Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - name: Relancer la ressource Web Coolify
         shell: bash
         run: |
           set -euo pipefail
           test -n "$COOLIFY_TOKEN"
-
-          components=("API" "Jobs" "Web")
-          webhooks=(
-            "$COOLIFY_API_WEBHOOK"
-            "$COOLIFY_JOBS_WEBHOOK"
+          test -n "$COOLIFY_WEB_WEBHOOK"
+          curl \
+            --request POST \
+            --fail-with-body \
+            --retry 3 \
+            --show-error \
+            --silent \
+            --header "Authorization: Bearer $COOLIFY_TOKEN" \
             "$COOLIFY_WEB_WEBHOOK"
-          )
+      - name: Vérifier le déploiement public et le domaine canonique
+        shell: bash
+        run: |
+          set -euo pipefail
 
-          for index in "${!webhooks[@]}"; do
-            webhook="${webhooks[$index]}"
-            test -n "$webhook"
-            printf 'Déclenchement Coolify : %s\n' "${components[$index]}"
-            curl \
-              --request POST \
-              --fail-with-body \
-              --retry 3 \
-              --show-error \
-              --silent \
-              --header "Authorization: Bearer $COOLIFY_TOKEN" \
-              "$webhook"
+          for _ in $(seq 1 60); do
+            if node scripts/check-web-seo.mjs \
+              --runtime-only \
+              --live \
+              --base-url=https://todam.fr \
+              >/dev/null 2>&1
+            then
+              node scripts/check-web-seo.mjs \
+                --runtime-only \
+                --live \
+                --base-url=https://todam.fr
+              exit 0
+            fi
+            sleep 5
           done
+
+          node scripts/check-web-seo.mjs \
+            --runtime-only \
+            --live \
+            --base-url=https://todam.fr

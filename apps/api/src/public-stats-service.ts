@@ -1,12 +1,18 @@
 import type { PublicStats } from "@todam/contracts";
-import { performances, productions, user, type TodamDatabase } from "@todam/database";
+import {
+  performances,
+  productions,
+  user,
+  venues,
+  type TodamDatabase,
+} from "@todam/database";
 import { and, count, eq, gte } from "drizzle-orm";
 
 export function createPublicStatsService(database: TodamDatabase) {
   return {
     async getStats(): Promise<PublicStats> {
       const generatedAt = new Date();
-      const [verifiedUsers, activeProductions, upcomingPerformances] =
+      const [verifiedUsers, activeProductions, upcomingPerformances, activeVenues] =
         await Promise.all([
           database
             .select({ total: count() })
@@ -15,7 +21,12 @@ export function createPublicStatsService(database: TodamDatabase) {
           database
             .select({ total: count() })
             .from(productions)
-            .where(eq(productions.isActive, true)),
+            .where(
+              and(
+                eq(productions.isActive, true),
+                eq(productions.publicationStatus, "published"),
+              ),
+            ),
           database
             .select({ total: count() })
             .from(performances)
@@ -23,16 +34,22 @@ export function createPublicStatsService(database: TodamDatabase) {
             .where(
               and(
                 eq(productions.isActive, true),
+                eq(productions.publicationStatus, "published"),
                 eq(performances.status, "scheduled"),
                 gte(performances.startsAt, generatedAt),
               ),
             ),
+          database
+            .select({ total: count() })
+            .from(venues)
+            .where(eq(venues.isActive, true)),
         ]);
 
       return {
         verifiedUsers: Number(verifiedUsers[0]?.total ?? 0),
         activeProductions: Number(activeProductions[0]?.total ?? 0),
         upcomingPerformances: Number(upcomingPerformances[0]?.total ?? 0),
+        activeVenues: Number(activeVenues[0]?.total ?? 0),
         generatedAt: generatedAt.toISOString(),
       };
     },

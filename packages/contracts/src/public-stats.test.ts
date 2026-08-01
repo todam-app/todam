@@ -9,12 +9,14 @@ describe("statistiques publiques", () => {
         verifiedUsers: 12,
         activeProductions: 48,
         upcomingPerformances: 96,
+        activeVenues: 24,
         generatedAt: "2026-07-26T12:00:00.000Z",
       }),
     ).toEqual({
       verifiedUsers: 12,
       activeProductions: 48,
       upcomingPerformances: 96,
+      activeVenues: 24,
       generatedAt: "2026-07-26T12:00:00.000Z",
     });
     expect(() =>
@@ -22,6 +24,7 @@ describe("statistiques publiques", () => {
         verifiedUsers: -1,
         activeProductions: 48,
         upcomingPerformances: 96,
+        activeVenues: 24,
         generatedAt: "maintenant",
       }),
     ).toThrow();

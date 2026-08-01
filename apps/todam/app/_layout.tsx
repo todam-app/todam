@@ -1,6 +1,7 @@
 import "../global.css";
 
 import { DefaultTheme, Stack, ThemeProvider } from "expo-router";
+import { tokens } from "@todam/design-system";
 import Head from "expo-router/head";
 import { StatusBar } from "expo-status-bar";
 import { Platform, View } from "react-native";
@@ -8,9 +9,10 @@ import { Platform, View } from "react-native";
 import { Providers } from "../components/Providers";
 import { WebPageScrollProvider } from "../components/PageScrollView";
 import { WebNavigation } from "../components/WebNavigation";
+import { PUBLIC_WEB_URL } from "../lib/config";
 
 const DEFAULT_WEB_TITLE = "Todam - Journal de spectacles";
-const TODAM_PAGE_BACKGROUND = "#F7F3EC";
+const TODAM_PAGE_BACKGROUND = tokens.color.background;
 const TODAM_NAVIGATION_THEME = {
   ...DefaultTheme,
   colors: {
@@ -24,7 +26,41 @@ export default function RootLayout() {
     <Providers>
       <Head>
         <title>{DEFAULT_WEB_TITLE}</title>
-        <link href="/favicon.ico?v=1" rel="icon" />
+        <link href="/favicon.svg?v=3" rel="icon" sizes="any" type="image/svg+xml" />
+        <link
+          href="/favicon-dark.svg?v=3"
+          media="(prefers-color-scheme: dark)"
+          rel="icon"
+          sizes="any"
+          type="image/svg+xml"
+        />
+        <meta
+          content="Retrouvez les spectacles que vous avez vus, notez-les et gardez-en une trace."
+          name="description"
+        />
+        <meta content="Todam — votre journal de spectacles" property="og:title" />
+        <meta
+          content="Retrouvez les spectacles que vous avez vus, notez-les et gardez-en une trace."
+          property="og:description"
+        />
+        <meta
+          content={`${PUBLIC_WEB_URL}/og/todam-open-graph.png`}
+          property="og:image"
+        />
+        <meta content="1200" property="og:image:width" />
+        <meta content="630" property="og:image:height" />
+        <meta content="fr_FR" property="og:locale" />
+        <meta content="website" property="og:type" />
+        <meta content="summary_large_image" name="twitter:card" />
+        <meta content="Todam — votre journal de spectacles" name="twitter:title" />
+        <meta
+          content="Retrouvez les spectacles que vous avez vus, notez-les et gardez-en une trace."
+          name="twitter:description"
+        />
+        <meta
+          content={`${PUBLIC_WEB_URL}/og/todam-open-graph.png`}
+          name="twitter:image"
+        />
       </Head>
       <StatusBar style="dark" />
       <ThemeProvider value={TODAM_NAVIGATION_THEME}>
@@ -45,14 +81,31 @@ export default function RootLayout() {
                   contentStyle: { backgroundColor: TODAM_PAGE_BACKGROUND },
                   headerShown: Platform.OS !== "web",
                   headerShadowVisible: false,
-                  headerStyle: { backgroundColor: "#FFFDF8" },
-                  headerTintColor: "#151515",
+                  headerStyle: { backgroundColor: tokens.color.surface },
+                  headerTintColor: tokens.color.ink,
                 }}
               >
                 <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
                 <Stack.Screen
                   name="production/[slug]"
                   options={{ headerTitle: "Spectacle" }}
+                />
+                <Stack.Screen
+                  name="les-coulisses"
+                  options={{ headerTitle: "Les coulisses" }}
+                />
+                <Stack.Screen name="contact" options={{ headerTitle: "Contact" }} />
+                <Stack.Screen
+                  name="signaler"
+                  options={{ headerTitle: "Signaler une information" }}
+                />
+                <Stack.Screen
+                  name="ajouter-un-spectacle"
+                  options={{ headerTitle: "Ajouter un spectacle manquant" }}
+                />
+                <Stack.Screen
+                  name="politique-editoriale"
+                  options={{ headerTitle: "Politique éditoriale" }}
                 />
                 <Stack.Screen
                   name="sign-in"
@@ -68,6 +121,10 @@ export default function RootLayout() {
                 <Stack.Screen
                   name="conditions-utilisation"
                   options={{ headerTitle: "Conditions d'utilisation" }}
+                />
+                <Stack.Screen
+                  name="informations-legales"
+                  options={{ headerTitle: "Informations légales" }}
                 />
                 <Stack.Screen
                   name="email-verifie"

@@ -1,0 +1,888 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Todam — Propositions de focus des boutons</title>
+    <style>
+      @font-face {
+        font-family: "Work Sans";
+        font-style: normal;
+        font-weight: 400;
+        src: url("../../apps/todam/public/fonts/work-sans-latin-400-normal.woff2")
+          format("woff2");
+      }
+
+      @font-face {
+        font-family: "Work Sans";
+        font-style: normal;
+        font-weight: 500;
+        src: url("../../apps/todam/public/fonts/work-sans-latin-500-normal.woff2")
+          format("woff2");
+      }
+
+      @font-face {
+        font-family: "Work Sans";
+        font-style: normal;
+        font-weight: 600;
+        src: url("../../apps/todam/public/fonts/work-sans-latin-600-normal.woff2")
+          format("woff2");
+      }
+
+      @font-face {
+        font-family: "Playfair Display";
+        font-style: normal;
+        font-weight: 700;
+        src: url("../../apps/todam/public/fonts/playfair-display-latin-700-normal.woff2")
+          format("woff2");
+      }
+
+      :root {
+        color-scheme: light;
+        --canvas: #fcf8f2;
+        --surface: #fffdf8;
+        --gutter: #f0eae1;
+        --ink: #151515;
+        --muted: #6f6b64;
+        --line: #e2d9cd;
+        --coral: #f3a995;
+        --coral-soft: #fceae2;
+        --brick: #c34e42;
+        --brand: #d9271a;
+        --lilac: #c8b8f0;
+        --lilac-strong: #6651b8;
+        --aqua: #9fd8d0;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        background: var(--gutter);
+      }
+
+      body {
+        margin: 0;
+        min-width: 320px;
+        color: var(--ink);
+        background:
+          radial-gradient(
+            circle at 3% 24%,
+            rgba(243, 169, 149, 0.36),
+            transparent 25rem
+          ),
+          radial-gradient(
+            circle at 96% 78%,
+            rgba(159, 216, 208, 0.32),
+            transparent 28rem
+          ),
+          var(--gutter);
+        font-family: "Work Sans", Arial, Helvetica, sans-serif;
+      }
+
+      button,
+      select,
+      input {
+        font: inherit;
+      }
+
+      button,
+      label,
+      select {
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .prototype {
+        width: min(1120px, 100%);
+        min-height: 100vh;
+        margin: 0 auto;
+        overflow: hidden;
+        background: var(--canvas);
+        box-shadow: 0 0 0 1px rgba(43, 34, 27, 0.05);
+      }
+
+      .topbar {
+        min-height: 78px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+        padding: 16px clamp(20px, 5vw, 56px);
+        border-bottom: 1px solid rgba(43, 34, 27, 0.1);
+        background: rgba(255, 253, 248, 0.86);
+      }
+
+      .brand {
+        margin: 0;
+        font-family: "Playfair Display", Georgia, serif;
+        font-size: clamp(30px, 4vw, 40px);
+        font-weight: 700;
+        line-height: 1;
+        letter-spacing: -0.04em;
+      }
+
+      .brand-dot {
+        color: #ed2215;
+      }
+
+      .prototype-tag {
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      main {
+        padding: clamp(36px, 7vw, 76px) clamp(20px, 5vw, 56px) 64px;
+      }
+
+      .intro {
+        max-width: 760px;
+        margin-bottom: 38px;
+      }
+
+      .eyebrow {
+        margin: 0 0 12px;
+        color: var(--brand);
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        max-width: 700px;
+        margin: 0;
+        font-family: "Playfair Display", Georgia, serif;
+        font-size: clamp(40px, 7vw, 70px);
+        font-weight: 700;
+        line-height: 0.98;
+        letter-spacing: -0.045em;
+      }
+
+      .intro-copy {
+        max-width: 650px;
+        margin: 22px 0 0;
+        color: var(--muted);
+        font-size: clamp(16px, 2vw, 18px);
+        line-height: 1.6;
+      }
+
+      fieldset {
+        min-width: 0;
+        margin: 0;
+        padding: 0;
+        border: 0;
+      }
+
+      legend {
+        margin-bottom: 14px;
+        font-size: 14px;
+        font-weight: 600;
+      }
+
+      .options {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .option-input {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .option-label {
+        min-height: 112px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 16px;
+        cursor: pointer;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: var(--surface);
+        transition:
+          border-color 140ms ease,
+          background-color 140ms ease,
+          transform 140ms ease;
+      }
+
+      .option-label:hover {
+        border-color: var(--coral);
+        background: var(--coral-soft);
+        transform: translateY(-1px);
+      }
+
+      .option-input:checked + .option-label {
+        border-color: var(--ink);
+        background: var(--coral-soft);
+        box-shadow: inset 0 0 0 1px var(--ink);
+      }
+
+      .option-input:focus-visible + .option-label {
+        outline: 2px solid var(--lilac-strong);
+        outline-offset: 3px;
+      }
+
+      .option-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+      }
+
+      .option-name {
+        font-size: 15px;
+        font-weight: 600;
+      }
+
+      .option-badge {
+        padding: 4px 7px;
+        color: var(--lilac-strong);
+        border-radius: 999px;
+        background: rgba(200, 184, 240, 0.26);
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+
+      .option-detail {
+        margin: 0;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.4;
+      }
+
+      .test-area {
+        margin-top: 30px;
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background: var(--surface);
+        box-shadow: 0 16px 42px rgba(43, 34, 27, 0.09);
+      }
+
+      .test-toolbar {
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: 24px;
+        padding: 18px 20px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .selection-copy {
+        min-width: 0;
+      }
+
+      .selection-label {
+        display: block;
+        margin-bottom: 4px;
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .selection-title {
+        display: block;
+        font-family: "Playfair Display", Georgia, serif;
+        font-size: 25px;
+        font-weight: 700;
+        line-height: 1.1;
+      }
+
+      .toolbar-controls {
+        display: flex;
+        align-items: end;
+        justify-content: flex-end;
+        gap: 18px;
+      }
+
+      .select-field {
+        display: grid;
+        gap: 5px;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 500;
+      }
+
+      select {
+        min-height: 40px;
+        padding: 0 36px 0 12px;
+        color: var(--ink);
+        border: 1px solid #8e877d;
+        border-radius: 8px;
+        background: var(--surface);
+      }
+
+      .preview-toggle {
+        min-height: 40px;
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        cursor: pointer;
+        color: var(--ink);
+        font-size: 13px;
+        font-weight: 500;
+        white-space: nowrap;
+      }
+
+      .preview-toggle input {
+        width: 18px;
+        height: 18px;
+        margin: 0;
+        accent-color: var(--brick);
+      }
+
+      select:focus-visible,
+      .preview-toggle input:focus-visible {
+        outline: 2px solid var(--lilac-strong);
+        outline-offset: 3px;
+      }
+
+      .stage {
+        position: relative;
+        min-height: 390px;
+        display: grid;
+        place-items: center;
+        overflow: hidden;
+        padding: clamp(38px, 7vw, 76px) 24px;
+        background:
+          radial-gradient(
+            circle at 15% 30%,
+            rgba(243, 169, 149, 0.26),
+            transparent 16rem
+          ),
+          radial-gradient(
+            circle at 86% 72%,
+            rgba(200, 184, 240, 0.26),
+            transparent 18rem
+          ),
+          var(--canvas);
+      }
+
+      .stage::before,
+      .stage::after {
+        position: absolute;
+        width: 110px;
+        height: 240px;
+        border-radius: 999px;
+        content: "";
+        filter: blur(26px);
+        opacity: 0.34;
+        pointer-events: none;
+        transform: rotate(22deg);
+      }
+
+      .stage::before {
+        top: -110px;
+        left: 5%;
+        background: var(--coral);
+      }
+
+      .stage::after {
+        right: 7%;
+        bottom: -140px;
+        background: var(--aqua);
+      }
+
+      .stage-content {
+        position: relative;
+        z-index: 1;
+        max-width: 720px;
+        text-align: center;
+      }
+
+      .stage-kicker {
+        margin: 0 0 12px;
+        color: var(--brand);
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+
+      h2 {
+        max-width: 620px;
+        margin: 0 auto;
+        font-family: "Playfair Display", Georgia, serif;
+        font-size: clamp(32px, 5vw, 50px);
+        font-weight: 700;
+        line-height: 1.02;
+        letter-spacing: -0.035em;
+      }
+
+      .stage-copy {
+        max-width: 560px;
+        margin: 16px auto 0;
+        color: var(--muted);
+        font-size: 15px;
+        line-height: 1.55;
+      }
+
+      .demo-actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: 14px;
+        margin-top: 28px;
+      }
+
+      .demo-control {
+        min-height: 48px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        border-radius: 10px;
+        font-size: 15px;
+        transition:
+          background-color 140ms ease,
+          border-color 140ms ease,
+          color 140ms ease,
+          box-shadow 140ms ease,
+          transform 140ms ease;
+      }
+
+      .demo-primary,
+      .demo-secondary {
+        padding: 0 20px;
+        border: 1px solid var(--ink);
+      }
+
+      .demo-primary {
+        color: var(--surface);
+        background: var(--ink);
+        font-weight: 600;
+      }
+
+      .demo-primary:hover {
+        border-color: var(--coral);
+        box-shadow: 0 12px 36px rgba(243, 169, 149, 0.32);
+      }
+
+      .demo-secondary {
+        color: var(--ink);
+        background: var(--surface);
+        font-weight: 500;
+      }
+
+      .demo-secondary:hover {
+        border-color: var(--coral);
+        background: var(--coral-soft);
+      }
+
+      .demo-ghost {
+        min-height: 44px;
+        padding: 0 7px;
+        color: var(--brand);
+        border: 0;
+        background: transparent;
+        font-weight: 500;
+      }
+
+      .demo-ghost:hover {
+        text-decoration: underline;
+        text-decoration-thickness: 1px;
+        text-underline-offset: 4px;
+      }
+
+      .demo-control:active {
+        transform: translateY(1px);
+      }
+
+      .demo-control:focus {
+        outline: none;
+      }
+
+      .stage[data-variant="current"] .demo-control:is(:focus-visible, .forced-focus) {
+        outline: 2px solid var(--brick);
+        outline-offset: 3px;
+        box-shadow: 0 0 0 6px rgba(243, 169, 149, 0.52);
+      }
+
+      .stage[data-variant="simple"] .demo-control:is(:focus-visible, .forced-focus) {
+        outline: 2px solid var(--brick);
+        outline-offset: 3px;
+        box-shadow: none;
+      }
+
+      .stage[data-variant="compact"] .demo-control:is(:focus-visible, .forced-focus) {
+        outline: 2px solid var(--brick);
+        outline-offset: 2px;
+        box-shadow: 0 0 0 3px rgba(243, 169, 149, 0.22);
+      }
+
+      .stage[data-variant="lilac"] .demo-control:is(:focus-visible, .forced-focus) {
+        outline: 2px solid var(--lilac-strong);
+        outline-offset: 3px;
+        box-shadow: 0 0 0 1px rgba(102, 81, 184, 0.12);
+      }
+
+      .stage-footer {
+        display: grid;
+        grid-template-columns: minmax(0, 1.25fr) minmax(260px, 0.75fr);
+        gap: 28px;
+        padding: 20px;
+        border-top: 1px solid var(--line);
+        background: var(--surface);
+      }
+
+      .decision-note {
+        margin: 0;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.55;
+      }
+
+      .decision-note strong {
+        color: var(--ink);
+        font-weight: 600;
+      }
+
+      .keyboard-note {
+        margin: 0;
+        text-align: right;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
+      kbd {
+        display: inline-block;
+        min-width: 30px;
+        padding: 2px 7px;
+        color: var(--ink);
+        border: 1px solid #b8b0a5;
+        border-bottom-width: 2px;
+        border-radius: 5px;
+        background: var(--canvas);
+        font-family: inherit;
+        font-size: 11px;
+        font-weight: 600;
+        text-align: center;
+      }
+
+      @media (max-width: 850px) {
+        .options {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .test-toolbar {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+
+        .toolbar-controls {
+          width: 100%;
+          justify-content: space-between;
+        }
+      }
+
+      @media (max-width: 580px) {
+        .topbar {
+          min-height: 66px;
+        }
+
+        .prototype-tag {
+          max-width: 100px;
+          text-align: right;
+        }
+
+        main {
+          padding-top: 38px;
+        }
+
+        .options {
+          grid-template-columns: 1fr;
+        }
+
+        .option-label {
+          min-height: 94px;
+        }
+
+        .toolbar-controls,
+        .stage-footer {
+          align-items: stretch;
+          flex-direction: column;
+        }
+
+        .toolbar-controls {
+          display: flex;
+        }
+
+        .select-field,
+        select {
+          width: 100%;
+        }
+
+        .preview-toggle {
+          min-height: 34px;
+        }
+
+        .stage {
+          min-height: 430px;
+          padding-inline: 18px;
+        }
+
+        .demo-actions {
+          align-items: stretch;
+          flex-direction: column;
+        }
+
+        .demo-primary,
+        .demo-secondary {
+          width: 100%;
+        }
+
+        .stage-footer {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 12px;
+        }
+
+        .keyboard-note {
+          text-align: left;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          scroll-behavior: auto !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="prototype">
+      <header class="topbar">
+        <p class="brand">Todam<span class="brand-dot">.</span></p>
+        <span class="prototype-tag">Comparateur de focus</span>
+      </header>
+
+      <main>
+        <section class="intro" aria-labelledby="page-title">
+          <p class="eyebrow">Interaction clavier</p>
+          <h1 id="page-title">Visible, sans prendre toute la scène.</h1>
+          <p class="intro-copy">
+            Quatre traitements appliqués aux boutons Todam actuels. L’état en place sert
+            de repère ; les trois autres réduisent progressivement le poids visuel du
+            focus.
+          </p>
+        </section>
+
+        <fieldset>
+          <legend>Choisir un traitement</legend>
+          <div class="options">
+            <div>
+              <input
+                class="option-input"
+                type="radio"
+                name="focus-variant"
+                id="variant-current"
+                value="current"
+              />
+              <label class="option-label" for="variant-current">
+                <span class="option-heading">
+                  <span class="option-name">Actuel</span>
+                  <span class="option-badge">Repère</span>
+                </span>
+                <span class="option-detail"
+                  >Contour 2 px · décalage 3 px · halo 6 px</span
+                >
+              </label>
+            </div>
+
+            <div>
+              <input
+                class="option-input"
+                type="radio"
+                name="focus-variant"
+                id="variant-simple"
+                value="simple"
+              />
+              <label class="option-label" for="variant-simple">
+                <span class="option-heading">
+                  <span class="option-name">01 — Filet simple</span>
+                </span>
+                <span class="option-detail">Contour brique 2 px · aucun halo</span>
+              </label>
+            </div>
+
+            <div>
+              <input
+                class="option-input"
+                type="radio"
+                name="focus-variant"
+                id="variant-compact"
+                value="compact"
+                checked
+              />
+              <label class="option-label" for="variant-compact">
+                <span class="option-heading">
+                  <span class="option-name">02 — Halo compact</span>
+                  <span class="option-badge">Conseillé</span>
+                </span>
+                <span class="option-detail">Contour 2 px · halo 3 px à 22 %</span>
+              </label>
+            </div>
+
+            <div>
+              <input
+                class="option-input"
+                type="radio"
+                name="focus-variant"
+                id="variant-lilac"
+                value="lilac"
+              />
+              <label class="option-label" for="variant-lilac">
+                <span class="option-heading">
+                  <span class="option-name">03 — Lilas calme</span>
+                </span>
+                <span class="option-detail"
+                  >Contour lilas 2 px · ombre imperceptible</span
+                >
+              </label>
+            </div>
+          </div>
+        </fieldset>
+
+        <section class="test-area" aria-labelledby="selected-title">
+          <div class="test-toolbar">
+            <div class="selection-copy">
+              <span class="selection-label">Traitement affiché</span>
+              <strong class="selection-title" id="selected-title"
+                >02 — Halo compact</strong
+              >
+            </div>
+
+            <div class="toolbar-controls">
+              <label class="select-field" for="preview-target">
+                Afficher sur
+                <select id="preview-target">
+                  <option value="primary">CTA principal</option>
+                  <option value="secondary">CTA secondaire</option>
+                  <option value="ghost">Action discrète</option>
+                </select>
+              </label>
+
+              <label class="preview-toggle" for="preview-focus">
+                <input type="checkbox" id="preview-focus" checked />
+                Forcer l’aperçu
+              </label>
+            </div>
+          </div>
+
+          <div class="stage" data-variant="compact" id="focus-stage">
+            <div class="stage-content">
+              <p class="stage-kicker">Votre journal de spectacles</p>
+              <h2>Les spectacles passent. Votre journal reste.</h2>
+              <p class="stage-copy">
+                Gardez une trace de ce que vous avez vu, partagez vos listes et préparez
+                vos prochaines sorties.
+              </p>
+
+              <div class="demo-actions">
+                <button
+                  class="demo-control demo-primary forced-focus"
+                  data-preview-target="primary"
+                  type="button"
+                >
+                  Créer mon journal
+                </button>
+                <button
+                  class="demo-control demo-secondary"
+                  data-preview-target="secondary"
+                  type="button"
+                >
+                  Découvrir les spectacles
+                </button>
+                <button
+                  class="demo-control demo-ghost"
+                  data-preview-target="ghost"
+                  type="button"
+                >
+                  En savoir plus
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="stage-footer">
+            <p class="decision-note" id="decision-note">
+              <strong>Équilibre recommandé.</strong> Le halo garde la chaleur corail,
+              mais son étendue est divisée par deux et son opacité fortement réduite.
+            </p>
+            <p class="keyboard-note">
+              Désactivez « Forcer l’aperçu », puis utilisez <kbd>Tab</kbd> pour tester
+              le vrai <code>:focus-visible</code>.
+            </p>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script>
+      const variants = {
+        current: {
+          title: "Actuel",
+          note: "<strong>Point de comparaison.</strong> Le cumul du contour, du décalage et du halo de 6 px crée une présence proche d’un double anneau.",
+        },
+        simple: {
+          title: "01 — Filet simple",
+          note: "<strong>Le plus sobre.</strong> Le contour brique reste très lisible sur l’ivoire comme sur l’encre, sans ajouter de masse autour du bouton.",
+        },
+        compact: {
+          title: "02 — Halo compact",
+          note: "<strong>Équilibre recommandé.</strong> Le halo garde la chaleur corail, mais son étendue est divisée par deux et son opacité fortement réduite.",
+        },
+        lilac: {
+          title: "03 — Lilas calme",
+          note: "<strong>Le plus éditorial.</strong> Le lilas sépare clairement le focus clavier des états de survol corail et calme la perception générale.",
+        },
+      };
+
+      const stage = document.getElementById("focus-stage");
+      const selectionTitle = document.getElementById("selected-title");
+      const decisionNote = document.getElementById("decision-note");
+      const previewToggle = document.getElementById("preview-focus");
+      const previewTarget = document.getElementById("preview-target");
+      const demoControls = [...document.querySelectorAll("[data-preview-target]")];
+
+      function updateForcedFocus() {
+        const selectedTarget = previewTarget.value;
+        demoControls.forEach((control) => {
+          const isPreviewed =
+            previewToggle.checked && control.dataset.previewTarget === selectedTarget;
+          control.classList.toggle("forced-focus", isPreviewed);
+        });
+      }
+
+      document.querySelectorAll('input[name="focus-variant"]').forEach((radio) => {
+        radio.addEventListener("change", () => {
+          if (!radio.checked) return;
+          const variant = variants[radio.value];
+          stage.dataset.variant = radio.value;
+          selectionTitle.textContent = variant.title;
+          decisionNote.innerHTML = variant.note;
+        });
+      });
+
+      previewToggle.addEventListener("change", updateForcedFocus);
+      previewTarget.addEventListener("change", updateForcedFocus);
+    </script>
+  </body>
+</html>

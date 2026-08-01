@@ -67,6 +67,17 @@ export type GetV1PublicStatsErrors = {
   /**
    * Default Response
    */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   404: {
     type: string;
     title: string;
@@ -79,6 +90,17 @@ export type GetV1PublicStatsErrors = {
    * Default Response
    */
   409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  413: {
     type: string;
     title: string;
     status: number;
@@ -108,6 +130,17 @@ export type GetV1PublicStatsErrors = {
     instance?: string;
     code?: string;
   };
+  /**
+   * Default Response
+   */
+  503: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
 };
 
 export type GetV1PublicStatsError =
@@ -121,12 +154,406 @@ export type GetV1PublicStatsResponses = {
     verifiedUsers: number;
     activeProductions: number;
     upcomingPerformances: number;
+    activeVenues: number;
     generatedAt: string;
   };
 };
 
 export type GetV1PublicStatsResponse =
   GetV1PublicStatsResponses[keyof GetV1PublicStatsResponses];
+
+export type PostV1ContactData = {
+  body: {
+    name: string;
+    email: string;
+    subject: string;
+    message: string;
+    website?: string;
+  };
+  path?: never;
+  query?: never;
+  url: "/v1/contact";
+};
+
+export type PostV1ContactErrors = {
+  /**
+   * Default Response
+   */
+  400: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  401: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  404: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+};
+
+export type PostV1ContactError = PostV1ContactErrors[keyof PostV1ContactErrors];
+
+export type PostV1ContactResponses = {
+  /**
+   * Default Response
+   */
+  200: {
+    ok: true;
+  };
+};
+
+export type PostV1ContactResponse =
+  PostV1ContactResponses[keyof PostV1ContactResponses];
+
+export type PostV1ContentReportsData = {
+  body: {
+    targetType: "production" | "venue" | "company" | "member" | "list" | "review";
+    targetId: string;
+    category: "visual_rights" | "information" | "schedule" | "other";
+    mediaId?: string | null;
+    reason: string;
+  };
+  path?: never;
+  query?: never;
+  url: "/v1/content-reports";
+};
+
+export type PostV1ContentReportsErrors = {
+  /**
+   * Default Response
+   */
+  400: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  401: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  404: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+};
+
+export type PostV1ContentReportsError =
+  PostV1ContentReportsErrors[keyof PostV1ContentReportsErrors];
+
+export type PostV1ContentReportsResponses = {
+  /**
+   * Default Response
+   */
+  200: {
+    id: string;
+    status: "open";
+  };
+};
+
+export type PostV1ContentReportsResponse =
+  PostV1ContentReportsResponses[keyof PostV1ContentReportsResponses];
+
+export type PostV1CommunityProductionsData = {
+  body: {
+    /**
+     * Objet JSON conforme à CreateCommunityProductionBody.
+     */
+    payload: string;
+    poster?: Blob | File;
+  };
+  path?: never;
+  query?: never;
+  url: "/v1/community/productions";
+};
+
+export type PostV1CommunityProductionsErrors = {
+  /**
+   * Default Response
+   */
+  400: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  401: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  404: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+};
+
+export type PostV1CommunityProductionsError =
+  PostV1CommunityProductionsErrors[keyof PostV1CommunityProductionsErrors];
+
+export type PostV1CommunityProductionsResponses = {
+  /**
+   * Default Response
+   */
+  201: {
+    id: string;
+    slug: string;
+    contributionId: string;
+    publicationStatus: "published";
+  };
+};
+
+export type PostV1CommunityProductionsResponse =
+  PostV1CommunityProductionsResponses[keyof PostV1CommunityProductionsResponses];
 
 export type PostV1AuthSignUpEmailData = {
   body: {
@@ -136,8 +563,8 @@ export type PostV1AuthSignUpEmailData = {
     email: string;
     password: string;
     age15OrOlder: true;
-    termsVersion: "1.0.0";
-    privacyNoticeVersion: "1.0.1";
+    termsVersion: "1.0.3";
+    privacyNoticeVersion: "1.0.4";
     channel: "web" | "android";
     callbackURL?: string;
   };
@@ -243,6 +670,17 @@ export type GetV1MeExportErrors = {
   /**
    * Default Response
    */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   404: {
     type: string;
     title: string;
@@ -255,6 +693,17 @@ export type GetV1MeExportErrors = {
    * Default Response
    */
   409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  413: {
     type: string;
     title: string;
     status: number;
@@ -284,6 +733,17 @@ export type GetV1MeExportErrors = {
     instance?: string;
     code?: string;
   };
+  /**
+   * Default Response
+   */
+  503: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
 };
 
 export type GetV1MeExportError = GetV1MeExportErrors[keyof GetV1MeExportErrors];
@@ -297,10 +757,13 @@ export type GetV1MeExportResponses = {
         exportedAt: string;
         account: {
           id: string;
-          pseudonym: string;
+          username: string;
           email: string;
           emailVerified: boolean;
           createdAt: string;
+          profileVisibility: "public" | "private";
+          ratingVisibility: "review_only" | "public";
+          bio: string | null;
           homeCity: {
             locality: string;
             countryCode: string;
@@ -330,6 +793,101 @@ export type GetV1MeExportResponses = {
         watchlist: Array<{
           productionId: string;
           addedAt: string;
+        }>;
+        reviews: Array<{
+          id: string;
+          productionId: string;
+          body: string;
+          containsSpoiler: boolean;
+          visibility: "public" | "private";
+          status: "published" | "hidden" | "rejected";
+          createdAt: string;
+          updatedAt: string;
+        }>;
+        lists: Array<{
+          id: string;
+          slug: string;
+          name: string;
+          description: string | null;
+          visibility: "public" | "private";
+          createdAt: string;
+          updatedAt: string;
+          items: Array<{
+            productionId: string;
+            position: number;
+            addedAt: string;
+          }>;
+        }>;
+        contentReports: Array<{
+          id: string;
+          targetType: "production" | "venue" | "company" | "member" | "list" | "review";
+          targetId: string;
+          category: "visual_rights" | "information" | "schedule" | "other";
+          mediaId: string | null;
+          reason: string;
+          status: "open" | "reviewing" | "resolved" | "dismissed";
+          decision: string | null;
+          submittedAt: string;
+          reviewedAt: string | null;
+        }>;
+        communitySubmissions: Array<{
+          id: string;
+          productionId: string;
+          sourceUrl: string;
+          submittedData: unknown;
+          status: "published" | "hidden";
+          createdAt: string;
+          updatedAt: string;
+        }>;
+        companyClaims: Array<{
+          id: string;
+          companyId: string;
+          representativeName: string;
+          roleTitle: string;
+          professionalEmail: string;
+          officialWebsiteUrl: string;
+          evidence: string;
+          authorityConfirmed: boolean;
+          status: "pending" | "approved" | "rejected" | "revoked";
+          decisionReason: string | null;
+          submittedAt: string;
+          reviewedAt: string | null;
+        }>;
+        companyMemberships: Array<{
+          companyId: string;
+          role: "representative" | "editor" | "manager";
+          roleTitle: string;
+          createdAt: string;
+        }>;
+        catalogRevisions: Array<{
+          id: string;
+          companyId: string;
+          targetType: "company" | "production";
+          targetId: string;
+          status: "draft" | "submitted" | "approved" | "rejected" | "superseded";
+          justification: string | null;
+          decisionReason: string | null;
+          createdAt: string;
+          updatedAt: string;
+          submittedAt: string | null;
+          reviewedAt: string | null;
+          changes: Array<{
+            id: string;
+            field: string;
+            oldValue: unknown;
+            newValue: unknown;
+            provenanceUrl: string | null;
+            rightsStatus:
+              | "review_required"
+              | "factual_metadata_only"
+              | "permission_granted"
+              | "open_license"
+              | "contractual_display"
+              | "hotlink_only"
+              | "todam_original"
+              | "community_submission";
+            createdAt: string;
+          }>;
         }>;
       }
     | string;
@@ -373,6 +931,17 @@ export type PatchV1MeUsernameErrors = {
   /**
    * Default Response
    */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   404: {
     type: string;
     title: string;
@@ -395,6 +964,17 @@ export type PatchV1MeUsernameErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -407,6 +987,17 @@ export type PatchV1MeUsernameErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -468,6 +1059,17 @@ export type PostV1MeEmailChangeErrors = {
   /**
    * Default Response
    */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   404: {
     type: string;
     title: string;
@@ -490,6 +1092,17 @@ export type PostV1MeEmailChangeErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -502,6 +1115,17 @@ export type PostV1MeEmailChangeErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -562,6 +1186,17 @@ export type PostV1MePasswordChangeErrors = {
   /**
    * Default Response
    */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   404: {
     type: string;
     title: string;
@@ -584,6 +1219,17 @@ export type PostV1MePasswordChangeErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -596,6 +1242,17 @@ export type PostV1MePasswordChangeErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -655,6 +1312,17 @@ export type PostV1AccountDeletionRequestErrors = {
   /**
    * Default Response
    */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   404: {
     type: string;
     title: string;
@@ -677,6 +1345,17 @@ export type PostV1AccountDeletionRequestErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -689,6 +1368,17 @@ export type PostV1AccountDeletionRequestErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -748,6 +1438,17 @@ export type PostV1AccountDeletionConfirmErrors = {
   /**
    * Default Response
    */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   404: {
     type: string;
     title: string;
@@ -770,6 +1471,17 @@ export type PostV1AccountDeletionConfirmErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -782,6 +1494,17 @@ export type PostV1AccountDeletionConfirmErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -872,6 +1595,17 @@ export type GetV1CatalogCitiesErrors = {
   /**
    * Default Response
    */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   404: {
     type: string;
     title: string;
@@ -894,6 +1628,17 @@ export type GetV1CatalogCitiesErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -906,6 +1651,17 @@ export type GetV1CatalogCitiesErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -937,8 +1693,16 @@ export type GetV1CatalogCitiesResponse =
 export type GetV1SearchData = {
   body?: never;
   path?: never;
-  query: {
-    q: string;
+  query?: {
+    q?: string;
+    type?: "productions" | "venues" | "companies" | "members";
+    discipline?: "theatre" | "opera" | "ballet";
+    locality?: string;
+    radiusKm?: number;
+    from?: string;
+    to?: string;
+    temporal?: "upcoming" | "past" | "all";
+    sort?: "relevance" | "date" | "proximity" | "popularity";
     cursor?: string | null;
     limit?: number;
   };
@@ -971,6 +1735,17 @@ export type GetV1SearchErrors = {
   /**
    * Default Response
    */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   404: {
     type: string;
     title: string;
@@ -983,6 +1758,17 @@ export type GetV1SearchErrors = {
    * Default Response
    */
   409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  413: {
     type: string;
     title: string;
     status: number;
@@ -1012,6 +1798,17 @@ export type GetV1SearchErrors = {
     instance?: string;
     code?: string;
   };
+  /**
+   * Default Response
+   */
+  503: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
 };
 
 export type GetV1SearchError = GetV1SearchErrors[keyof GetV1SearchErrors];
@@ -1021,35 +1818,75 @@ export type GetV1SearchResponses = {
    * Default Response
    */
   200: {
-    items: Array<{
+    type: "productions" | "venues" | "companies" | "members";
+    total: number;
+    productions: Array<{
       id: string;
       slug: string;
       title: string;
       discipline: "theatre" | "opera" | "ballet";
       audience: "general" | "family" | "children";
+      minimumAge: number | null;
       workTitle: string | null;
       primaryCredit: string | null;
+      company: {
+        id: string;
+        slug: string;
+        name: string;
+        officialUrl: string | null;
+      } | null;
       venueNames: Array<string>;
       nextPerformance: string | null;
+      nextVenue: {
+        id: string;
+        slug: string;
+        name: string;
+        locality: string;
+        countryCode: string;
+        timezone: string;
+        officialUrl: string | null;
+      } | null;
       poster: {
         id: string;
         url: string;
         kind: "poster" | "key_visual" | "photo" | "logo";
         alt: string | null;
-        credit: string;
+        credit: string | null;
         copyrightHolder: string | null;
         license: string | null;
         rightsStatus:
           | "permission_granted"
           | "open_license"
           | "contractual_display"
-          | "hotlink_only";
+          | "hotlink_only"
+          | "todam_original"
+          | "community_submission";
         sourceUrl: string;
         width: number | null;
         height: number | null;
       } | null;
     }>;
+    venues: Array<{
+      id: string;
+      slug: string;
+      name: string;
+      locality: string;
+      countryCode: string;
+      timezone: string;
+      officialUrl: string | null;
+    }>;
+    companies: Array<{
+      id: string;
+      slug: string;
+      name: string;
+      officialUrl: string | null;
+    }>;
+    members: Array<{
+      username: string;
+      bio: string | null;
+    }>;
     nextCursor: string | null;
+    suggestion: string | null;
   };
 };
 
@@ -1090,6 +1927,17 @@ export type GetV1ProductionsBySlugErrors = {
   /**
    * Default Response
    */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   404: {
     type: string;
     title: string;
@@ -1102,6 +1950,17 @@ export type GetV1ProductionsBySlugErrors = {
    * Default Response
    */
   409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  413: {
     type: string;
     title: string;
     status: number;
@@ -1131,6 +1990,17 @@ export type GetV1ProductionsBySlugErrors = {
     instance?: string;
     code?: string;
   };
+  /**
+   * Default Response
+   */
+  503: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
 };
 
 export type GetV1ProductionsBySlugError =
@@ -1146,10 +2016,17 @@ export type GetV1ProductionsBySlugResponses = {
     title: string;
     discipline: "theatre" | "opera" | "ballet";
     audience: "general" | "family" | "children";
+    minimumAge: number | null;
     work: {
       id: string;
       slug: string;
       title: string;
+    } | null;
+    company: {
+      id: string;
+      slug: string;
+      name: string;
+      officialUrl: string | null;
     } | null;
     durationMinutes: number | null;
     language: string | null;
@@ -1159,14 +2036,40 @@ export type GetV1ProductionsBySlugResponses = {
       url: string;
       kind: "poster" | "key_visual" | "photo" | "logo";
       alt: string | null;
-      credit: string;
+      credit: string | null;
       copyrightHolder: string | null;
       license: string | null;
       rightsStatus:
-        "permission_granted" | "open_license" | "contractual_display" | "hotlink_only";
+        | "permission_granted"
+        | "open_license"
+        | "contractual_display"
+        | "hotlink_only"
+        | "todam_original"
+        | "community_submission";
       sourceUrl: string;
       width: number | null;
       height: number | null;
+    }>;
+    imagePolicyMessage: string;
+    descriptions: Array<{
+      id: string;
+      locale: string;
+      kind: "short" | "full";
+      body: string;
+      rightsStatus:
+        | "review_required"
+        | "factual_metadata_only"
+        | "permission_granted"
+        | "open_license"
+        | "contractual_display"
+        | "hotlink_only"
+        | "todam_original"
+        | "community_submission";
+      license: string | null;
+      sourceUrl: string | null;
+      sourceTitle: string | null;
+      retrievedAt: string | null;
+      lastVerifiedAt: string;
     }>;
     credits: Array<{
       artistId: string;
@@ -1194,15 +2097,1275 @@ export type GetV1ProductionsBySlugResponses = {
         slug: string;
         name: string;
         locality: string;
+        countryCode: string;
         timezone: string;
+        officialUrl: string | null;
       };
     }>;
+    ratingSummary: {
+      average: number | null;
+      count: number;
+    };
+    reviews: Array<{
+      id: string;
+      username: string;
+      rating: number | null;
+      body: string;
+      containsSpoiler: boolean;
+      createdAt: string;
+      updatedAt: string;
+    }>;
+    relatedProductions: Array<{
+      id: string;
+      slug: string;
+      title: string;
+      discipline: "theatre" | "opera" | "ballet";
+      audience: "general" | "family" | "children";
+      minimumAge: number | null;
+      workTitle: string | null;
+      primaryCredit: string | null;
+      company: {
+        id: string;
+        slug: string;
+        name: string;
+        officialUrl: string | null;
+      } | null;
+      venueNames: Array<string>;
+      nextPerformance: string | null;
+      nextVenue: {
+        id: string;
+        slug: string;
+        name: string;
+        locality: string;
+        countryCode: string;
+        timezone: string;
+        officialUrl: string | null;
+      } | null;
+      poster: {
+        id: string;
+        url: string;
+        kind: "poster" | "key_visual" | "photo" | "logo";
+        alt: string | null;
+        credit: string | null;
+        copyrightHolder: string | null;
+        license: string | null;
+        rightsStatus:
+          | "permission_granted"
+          | "open_license"
+          | "contractual_display"
+          | "hotlink_only"
+          | "todam_original"
+          | "community_submission";
+        sourceUrl: string;
+        width: number | null;
+        height: number | null;
+      } | null;
+    }>;
+    sources: Array<{
+      title: string;
+      url: string;
+      retrievedAt: string;
+      rightsStatus:
+        | "review_required"
+        | "factual_metadata_only"
+        | "permission_granted"
+        | "open_license"
+        | "contractual_display"
+        | "hotlink_only"
+        | "todam_original"
+        | "community_submission";
+      license: string | null;
+    }>;
+    lastVerifiedAt: string | null;
     sourceUrls: Array<string>;
   };
 };
 
 export type GetV1ProductionsBySlugResponse =
   GetV1ProductionsBySlugResponses[keyof GetV1ProductionsBySlugResponses];
+
+export type GetV1VenuesBySlugData = {
+  body?: never;
+  path: {
+    slug: string;
+  };
+  query?: never;
+  url: "/v1/venues/{slug}";
+};
+
+export type GetV1VenuesBySlugErrors = {
+  /**
+   * Default Response
+   */
+  400: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  401: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  404: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+};
+
+export type GetV1VenuesBySlugError =
+  GetV1VenuesBySlugErrors[keyof GetV1VenuesBySlugErrors];
+
+export type GetV1VenuesBySlugResponses = {
+  /**
+   * Default Response
+   */
+  200: {
+    id: string;
+    slug: string;
+    name: string;
+    locality: string;
+    countryCode: string;
+    timezone: string;
+    officialUrl: string | null;
+    addressLine1: string;
+    postalCode: string;
+    coordinates: {
+      longitude: number;
+      latitude: number;
+    } | null;
+    upcoming: Array<{
+      id: string;
+      slug: string;
+      title: string;
+      discipline: "theatre" | "opera" | "ballet";
+      audience: "general" | "family" | "children";
+      minimumAge: number | null;
+      workTitle: string | null;
+      primaryCredit: string | null;
+      company: {
+        id: string;
+        slug: string;
+        name: string;
+        officialUrl: string | null;
+      } | null;
+      venueNames: Array<string>;
+      nextPerformance: string | null;
+      nextVenue: {
+        id: string;
+        slug: string;
+        name: string;
+        locality: string;
+        countryCode: string;
+        timezone: string;
+        officialUrl: string | null;
+      } | null;
+      poster: {
+        id: string;
+        url: string;
+        kind: "poster" | "key_visual" | "photo" | "logo";
+        alt: string | null;
+        credit: string | null;
+        copyrightHolder: string | null;
+        license: string | null;
+        rightsStatus:
+          | "permission_granted"
+          | "open_license"
+          | "contractual_display"
+          | "hotlink_only"
+          | "todam_original"
+          | "community_submission";
+        sourceUrl: string;
+        width: number | null;
+        height: number | null;
+      } | null;
+      venuePerformances: Array<{
+        id: string;
+        startsAt: string;
+        endsAt: string | null;
+        status: "scheduled" | "completed" | "cancelled" | "postponed";
+        officialUrl: string | null;
+        venue: {
+          id: string;
+          slug: string;
+          name: string;
+          locality: string;
+          countryCode: string;
+          timezone: string;
+          officialUrl: string | null;
+        };
+      }>;
+    }>;
+    archives: Array<{
+      id: string;
+      slug: string;
+      title: string;
+      discipline: "theatre" | "opera" | "ballet";
+      audience: "general" | "family" | "children";
+      minimumAge: number | null;
+      workTitle: string | null;
+      primaryCredit: string | null;
+      company: {
+        id: string;
+        slug: string;
+        name: string;
+        officialUrl: string | null;
+      } | null;
+      venueNames: Array<string>;
+      nextPerformance: string | null;
+      nextVenue: {
+        id: string;
+        slug: string;
+        name: string;
+        locality: string;
+        countryCode: string;
+        timezone: string;
+        officialUrl: string | null;
+      } | null;
+      poster: {
+        id: string;
+        url: string;
+        kind: "poster" | "key_visual" | "photo" | "logo";
+        alt: string | null;
+        credit: string | null;
+        copyrightHolder: string | null;
+        license: string | null;
+        rightsStatus:
+          | "permission_granted"
+          | "open_license"
+          | "contractual_display"
+          | "hotlink_only"
+          | "todam_original"
+          | "community_submission";
+        sourceUrl: string;
+        width: number | null;
+        height: number | null;
+      } | null;
+      venuePerformances: Array<{
+        id: string;
+        startsAt: string;
+        endsAt: string | null;
+        status: "scheduled" | "completed" | "cancelled" | "postponed";
+        officialUrl: string | null;
+        venue: {
+          id: string;
+          slug: string;
+          name: string;
+          locality: string;
+          countryCode: string;
+          timezone: string;
+          officialUrl: string | null;
+        };
+      }>;
+    }>;
+    disciplines: Array<"theatre" | "opera" | "ballet">;
+    sources: Array<{
+      title: string;
+      url: string;
+      retrievedAt: string;
+      rightsStatus:
+        | "review_required"
+        | "factual_metadata_only"
+        | "permission_granted"
+        | "open_license"
+        | "contractual_display"
+        | "hotlink_only"
+        | "todam_original"
+        | "community_submission";
+      license: string | null;
+    }>;
+    lastVerifiedAt: string | null;
+  };
+};
+
+export type GetV1VenuesBySlugResponse =
+  GetV1VenuesBySlugResponses[keyof GetV1VenuesBySlugResponses];
+
+export type GetV1CompaniesBySlugData = {
+  body?: never;
+  path: {
+    slug: string;
+  };
+  query?: never;
+  url: "/v1/companies/{slug}";
+};
+
+export type GetV1CompaniesBySlugErrors = {
+  /**
+   * Default Response
+   */
+  400: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  401: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  404: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+};
+
+export type GetV1CompaniesBySlugError =
+  GetV1CompaniesBySlugErrors[keyof GetV1CompaniesBySlugErrors];
+
+export type GetV1CompaniesBySlugResponses = {
+  /**
+   * Default Response
+   */
+  200: {
+    id: string;
+    slug: string;
+    name: string;
+    officialUrl: string | null;
+    shortDescription: string | null;
+    description: string | null;
+    locality: string | null;
+    countryCode: string | null;
+    currentProductions: Array<{
+      id: string;
+      slug: string;
+      title: string;
+      discipline: "theatre" | "opera" | "ballet";
+      audience: "general" | "family" | "children";
+      minimumAge: number | null;
+      workTitle: string | null;
+      primaryCredit: string | null;
+      company: {
+        id: string;
+        slug: string;
+        name: string;
+        officialUrl: string | null;
+      } | null;
+      venueNames: Array<string>;
+      nextPerformance: string | null;
+      nextVenue: {
+        id: string;
+        slug: string;
+        name: string;
+        locality: string;
+        countryCode: string;
+        timezone: string;
+        officialUrl: string | null;
+      } | null;
+      poster: {
+        id: string;
+        url: string;
+        kind: "poster" | "key_visual" | "photo" | "logo";
+        alt: string | null;
+        credit: string | null;
+        copyrightHolder: string | null;
+        license: string | null;
+        rightsStatus:
+          | "permission_granted"
+          | "open_license"
+          | "contractual_display"
+          | "hotlink_only"
+          | "todam_original"
+          | "community_submission";
+        sourceUrl: string;
+        width: number | null;
+        height: number | null;
+      } | null;
+    }>;
+    touringDates: Array<{
+      id: string;
+      startsAt: string;
+      endsAt: string | null;
+      status: "scheduled" | "completed" | "cancelled" | "postponed";
+      officialUrl: string | null;
+      venue: {
+        id: string;
+        slug: string;
+        name: string;
+        locality: string;
+        countryCode: string;
+        timezone: string;
+        officialUrl: string | null;
+      };
+      production: {
+        id: string;
+        slug: string;
+        title: string;
+        discipline: "theatre" | "opera" | "ballet";
+      };
+    }>;
+    archives: Array<{
+      id: string;
+      slug: string;
+      title: string;
+      discipline: "theatre" | "opera" | "ballet";
+      audience: "general" | "family" | "children";
+      minimumAge: number | null;
+      workTitle: string | null;
+      primaryCredit: string | null;
+      company: {
+        id: string;
+        slug: string;
+        name: string;
+        officialUrl: string | null;
+      } | null;
+      venueNames: Array<string>;
+      nextPerformance: string | null;
+      nextVenue: {
+        id: string;
+        slug: string;
+        name: string;
+        locality: string;
+        countryCode: string;
+        timezone: string;
+        officialUrl: string | null;
+      } | null;
+      poster: {
+        id: string;
+        url: string;
+        kind: "poster" | "key_visual" | "photo" | "logo";
+        alt: string | null;
+        credit: string | null;
+        copyrightHolder: string | null;
+        license: string | null;
+        rightsStatus:
+          | "permission_granted"
+          | "open_license"
+          | "contractual_display"
+          | "hotlink_only"
+          | "todam_original"
+          | "community_submission";
+        sourceUrl: string;
+        width: number | null;
+        height: number | null;
+      } | null;
+    }>;
+    principalArtists: Array<{
+      id: string;
+      slug: string;
+      name: string;
+      roles: Array<
+        | "author"
+        | "director"
+        | "performer"
+        | "choreographer"
+        | "composer"
+        | "musical_director"
+        | "designer"
+        | "other"
+      >;
+    }>;
+    sources: Array<{
+      title: string;
+      url: string;
+      retrievedAt: string;
+      rightsStatus:
+        | "review_required"
+        | "factual_metadata_only"
+        | "permission_granted"
+        | "open_license"
+        | "contractual_display"
+        | "hotlink_only"
+        | "todam_original"
+        | "community_submission";
+      license: string | null;
+    }>;
+    lastVerifiedAt: string | null;
+  };
+};
+
+export type GetV1CompaniesBySlugResponse =
+  GetV1CompaniesBySlugResponses[keyof GetV1CompaniesBySlugResponses];
+
+export type GetV1MembersByUsernameData = {
+  body?: never;
+  path: {
+    username: string;
+  };
+  query?: never;
+  url: "/v1/members/{username}";
+};
+
+export type GetV1MembersByUsernameErrors = {
+  /**
+   * Default Response
+   */
+  400: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  401: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  404: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+};
+
+export type GetV1MembersByUsernameError =
+  GetV1MembersByUsernameErrors[keyof GetV1MembersByUsernameErrors];
+
+export type GetV1MembersByUsernameResponses = {
+  /**
+   * Default Response
+   */
+  200: {
+    username: string;
+    bio: string | null;
+    memberSince: string;
+    counts: {
+      seen: number;
+      lists: number;
+      reviews: number;
+    };
+    recentJournal: Array<{
+      id: string;
+      production: {
+        id: string;
+        slug: string;
+        title: string;
+        discipline: "theatre" | "opera" | "ballet";
+        audience: "general" | "family" | "children";
+        minimumAge: number | null;
+        workTitle: string | null;
+        primaryCredit: string | null;
+        company: {
+          id: string;
+          slug: string;
+          name: string;
+          officialUrl: string | null;
+        } | null;
+        venueNames: Array<string>;
+        nextPerformance: string | null;
+        nextVenue: {
+          id: string;
+          slug: string;
+          name: string;
+          locality: string;
+          countryCode: string;
+          timezone: string;
+          officialUrl: string | null;
+        } | null;
+        poster: {
+          id: string;
+          url: string;
+          kind: "poster" | "key_visual" | "photo" | "logo";
+          alt: string | null;
+          credit: string | null;
+          copyrightHolder: string | null;
+          license: string | null;
+          rightsStatus:
+            | "permission_granted"
+            | "open_license"
+            | "contractual_display"
+            | "hotlink_only"
+            | "todam_original"
+            | "community_submission";
+          sourceUrl: string;
+          width: number | null;
+          height: number | null;
+        } | null;
+      };
+      performanceId: string | null;
+      attendedOn: string | null;
+      addedAt: string;
+      ratedAt: string | null;
+      rating: number | null;
+      hasReview: boolean;
+    }>;
+    publicLists: Array<{
+      id: string;
+      slug: string;
+      name: string;
+      description: string | null;
+      visibility: "public" | "private";
+      itemCount: number;
+      updatedAt: string;
+    }>;
+    recentReviews: Array<{
+      id: string;
+      production: {
+        id: string;
+        slug: string;
+        title: string;
+        discipline: "theatre" | "opera" | "ballet";
+        audience: "general" | "family" | "children";
+        minimumAge: number | null;
+        workTitle: string | null;
+        primaryCredit: string | null;
+        company: {
+          id: string;
+          slug: string;
+          name: string;
+          officialUrl: string | null;
+        } | null;
+        venueNames: Array<string>;
+        nextPerformance: string | null;
+        nextVenue: {
+          id: string;
+          slug: string;
+          name: string;
+          locality: string;
+          countryCode: string;
+          timezone: string;
+          officialUrl: string | null;
+        } | null;
+        poster: {
+          id: string;
+          url: string;
+          kind: "poster" | "key_visual" | "photo" | "logo";
+          alt: string | null;
+          credit: string | null;
+          copyrightHolder: string | null;
+          license: string | null;
+          rightsStatus:
+            | "permission_granted"
+            | "open_license"
+            | "contractual_display"
+            | "hotlink_only"
+            | "todam_original"
+            | "community_submission";
+          sourceUrl: string;
+          width: number | null;
+          height: number | null;
+        } | null;
+      };
+      body: string;
+      containsSpoiler: boolean;
+      createdAt: string;
+      updatedAt: string;
+      rating: number | null;
+    }>;
+  };
+};
+
+export type GetV1MembersByUsernameResponse =
+  GetV1MembersByUsernameResponses[keyof GetV1MembersByUsernameResponses];
+
+export type GetV1MembersByUsernameJournalData = {
+  body?: never;
+  path: {
+    username: string;
+  };
+  query?: {
+    cursor?: string | null;
+    limit?: number;
+    discipline?: "theatre" | "opera" | "ballet";
+    year?: number;
+    venue?: string;
+    rating?: number;
+    hasReview?: boolean;
+    sort?: "attended" | "added" | "rated" | "rating" | "title";
+    order?: "asc" | "desc";
+  };
+  url: "/v1/members/{username}/journal";
+};
+
+export type GetV1MembersByUsernameJournalErrors = {
+  /**
+   * Default Response
+   */
+  400: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  401: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  404: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+};
+
+export type GetV1MembersByUsernameJournalError =
+  GetV1MembersByUsernameJournalErrors[keyof GetV1MembersByUsernameJournalErrors];
+
+export type GetV1MembersByUsernameJournalResponses = {
+  /**
+   * Default Response
+   */
+  200: {
+    items: Array<{
+      id: string;
+      production: {
+        id: string;
+        slug: string;
+        title: string;
+        discipline: "theatre" | "opera" | "ballet";
+        audience: "general" | "family" | "children";
+        minimumAge: number | null;
+        workTitle: string | null;
+        primaryCredit: string | null;
+        company: {
+          id: string;
+          slug: string;
+          name: string;
+          officialUrl: string | null;
+        } | null;
+        venueNames: Array<string>;
+        nextPerformance: string | null;
+        nextVenue: {
+          id: string;
+          slug: string;
+          name: string;
+          locality: string;
+          countryCode: string;
+          timezone: string;
+          officialUrl: string | null;
+        } | null;
+        poster: {
+          id: string;
+          url: string;
+          kind: "poster" | "key_visual" | "photo" | "logo";
+          alt: string | null;
+          credit: string | null;
+          copyrightHolder: string | null;
+          license: string | null;
+          rightsStatus:
+            | "permission_granted"
+            | "open_license"
+            | "contractual_display"
+            | "hotlink_only"
+            | "todam_original"
+            | "community_submission";
+          sourceUrl: string;
+          width: number | null;
+          height: number | null;
+        } | null;
+      };
+      performanceId: string | null;
+      attendedOn: string | null;
+      addedAt: string;
+      ratedAt: string | null;
+      rating: number | null;
+      hasReview: boolean;
+    }>;
+    nextCursor: string | null;
+  };
+};
+
+export type GetV1MembersByUsernameJournalResponse =
+  GetV1MembersByUsernameJournalResponses[keyof GetV1MembersByUsernameJournalResponses];
+
+export type GetV1MembersByUsernameListsBySlugData = {
+  body?: never;
+  path: {
+    username: string;
+    slug: string;
+  };
+  query?: never;
+  url: "/v1/members/{username}/lists/{slug}";
+};
+
+export type GetV1MembersByUsernameListsBySlugErrors = {
+  /**
+   * Default Response
+   */
+  400: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  401: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  404: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+};
+
+export type GetV1MembersByUsernameListsBySlugError =
+  GetV1MembersByUsernameListsBySlugErrors[keyof GetV1MembersByUsernameListsBySlugErrors];
+
+export type GetV1MembersByUsernameListsBySlugResponses = {
+  /**
+   * Default Response
+   */
+  200: {
+    id: string;
+    slug: string;
+    name: string;
+    description: string | null;
+    visibility: "public" | "private";
+    itemCount: number;
+    updatedAt: string;
+    username: string;
+    items: Array<{
+      production: {
+        id: string;
+        slug: string;
+        title: string;
+        discipline: "theatre" | "opera" | "ballet";
+        audience: "general" | "family" | "children";
+        minimumAge: number | null;
+        workTitle: string | null;
+        primaryCredit: string | null;
+        company: {
+          id: string;
+          slug: string;
+          name: string;
+          officialUrl: string | null;
+        } | null;
+        venueNames: Array<string>;
+        nextPerformance: string | null;
+        nextVenue: {
+          id: string;
+          slug: string;
+          name: string;
+          locality: string;
+          countryCode: string;
+          timezone: string;
+          officialUrl: string | null;
+        } | null;
+        poster: {
+          id: string;
+          url: string;
+          kind: "poster" | "key_visual" | "photo" | "logo";
+          alt: string | null;
+          credit: string | null;
+          copyrightHolder: string | null;
+          license: string | null;
+          rightsStatus:
+            | "permission_granted"
+            | "open_license"
+            | "contractual_display"
+            | "hotlink_only"
+            | "todam_original"
+            | "community_submission";
+          sourceUrl: string;
+          width: number | null;
+          height: number | null;
+        } | null;
+      };
+      position: number;
+      addedAt: string;
+    }>;
+  };
+};
+
+export type GetV1MembersByUsernameListsBySlugResponse =
+  GetV1MembersByUsernameListsBySlugResponses[keyof GetV1MembersByUsernameListsBySlugResponses];
 
 export type GetV1MeProductionsByIdStateData = {
   body?: never;
@@ -1239,6 +3402,17 @@ export type GetV1MeProductionsByIdStateErrors = {
   /**
    * Default Response
    */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   404: {
     type: string;
     title: string;
@@ -1251,6 +3425,17 @@ export type GetV1MeProductionsByIdStateErrors = {
    * Default Response
    */
   409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  413: {
     type: string;
     title: string;
     status: number;
@@ -1280,6 +3465,17 @@ export type GetV1MeProductionsByIdStateErrors = {
     instance?: string;
     code?: string;
   };
+  /**
+   * Default Response
+   */
+  503: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
 };
 
 export type GetV1MeProductionsByIdStateError =
@@ -1294,6 +3490,13 @@ export type GetV1MeProductionsByIdStateResponses = {
     seen: boolean;
     rating: number | null;
     watchlisted: boolean;
+    review: {
+      id: string;
+      body: string;
+      containsSpoiler: boolean;
+      visibility: "public" | "private";
+      status: "published" | "hidden" | "rejected";
+    } | null;
   };
 };
 
@@ -1335,6 +3538,17 @@ export type GetV1MeProductionsByIdDiaryErrors = {
   /**
    * Default Response
    */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   404: {
     type: string;
     title: string;
@@ -1357,6 +3571,17 @@ export type GetV1MeProductionsByIdDiaryErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -1369,6 +3594,17 @@ export type GetV1MeProductionsByIdDiaryErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -1401,7 +3637,9 @@ export type GetV1MeProductionsByIdDiaryResponses = {
           slug: string;
           name: string;
           locality: string;
+          countryCode: string;
           timezone: string;
+          officialUrl: string | null;
         };
       } | null;
     }>;
@@ -1444,6 +3682,17 @@ export type GetV1MeHomeErrors = {
   /**
    * Default Response
    */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   404: {
     type: string;
     title: string;
@@ -1456,6 +3705,17 @@ export type GetV1MeHomeErrors = {
    * Default Response
    */
   409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  413: {
     type: string;
     title: string;
     status: number;
@@ -1485,6 +3745,17 @@ export type GetV1MeHomeErrors = {
     instance?: string;
     code?: string;
   };
+  /**
+   * Default Response
+   */
+  503: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
 };
 
 export type GetV1MeHomeError = GetV1MeHomeErrors[keyof GetV1MeHomeErrors];
@@ -1495,7 +3766,7 @@ export type GetV1MeHomeResponses = {
    */
   200: {
     profile: {
-      pseudonym: string;
+      username: string;
     };
     homeCity: {
       locality: string;
@@ -1515,23 +3786,41 @@ export type GetV1MeHomeResponses = {
         title: string;
         discipline: "theatre" | "opera" | "ballet";
         audience: "general" | "family" | "children";
+        minimumAge: number | null;
         workTitle: string | null;
         primaryCredit: string | null;
+        company: {
+          id: string;
+          slug: string;
+          name: string;
+          officialUrl: string | null;
+        } | null;
         venueNames: Array<string>;
         nextPerformance: string | null;
+        nextVenue: {
+          id: string;
+          slug: string;
+          name: string;
+          locality: string;
+          countryCode: string;
+          timezone: string;
+          officialUrl: string | null;
+        } | null;
         poster: {
           id: string;
           url: string;
           kind: "poster" | "key_visual" | "photo" | "logo";
           alt: string | null;
-          credit: string;
+          credit: string | null;
           copyrightHolder: string | null;
           license: string | null;
           rightsStatus:
             | "permission_granted"
             | "open_license"
             | "contractual_display"
-            | "hotlink_only";
+            | "hotlink_only"
+            | "todam_original"
+            | "community_submission";
           sourceUrl: string;
           width: number | null;
           height: number | null;
@@ -1551,23 +3840,41 @@ export type GetV1MeHomeResponses = {
         title: string;
         discipline: "theatre" | "opera" | "ballet";
         audience: "general" | "family" | "children";
+        minimumAge: number | null;
         workTitle: string | null;
         primaryCredit: string | null;
+        company: {
+          id: string;
+          slug: string;
+          name: string;
+          officialUrl: string | null;
+        } | null;
         venueNames: Array<string>;
         nextPerformance: string | null;
+        nextVenue: {
+          id: string;
+          slug: string;
+          name: string;
+          locality: string;
+          countryCode: string;
+          timezone: string;
+          officialUrl: string | null;
+        } | null;
         poster: {
           id: string;
           url: string;
           kind: "poster" | "key_visual" | "photo" | "logo";
           alt: string | null;
-          credit: string;
+          credit: string | null;
           copyrightHolder: string | null;
           license: string | null;
           rightsStatus:
             | "permission_granted"
             | "open_license"
             | "contractual_display"
-            | "hotlink_only";
+            | "hotlink_only"
+            | "todam_original"
+            | "community_submission";
           sourceUrl: string;
           width: number | null;
           height: number | null;
@@ -1587,23 +3894,41 @@ export type GetV1MeHomeResponses = {
         title: string;
         discipline: "theatre" | "opera" | "ballet";
         audience: "general" | "family" | "children";
+        minimumAge: number | null;
         workTitle: string | null;
         primaryCredit: string | null;
+        company: {
+          id: string;
+          slug: string;
+          name: string;
+          officialUrl: string | null;
+        } | null;
         venueNames: Array<string>;
         nextPerformance: string | null;
+        nextVenue: {
+          id: string;
+          slug: string;
+          name: string;
+          locality: string;
+          countryCode: string;
+          timezone: string;
+          officialUrl: string | null;
+        } | null;
         poster: {
           id: string;
           url: string;
           kind: "poster" | "key_visual" | "photo" | "logo";
           alt: string | null;
-          credit: string;
+          credit: string | null;
           copyrightHolder: string | null;
           license: string | null;
           rightsStatus:
             | "permission_granted"
             | "open_license"
             | "contractual_display"
-            | "hotlink_only";
+            | "hotlink_only"
+            | "todam_original"
+            | "community_submission";
           sourceUrl: string;
           width: number | null;
           height: number | null;
@@ -1659,6 +3984,17 @@ export type PutV1MeHomeCityErrors = {
   /**
    * Default Response
    */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   404: {
     type: string;
     title: string;
@@ -1681,6 +4017,17 @@ export type PutV1MeHomeCityErrors = {
   /**
    * Default Response
    */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   429: {
     type: string;
     title: string;
@@ -1693,6 +4040,17 @@ export type PutV1MeHomeCityErrors = {
    * Default Response
    */
   500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
     type: string;
     title: string;
     status: number;
@@ -1753,6 +4111,17 @@ export type GetV1MeDashboardErrors = {
   /**
    * Default Response
    */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   404: {
     type: string;
     title: string;
@@ -1765,6 +4134,17 @@ export type GetV1MeDashboardErrors = {
    * Default Response
    */
   409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  413: {
     type: string;
     title: string;
     status: number;
@@ -1794,6 +4174,17 @@ export type GetV1MeDashboardErrors = {
     instance?: string;
     code?: string;
   };
+  /**
+   * Default Response
+   */
+  503: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
 };
 
 export type GetV1MeDashboardError =
@@ -1805,13 +4196,14 @@ export type GetV1MeDashboardResponses = {
    */
   200: {
     profile: {
-      pseudonym: string;
+      username: string;
     };
     counts: {
       seen: number;
       ratings: number;
       watchlist: number;
-      lists: 0;
+      lists: number;
+      reviews: number;
     };
     recentDiary: Array<{
       id: string;
@@ -1821,23 +4213,41 @@ export type GetV1MeDashboardResponses = {
         title: string;
         discipline: "theatre" | "opera" | "ballet";
         audience: "general" | "family" | "children";
+        minimumAge: number | null;
         workTitle: string | null;
         primaryCredit: string | null;
+        company: {
+          id: string;
+          slug: string;
+          name: string;
+          officialUrl: string | null;
+        } | null;
         venueNames: Array<string>;
         nextPerformance: string | null;
+        nextVenue: {
+          id: string;
+          slug: string;
+          name: string;
+          locality: string;
+          countryCode: string;
+          timezone: string;
+          officialUrl: string | null;
+        } | null;
         poster: {
           id: string;
           url: string;
           kind: "poster" | "key_visual" | "photo" | "logo";
           alt: string | null;
-          credit: string;
+          credit: string | null;
           copyrightHolder: string | null;
           license: string | null;
           rightsStatus:
             | "permission_granted"
             | "open_license"
             | "contractual_display"
-            | "hotlink_only";
+            | "hotlink_only"
+            | "todam_original"
+            | "community_submission";
           sourceUrl: string;
           width: number | null;
           height: number | null;
@@ -1846,6 +4256,57 @@ export type GetV1MeDashboardResponses = {
       performanceId: string | null;
       attendedOn: string | null;
       createdAt: string;
+    }>;
+    recentRatings: Array<{
+      production: {
+        id: string;
+        slug: string;
+        title: string;
+        discipline: "theatre" | "opera" | "ballet";
+        audience: "general" | "family" | "children";
+        minimumAge: number | null;
+        workTitle: string | null;
+        primaryCredit: string | null;
+        company: {
+          id: string;
+          slug: string;
+          name: string;
+          officialUrl: string | null;
+        } | null;
+        venueNames: Array<string>;
+        nextPerformance: string | null;
+        nextVenue: {
+          id: string;
+          slug: string;
+          name: string;
+          locality: string;
+          countryCode: string;
+          timezone: string;
+          officialUrl: string | null;
+        } | null;
+        poster: {
+          id: string;
+          url: string;
+          kind: "poster" | "key_visual" | "photo" | "logo";
+          alt: string | null;
+          credit: string | null;
+          copyrightHolder: string | null;
+          license: string | null;
+          rightsStatus:
+            | "permission_granted"
+            | "open_license"
+            | "contractual_display"
+            | "hotlink_only"
+            | "todam_original"
+            | "community_submission";
+          sourceUrl: string;
+          width: number | null;
+          height: number | null;
+        } | null;
+      };
+      value: number;
+      ratedAt: string;
+      hasReview: boolean;
     }>;
     ratingDistribution: Array<{
       value: number;
@@ -1857,23 +4318,41 @@ export type GetV1MeDashboardResponses = {
       title: string;
       discipline: "theatre" | "opera" | "ballet";
       audience: "general" | "family" | "children";
+      minimumAge: number | null;
       workTitle: string | null;
       primaryCredit: string | null;
+      company: {
+        id: string;
+        slug: string;
+        name: string;
+        officialUrl: string | null;
+      } | null;
       venueNames: Array<string>;
       nextPerformance: string | null;
+      nextVenue: {
+        id: string;
+        slug: string;
+        name: string;
+        locality: string;
+        countryCode: string;
+        timezone: string;
+        officialUrl: string | null;
+      } | null;
       poster: {
         id: string;
         url: string;
         kind: "poster" | "key_visual" | "photo" | "logo";
         alt: string | null;
-        credit: string;
+        credit: string | null;
         copyrightHolder: string | null;
         license: string | null;
         rightsStatus:
           | "permission_granted"
           | "open_license"
           | "contractual_display"
-          | "hotlink_only";
+          | "hotlink_only"
+          | "todam_original"
+          | "community_submission";
         sourceUrl: string;
         width: number | null;
         height: number | null;
@@ -1884,6 +4363,2487 @@ export type GetV1MeDashboardResponses = {
 
 export type GetV1MeDashboardResponse =
   GetV1MeDashboardResponses[keyof GetV1MeDashboardResponses];
+
+export type GetV1MeShowsData = {
+  body?: never;
+  path?: never;
+  query: {
+    section: "watchlist" | "seen" | "rated";
+    q?: string;
+    discipline?: "theatre" | "opera" | "ballet";
+    venue?: string;
+    year?: number;
+    communityRating?: number;
+    myRating?: number;
+    hasReview?: boolean;
+    upcoming?: "7d" | "30d" | "90d" | "none";
+    sort?: "recent" | "title" | "community-rating" | "my-rating" | "next-performance";
+    cursor?: string | null;
+    limit?: number;
+  };
+  url: "/v1/me/shows";
+};
+
+export type GetV1MeShowsErrors = {
+  /**
+   * Default Response
+   */
+  400: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  401: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  404: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+};
+
+export type GetV1MeShowsError = GetV1MeShowsErrors[keyof GetV1MeShowsErrors];
+
+export type GetV1MeShowsResponses = {
+  /**
+   * Default Response
+   */
+  200: {
+    items: Array<{
+      production: {
+        id: string;
+        slug: string;
+        title: string;
+        discipline: "theatre" | "opera" | "ballet";
+        audience: "general" | "family" | "children";
+        minimumAge: number | null;
+        workTitle: string | null;
+        primaryCredit: string | null;
+        company: {
+          id: string;
+          slug: string;
+          name: string;
+          officialUrl: string | null;
+        } | null;
+        venueNames: Array<string>;
+        nextPerformance: string | null;
+        nextVenue: {
+          id: string;
+          slug: string;
+          name: string;
+          locality: string;
+          countryCode: string;
+          timezone: string;
+          officialUrl: string | null;
+        } | null;
+        poster: {
+          id: string;
+          url: string;
+          kind: "poster" | "key_visual" | "photo" | "logo";
+          alt: string | null;
+          credit: string | null;
+          copyrightHolder: string | null;
+          license: string | null;
+          rightsStatus:
+            | "permission_granted"
+            | "open_license"
+            | "contractual_display"
+            | "hotlink_only"
+            | "todam_original"
+            | "community_submission";
+          sourceUrl: string;
+          width: number | null;
+          height: number | null;
+        } | null;
+      };
+      section: "watchlist" | "seen" | "rated";
+      diaryEntryId: string | null;
+      seenCount: number;
+      addedAt: string | null;
+      attendedOn: string | null;
+      ratedAt: string | null;
+      myRating: number | null;
+      communityRating: {
+        average: number | null;
+        count: number;
+      };
+      review: {
+        id: string;
+        body: string;
+        containsSpoiler: boolean;
+        visibility: "public" | "private";
+        status: "published" | "hidden" | "rejected";
+        createdAt: string;
+        updatedAt: string;
+      } | null;
+    }>;
+    nextCursor: string | null;
+    total: number;
+    facets: {
+      disciplines: Array<{
+        value: "theatre" | "opera" | "ballet";
+        count: number;
+      }>;
+      venues: Array<{
+        value: string;
+        count: number;
+      }>;
+      years: Array<{
+        value: number;
+        count: number;
+      }>;
+      communityRatings: Array<{
+        value: number;
+        count: number;
+      }>;
+      myRatings: Array<{
+        value: number;
+        count: number;
+      }>;
+      reviews: Array<{
+        value: "with" | "without";
+        count: number;
+      }>;
+      upcoming: Array<{
+        value: "7d" | "30d" | "90d" | "none";
+        count: number;
+      }>;
+    };
+  };
+};
+
+export type GetV1MeShowsResponse = GetV1MeShowsResponses[keyof GetV1MeShowsResponses];
+
+export type GetV1MeProfileData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: "/v1/me/profile";
+};
+
+export type GetV1MeProfileErrors = {
+  /**
+   * Default Response
+   */
+  400: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  401: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  404: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+};
+
+export type GetV1MeProfileError = GetV1MeProfileErrors[keyof GetV1MeProfileErrors];
+
+export type GetV1MeProfileResponses = {
+  /**
+   * Default Response
+   */
+  200: {
+    username: string;
+    bio: string | null;
+    profileVisibility: "public" | "private";
+    ratingVisibility: "review_only" | "public";
+    memberSince: string;
+  };
+};
+
+export type GetV1MeProfileResponse =
+  GetV1MeProfileResponses[keyof GetV1MeProfileResponses];
+
+export type PatchV1MeProfileData = {
+  body: {
+    bio?: string | null;
+    profileVisibility?: "public" | "private";
+    ratingVisibility?: "review_only" | "public";
+  };
+  path?: never;
+  query?: never;
+  url: "/v1/me/profile";
+};
+
+export type PatchV1MeProfileErrors = {
+  /**
+   * Default Response
+   */
+  400: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  401: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  404: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+};
+
+export type PatchV1MeProfileError =
+  PatchV1MeProfileErrors[keyof PatchV1MeProfileErrors];
+
+export type PatchV1MeProfileResponses = {
+  /**
+   * Default Response
+   */
+  200: {
+    username: string;
+    bio: string | null;
+    profileVisibility: "public" | "private";
+    ratingVisibility: "review_only" | "public";
+    memberSince: string;
+  };
+};
+
+export type PatchV1MeProfileResponse =
+  PatchV1MeProfileResponses[keyof PatchV1MeProfileResponses];
+
+export type GetV1MeJournalData = {
+  body?: never;
+  path?: never;
+  query?: {
+    cursor?: string | null;
+    limit?: number;
+    discipline?: "theatre" | "opera" | "ballet";
+    year?: number;
+    venue?: string;
+    rating?: number;
+    hasReview?: boolean;
+    sort?: "attended" | "added" | "rated" | "rating" | "title";
+    order?: "asc" | "desc";
+  };
+  url: "/v1/me/journal";
+};
+
+export type GetV1MeJournalErrors = {
+  /**
+   * Default Response
+   */
+  400: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  401: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  404: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+};
+
+export type GetV1MeJournalError = GetV1MeJournalErrors[keyof GetV1MeJournalErrors];
+
+export type GetV1MeJournalResponses = {
+  /**
+   * Default Response
+   */
+  200: {
+    items: Array<{
+      id: string;
+      production: {
+        id: string;
+        slug: string;
+        title: string;
+        discipline: "theatre" | "opera" | "ballet";
+        audience: "general" | "family" | "children";
+        minimumAge: number | null;
+        workTitle: string | null;
+        primaryCredit: string | null;
+        company: {
+          id: string;
+          slug: string;
+          name: string;
+          officialUrl: string | null;
+        } | null;
+        venueNames: Array<string>;
+        nextPerformance: string | null;
+        nextVenue: {
+          id: string;
+          slug: string;
+          name: string;
+          locality: string;
+          countryCode: string;
+          timezone: string;
+          officialUrl: string | null;
+        } | null;
+        poster: {
+          id: string;
+          url: string;
+          kind: "poster" | "key_visual" | "photo" | "logo";
+          alt: string | null;
+          credit: string | null;
+          copyrightHolder: string | null;
+          license: string | null;
+          rightsStatus:
+            | "permission_granted"
+            | "open_license"
+            | "contractual_display"
+            | "hotlink_only"
+            | "todam_original"
+            | "community_submission";
+          sourceUrl: string;
+          width: number | null;
+          height: number | null;
+        } | null;
+      };
+      performanceId: string | null;
+      attendedOn: string | null;
+      addedAt: string;
+      ratedAt: string | null;
+      rating: number | null;
+      hasReview: boolean;
+    }>;
+    nextCursor: string | null;
+  };
+};
+
+export type GetV1MeJournalResponse =
+  GetV1MeJournalResponses[keyof GetV1MeJournalResponses];
+
+export type GetV1MeListsData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: "/v1/me/lists";
+};
+
+export type GetV1MeListsErrors = {
+  /**
+   * Default Response
+   */
+  400: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  401: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  404: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+};
+
+export type GetV1MeListsError = GetV1MeListsErrors[keyof GetV1MeListsErrors];
+
+export type GetV1MeListsResponses = {
+  /**
+   * Default Response
+   */
+  200: {
+    items: Array<{
+      id: string;
+      slug: string;
+      name: string;
+      description: string | null;
+      visibility: "public" | "private";
+      itemCount: number;
+      updatedAt: string;
+    }>;
+  };
+};
+
+export type GetV1MeListsResponse = GetV1MeListsResponses[keyof GetV1MeListsResponses];
+
+export type PostV1MeListsData = {
+  body: {
+    name: string;
+    description?: string | null;
+    visibility?: "private";
+    productionId?: string;
+  };
+  path?: never;
+  query?: never;
+  url: "/v1/me/lists";
+};
+
+export type PostV1MeListsErrors = {
+  /**
+   * Default Response
+   */
+  400: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  401: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  404: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+};
+
+export type PostV1MeListsError = PostV1MeListsErrors[keyof PostV1MeListsErrors];
+
+export type PostV1MeListsResponses = {
+  /**
+   * Default Response
+   */
+  200: {
+    id: string;
+    slug: string;
+    name: string;
+    description: string | null;
+    visibility: "public" | "private";
+    itemCount: number;
+    updatedAt: string;
+    username: string;
+    items: Array<{
+      production: {
+        id: string;
+        slug: string;
+        title: string;
+        discipline: "theatre" | "opera" | "ballet";
+        audience: "general" | "family" | "children";
+        minimumAge: number | null;
+        workTitle: string | null;
+        primaryCredit: string | null;
+        company: {
+          id: string;
+          slug: string;
+          name: string;
+          officialUrl: string | null;
+        } | null;
+        venueNames: Array<string>;
+        nextPerformance: string | null;
+        nextVenue: {
+          id: string;
+          slug: string;
+          name: string;
+          locality: string;
+          countryCode: string;
+          timezone: string;
+          officialUrl: string | null;
+        } | null;
+        poster: {
+          id: string;
+          url: string;
+          kind: "poster" | "key_visual" | "photo" | "logo";
+          alt: string | null;
+          credit: string | null;
+          copyrightHolder: string | null;
+          license: string | null;
+          rightsStatus:
+            | "permission_granted"
+            | "open_license"
+            | "contractual_display"
+            | "hotlink_only"
+            | "todam_original"
+            | "community_submission";
+          sourceUrl: string;
+          width: number | null;
+          height: number | null;
+        } | null;
+      };
+      position: number;
+      addedAt: string;
+    }>;
+  };
+};
+
+export type PostV1MeListsResponse =
+  PostV1MeListsResponses[keyof PostV1MeListsResponses];
+
+export type GetV1MeWatchlistData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: "/v1/me/watchlist";
+};
+
+export type GetV1MeWatchlistErrors = {
+  /**
+   * Default Response
+   */
+  400: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  401: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  404: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+};
+
+export type GetV1MeWatchlistError =
+  GetV1MeWatchlistErrors[keyof GetV1MeWatchlistErrors];
+
+export type GetV1MeWatchlistResponses = {
+  /**
+   * Default Response
+   */
+  200: {
+    items: Array<{
+      production: {
+        id: string;
+        slug: string;
+        title: string;
+        discipline: "theatre" | "opera" | "ballet";
+        audience: "general" | "family" | "children";
+        minimumAge: number | null;
+        workTitle: string | null;
+        primaryCredit: string | null;
+        company: {
+          id: string;
+          slug: string;
+          name: string;
+          officialUrl: string | null;
+        } | null;
+        venueNames: Array<string>;
+        nextPerformance: string | null;
+        nextVenue: {
+          id: string;
+          slug: string;
+          name: string;
+          locality: string;
+          countryCode: string;
+          timezone: string;
+          officialUrl: string | null;
+        } | null;
+        poster: {
+          id: string;
+          url: string;
+          kind: "poster" | "key_visual" | "photo" | "logo";
+          alt: string | null;
+          credit: string | null;
+          copyrightHolder: string | null;
+          license: string | null;
+          rightsStatus:
+            | "permission_granted"
+            | "open_license"
+            | "contractual_display"
+            | "hotlink_only"
+            | "todam_original"
+            | "community_submission";
+          sourceUrl: string;
+          width: number | null;
+          height: number | null;
+        } | null;
+      };
+      addedAt: string;
+    }>;
+  };
+};
+
+export type GetV1MeWatchlistResponse =
+  GetV1MeWatchlistResponses[keyof GetV1MeWatchlistResponses];
+
+export type GetV1MeReviewsData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: "/v1/me/reviews";
+};
+
+export type GetV1MeReviewsErrors = {
+  /**
+   * Default Response
+   */
+  400: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  401: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  404: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+};
+
+export type GetV1MeReviewsError = GetV1MeReviewsErrors[keyof GetV1MeReviewsErrors];
+
+export type GetV1MeReviewsResponses = {
+  /**
+   * Default Response
+   */
+  200: {
+    items: Array<{
+      id: string;
+      production: {
+        id: string;
+        slug: string;
+        title: string;
+        discipline: "theatre" | "opera" | "ballet";
+        audience: "general" | "family" | "children";
+        minimumAge: number | null;
+        workTitle: string | null;
+        primaryCredit: string | null;
+        company: {
+          id: string;
+          slug: string;
+          name: string;
+          officialUrl: string | null;
+        } | null;
+        venueNames: Array<string>;
+        nextPerformance: string | null;
+        nextVenue: {
+          id: string;
+          slug: string;
+          name: string;
+          locality: string;
+          countryCode: string;
+          timezone: string;
+          officialUrl: string | null;
+        } | null;
+        poster: {
+          id: string;
+          url: string;
+          kind: "poster" | "key_visual" | "photo" | "logo";
+          alt: string | null;
+          credit: string | null;
+          copyrightHolder: string | null;
+          license: string | null;
+          rightsStatus:
+            | "permission_granted"
+            | "open_license"
+            | "contractual_display"
+            | "hotlink_only"
+            | "todam_original"
+            | "community_submission";
+          sourceUrl: string;
+          width: number | null;
+          height: number | null;
+        } | null;
+      };
+      body: string;
+      containsSpoiler: boolean;
+      visibility: "public" | "private";
+      status: "published" | "hidden" | "rejected";
+      createdAt: string;
+      updatedAt: string;
+    }>;
+  };
+};
+
+export type GetV1MeReviewsResponse =
+  GetV1MeReviewsResponses[keyof GetV1MeReviewsResponses];
+
+export type DeleteV1MeListsByListIdData = {
+  body?: never;
+  path: {
+    listId: string;
+  };
+  query?: never;
+  url: "/v1/me/lists/{listId}";
+};
+
+export type DeleteV1MeListsByListIdErrors = {
+  /**
+   * Default Response
+   */
+  400: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  401: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  404: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+};
+
+export type DeleteV1MeListsByListIdError =
+  DeleteV1MeListsByListIdErrors[keyof DeleteV1MeListsByListIdErrors];
+
+export type DeleteV1MeListsByListIdResponses = {
+  /**
+   * Default Response
+   */
+  200: {
+    ok: true;
+  };
+};
+
+export type DeleteV1MeListsByListIdResponse =
+  DeleteV1MeListsByListIdResponses[keyof DeleteV1MeListsByListIdResponses];
+
+export type GetV1MeListsByListIdData = {
+  body?: never;
+  path: {
+    listId: string;
+  };
+  query?: never;
+  url: "/v1/me/lists/{listId}";
+};
+
+export type GetV1MeListsByListIdErrors = {
+  /**
+   * Default Response
+   */
+  400: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  401: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  404: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+};
+
+export type GetV1MeListsByListIdError =
+  GetV1MeListsByListIdErrors[keyof GetV1MeListsByListIdErrors];
+
+export type GetV1MeListsByListIdResponses = {
+  /**
+   * Default Response
+   */
+  200: {
+    id: string;
+    slug: string;
+    name: string;
+    description: string | null;
+    visibility: "public" | "private";
+    itemCount: number;
+    updatedAt: string;
+    username: string;
+    items: Array<{
+      production: {
+        id: string;
+        slug: string;
+        title: string;
+        discipline: "theatre" | "opera" | "ballet";
+        audience: "general" | "family" | "children";
+        minimumAge: number | null;
+        workTitle: string | null;
+        primaryCredit: string | null;
+        company: {
+          id: string;
+          slug: string;
+          name: string;
+          officialUrl: string | null;
+        } | null;
+        venueNames: Array<string>;
+        nextPerformance: string | null;
+        nextVenue: {
+          id: string;
+          slug: string;
+          name: string;
+          locality: string;
+          countryCode: string;
+          timezone: string;
+          officialUrl: string | null;
+        } | null;
+        poster: {
+          id: string;
+          url: string;
+          kind: "poster" | "key_visual" | "photo" | "logo";
+          alt: string | null;
+          credit: string | null;
+          copyrightHolder: string | null;
+          license: string | null;
+          rightsStatus:
+            | "permission_granted"
+            | "open_license"
+            | "contractual_display"
+            | "hotlink_only"
+            | "todam_original"
+            | "community_submission";
+          sourceUrl: string;
+          width: number | null;
+          height: number | null;
+        } | null;
+      };
+      position: number;
+      addedAt: string;
+    }>;
+  };
+};
+
+export type GetV1MeListsByListIdResponse =
+  GetV1MeListsByListIdResponses[keyof GetV1MeListsByListIdResponses];
+
+export type PatchV1MeListsByListIdData = {
+  body: {
+    name?: string;
+    description?: string | null;
+    visibility?: "private";
+  };
+  path: {
+    listId: string;
+  };
+  query?: never;
+  url: "/v1/me/lists/{listId}";
+};
+
+export type PatchV1MeListsByListIdErrors = {
+  /**
+   * Default Response
+   */
+  400: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  401: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  404: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+};
+
+export type PatchV1MeListsByListIdError =
+  PatchV1MeListsByListIdErrors[keyof PatchV1MeListsByListIdErrors];
+
+export type PatchV1MeListsByListIdResponses = {
+  /**
+   * Default Response
+   */
+  200: {
+    id: string;
+    slug: string;
+    name: string;
+    description: string | null;
+    visibility: "public" | "private";
+    itemCount: number;
+    updatedAt: string;
+    username: string;
+    items: Array<{
+      production: {
+        id: string;
+        slug: string;
+        title: string;
+        discipline: "theatre" | "opera" | "ballet";
+        audience: "general" | "family" | "children";
+        minimumAge: number | null;
+        workTitle: string | null;
+        primaryCredit: string | null;
+        company: {
+          id: string;
+          slug: string;
+          name: string;
+          officialUrl: string | null;
+        } | null;
+        venueNames: Array<string>;
+        nextPerformance: string | null;
+        nextVenue: {
+          id: string;
+          slug: string;
+          name: string;
+          locality: string;
+          countryCode: string;
+          timezone: string;
+          officialUrl: string | null;
+        } | null;
+        poster: {
+          id: string;
+          url: string;
+          kind: "poster" | "key_visual" | "photo" | "logo";
+          alt: string | null;
+          credit: string | null;
+          copyrightHolder: string | null;
+          license: string | null;
+          rightsStatus:
+            | "permission_granted"
+            | "open_license"
+            | "contractual_display"
+            | "hotlink_only"
+            | "todam_original"
+            | "community_submission";
+          sourceUrl: string;
+          width: number | null;
+          height: number | null;
+        } | null;
+      };
+      position: number;
+      addedAt: string;
+    }>;
+  };
+};
+
+export type PatchV1MeListsByListIdResponse =
+  PatchV1MeListsByListIdResponses[keyof PatchV1MeListsByListIdResponses];
+
+export type PostV1MeListsByListIdItemsData = {
+  body: {
+    productionId: string;
+    position?: number;
+  };
+  path: {
+    listId: string;
+  };
+  query?: never;
+  url: "/v1/me/lists/{listId}/items";
+};
+
+export type PostV1MeListsByListIdItemsErrors = {
+  /**
+   * Default Response
+   */
+  400: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  401: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  404: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+};
+
+export type PostV1MeListsByListIdItemsError =
+  PostV1MeListsByListIdItemsErrors[keyof PostV1MeListsByListIdItemsErrors];
+
+export type PostV1MeListsByListIdItemsResponses = {
+  /**
+   * Default Response
+   */
+  200: {
+    ok: true;
+  };
+};
+
+export type PostV1MeListsByListIdItemsResponse =
+  PostV1MeListsByListIdItemsResponses[keyof PostV1MeListsByListIdItemsResponses];
+
+export type DeleteV1MeListsByListIdItemsByProductionIdData = {
+  body?: never;
+  path: {
+    listId: string;
+    productionId: string;
+  };
+  query?: never;
+  url: "/v1/me/lists/{listId}/items/{productionId}";
+};
+
+export type DeleteV1MeListsByListIdItemsByProductionIdErrors = {
+  /**
+   * Default Response
+   */
+  400: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  401: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  404: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+};
+
+export type DeleteV1MeListsByListIdItemsByProductionIdError =
+  DeleteV1MeListsByListIdItemsByProductionIdErrors[keyof DeleteV1MeListsByListIdItemsByProductionIdErrors];
+
+export type DeleteV1MeListsByListIdItemsByProductionIdResponses = {
+  /**
+   * Default Response
+   */
+  200: {
+    ok: true;
+  };
+};
+
+export type DeleteV1MeListsByListIdItemsByProductionIdResponse =
+  DeleteV1MeListsByListIdItemsByProductionIdResponses[keyof DeleteV1MeListsByListIdItemsByProductionIdResponses];
+
+export type PutV1MeListsByListIdOrderData = {
+  body: {
+    productionIds: Array<string>;
+  };
+  path: {
+    listId: string;
+  };
+  query?: never;
+  url: "/v1/me/lists/{listId}/order";
+};
+
+export type PutV1MeListsByListIdOrderErrors = {
+  /**
+   * Default Response
+   */
+  400: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  401: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  404: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+};
+
+export type PutV1MeListsByListIdOrderError =
+  PutV1MeListsByListIdOrderErrors[keyof PutV1MeListsByListIdOrderErrors];
+
+export type PutV1MeListsByListIdOrderResponses = {
+  /**
+   * Default Response
+   */
+  200: {
+    ok: true;
+  };
+};
+
+export type PutV1MeListsByListIdOrderResponse =
+  PutV1MeListsByListIdOrderResponses[keyof PutV1MeListsByListIdOrderResponses];
+
+export type DeleteV1MeReviewsByProductionIdData = {
+  body?: never;
+  path: {
+    productionId: string;
+  };
+  query?: never;
+  url: "/v1/me/reviews/{productionId}";
+};
+
+export type DeleteV1MeReviewsByProductionIdErrors = {
+  /**
+   * Default Response
+   */
+  400: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  401: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  404: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+};
+
+export type DeleteV1MeReviewsByProductionIdError =
+  DeleteV1MeReviewsByProductionIdErrors[keyof DeleteV1MeReviewsByProductionIdErrors];
+
+export type DeleteV1MeReviewsByProductionIdResponses = {
+  /**
+   * Default Response
+   */
+  200: {
+    ok: true;
+  };
+};
+
+export type DeleteV1MeReviewsByProductionIdResponse =
+  DeleteV1MeReviewsByProductionIdResponses[keyof DeleteV1MeReviewsByProductionIdResponses];
+
+export type PutV1MeReviewsByProductionIdData = {
+  body: {
+    body: string;
+    containsSpoiler?: boolean;
+    visibility?: "public" | "private";
+  };
+  path: {
+    productionId: string;
+  };
+  query?: never;
+  url: "/v1/me/reviews/{productionId}";
+};
+
+export type PutV1MeReviewsByProductionIdErrors = {
+  /**
+   * Default Response
+   */
+  400: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  401: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  404: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+};
+
+export type PutV1MeReviewsByProductionIdError =
+  PutV1MeReviewsByProductionIdErrors[keyof PutV1MeReviewsByProductionIdErrors];
+
+export type PutV1MeReviewsByProductionIdResponses = {
+  /**
+   * Default Response
+   */
+  200: {
+    ok: true;
+  };
+};
+
+export type PutV1MeReviewsByProductionIdResponse =
+  PutV1MeReviewsByProductionIdResponses[keyof PutV1MeReviewsByProductionIdResponses];
 
 export type PostV1MeDiaryData = {
   body: {
@@ -1922,6 +6882,17 @@ export type PostV1MeDiaryErrors = {
   /**
    * Default Response
    */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   404: {
     type: string;
     title: string;
@@ -1934,6 +6905,17 @@ export type PostV1MeDiaryErrors = {
    * Default Response
    */
   409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  413: {
     type: string;
     title: string;
     status: number;
@@ -1963,6 +6945,17 @@ export type PostV1MeDiaryErrors = {
     instance?: string;
     code?: string;
   };
+  /**
+   * Default Response
+   */
+  503: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
 };
 
 export type PostV1MeDiaryError = PostV1MeDiaryErrors[keyof PostV1MeDiaryErrors];
@@ -1977,6 +6970,13 @@ export type PostV1MeDiaryResponses = {
       seen: boolean;
       rating: number | null;
       watchlisted: boolean;
+      review: {
+        id: string;
+        body: string;
+        containsSpoiler: boolean;
+        visibility: "public" | "private";
+        status: "published" | "hidden" | "rejected";
+      } | null;
     };
   };
 };
@@ -2019,6 +7019,17 @@ export type DeleteV1MeDiaryByEntryIdErrors = {
   /**
    * Default Response
    */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   404: {
     type: string;
     title: string;
@@ -2031,6 +7042,17 @@ export type DeleteV1MeDiaryByEntryIdErrors = {
    * Default Response
    */
   409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  413: {
     type: string;
     title: string;
     status: number;
@@ -2060,6 +7082,17 @@ export type DeleteV1MeDiaryByEntryIdErrors = {
     instance?: string;
     code?: string;
   };
+  /**
+   * Default Response
+   */
+  503: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
 };
 
 export type DeleteV1MeDiaryByEntryIdError =
@@ -2075,12 +7108,148 @@ export type DeleteV1MeDiaryByEntryIdResponses = {
       seen: boolean;
       rating: number | null;
       watchlisted: boolean;
+      review: {
+        id: string;
+        body: string;
+        containsSpoiler: boolean;
+        visibility: "public" | "private";
+        status: "published" | "hidden" | "rejected";
+      } | null;
     };
   };
 };
 
 export type DeleteV1MeDiaryByEntryIdResponse =
   DeleteV1MeDiaryByEntryIdResponses[keyof DeleteV1MeDiaryByEntryIdResponses];
+
+export type PatchV1MeDiaryByEntryIdData = {
+  body: {
+    performanceId?: string | null;
+    attendedOn?: string | null;
+  };
+  path: {
+    entryId: string;
+  };
+  query?: never;
+  url: "/v1/me/diary/{entryId}";
+};
+
+export type PatchV1MeDiaryByEntryIdErrors = {
+  /**
+   * Default Response
+   */
+  400: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  401: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  404: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+};
+
+export type PatchV1MeDiaryByEntryIdError =
+  PatchV1MeDiaryByEntryIdErrors[keyof PatchV1MeDiaryByEntryIdErrors];
+
+export type PatchV1MeDiaryByEntryIdResponses = {
+  /**
+   * Default Response
+   */
+  200: {
+    ok: true;
+  };
+};
+
+export type PatchV1MeDiaryByEntryIdResponse =
+  PatchV1MeDiaryByEntryIdResponses[keyof PatchV1MeDiaryByEntryIdResponses];
 
 export type DeleteV1MeProductionsByIdRatingData = {
   body?: never;
@@ -2117,6 +7286,17 @@ export type DeleteV1MeProductionsByIdRatingErrors = {
   /**
    * Default Response
    */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   404: {
     type: string;
     title: string;
@@ -2129,6 +7309,17 @@ export type DeleteV1MeProductionsByIdRatingErrors = {
    * Default Response
    */
   409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  413: {
     type: string;
     title: string;
     status: number;
@@ -2158,6 +7349,17 @@ export type DeleteV1MeProductionsByIdRatingErrors = {
     instance?: string;
     code?: string;
   };
+  /**
+   * Default Response
+   */
+  503: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
 };
 
 export type DeleteV1MeProductionsByIdRatingError =
@@ -2173,6 +7375,13 @@ export type DeleteV1MeProductionsByIdRatingResponses = {
       seen: boolean;
       rating: number | null;
       watchlisted: boolean;
+      review: {
+        id: string;
+        body: string;
+        containsSpoiler: boolean;
+        visibility: "public" | "private";
+        status: "published" | "hidden" | "rejected";
+      } | null;
     };
   };
 };
@@ -2217,6 +7426,17 @@ export type PutV1MeProductionsByIdRatingErrors = {
   /**
    * Default Response
    */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   404: {
     type: string;
     title: string;
@@ -2229,6 +7449,17 @@ export type PutV1MeProductionsByIdRatingErrors = {
    * Default Response
    */
   409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  413: {
     type: string;
     title: string;
     status: number;
@@ -2258,6 +7489,17 @@ export type PutV1MeProductionsByIdRatingErrors = {
     instance?: string;
     code?: string;
   };
+  /**
+   * Default Response
+   */
+  503: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
 };
 
 export type PutV1MeProductionsByIdRatingError =
@@ -2273,6 +7515,13 @@ export type PutV1MeProductionsByIdRatingResponses = {
       seen: boolean;
       rating: number | null;
       watchlisted: boolean;
+      review: {
+        id: string;
+        body: string;
+        containsSpoiler: boolean;
+        visibility: "public" | "private";
+        status: "published" | "hidden" | "rejected";
+      } | null;
     };
   };
 };
@@ -2315,6 +7564,17 @@ export type DeleteV1MeWatchlistByIdErrors = {
   /**
    * Default Response
    */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   404: {
     type: string;
     title: string;
@@ -2327,6 +7587,17 @@ export type DeleteV1MeWatchlistByIdErrors = {
    * Default Response
    */
   409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  413: {
     type: string;
     title: string;
     status: number;
@@ -2356,6 +7627,17 @@ export type DeleteV1MeWatchlistByIdErrors = {
     instance?: string;
     code?: string;
   };
+  /**
+   * Default Response
+   */
+  503: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
 };
 
 export type DeleteV1MeWatchlistByIdError =
@@ -2371,6 +7653,13 @@ export type DeleteV1MeWatchlistByIdResponses = {
       seen: boolean;
       rating: number | null;
       watchlisted: boolean;
+      review: {
+        id: string;
+        body: string;
+        containsSpoiler: boolean;
+        visibility: "public" | "private";
+        status: "published" | "hidden" | "rejected";
+      } | null;
     };
   };
 };
@@ -2413,6 +7702,17 @@ export type PutV1MeWatchlistByIdErrors = {
   /**
    * Default Response
    */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
   404: {
     type: string;
     title: string;
@@ -2425,6 +7725,17 @@ export type PutV1MeWatchlistByIdErrors = {
    * Default Response
    */
   409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  413: {
     type: string;
     title: string;
     status: number;
@@ -2454,6 +7765,17 @@ export type PutV1MeWatchlistByIdErrors = {
     instance?: string;
     code?: string;
   };
+  /**
+   * Default Response
+   */
+  503: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
 };
 
 export type PutV1MeWatchlistByIdError =
@@ -2469,9 +7791,4140 @@ export type PutV1MeWatchlistByIdResponses = {
       seen: boolean;
       rating: number | null;
       watchlisted: boolean;
+      review: {
+        id: string;
+        body: string;
+        containsSpoiler: boolean;
+        visibility: "public" | "private";
+        status: "published" | "hidden" | "rejected";
+      } | null;
     };
   };
 };
 
 export type PutV1MeWatchlistByIdResponse =
   PutV1MeWatchlistByIdResponses[keyof PutV1MeWatchlistByIdResponses];
+
+export type PostV1MeCompanyClaimsByCompanyIdData = {
+  body: {
+    representativeName: string;
+    roleTitle: string;
+    professionalEmail: string;
+    officialWebsiteUrl: string;
+    evidence: string;
+    authorityConfirmed: true;
+  };
+  path: {
+    companyId: string;
+  };
+  query?: never;
+  url: "/v1/me/company-claims/{companyId}";
+};
+
+export type PostV1MeCompanyClaimsByCompanyIdErrors = {
+  /**
+   * Default Response
+   */
+  400: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  401: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  404: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+};
+
+export type PostV1MeCompanyClaimsByCompanyIdError =
+  PostV1MeCompanyClaimsByCompanyIdErrors[keyof PostV1MeCompanyClaimsByCompanyIdErrors];
+
+export type PostV1MeCompanyClaimsByCompanyIdResponses = {
+  /**
+   * Default Response
+   */
+  200: {
+    id: string;
+    companyId: string;
+    companyName: string;
+    companySlug: string;
+    representativeName: string;
+    roleTitle: string;
+    professionalEmail: string;
+    officialWebsiteUrl: string;
+    evidence: string;
+    authorityConfirmed: true;
+    status: "pending" | "approved" | "rejected" | "revoked";
+    decisionReason: string | null;
+    submittedAt: string;
+    reviewedAt: string | null;
+  };
+};
+
+export type PostV1MeCompanyClaimsByCompanyIdResponse =
+  PostV1MeCompanyClaimsByCompanyIdResponses[keyof PostV1MeCompanyClaimsByCompanyIdResponses];
+
+export type GetV1MeCompanyClaimsData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: "/v1/me/company-claims";
+};
+
+export type GetV1MeCompanyClaimsErrors = {
+  /**
+   * Default Response
+   */
+  400: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  401: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  404: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+};
+
+export type GetV1MeCompanyClaimsError =
+  GetV1MeCompanyClaimsErrors[keyof GetV1MeCompanyClaimsErrors];
+
+export type GetV1MeCompanyClaimsResponses = {
+  /**
+   * Default Response
+   */
+  200: {
+    items: Array<{
+      id: string;
+      companyId: string;
+      companyName: string;
+      companySlug: string;
+      representativeName: string;
+      roleTitle: string;
+      professionalEmail: string;
+      officialWebsiteUrl: string;
+      evidence: string;
+      authorityConfirmed: true;
+      status: "pending" | "approved" | "rejected" | "revoked";
+      decisionReason: string | null;
+      submittedAt: string;
+      reviewedAt: string | null;
+    }>;
+  };
+};
+
+export type GetV1MeCompanyClaimsResponse =
+  GetV1MeCompanyClaimsResponses[keyof GetV1MeCompanyClaimsResponses];
+
+export type GetV1MeCompanyMembershipsData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: "/v1/me/company-memberships";
+};
+
+export type GetV1MeCompanyMembershipsErrors = {
+  /**
+   * Default Response
+   */
+  400: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  401: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  404: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+};
+
+export type GetV1MeCompanyMembershipsError =
+  GetV1MeCompanyMembershipsErrors[keyof GetV1MeCompanyMembershipsErrors];
+
+export type GetV1MeCompanyMembershipsResponses = {
+  /**
+   * Default Response
+   */
+  200: {
+    items: Array<{
+      companyId: string;
+      companyName: string;
+      companySlug: string;
+      role: "representative" | "editor" | "manager";
+      roleTitle: string;
+    }>;
+  };
+};
+
+export type GetV1MeCompanyMembershipsResponse =
+  GetV1MeCompanyMembershipsResponses[keyof GetV1MeCompanyMembershipsResponses];
+
+export type GetV1MeCompaniesByCompanyIdProductionsData = {
+  body?: never;
+  path: {
+    companyId: string;
+  };
+  query?: never;
+  url: "/v1/me/companies/{companyId}/productions";
+};
+
+export type GetV1MeCompaniesByCompanyIdProductionsErrors = {
+  /**
+   * Default Response
+   */
+  400: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  401: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  404: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+};
+
+export type GetV1MeCompaniesByCompanyIdProductionsError =
+  GetV1MeCompaniesByCompanyIdProductionsErrors[keyof GetV1MeCompaniesByCompanyIdProductionsErrors];
+
+export type GetV1MeCompaniesByCompanyIdProductionsResponses = {
+  /**
+   * Default Response
+   */
+  200: {
+    items: Array<{
+      id: string;
+      slug: string;
+      title: string;
+      discipline: "theatre" | "opera" | "ballet";
+      audience: "general" | "family" | "children";
+      minimumAge: number | null;
+      publicationStatus: "draft" | "published" | "hidden";
+    }>;
+  };
+};
+
+export type GetV1MeCompaniesByCompanyIdProductionsResponse =
+  GetV1MeCompaniesByCompanyIdProductionsResponses[keyof GetV1MeCompaniesByCompanyIdProductionsResponses];
+
+export type PostV1MeCompaniesByCompanyIdProductionsData = {
+  body: {
+    title: string;
+    discipline: "theatre" | "opera" | "ballet";
+    audience?: "general" | "family" | "children";
+    minimumAge?: number | null;
+    officialUrl?: string | null;
+  };
+  path: {
+    companyId: string;
+  };
+  query?: never;
+  url: "/v1/me/companies/{companyId}/productions";
+};
+
+export type PostV1MeCompaniesByCompanyIdProductionsErrors = {
+  /**
+   * Default Response
+   */
+  400: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  401: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  404: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+};
+
+export type PostV1MeCompaniesByCompanyIdProductionsError =
+  PostV1MeCompaniesByCompanyIdProductionsErrors[keyof PostV1MeCompaniesByCompanyIdProductionsErrors];
+
+export type PostV1MeCompaniesByCompanyIdProductionsResponses = {
+  /**
+   * Default Response
+   */
+  200: {
+    id: string;
+    slug: string;
+    title: string;
+    discipline: "theatre" | "opera" | "ballet";
+    audience: "general" | "family" | "children";
+    minimumAge: number | null;
+    publicationStatus: "draft" | "published" | "hidden";
+  };
+};
+
+export type PostV1MeCompaniesByCompanyIdProductionsResponse =
+  PostV1MeCompaniesByCompanyIdProductionsResponses[keyof PostV1MeCompaniesByCompanyIdProductionsResponses];
+
+export type GetV1MeCompaniesByCompanyIdProductionsByProductionIdData = {
+  body?: never;
+  path: {
+    companyId: string;
+    productionId: string;
+  };
+  query?: never;
+  url: "/v1/me/companies/{companyId}/productions/{productionId}";
+};
+
+export type GetV1MeCompaniesByCompanyIdProductionsByProductionIdErrors = {
+  /**
+   * Default Response
+   */
+  400: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  401: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  404: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+};
+
+export type GetV1MeCompaniesByCompanyIdProductionsByProductionIdError =
+  GetV1MeCompaniesByCompanyIdProductionsByProductionIdErrors[keyof GetV1MeCompaniesByCompanyIdProductionsByProductionIdErrors];
+
+export type GetV1MeCompaniesByCompanyIdProductionsByProductionIdResponses = {
+  /**
+   * Default Response
+   */
+  200: {
+    id: string;
+    slug: string;
+    title: string;
+    discipline: "theatre" | "opera" | "ballet";
+    audience: "general" | "family" | "children";
+    minimumAge: number | null;
+    work: {
+      id: string;
+      slug: string;
+      title: string;
+    } | null;
+    company: {
+      id: string;
+      slug: string;
+      name: string;
+      officialUrl: string | null;
+    } | null;
+    durationMinutes: number | null;
+    language: string | null;
+    officialUrl: string | null;
+    posters: Array<{
+      id: string;
+      url: string;
+      kind: "poster" | "key_visual" | "photo" | "logo";
+      alt: string | null;
+      credit: string | null;
+      copyrightHolder: string | null;
+      license: string | null;
+      rightsStatus:
+        | "permission_granted"
+        | "open_license"
+        | "contractual_display"
+        | "hotlink_only"
+        | "todam_original"
+        | "community_submission";
+      sourceUrl: string;
+      width: number | null;
+      height: number | null;
+    }>;
+    imagePolicyMessage: string;
+    descriptions: Array<{
+      id: string;
+      locale: string;
+      kind: "short" | "full";
+      body: string;
+      rightsStatus:
+        | "review_required"
+        | "factual_metadata_only"
+        | "permission_granted"
+        | "open_license"
+        | "contractual_display"
+        | "hotlink_only"
+        | "todam_original"
+        | "community_submission";
+      license: string | null;
+      sourceUrl: string | null;
+      sourceTitle: string | null;
+      retrievedAt: string | null;
+      lastVerifiedAt: string;
+    }>;
+    credits: Array<{
+      artistId: string;
+      artistName: string;
+      role:
+        | "author"
+        | "director"
+        | "performer"
+        | "choreographer"
+        | "composer"
+        | "musical_director"
+        | "designer"
+        | "other";
+      label: string | null;
+      position: number;
+    }>;
+    performances: Array<{
+      id: string;
+      startsAt: string;
+      endsAt: string | null;
+      status: "scheduled" | "completed" | "cancelled" | "postponed";
+      officialUrl: string | null;
+      venue: {
+        id: string;
+        slug: string;
+        name: string;
+        locality: string;
+        countryCode: string;
+        timezone: string;
+        officialUrl: string | null;
+      };
+    }>;
+    ratingSummary: {
+      average: number | null;
+      count: number;
+    };
+    reviews: Array<{
+      id: string;
+      username: string;
+      rating: number | null;
+      body: string;
+      containsSpoiler: boolean;
+      createdAt: string;
+      updatedAt: string;
+    }>;
+    relatedProductions: Array<{
+      id: string;
+      slug: string;
+      title: string;
+      discipline: "theatre" | "opera" | "ballet";
+      audience: "general" | "family" | "children";
+      minimumAge: number | null;
+      workTitle: string | null;
+      primaryCredit: string | null;
+      company: {
+        id: string;
+        slug: string;
+        name: string;
+        officialUrl: string | null;
+      } | null;
+      venueNames: Array<string>;
+      nextPerformance: string | null;
+      nextVenue: {
+        id: string;
+        slug: string;
+        name: string;
+        locality: string;
+        countryCode: string;
+        timezone: string;
+        officialUrl: string | null;
+      } | null;
+      poster: {
+        id: string;
+        url: string;
+        kind: "poster" | "key_visual" | "photo" | "logo";
+        alt: string | null;
+        credit: string | null;
+        copyrightHolder: string | null;
+        license: string | null;
+        rightsStatus:
+          | "permission_granted"
+          | "open_license"
+          | "contractual_display"
+          | "hotlink_only"
+          | "todam_original"
+          | "community_submission";
+        sourceUrl: string;
+        width: number | null;
+        height: number | null;
+      } | null;
+    }>;
+    sources: Array<{
+      title: string;
+      url: string;
+      retrievedAt: string;
+      rightsStatus:
+        | "review_required"
+        | "factual_metadata_only"
+        | "permission_granted"
+        | "open_license"
+        | "contractual_display"
+        | "hotlink_only"
+        | "todam_original"
+        | "community_submission";
+      license: string | null;
+    }>;
+    lastVerifiedAt: string | null;
+    sourceUrls: Array<string>;
+    editableMedia: Array<{
+      id: string;
+      remoteUrl: string;
+      kind: "poster" | "key_visual" | "photo" | "logo";
+      alt: string | null;
+      credit: string | null;
+      copyrightHolder: string | null;
+      rightsStatus:
+        | "permission_granted"
+        | "open_license"
+        | "contractual_display"
+        | "hotlink_only"
+        | "todam_original"
+        | "community_submission";
+      storagePolicy: "hotlink" | "mirror";
+      termsUrl: string | null;
+      license: string | null;
+      validUntil: string | null;
+      isPrimary: boolean;
+      position: number;
+    }>;
+  };
+};
+
+export type GetV1MeCompaniesByCompanyIdProductionsByProductionIdResponse =
+  GetV1MeCompaniesByCompanyIdProductionsByProductionIdResponses[keyof GetV1MeCompaniesByCompanyIdProductionsByProductionIdResponses];
+
+export type PostV1MeCompaniesByCompanyIdRevisionsData = {
+  body: {
+    targetType: "company" | "production";
+    targetId: string;
+    justification?: string | null;
+    changes: Array<{
+      field: string;
+      newValue: unknown;
+      provenanceUrl?: string | null;
+      rightsStatus?:
+        | "review_required"
+        | "factual_metadata_only"
+        | "permission_granted"
+        | "open_license"
+        | "contractual_display"
+        | "hotlink_only"
+        | "todam_original"
+        | "community_submission";
+    }>;
+  };
+  path: {
+    companyId: string;
+  };
+  query?: never;
+  url: "/v1/me/companies/{companyId}/revisions";
+};
+
+export type PostV1MeCompaniesByCompanyIdRevisionsErrors = {
+  /**
+   * Default Response
+   */
+  400: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  401: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  404: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+};
+
+export type PostV1MeCompaniesByCompanyIdRevisionsError =
+  PostV1MeCompaniesByCompanyIdRevisionsErrors[keyof PostV1MeCompaniesByCompanyIdRevisionsErrors];
+
+export type PostV1MeCompaniesByCompanyIdRevisionsResponses = {
+  /**
+   * Default Response
+   */
+  200: {
+    id: string;
+    companyId: string;
+    targetType: "company" | "production";
+    targetId: string;
+    status: "draft" | "submitted" | "approved" | "rejected" | "superseded";
+    justification: string | null;
+    decisionReason: string | null;
+    changes: Array<{
+      field: string;
+      newValue: unknown;
+      provenanceUrl: string | null;
+      rightsStatus:
+        | "review_required"
+        | "factual_metadata_only"
+        | "permission_granted"
+        | "open_license"
+        | "contractual_display"
+        | "hotlink_only"
+        | "todam_original"
+        | "community_submission";
+      id: string;
+      oldValue: unknown;
+    }>;
+    createdAt: string;
+    updatedAt: string;
+    submittedAt: string | null;
+    reviewedAt: string | null;
+  };
+};
+
+export type PostV1MeCompaniesByCompanyIdRevisionsResponse =
+  PostV1MeCompaniesByCompanyIdRevisionsResponses[keyof PostV1MeCompaniesByCompanyIdRevisionsResponses];
+
+export type GetV1MeCatalogRevisionsData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: "/v1/me/catalog-revisions";
+};
+
+export type GetV1MeCatalogRevisionsErrors = {
+  /**
+   * Default Response
+   */
+  400: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  401: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  404: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+};
+
+export type GetV1MeCatalogRevisionsError =
+  GetV1MeCatalogRevisionsErrors[keyof GetV1MeCatalogRevisionsErrors];
+
+export type GetV1MeCatalogRevisionsResponses = {
+  /**
+   * Default Response
+   */
+  200: {
+    items: Array<{
+      id: string;
+      companyId: string;
+      targetType: "company" | "production";
+      targetId: string;
+      status: "draft" | "submitted" | "approved" | "rejected" | "superseded";
+      justification: string | null;
+      decisionReason: string | null;
+      changes: Array<{
+        field: string;
+        newValue: unknown;
+        provenanceUrl: string | null;
+        rightsStatus:
+          | "review_required"
+          | "factual_metadata_only"
+          | "permission_granted"
+          | "open_license"
+          | "contractual_display"
+          | "hotlink_only"
+          | "todam_original"
+          | "community_submission";
+        id: string;
+        oldValue: unknown;
+      }>;
+      createdAt: string;
+      updatedAt: string;
+      submittedAt: string | null;
+      reviewedAt: string | null;
+    }>;
+  };
+};
+
+export type GetV1MeCatalogRevisionsResponse =
+  GetV1MeCatalogRevisionsResponses[keyof GetV1MeCatalogRevisionsResponses];
+
+export type GetV1MeCatalogRevisionsByRevisionIdData = {
+  body?: never;
+  path: {
+    revisionId: string;
+  };
+  query?: never;
+  url: "/v1/me/catalog-revisions/{revisionId}";
+};
+
+export type GetV1MeCatalogRevisionsByRevisionIdErrors = {
+  /**
+   * Default Response
+   */
+  400: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  401: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  404: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+};
+
+export type GetV1MeCatalogRevisionsByRevisionIdError =
+  GetV1MeCatalogRevisionsByRevisionIdErrors[keyof GetV1MeCatalogRevisionsByRevisionIdErrors];
+
+export type GetV1MeCatalogRevisionsByRevisionIdResponses = {
+  /**
+   * Default Response
+   */
+  200: {
+    id: string;
+    companyId: string;
+    targetType: "company" | "production";
+    targetId: string;
+    status: "draft" | "submitted" | "approved" | "rejected" | "superseded";
+    justification: string | null;
+    decisionReason: string | null;
+    changes: Array<{
+      field: string;
+      newValue: unknown;
+      provenanceUrl: string | null;
+      rightsStatus:
+        | "review_required"
+        | "factual_metadata_only"
+        | "permission_granted"
+        | "open_license"
+        | "contractual_display"
+        | "hotlink_only"
+        | "todam_original"
+        | "community_submission";
+      id: string;
+      oldValue: unknown;
+    }>;
+    createdAt: string;
+    updatedAt: string;
+    submittedAt: string | null;
+    reviewedAt: string | null;
+  };
+};
+
+export type GetV1MeCatalogRevisionsByRevisionIdResponse =
+  GetV1MeCatalogRevisionsByRevisionIdResponses[keyof GetV1MeCatalogRevisionsByRevisionIdResponses];
+
+export type PatchV1MeCatalogRevisionsByRevisionIdData = {
+  body: {
+    justification?: string | null;
+    changes: Array<{
+      field: string;
+      newValue: unknown;
+      provenanceUrl?: string | null;
+      rightsStatus?:
+        | "review_required"
+        | "factual_metadata_only"
+        | "permission_granted"
+        | "open_license"
+        | "contractual_display"
+        | "hotlink_only"
+        | "todam_original"
+        | "community_submission";
+    }>;
+  };
+  path: {
+    revisionId: string;
+  };
+  query?: never;
+  url: "/v1/me/catalog-revisions/{revisionId}";
+};
+
+export type PatchV1MeCatalogRevisionsByRevisionIdErrors = {
+  /**
+   * Default Response
+   */
+  400: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  401: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  404: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+};
+
+export type PatchV1MeCatalogRevisionsByRevisionIdError =
+  PatchV1MeCatalogRevisionsByRevisionIdErrors[keyof PatchV1MeCatalogRevisionsByRevisionIdErrors];
+
+export type PatchV1MeCatalogRevisionsByRevisionIdResponses = {
+  /**
+   * Default Response
+   */
+  200: {
+    id: string;
+    companyId: string;
+    targetType: "company" | "production";
+    targetId: string;
+    status: "draft" | "submitted" | "approved" | "rejected" | "superseded";
+    justification: string | null;
+    decisionReason: string | null;
+    changes: Array<{
+      field: string;
+      newValue: unknown;
+      provenanceUrl: string | null;
+      rightsStatus:
+        | "review_required"
+        | "factual_metadata_only"
+        | "permission_granted"
+        | "open_license"
+        | "contractual_display"
+        | "hotlink_only"
+        | "todam_original"
+        | "community_submission";
+      id: string;
+      oldValue: unknown;
+    }>;
+    createdAt: string;
+    updatedAt: string;
+    submittedAt: string | null;
+    reviewedAt: string | null;
+  };
+};
+
+export type PatchV1MeCatalogRevisionsByRevisionIdResponse =
+  PatchV1MeCatalogRevisionsByRevisionIdResponses[keyof PatchV1MeCatalogRevisionsByRevisionIdResponses];
+
+export type PostV1MeCatalogRevisionsByRevisionIdSubmitData = {
+  body?: never;
+  path: {
+    revisionId: string;
+  };
+  query?: never;
+  url: "/v1/me/catalog-revisions/{revisionId}/submit";
+};
+
+export type PostV1MeCatalogRevisionsByRevisionIdSubmitErrors = {
+  /**
+   * Default Response
+   */
+  400: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  401: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  404: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+};
+
+export type PostV1MeCatalogRevisionsByRevisionIdSubmitError =
+  PostV1MeCatalogRevisionsByRevisionIdSubmitErrors[keyof PostV1MeCatalogRevisionsByRevisionIdSubmitErrors];
+
+export type PostV1MeCatalogRevisionsByRevisionIdSubmitResponses = {
+  /**
+   * Default Response
+   */
+  200: {
+    id: string;
+    companyId: string;
+    targetType: "company" | "production";
+    targetId: string;
+    status: "draft" | "submitted" | "approved" | "rejected" | "superseded";
+    justification: string | null;
+    decisionReason: string | null;
+    changes: Array<{
+      field: string;
+      newValue: unknown;
+      provenanceUrl: string | null;
+      rightsStatus:
+        | "review_required"
+        | "factual_metadata_only"
+        | "permission_granted"
+        | "open_license"
+        | "contractual_display"
+        | "hotlink_only"
+        | "todam_original"
+        | "community_submission";
+      id: string;
+      oldValue: unknown;
+    }>;
+    createdAt: string;
+    updatedAt: string;
+    submittedAt: string | null;
+    reviewedAt: string | null;
+  };
+};
+
+export type PostV1MeCatalogRevisionsByRevisionIdSubmitResponse =
+  PostV1MeCatalogRevisionsByRevisionIdSubmitResponses[keyof PostV1MeCatalogRevisionsByRevisionIdSubmitResponses];
+
+export type GetV1AdminCatalogCandidatesData = {
+  body?: never;
+  path?: never;
+  query?: {
+    status?: "draft" | "published" | "hidden" | "all";
+    type?: "company" | "production" | "all";
+    limit?: number;
+  };
+  url: "/v1/admin/catalog-candidates";
+};
+
+export type GetV1AdminCatalogCandidatesErrors = {
+  /**
+   * Default Response
+   */
+  400: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  401: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  404: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+};
+
+export type GetV1AdminCatalogCandidatesError =
+  GetV1AdminCatalogCandidatesErrors[keyof GetV1AdminCatalogCandidatesErrors];
+
+export type GetV1AdminCatalogCandidatesResponses = {
+  /**
+   * Default Response
+   */
+  200: {
+    items: Array<{
+      id: string;
+      targetType: "company" | "production";
+      slug: string;
+      label: string;
+      secondaryLabel: string | null;
+      discipline: "theatre" | "opera" | "ballet";
+      publicationStatus: "draft" | "published" | "hidden";
+      readinessIssues: Array<string>;
+      sources: Array<{
+        title: string;
+        url: string;
+        retrievedAt: string;
+        rightsStatus:
+          | "review_required"
+          | "factual_metadata_only"
+          | "permission_granted"
+          | "open_license"
+          | "contractual_display"
+          | "hotlink_only"
+          | "todam_original"
+          | "community_submission";
+        license: string | null;
+      }>;
+      updatedAt: string;
+      reviewedAt: string | null;
+    }>;
+  };
+};
+
+export type GetV1AdminCatalogCandidatesResponse =
+  GetV1AdminCatalogCandidatesResponses[keyof GetV1AdminCatalogCandidatesResponses];
+
+export type PostV1AdminCatalogCandidatesByTargetTypeByTargetIdPublishData = {
+  body?: never;
+  path: {
+    targetType: "company" | "production";
+    targetId: string;
+  };
+  query?: never;
+  url: "/v1/admin/catalog-candidates/{targetType}/{targetId}/publish";
+};
+
+export type PostV1AdminCatalogCandidatesByTargetTypeByTargetIdPublishErrors = {
+  /**
+   * Default Response
+   */
+  400: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  401: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  404: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+};
+
+export type PostV1AdminCatalogCandidatesByTargetTypeByTargetIdPublishError =
+  PostV1AdminCatalogCandidatesByTargetTypeByTargetIdPublishErrors[keyof PostV1AdminCatalogCandidatesByTargetTypeByTargetIdPublishErrors];
+
+export type PostV1AdminCatalogCandidatesByTargetTypeByTargetIdPublishResponses = {
+  /**
+   * Default Response
+   */
+  200: {
+    ok: true;
+  };
+};
+
+export type PostV1AdminCatalogCandidatesByTargetTypeByTargetIdPublishResponse =
+  PostV1AdminCatalogCandidatesByTargetTypeByTargetIdPublishResponses[keyof PostV1AdminCatalogCandidatesByTargetTypeByTargetIdPublishResponses];
+
+export type PostV1AdminCatalogCandidatesByTargetTypeByTargetIdHideData = {
+  body?: never;
+  path: {
+    targetType: "company" | "production";
+    targetId: string;
+  };
+  query?: never;
+  url: "/v1/admin/catalog-candidates/{targetType}/{targetId}/hide";
+};
+
+export type PostV1AdminCatalogCandidatesByTargetTypeByTargetIdHideErrors = {
+  /**
+   * Default Response
+   */
+  400: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  401: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  404: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+};
+
+export type PostV1AdminCatalogCandidatesByTargetTypeByTargetIdHideError =
+  PostV1AdminCatalogCandidatesByTargetTypeByTargetIdHideErrors[keyof PostV1AdminCatalogCandidatesByTargetTypeByTargetIdHideErrors];
+
+export type PostV1AdminCatalogCandidatesByTargetTypeByTargetIdHideResponses = {
+  /**
+   * Default Response
+   */
+  200: {
+    ok: true;
+  };
+};
+
+export type PostV1AdminCatalogCandidatesByTargetTypeByTargetIdHideResponse =
+  PostV1AdminCatalogCandidatesByTargetTypeByTargetIdHideResponses[keyof PostV1AdminCatalogCandidatesByTargetTypeByTargetIdHideResponses];
+
+export type PostV1AdminCatalogCandidatesByTargetTypeByTargetIdDraftData = {
+  body?: never;
+  path: {
+    targetType: "company" | "production";
+    targetId: string;
+  };
+  query?: never;
+  url: "/v1/admin/catalog-candidates/{targetType}/{targetId}/draft";
+};
+
+export type PostV1AdminCatalogCandidatesByTargetTypeByTargetIdDraftErrors = {
+  /**
+   * Default Response
+   */
+  400: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  401: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  404: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+};
+
+export type PostV1AdminCatalogCandidatesByTargetTypeByTargetIdDraftError =
+  PostV1AdminCatalogCandidatesByTargetTypeByTargetIdDraftErrors[keyof PostV1AdminCatalogCandidatesByTargetTypeByTargetIdDraftErrors];
+
+export type PostV1AdminCatalogCandidatesByTargetTypeByTargetIdDraftResponses = {
+  /**
+   * Default Response
+   */
+  200: {
+    ok: true;
+  };
+};
+
+export type PostV1AdminCatalogCandidatesByTargetTypeByTargetIdDraftResponse =
+  PostV1AdminCatalogCandidatesByTargetTypeByTargetIdDraftResponses[keyof PostV1AdminCatalogCandidatesByTargetTypeByTargetIdDraftResponses];
+
+export type GetV1AdminContentReportsData = {
+  body?: never;
+  path?: never;
+  query?: {
+    status?: "open" | "reviewing" | "resolved" | "dismissed" | "all";
+  };
+  url: "/v1/admin/content-reports";
+};
+
+export type GetV1AdminContentReportsErrors = {
+  /**
+   * Default Response
+   */
+  400: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  401: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  404: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+};
+
+export type GetV1AdminContentReportsError =
+  GetV1AdminContentReportsErrors[keyof GetV1AdminContentReportsErrors];
+
+export type GetV1AdminContentReportsResponses = {
+  /**
+   * Default Response
+   */
+  200: {
+    items: Array<{
+      id: string;
+      targetType: "production" | "venue" | "company" | "member" | "list" | "review";
+      targetId: string;
+      category: "visual_rights" | "information" | "schedule" | "other";
+      targetLabel: string;
+      targetPath: string | null;
+      canHide: boolean;
+      canHideMedia: boolean;
+      media: {
+        id: string;
+        url: string;
+        credit: string | null;
+        sourceUrl: string;
+      } | null;
+      contribution: {
+        id: string;
+        status: "published" | "hidden";
+        sourceUrl: string;
+        submittedAt: string;
+      } | null;
+      reason: string;
+      status: "open" | "reviewing" | "resolved" | "dismissed";
+      decision: string | null;
+      submittedAt: string;
+      reviewedAt: string | null;
+    }>;
+  };
+};
+
+export type GetV1AdminContentReportsResponse =
+  GetV1AdminContentReportsResponses[keyof GetV1AdminContentReportsResponses];
+
+export type PostV1AdminContentReportsByReportIdReviewingData = {
+  body: {
+    decision: string;
+    contentAction?: "none" | "hide" | "hide_media";
+  };
+  path: {
+    reportId: string;
+  };
+  query?: never;
+  url: "/v1/admin/content-reports/{reportId}/reviewing";
+};
+
+export type PostV1AdminContentReportsByReportIdReviewingErrors = {
+  /**
+   * Default Response
+   */
+  400: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  401: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  404: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+};
+
+export type PostV1AdminContentReportsByReportIdReviewingError =
+  PostV1AdminContentReportsByReportIdReviewingErrors[keyof PostV1AdminContentReportsByReportIdReviewingErrors];
+
+export type PostV1AdminContentReportsByReportIdReviewingResponses = {
+  /**
+   * Default Response
+   */
+  200: {
+    id: string;
+    targetType: "production" | "venue" | "company" | "member" | "list" | "review";
+    targetId: string;
+    category: "visual_rights" | "information" | "schedule" | "other";
+    targetLabel: string;
+    targetPath: string | null;
+    canHide: boolean;
+    canHideMedia: boolean;
+    media: {
+      id: string;
+      url: string;
+      credit: string | null;
+      sourceUrl: string;
+    } | null;
+    contribution: {
+      id: string;
+      status: "published" | "hidden";
+      sourceUrl: string;
+      submittedAt: string;
+    } | null;
+    reason: string;
+    status: "open" | "reviewing" | "resolved" | "dismissed";
+    decision: string | null;
+    submittedAt: string;
+    reviewedAt: string | null;
+  };
+};
+
+export type PostV1AdminContentReportsByReportIdReviewingResponse =
+  PostV1AdminContentReportsByReportIdReviewingResponses[keyof PostV1AdminContentReportsByReportIdReviewingResponses];
+
+export type PostV1AdminContentReportsByReportIdResolvedData = {
+  body: {
+    decision: string;
+    contentAction?: "none" | "hide" | "hide_media";
+  };
+  path: {
+    reportId: string;
+  };
+  query?: never;
+  url: "/v1/admin/content-reports/{reportId}/resolved";
+};
+
+export type PostV1AdminContentReportsByReportIdResolvedErrors = {
+  /**
+   * Default Response
+   */
+  400: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  401: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  404: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+};
+
+export type PostV1AdminContentReportsByReportIdResolvedError =
+  PostV1AdminContentReportsByReportIdResolvedErrors[keyof PostV1AdminContentReportsByReportIdResolvedErrors];
+
+export type PostV1AdminContentReportsByReportIdResolvedResponses = {
+  /**
+   * Default Response
+   */
+  200: {
+    id: string;
+    targetType: "production" | "venue" | "company" | "member" | "list" | "review";
+    targetId: string;
+    category: "visual_rights" | "information" | "schedule" | "other";
+    targetLabel: string;
+    targetPath: string | null;
+    canHide: boolean;
+    canHideMedia: boolean;
+    media: {
+      id: string;
+      url: string;
+      credit: string | null;
+      sourceUrl: string;
+    } | null;
+    contribution: {
+      id: string;
+      status: "published" | "hidden";
+      sourceUrl: string;
+      submittedAt: string;
+    } | null;
+    reason: string;
+    status: "open" | "reviewing" | "resolved" | "dismissed";
+    decision: string | null;
+    submittedAt: string;
+    reviewedAt: string | null;
+  };
+};
+
+export type PostV1AdminContentReportsByReportIdResolvedResponse =
+  PostV1AdminContentReportsByReportIdResolvedResponses[keyof PostV1AdminContentReportsByReportIdResolvedResponses];
+
+export type PostV1AdminContentReportsByReportIdDismissedData = {
+  body: {
+    decision: string;
+    contentAction?: "none" | "hide" | "hide_media";
+  };
+  path: {
+    reportId: string;
+  };
+  query?: never;
+  url: "/v1/admin/content-reports/{reportId}/dismissed";
+};
+
+export type PostV1AdminContentReportsByReportIdDismissedErrors = {
+  /**
+   * Default Response
+   */
+  400: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  401: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  404: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+};
+
+export type PostV1AdminContentReportsByReportIdDismissedError =
+  PostV1AdminContentReportsByReportIdDismissedErrors[keyof PostV1AdminContentReportsByReportIdDismissedErrors];
+
+export type PostV1AdminContentReportsByReportIdDismissedResponses = {
+  /**
+   * Default Response
+   */
+  200: {
+    id: string;
+    targetType: "production" | "venue" | "company" | "member" | "list" | "review";
+    targetId: string;
+    category: "visual_rights" | "information" | "schedule" | "other";
+    targetLabel: string;
+    targetPath: string | null;
+    canHide: boolean;
+    canHideMedia: boolean;
+    media: {
+      id: string;
+      url: string;
+      credit: string | null;
+      sourceUrl: string;
+    } | null;
+    contribution: {
+      id: string;
+      status: "published" | "hidden";
+      sourceUrl: string;
+      submittedAt: string;
+    } | null;
+    reason: string;
+    status: "open" | "reviewing" | "resolved" | "dismissed";
+    decision: string | null;
+    submittedAt: string;
+    reviewedAt: string | null;
+  };
+};
+
+export type PostV1AdminContentReportsByReportIdDismissedResponse =
+  PostV1AdminContentReportsByReportIdDismissedResponses[keyof PostV1AdminContentReportsByReportIdDismissedResponses];
+
+export type GetV1AdminCompanyClaimsData = {
+  body?: never;
+  path?: never;
+  query?: {
+    status?: "pending" | "approved" | "rejected" | "revoked" | "all";
+  };
+  url: "/v1/admin/company-claims";
+};
+
+export type GetV1AdminCompanyClaimsErrors = {
+  /**
+   * Default Response
+   */
+  400: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  401: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  404: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+};
+
+export type GetV1AdminCompanyClaimsError =
+  GetV1AdminCompanyClaimsErrors[keyof GetV1AdminCompanyClaimsErrors];
+
+export type GetV1AdminCompanyClaimsResponses = {
+  /**
+   * Default Response
+   */
+  200: {
+    items: Array<{
+      id: string;
+      companyId: string;
+      companyName: string;
+      companySlug: string;
+      representativeName: string;
+      roleTitle: string;
+      professionalEmail: string;
+      officialWebsiteUrl: string;
+      evidence: string;
+      authorityConfirmed: true;
+      status: "pending" | "approved" | "rejected" | "revoked";
+      decisionReason: string | null;
+      submittedAt: string;
+      reviewedAt: string | null;
+    }>;
+  };
+};
+
+export type GetV1AdminCompanyClaimsResponse =
+  GetV1AdminCompanyClaimsResponses[keyof GetV1AdminCompanyClaimsResponses];
+
+export type PostV1AdminCompanyClaimsByClaimIdApprovedData = {
+  body: {
+    decisionReason: string;
+    membershipRole?: "representative" | "editor" | "manager";
+  };
+  path: {
+    claimId: string;
+  };
+  query?: never;
+  url: "/v1/admin/company-claims/{claimId}/approved";
+};
+
+export type PostV1AdminCompanyClaimsByClaimIdApprovedErrors = {
+  /**
+   * Default Response
+   */
+  400: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  401: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  404: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+};
+
+export type PostV1AdminCompanyClaimsByClaimIdApprovedError =
+  PostV1AdminCompanyClaimsByClaimIdApprovedErrors[keyof PostV1AdminCompanyClaimsByClaimIdApprovedErrors];
+
+export type PostV1AdminCompanyClaimsByClaimIdApprovedResponses = {
+  /**
+   * Default Response
+   */
+  200: {
+    id: string;
+    companyId: string;
+    companyName: string;
+    companySlug: string;
+    representativeName: string;
+    roleTitle: string;
+    professionalEmail: string;
+    officialWebsiteUrl: string;
+    evidence: string;
+    authorityConfirmed: true;
+    status: "pending" | "approved" | "rejected" | "revoked";
+    decisionReason: string | null;
+    submittedAt: string;
+    reviewedAt: string | null;
+  };
+};
+
+export type PostV1AdminCompanyClaimsByClaimIdApprovedResponse =
+  PostV1AdminCompanyClaimsByClaimIdApprovedResponses[keyof PostV1AdminCompanyClaimsByClaimIdApprovedResponses];
+
+export type PostV1AdminCompanyClaimsByClaimIdRejectedData = {
+  body: {
+    decisionReason: string;
+    membershipRole?: "representative" | "editor" | "manager";
+  };
+  path: {
+    claimId: string;
+  };
+  query?: never;
+  url: "/v1/admin/company-claims/{claimId}/rejected";
+};
+
+export type PostV1AdminCompanyClaimsByClaimIdRejectedErrors = {
+  /**
+   * Default Response
+   */
+  400: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  401: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  404: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+};
+
+export type PostV1AdminCompanyClaimsByClaimIdRejectedError =
+  PostV1AdminCompanyClaimsByClaimIdRejectedErrors[keyof PostV1AdminCompanyClaimsByClaimIdRejectedErrors];
+
+export type PostV1AdminCompanyClaimsByClaimIdRejectedResponses = {
+  /**
+   * Default Response
+   */
+  200: {
+    id: string;
+    companyId: string;
+    companyName: string;
+    companySlug: string;
+    representativeName: string;
+    roleTitle: string;
+    professionalEmail: string;
+    officialWebsiteUrl: string;
+    evidence: string;
+    authorityConfirmed: true;
+    status: "pending" | "approved" | "rejected" | "revoked";
+    decisionReason: string | null;
+    submittedAt: string;
+    reviewedAt: string | null;
+  };
+};
+
+export type PostV1AdminCompanyClaimsByClaimIdRejectedResponse =
+  PostV1AdminCompanyClaimsByClaimIdRejectedResponses[keyof PostV1AdminCompanyClaimsByClaimIdRejectedResponses];
+
+export type PostV1AdminCompanyClaimsByClaimIdRevokedData = {
+  body: {
+    decisionReason: string;
+    membershipRole?: "representative" | "editor" | "manager";
+  };
+  path: {
+    claimId: string;
+  };
+  query?: never;
+  url: "/v1/admin/company-claims/{claimId}/revoked";
+};
+
+export type PostV1AdminCompanyClaimsByClaimIdRevokedErrors = {
+  /**
+   * Default Response
+   */
+  400: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  401: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  404: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+};
+
+export type PostV1AdminCompanyClaimsByClaimIdRevokedError =
+  PostV1AdminCompanyClaimsByClaimIdRevokedErrors[keyof PostV1AdminCompanyClaimsByClaimIdRevokedErrors];
+
+export type PostV1AdminCompanyClaimsByClaimIdRevokedResponses = {
+  /**
+   * Default Response
+   */
+  200: {
+    id: string;
+    companyId: string;
+    companyName: string;
+    companySlug: string;
+    representativeName: string;
+    roleTitle: string;
+    professionalEmail: string;
+    officialWebsiteUrl: string;
+    evidence: string;
+    authorityConfirmed: true;
+    status: "pending" | "approved" | "rejected" | "revoked";
+    decisionReason: string | null;
+    submittedAt: string;
+    reviewedAt: string | null;
+  };
+};
+
+export type PostV1AdminCompanyClaimsByClaimIdRevokedResponse =
+  PostV1AdminCompanyClaimsByClaimIdRevokedResponses[keyof PostV1AdminCompanyClaimsByClaimIdRevokedResponses];
+
+export type GetV1AdminCatalogRevisionsData = {
+  body?: never;
+  path?: never;
+  query?: {
+    status?: "draft" | "submitted" | "approved" | "rejected" | "superseded" | "all";
+  };
+  url: "/v1/admin/catalog-revisions";
+};
+
+export type GetV1AdminCatalogRevisionsErrors = {
+  /**
+   * Default Response
+   */
+  400: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  401: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  404: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+};
+
+export type GetV1AdminCatalogRevisionsError =
+  GetV1AdminCatalogRevisionsErrors[keyof GetV1AdminCatalogRevisionsErrors];
+
+export type GetV1AdminCatalogRevisionsResponses = {
+  /**
+   * Default Response
+   */
+  200: {
+    items: Array<{
+      id: string;
+      companyId: string;
+      targetType: "company" | "production";
+      targetId: string;
+      status: "draft" | "submitted" | "approved" | "rejected" | "superseded";
+      justification: string | null;
+      decisionReason: string | null;
+      changes: Array<{
+        field: string;
+        newValue: unknown;
+        provenanceUrl: string | null;
+        rightsStatus:
+          | "review_required"
+          | "factual_metadata_only"
+          | "permission_granted"
+          | "open_license"
+          | "contractual_display"
+          | "hotlink_only"
+          | "todam_original"
+          | "community_submission";
+        id: string;
+        oldValue: unknown;
+      }>;
+      createdAt: string;
+      updatedAt: string;
+      submittedAt: string | null;
+      reviewedAt: string | null;
+    }>;
+  };
+};
+
+export type GetV1AdminCatalogRevisionsResponse =
+  GetV1AdminCatalogRevisionsResponses[keyof GetV1AdminCatalogRevisionsResponses];
+
+export type PostV1AdminCatalogRevisionsByRevisionIdApprovedData = {
+  body: {
+    decisionReason: string;
+  };
+  path: {
+    revisionId: string;
+  };
+  query?: never;
+  url: "/v1/admin/catalog-revisions/{revisionId}/approved";
+};
+
+export type PostV1AdminCatalogRevisionsByRevisionIdApprovedErrors = {
+  /**
+   * Default Response
+   */
+  400: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  401: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  404: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+};
+
+export type PostV1AdminCatalogRevisionsByRevisionIdApprovedError =
+  PostV1AdminCatalogRevisionsByRevisionIdApprovedErrors[keyof PostV1AdminCatalogRevisionsByRevisionIdApprovedErrors];
+
+export type PostV1AdminCatalogRevisionsByRevisionIdApprovedResponses = {
+  /**
+   * Default Response
+   */
+  200: {
+    id: string;
+    companyId: string;
+    targetType: "company" | "production";
+    targetId: string;
+    status: "draft" | "submitted" | "approved" | "rejected" | "superseded";
+    justification: string | null;
+    decisionReason: string | null;
+    changes: Array<{
+      field: string;
+      newValue: unknown;
+      provenanceUrl: string | null;
+      rightsStatus:
+        | "review_required"
+        | "factual_metadata_only"
+        | "permission_granted"
+        | "open_license"
+        | "contractual_display"
+        | "hotlink_only"
+        | "todam_original"
+        | "community_submission";
+      id: string;
+      oldValue: unknown;
+    }>;
+    createdAt: string;
+    updatedAt: string;
+    submittedAt: string | null;
+    reviewedAt: string | null;
+  };
+};
+
+export type PostV1AdminCatalogRevisionsByRevisionIdApprovedResponse =
+  PostV1AdminCatalogRevisionsByRevisionIdApprovedResponses[keyof PostV1AdminCatalogRevisionsByRevisionIdApprovedResponses];
+
+export type PostV1AdminCatalogRevisionsByRevisionIdRejectedData = {
+  body: {
+    decisionReason: string;
+  };
+  path: {
+    revisionId: string;
+  };
+  query?: never;
+  url: "/v1/admin/catalog-revisions/{revisionId}/rejected";
+};
+
+export type PostV1AdminCatalogRevisionsByRevisionIdRejectedErrors = {
+  /**
+   * Default Response
+   */
+  400: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  401: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  404: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+};
+
+export type PostV1AdminCatalogRevisionsByRevisionIdRejectedError =
+  PostV1AdminCatalogRevisionsByRevisionIdRejectedErrors[keyof PostV1AdminCatalogRevisionsByRevisionIdRejectedErrors];
+
+export type PostV1AdminCatalogRevisionsByRevisionIdRejectedResponses = {
+  /**
+   * Default Response
+   */
+  200: {
+    id: string;
+    companyId: string;
+    targetType: "company" | "production";
+    targetId: string;
+    status: "draft" | "submitted" | "approved" | "rejected" | "superseded";
+    justification: string | null;
+    decisionReason: string | null;
+    changes: Array<{
+      field: string;
+      newValue: unknown;
+      provenanceUrl: string | null;
+      rightsStatus:
+        | "review_required"
+        | "factual_metadata_only"
+        | "permission_granted"
+        | "open_license"
+        | "contractual_display"
+        | "hotlink_only"
+        | "todam_original"
+        | "community_submission";
+      id: string;
+      oldValue: unknown;
+    }>;
+    createdAt: string;
+    updatedAt: string;
+    submittedAt: string | null;
+    reviewedAt: string | null;
+  };
+};
+
+export type PostV1AdminCatalogRevisionsByRevisionIdRejectedResponse =
+  PostV1AdminCatalogRevisionsByRevisionIdRejectedResponses[keyof PostV1AdminCatalogRevisionsByRevisionIdRejectedResponses];
+
+export type PostV1AdminCatalogRevisionsByRevisionIdRestoreData = {
+  body: {
+    decisionReason: string;
+  };
+  path: {
+    revisionId: string;
+  };
+  query?: never;
+  url: "/v1/admin/catalog-revisions/{revisionId}/restore";
+};
+
+export type PostV1AdminCatalogRevisionsByRevisionIdRestoreErrors = {
+  /**
+   * Default Response
+   */
+  400: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  401: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  403: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  404: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  409: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  413: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  429: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  500: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+  /**
+   * Default Response
+   */
+  503: {
+    type: string;
+    title: string;
+    status: number;
+    detail: string;
+    instance?: string;
+    code?: string;
+  };
+};
+
+export type PostV1AdminCatalogRevisionsByRevisionIdRestoreError =
+  PostV1AdminCatalogRevisionsByRevisionIdRestoreErrors[keyof PostV1AdminCatalogRevisionsByRevisionIdRestoreErrors];
+
+export type PostV1AdminCatalogRevisionsByRevisionIdRestoreResponses = {
+  /**
+   * Default Response
+   */
+  200: {
+    id: string;
+    companyId: string;
+    targetType: "company" | "production";
+    targetId: string;
+    status: "draft" | "submitted" | "approved" | "rejected" | "superseded";
+    justification: string | null;
+    decisionReason: string | null;
+    changes: Array<{
+      field: string;
+      newValue: unknown;
+      provenanceUrl: string | null;
+      rightsStatus:
+        | "review_required"
+        | "factual_metadata_only"
+        | "permission_granted"
+        | "open_license"
+        | "contractual_display"
+        | "hotlink_only"
+        | "todam_original"
+        | "community_submission";
+      id: string;
+      oldValue: unknown;
+    }>;
+    createdAt: string;
+    updatedAt: string;
+    submittedAt: string | null;
+    reviewedAt: string | null;
+  };
+};
+
+export type PostV1AdminCatalogRevisionsByRevisionIdRestoreResponse =
+  PostV1AdminCatalogRevisionsByRevisionIdRestoreResponses[keyof PostV1AdminCatalogRevisionsByRevisionIdRestoreResponses];

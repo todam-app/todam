@@ -20,7 +20,9 @@
   "dependencies": {
     "@better-auth/drizzle-adapter": "1.6.25",
     "@better-auth/expo": "1.6.25",
+    "@aws-sdk/client-s3": "3.1090.0",
     "@fastify/cors": "11.3.0",
+    "@fastify/multipart": "10.1.0",
     "@fastify/swagger": "9.8.1",
     "@fastify/swagger-ui": "6.1.0",
     "@todam/contracts": "workspace:*",
@@ -34,6 +36,7 @@
     "fastify-type-provider-zod": "7.0.0",
     "pg": "8.22.0",
     "pino-pretty": "13.1.3",
+    "sharp": "0.35.3",
     "zod": "4.4.3"
   },
   "devDependencies": {

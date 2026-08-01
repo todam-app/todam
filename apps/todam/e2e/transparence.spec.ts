@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-test("la page transparence expose les chiffres, les coûts et le code source", async ({
+test("la page Les coulisses expose les chiffres, les coûts et le code source", async ({
   page,
 }) => {
   let releaseStats: (() => void) | undefined;
@@ -15,16 +15,16 @@ test("la page transparence expose les chiffres, les coûts et le code source", a
         verifiedUsers: 12,
         activeProductions: 48,
         upcomingPerformances: 96,
+        activeVenues: 24,
         generatedAt: "2026-07-26T12:00:00.000Z",
       }),
     });
   });
-  await page.goto("/");
-  await page.getByRole("link", { name: "Transparence & open source" }).press("Enter");
+  await page.goto("/les-coulisses");
 
-  await expect(page).toHaveURL("/transparence");
+  await expect(page).toHaveURL("/les-coulisses");
   await expect(page).toHaveTitle(
-    "Todam, projet open source - Chiffres et transparence",
+    "Les coulisses de Todam | Coût, code et fonctionnement",
   );
   await expect(page.getByLabel("Comptes vérifiés : …")).toBeVisible();
   releaseStats?.();
@@ -33,7 +33,9 @@ test("la page transparence expose les chiffres, les coûts et le code source", a
   ).toBeVisible();
   await expect(page.getByLabel("Comptes vérifiés : 12")).toBeVisible();
   await expect(page.getByLabel("Spectacles actifs : 48")).toBeVisible();
-  await expect(page.getByLabel("Représentations à venir : 96")).toBeVisible();
+  await expect(
+    page.getByLabel("Salles de théâtre, d’opéra et de ballet : 24"),
+  ).toBeVisible();
   await expect(page.getByText("10,71 €")).toBeVisible();
   await expect(page.getByText("Le code de Todam est public")).toBeVisible();
   await expect(
@@ -50,6 +52,19 @@ test("la page transparence expose les chiffres, les coûts et le code source", a
     page.getByRole("link", { name: "Voir le code sur GitHub" }),
   ).toBeVisible();
   await expect(page.getByRole("link", { name: "Contribuer au projet" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Aidez-nous" })).toBeVisible();
+  await expect(page.getByText("ajoutez des spectacles", { exact: false })).toBeVisible();
+  await expect(
+    page.getByRole("heading", {
+      name: "Ce qui est disponible, et ce qui reste à prouver",
+    }),
+  ).toHaveCount(0);
+  await expect(
+    page.getByRole("heading", { name: "Corriger une information" }),
+  ).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Limites actuelles" })).toHaveCount(
+    0,
+  );
   await expect(
     page.getByText("Je vous le recommande : ça fait gagner un temps fou !"),
   ).toBeVisible();
@@ -71,7 +86,7 @@ test("la page transparence expose les chiffres, les coûts et le code source", a
   }
 });
 
-test("la page transparence ne transforme pas une panne API en zéro", async ({
+test("la page Les coulisses ne transforme pas une panne API en zéro", async ({
   page,
 }) => {
   await page.route("**/v1/public/stats", async (route) => {
@@ -86,12 +101,14 @@ test("la page transparence ne transforme pas une panne API en zéro", async ({
       }),
     });
   });
-  await page.goto("/transparence");
+  await page.goto("/les-coulisses");
 
   await expect(
     page.getByText("Les chiffres sont temporairement indisponibles."),
   ).toBeVisible();
   await expect(page.getByLabel("Comptes vérifiés : —")).toBeVisible();
   await expect(page.getByLabel("Spectacles actifs : —")).toBeVisible();
-  await expect(page.getByLabel("Représentations à venir : —")).toBeVisible();
+  await expect(
+    page.getByLabel("Salles de théâtre, d’opéra et de ballet : —"),
+  ).toBeVisible();
 });

@@ -90,8 +90,21 @@ for (const markdown of walk(".").filter((path) => extname(path) === ".md")) {
 const nginxConfig = readFileSync("deploy/nginx.conf", "utf8");
 const legalRobotsHeader =
   'add_header X-Robots-Tag "noindex, nofollow, noarchive, nosnippet" always;';
-const legalRobotsHeaderCount = nginxConfig.split(legalRobotsHeader).length - 1;
-if (legalRobotsHeaderCount !== 2) {
+const protectedLegalLocations = [
+  "location ~* ^/legal/.+\\.pdf$ {",
+  "location ~ ^/(?:conditions-utilisation|confidentialite|informations-legales|mentions-legales|suppression-compte)/?$ {",
+];
+const legalLocationsProtected = protectedLegalLocations.every((location) => {
+  const locationStart = nginxConfig.indexOf(location);
+  if (locationStart === -1) return false;
+
+  const locationEnd = nginxConfig.indexOf("\n    }", locationStart);
+  return (
+    locationEnd !== -1 &&
+    nginxConfig.slice(locationStart, locationEnd).includes(legalRobotsHeader)
+  );
+});
+if (!legalLocationsProtected) {
   errors.push(
     "deploy/nginx.conf doit protéger les pages juridiques et leurs PDF avec X-Robots-Tag.",
   );

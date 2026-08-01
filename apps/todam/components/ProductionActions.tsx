@@ -3,11 +3,13 @@ import { tokens } from "@todam/design-system";
 import type { ComponentProps } from "react";
 import {
   ActivityIndicator,
+  Platform,
   Pressable,
   StyleSheet,
   Text,
   View,
   useWindowDimensions,
+  type PressableProps,
 } from "react-native";
 
 import { getProductionActionsPresentation } from "../lib/production-actions";
@@ -36,12 +38,25 @@ function ActionButton({
   selected = false,
   tone,
 }: ActionButtonProps) {
-  const foreground =
-    tone === "primary"
-      ? tokens.color.surface
-      : tone === "success"
-        ? tokens.color.success
-        : tokens.color.ink;
+  const primaryWebButton = Platform.OS === "web" && tone === "primary";
+  const secondaryWebButton = Platform.OS === "web" && tone === "secondary";
+  const foreground = primaryWebButton
+    ? tokens.button.standard.text
+    : secondaryWebButton
+      ? tokens.button.quiet.text
+      : tone === "primary"
+        ? tokens.color.surface
+        : tone === "success"
+          ? tokens.color.accent
+          : tokens.color.ink;
+  const webInteractionProps =
+    primaryWebButton || secondaryWebButton
+      ? ({
+          dataSet: {
+            todamCta: primaryWebButton ? "standard" : "quiet",
+          },
+        } as unknown as PressableProps)
+      : {};
 
   return (
     <Pressable
@@ -50,10 +65,13 @@ function ActionButton({
       accessibilityState={{ disabled: disabled || loading, selected }}
       disabled={disabled || loading}
       onPress={onPress}
+      {...webInteractionProps}
       style={({ pressed }) => [
         styles.action,
-        tone === "primary" && styles.actionPrimary,
-        tone === "secondary" && styles.actionSecondary,
+        primaryWebButton && styles.actionStandardWeb,
+        secondaryWebButton && styles.actionQuietWeb,
+        !primaryWebButton && tone === "primary" && styles.actionPrimary,
+        !secondaryWebButton && tone === "secondary" && styles.actionSecondary,
         tone === "success" && styles.actionSuccess,
         pressed && styles.actionPressed,
         (disabled || loading) && styles.actionDisabled,
@@ -71,7 +89,16 @@ function ActionButton({
             size={22}
           />
           <View style={styles.copy}>
-            <Text style={[styles.label, { color: foreground }]}>{label}</Text>
+            <Text
+              style={[
+                styles.label,
+                (primaryWebButton || secondaryWebButton) &&
+                  styles.labelStandardWeb,
+                { color: foreground },
+              ]}
+            >
+              {label}
+            </Text>
           </View>
         </>
       )}
@@ -143,22 +170,37 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   actionDisabled: {
-    opacity: 0.5,
+    backgroundColor: tokens.color.disabled,
+    borderColor: tokens.color.controlBorder,
   },
   actionPressed: {
-    opacity: 0.76,
+    transform: [{ translateY: 1 }],
   },
   actionPrimary: {
     backgroundColor: tokens.color.accent,
   },
   actionSecondary: {
     backgroundColor: tokens.color.surface,
-    borderColor: tokens.color.border,
+    borderColor: tokens.color.controlBorder,
     borderWidth: 1,
   },
+  actionStandardWeb: {
+    backgroundColor: tokens.button.standard.background,
+    borderColor: tokens.button.standard.border,
+    borderRadius: tokens.button.standard.radius,
+    borderWidth: tokens.button.standard.borderWidth,
+    boxSizing: "border-box",
+  },
+  actionQuietWeb: {
+    backgroundColor: tokens.button.quiet.background,
+    borderColor: tokens.button.quiet.border,
+    borderRadius: tokens.button.quiet.radius,
+    borderWidth: tokens.button.quiet.borderWidth,
+    boxSizing: "border-box",
+  },
   actionSuccess: {
-    backgroundColor: tokens.color.surface,
-    borderColor: tokens.color.success,
+    backgroundColor: tokens.color.selectedSurface,
+    borderColor: tokens.color.selectedBorder,
     borderWidth: 1,
   },
   actions: {
@@ -175,5 +217,9 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     fontWeight: "700",
+  },
+  labelStandardWeb: {
+    fontFamily: tokens.button.standard.fontFamily,
+    fontWeight: tokens.button.standard.fontWeight,
   },
 });

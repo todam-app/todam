@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import {
   CitySearchQuerySchema,
+  CompanyProductionParamsSchema,
+  ContactBodySchema,
   EmailChangeBodySchema,
   EmailSignInBodySchema,
   HomeCityBodySchema,
@@ -17,6 +19,41 @@ import {
 import { ProductionCardSchema } from "./catalog.js";
 
 describe("contrats API", () => {
+  it("valide et normalise un message de contact", () => {
+    expect(
+      ContactBodySchema.parse({
+        name: "  Camille  ",
+        email: "camille@example.test",
+        subject: "  Une question  ",
+        message: "  Bonjour, voici ma question.  ",
+      }),
+    ).toEqual({
+      name: "Camille",
+      email: "camille@example.test",
+      subject: "Une question",
+      message: "Bonjour, voici ma question.",
+      website: "",
+    });
+
+    expect(() =>
+      ContactBodySchema.parse({
+        name: "",
+        email: "adresse-invalide",
+        subject: "Hi",
+        message: "Trop court",
+      }),
+    ).toThrow();
+    expect(() =>
+      ContactBodySchema.parse({
+        name: "Camille",
+        email: "camille@example.test",
+        subject: "Question",
+        message: "Un message suffisamment détaillé.",
+        website: "x".repeat(201),
+      }),
+    ).toThrow();
+  });
+
   it("décrit les connexions par email et nom d'utilisateur", () => {
     expect(
       EmailSignInBodySchema.parse({
@@ -55,8 +92,29 @@ describe("contrats API", () => {
   it("normalise la pagination de recherche", () => {
     expect(SearchQuerySchema.parse({ q: "Muses" })).toEqual({
       q: "Muses",
+      type: "productions",
+      temporal: "all",
+      sort: "relevance",
       limit: 20,
     });
+  });
+
+  it("contraint les identifiants de l’éditeur privé d’une production", () => {
+    expect(
+      CompanyProductionParamsSchema.parse({
+        companyId: "5aecf9f4-b9da-4da0-b8fa-8898e882d99f",
+        productionId: "a902c9b8-7c10-4bef-898d-8037c0501480",
+      }),
+    ).toEqual({
+      companyId: "5aecf9f4-b9da-4da0-b8fa-8898e882d99f",
+      productionId: "a902c9b8-7c10-4bef-898d-8037c0501480",
+    });
+    expect(() =>
+      CompanyProductionParamsSchema.parse({
+        companyId: "compagnie",
+        productionId: "production",
+      }),
+    ).toThrow();
   });
 
   it("contraint la ville à une option canonique du catalogue", () => {
@@ -81,7 +139,7 @@ describe("contrats API", () => {
 
   it("décrit l'accueil connecté et sa progression sur cinq spectacles", () => {
     const home = HomeResponseSchema.parse({
-      profile: { pseudonym: "spectatrice" },
+      profile: { username: "spectatrice" },
       homeCity: {
         locality: "Monaco",
         countryCode: "MC",
@@ -94,7 +152,7 @@ describe("contrats API", () => {
       recentlyAdded: [],
     });
 
-    expect(home.profile.pseudonym).toBe("spectatrice");
+    expect(home.profile.username).toBe("spectatrice");
     expect(home.progress).toEqual({ current: 4, target: 5, completed: false });
   });
 
@@ -128,7 +186,9 @@ describe("contrats API", () => {
               slug: "theatre-des-muses",
               name: "Théâtre des Muses",
               locality: "Monaco",
+              countryCode: "MC",
               timezone: "Europe/Monaco",
+              officialUrl: null,
             },
           },
         },
@@ -145,6 +205,7 @@ describe("contrats API", () => {
       title: "Une pièce",
       discipline: "theatre",
       audience: "general",
+      minimumAge: null,
       workTitle: null,
       primaryCredit: null,
       venueNames: ["Scène Exemple"],

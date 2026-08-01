@@ -1,4 +1,4 @@
-import { usePathname } from "expo-router";
+import { useIsFocused, usePathname } from "expo-router";
 import {
   createContext,
   useContext,
@@ -17,6 +17,9 @@ import {
   type ScrollViewProps,
   type ViewProps,
 } from "react-native";
+
+import { isPrimaryMobilePath } from "../lib/navigation";
+import { LegalFooter, type LegalFooterVariant } from "./LegalFooter";
 
 type WebPageScrollContextValue = {
   isScrolled: boolean;
@@ -53,11 +56,19 @@ export function useWebPageScrolled(): boolean {
 }
 
 export function PageScrollView({
+  children,
   className,
+  footer = "full",
+  footerAlwaysVisible = false,
+  nativeID,
   onScroll,
   scrollEventThrottle,
   ...props
-}: ScrollViewProps) {
+}: ScrollViewProps & {
+  footer?: LegalFooterVariant | "none";
+  footerAlwaysVisible?: boolean;
+}) {
+  const isFocused = useIsFocused();
   const pathname = usePathname();
   const scrollViewRef = useRef<ScrollView>(null);
   const { setIsScrolled } = useContext(WebPageScrollContext);
@@ -80,7 +91,9 @@ export function PageScrollView({
 
   const webClassName =
     Platform.OS === "web"
-      ? `todam-web-page-scroll${className ? ` ${className}` : ""}`
+      ? `todam-web-page-scroll${
+          isPrimaryMobilePath(pathname) ? " todam-web-page-scroll--primary-mobile" : ""
+        }${className ? ` ${className}` : ""}`
       : className;
   const scrollHandler = Platform.OS === "web" || onScroll ? handleScroll : undefined;
 
@@ -89,17 +102,36 @@ export function PageScrollView({
       {...props}
       {...(webClassName ? { className: webClassName } : {})}
       {...(scrollHandler ? { onScroll: scrollHandler } : {})}
+      {...(Platform.OS === "web" ? { role: "main" as const } : {})}
+      nativeID={nativeID ?? "contenu-principal"}
       ref={scrollViewRef}
       scrollEventThrottle={scrollEventThrottle ?? 16}
-    />
+    >
+      {children}
+      {isFocused &&
+      footer !== "none" &&
+      (Platform.OS === "web" || footerAlwaysVisible) ? (
+        <LegalFooter alwaysVisible={footerAlwaysVisible} variant={footer} />
+      ) : null}
+    </ScrollView>
   );
 }
 
-export function PageStaticView({ className, ...props }: ViewProps) {
+export function PageStaticView({ className, nativeID, ...props }: ViewProps) {
+  const pathname = usePathname();
   const webClassName =
     Platform.OS === "web"
-      ? `todam-web-page-static${className ? ` ${className}` : ""}`
+      ? `todam-web-page-static${
+          isPrimaryMobilePath(pathname) ? " todam-web-page-static--primary-mobile" : ""
+        }${className ? ` ${className}` : ""}`
       : className;
 
-  return <View {...props} {...(webClassName ? { className: webClassName } : {})} />;
+  return (
+    <View
+      {...props}
+      {...(webClassName ? { className: webClassName } : {})}
+      {...(Platform.OS === "web" ? { role: "main" as const } : {})}
+      nativeID={nativeID ?? "contenu-principal"}
+    />
+  );
 }

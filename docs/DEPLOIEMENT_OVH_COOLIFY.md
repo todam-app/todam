@@ -132,15 +132,38 @@ Le rapport du lundi est envoyé à `TODAM_OPERATIONS_EMAIL`. À partir de 900 co
 demande explicitement de préparer le passage professionnel ; 1 000 comptes est le seuil
 maximal de cette phase personnelle.
 
-L'import du catalogue reste une opération volontaire, avec un fichier dont la provenance
-et la licence ont été vérifiées :
+L'import du catalogue reste une opération volontaire, avec des fichiers dont la
+provenance et la licence ont été vérifiées. Pour remplacer automatiquement l'ancien
+catalogue actif par les trois nouvelles sources, exécuter d'abord la simulation :
 
 ```bash
-node dist/catalog-import.js --file /imports/catalogue.json --apply
+node dist/catalog-replace.js \
+  --file /imports/theatre-des-muses.2025-2026.json \
+  --file /imports/anthea-antibes.2025-2026.json \
+  --file /imports/festival-off-avignon.selection-2026.json
+```
+
+Après contrôle du rapport et sauvegarde PostgreSQL, préparer les nouvelles fiches avec
+la même commande suivie de `--stage`. Cette étape importe les trois lots sans masquer
+l'ancien catalogue. Terminer ensuite leur contrôle dans la modération.
+
+Lorsque toutes les nouvelles productions sont publiées, lancer la bascule automatique :
+
+```bash
+node dist/catalog-replace.js \
+  --file /imports/theatre-des-muses.2025-2026.json \
+  --file /imports/anthea-antibes.2025-2026.json \
+  --file /imports/festival-off-avignon.selection-2026.json \
+  --apply
 ```
 
 Le chemin `/imports` doit être un montage privé. Ne jamais intégrer le catalogue réel ou
-les affiches au dépôt ni à l'image Docker.
+les affiches au dépôt ni à l'image Docker. Le remplacement valide tous les fichiers
+avant d'ouvrir la connexion, applique tous les imports dans une transaction globale,
+puis masque automatiquement les anciennes productions absentes des nouvelles sources. Il
+ne supprime aucune ligne et ne publie pas automatiquement les fiches encore en
+brouillon. Si une nouvelle production n'est pas publiée, `--apply` annule toute la
+bascule et laisse l'ancien catalogue actif.
 
 ## Images et sauvegardes R2
 

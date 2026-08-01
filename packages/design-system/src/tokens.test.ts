@@ -28,7 +28,125 @@ describe("tokens accessibles", () => {
     expect(contrast(tokens.color.ink, tokens.color.background)).toBeGreaterThan(4.5);
   });
 
+  it("garde le texte de marque au niveau WCAG AA sur les fonds neutres", () => {
+    expect(contrast(tokens.color.brandText, tokens.color.background)).toBeGreaterThan(
+      4.5,
+    );
+    expect(contrast(tokens.color.brandText, tokens.color.surface)).toBeGreaterThan(4.5);
+  });
+
   it("garde le libellé du bouton destructif au niveau WCAG AA", () => {
     expect(contrast(tokens.color.surface, tokens.color.error)).toBeGreaterThan(4.5);
+  });
+
+  it("centralise les surfaces neutres selon leur rôle", () => {
+    expect({
+      background: tokens.color.background,
+      surface: tokens.color.surface,
+      placeholder: tokens.color.placeholder,
+      disabled: tokens.color.disabled,
+      border: tokens.color.border,
+      selectedSurface: tokens.color.selectedSurface,
+    }).toEqual({
+      background: "#FCF8F2",
+      surface: "#FFFDF8",
+      placeholder: "#F0E9DF",
+      disabled: "#E5E0D8",
+      border: "#E2D9CD",
+      selectedSurface: "#FCEAE2",
+    });
+  });
+
+  it("centralise le CTA principal encre", () => {
+    expect(tokens.button.standard).toEqual({
+      background: "#151515",
+      backgroundHover: "#151515",
+      border: "#151515",
+      borderWidth: 1,
+      fontFamily: "Work Sans",
+      fontWeight: "600",
+      radius: 10,
+      text: "#FFFDF8",
+    });
+  });
+
+  it("centralise le bouton de service neutre", () => {
+    expect(tokens.button.quiet).toEqual({
+      background: "#FFFDF8",
+      backgroundHover: "#FCEAE2",
+      border: "#151515",
+      borderWidth: 1,
+      fontFamily: "Work Sans",
+      fontWeight: "500",
+      radius: 10,
+      text: "#151515",
+    });
+  });
+
+  it("centralise le CTA vedette et conserve son contraste", () => {
+    expect(tokens.button.featured).toEqual({
+      background: "#151515",
+      backgroundHover: "#151515",
+      border: "#151515",
+      borderWidth: 1,
+      fontFamily: "Work Sans",
+      fontWeight: "600",
+      radius: 10,
+      text: "#FFFDF8",
+    });
+    expect(
+      contrast(tokens.button.featured.text, tokens.button.featured.background),
+    ).toBeGreaterThan(4.5);
+    expect(
+      contrast(tokens.button.featured.text, tokens.button.featured.backgroundHover),
+    ).toBeGreaterThan(4.5);
+  });
+
+  it("expose les accents éditoriaux, rayons et surfaces Web", () => {
+    expect({
+      brandSignal: tokens.color.brandSignal,
+      brandText: tokens.color.brandText,
+      coral: tokens.color.coral,
+      lilac: tokens.color.lilac,
+      aqua: tokens.color.aqua,
+      posterNightTheatre: tokens.color.posterNightTheatre,
+      posterNightOpera: tokens.color.posterNightOpera,
+      posterNightBallet: tokens.color.posterNightBallet,
+      panel: tokens.radius.panel,
+      media: tokens.radius.media,
+      glass: tokens.surface.glass,
+      shadow: tokens.shadow.light,
+    }).toEqual({
+      brandSignal: "#ED2215",
+      brandText: "#D9271A",
+      coral: "#F3A995",
+      lilac: "#C8B8F0",
+      aqua: "#9FD8D0",
+      posterNightTheatre: "#1B1719",
+      posterNightOpera: "#15131A",
+      posterNightBallet: "#11191A",
+      panel: 18,
+      media: 16,
+      glass: "rgba(255, 253, 248, 0.86)",
+      shadow: "0 16px 42px rgba(43, 34, 27, 0.09)",
+    });
+  });
+
+  it("garde le bouton principal lisible sur ses surfaces", () => {
+    expect(
+      contrast(tokens.button.standard.text, tokens.button.standard.background),
+    ).toBeGreaterThan(4.5);
+    expect(
+      contrast(tokens.button.standard.background, tokens.color.background),
+    ).toBeGreaterThan(4.5);
+  });
+
+  it("garde la bordure du bouton neutre perceptible sur les fonds Web", () => {
+    expect(
+      contrast(tokens.button.quiet.border, tokens.button.quiet.background),
+    ).toBeGreaterThanOrEqual(3);
+    expect(
+      contrast(tokens.button.quiet.border, tokens.color.background),
+    ).toBeGreaterThanOrEqual(3);
   });
 });

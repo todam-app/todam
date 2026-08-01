@@ -21,6 +21,10 @@ describe("transport des e-mails transactionnels", () => {
 
     await sender.send({
       html: "<p>Bonjour</p>",
+      replyTo: {
+        email: "reponse@example.test",
+        name: "Camille",
+      },
       subject: "Bienvenue",
       text: "Bonjour",
       to: "destinataire@example.test",
@@ -34,6 +38,7 @@ describe("transport des e-mails transactionnels", () => {
     expect(request.method).toBe("POST");
     expect(JSON.parse(request.body as string)).toMatchObject({
       htmlContent: "<p>Bonjour</p>",
+      replyTo: { email: "reponse@example.test", name: "Camille" },
       sender: { email: "envoi@example.test", name: "Todam" },
       subject: "Bienvenue",
       textContent: "Bonjour",

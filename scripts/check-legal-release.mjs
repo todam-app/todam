@@ -25,10 +25,10 @@ const requiredProductionVariables = [
 ];
 
 const documents = [
-  ["docs/legal/conditions-utilisation-v1.0.0.md", "1.0.0"],
-  ["docs/legal/confidentialite-v1.0.1.md", "1.0.1"],
-  ["docs/legal/mentions-legales-v1.0.0.md", "1.0.0"],
-  ["docs/legal/suppression-compte-v1.0.0.md", "1.0.0"],
+  ["docs/legal/conditions-utilisation-v1.0.3.md", "1.0.3", "29 juillet 2026"],
+  ["docs/legal/confidentialite-v1.0.4.md", "1.0.4", "29 juillet 2026"],
+  ["docs/legal/mentions-legales-v1.0.0.md", "1.0.0", "26 juillet 2026"],
+  ["docs/legal/suppression-compte-v1.0.3.md", "1.0.3", "29 juillet 2026"],
 ];
 
 const forbiddenPublisherMarkers = [
@@ -51,12 +51,12 @@ const forbiddenPublisherMarkers = [
   "Téléphone :",
 ];
 
-for (const [document, version] of documents) {
+for (const [document, version, effectiveDate] of documents) {
   const contents = await readFile(document, "utf8");
   if (!contents.includes(`Version ${version}`)) {
     throw new Error(`${document} ne contient pas sa version attendue.`);
   }
-  if (!contents.includes("Date d'effet : 26 juillet 2026")) {
+  if (!contents.includes(`Date d'effet : ${effectiveDate}`)) {
     throw new Error(`${document} ne contient pas la date d'effet attendue.`);
   }
   const forbidden = forbiddenPublisherMarkers.find((marker) =>

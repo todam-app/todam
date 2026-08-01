@@ -40,23 +40,30 @@ unique. Ils combinent quatre mécanismes complémentaires :
 ### Contribution communautaire et parcours d'ajout
 
 L'ajout d'un spectacle ou d'une affiche n'est pas réservé aux professionnel·les. Le
-parcours s'inspire des catalogues contributifs comme Babelio :
+parcours Web est disponible aux membres connectés dont l'adresse e-mail est vérifiée :
 
 1. l'utilisateur recherche d'abord le spectacle ;
 2. Todam élargit la recherche et présente les correspondances déjà connues ;
 3. l'utilisateur ajoute la fiche existante lorsqu'il la trouve ;
-4. si aucune correspondance ne convient, il crée manuellement le spectacle ;
-5. depuis la fiche, il peut proposer ou modifier l'affiche depuis une page web ou en
-   chargeant un fichier.
+4. si aucune correspondance ne convient, il crée manuellement le spectacle, la compagnie
+   ou le lieu manquant ;
+5. la fiche est publiée immédiatement avec ses représentations et, facultativement, une
+   description promotionnelle déjà publiée et une affiche officielle.
 
-Chaque affiche contributive reste liée au compte qui l'a proposée. Todam conserve la
-page source, le crédit et la licence lorsqu'ils sont connus, ainsi que la date du dépôt.
-Une procédure de signalement et de retrait permet de masquer rapidement un visuel
-contesté. La revendication ultérieure de la fiche par une compagnie ou un théâtre permet
-de confirmer ou de remplacer l'affiche, mais elle n'est pas nécessaire pour contribuer.
+Le lien officiel du spectacle documente la provenance de la contribution. Une affiche
+est fournie par URL HTTPS directe ou par fichier JPEG, PNG ou WebP. Le fichier est
+converti en WebP sans métadonnées et stocké dans R2 ; l'URL distante reste en hotlink
+après contrôle du format, de la taille, des dimensions et de l'adresse réseau. Chaque
+contribution reste liée au compte qui l'a proposée jusqu'à sa suppression, puis la fiche
+est conservée sans auteur.
+
+Un seul bouton « Signaler ou corriger » couvre l'affiche et ses droits, les
+informations, les dates, les horaires et le lieu. La modération peut retirer uniquement
+le visuel contesté sans masquer le spectacle. La modification communautaire d'une fiche
+ou d'une affiche déjà existante n'est pas incluse dans cette première version.
 
 Todam ne génère pas de fausse affiche pour combler une absence. Une production sans
-visuel reste publiable et affiche explicitement « Affiche non disponible ».
+visuel reste publiable et affiche explicitement « Visuel non publié ».
 
 L'ajout en masse accepte à terme :
 
@@ -113,8 +120,9 @@ recopier.
 La stratégie de long terme doit donc superposer plusieurs voies :
 
 - conserver OpenAgenda, DATAtourisme et les autres sources ouvertes comme amorçage ;
-- proposer « Ajouter un spectacle » et « Ajouter ou modifier l'affiche » à toute
-  personne disposant d'un compte ;
+- maintenir « Ajouter un spectacle » pour les comptes vérifiés ;
+- prévoir ultérieurement la modification communautaire des fiches et affiches existantes
+  ;
 - proposer « Revendiquer cette fiche » aux compagnies, théâtres et producteurs ;
 - vérifier le rattachement professionnel avant de leur permettre de corriger une fiche ;
 - conserver l'identité de la personne ou de la structure contributrice, la provenance,
@@ -124,8 +132,9 @@ La stratégie de long terme doit donc superposer plusieurs voies :
 - rechercher des exports ou API contractuels auprès des festivals, réseaux de salles et
   distributeurs lorsque leur couverture le justifie.
 
-Ces fonctions sont des évolutions candidates, pas des capacités présentes dans le socle.
-Aucun catalogue BilletRéduc, France Billet ou festival Off Avignon ne doit être copié
+L'ajout communautaire unitaire est implémenté sur le Web. L'import en masse et la
+modification communautaire de fiches existantes restent des évolutions candidates. Aucun
+catalogue BilletRéduc, France Billet ou festival Off Avignon ne doit être copié en masse
 sans accord. Les textes, affiches et photographies restent soumis aux permissions,
 licences, crédits et durées d'utilisation propres à chaque partenaire.
 
@@ -276,7 +285,31 @@ minimum :
 2. une couverture géographique et temporelle ;
 3. un document source et sa licence ;
 4. des identifiants externes stables ;
-5. pour chaque image, un crédit et une politique de stockage explicites.
+5. les compagnies comme entités distinctes, puis leurs liens ordonnés avec chaque
+   production et, le cas échéant, une seule compagnie principale ;
+6. les descriptions courtes et longues séparées, avec langue, provenance, statut de
+   droits, licence éventuelle et date de dernière vérification ;
+7. pour chaque image, un crédit et une politique de stockage explicites.
+
+Les présentations de compagnie issues de sources factuelles sont reformulées par Todam.
+Un texte promotionnel tiers n’est importé que si son droit de republication est
+documenté. Les crédits artistiques conservent eux aussi un document source lié à la
+production et à chaque identité d’artiste importée.
+
+Les lieux, compagnies, œuvres, artistes, productions, descriptions, représentations et
+visuels ne sont jamais définis dans les écrans de l’application. Ils sont importés dans
+la base puis servis par les routes génériques à partir de leur identifiant et de leur
+`slug`. L’Hexagone est un lot pilote reproductible de cette même chaîne d’import, pas
+une page de données codées en dur.
+
+Une modification d’une compagnie, d’une description ou de son document source replace la
+production publiée concernée en `draft`. Une suppression dans un flux déclaré complet
+retire la description de cette source et déclenche le même contrôle éditorial. La
+republication exige de nouveau des descriptions françaises courte et longue publiables,
+et une provenance documentée des lieux et des représentations. La compagnie principale,
+les crédits, la durée et la langue sont importés lorsqu’ils existent mais leur absence
+dans la source ne bloque pas la fiche. Un visuel `metadata_only` reste une référence non
+affichée et n’entre pas dans le contrôle des droits des visuels publiés.
 
 Les tests doivent prouver la pagination, l'idempotence, les annulations, la disparition
 d'une image et le refus d'une copie sans droit. Le connecteur reste désactivé tant que

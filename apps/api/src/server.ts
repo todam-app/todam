@@ -1,4 +1,5 @@
 import cors from "@fastify/cors";
+import multipart from "@fastify/multipart";
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
 import type { TodamDatabase } from "@todam/database";
@@ -14,9 +15,13 @@ import {
 import { createAuth } from "./auth.js";
 import { createAccountService } from "./account-service.js";
 import { createCatalogService } from "./catalog-service.js";
+import { createCommunityMediaService } from "./community-media.js";
+import { createCommunityService } from "./community-service.js";
 import { HttpProblem, problemDocument } from "./errors.js";
 import { assertProductionConfiguration } from "./production-config.js";
 import { createPublicStatsService } from "./public-stats-service.js";
+import { createMemberService } from "./member-service.js";
+import { createProfessionalService } from "./professional-service.js";
 import { registerRoutes } from "./routes.js";
 
 export interface BuildServerOptions {
@@ -42,8 +47,12 @@ function statusTitle(status: number): string {
       return "Ressource introuvable";
     case 409:
       return "Conflit";
+    case 413:
+      return "Fichier trop volumineux";
     case 429:
       return "Trop de requêtes";
+    case 503:
+      return "Service indisponible";
     default:
       return "Erreur interne";
   }
@@ -57,8 +66,12 @@ export async function buildServer(options: BuildServerOptions) {
       "req.headers.cookie",
       "res.headers.set-cookie",
       "req.body.email",
+      "req.body.name",
       "req.body.password",
+      "req.body.subject",
+      "req.body.message",
       "req.body.token",
+      "req.body.website",
     ],
     censor: "[MASQUÉ]",
   };
@@ -91,7 +104,15 @@ export async function buildServer(options: BuildServerOptions) {
   await app.register(cors, {
     origin: corsOrigins(),
     credentials: true,
-    methods: ["GET", "HEAD", "POST", "PUT", "DELETE"],
+    methods: ["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE"],
+  });
+  await app.register(multipart, {
+    limits: {
+      files: 1,
+      fileSize: 2 * 1024 * 1024,
+      fields: 1,
+      parts: 2,
+    },
   });
   await app.register(swagger, {
     openapi: {
@@ -122,8 +143,21 @@ export async function buildServer(options: BuildServerOptions) {
   const auth = createAuth(options.database, emailSender);
   const account = createAccountService(options.database, emailSender);
   const catalog = createCatalogService(options.database);
+  const communityMedia = createCommunityMediaService();
+  const community = createCommunityService(options.database, communityMedia);
+  const member = createMemberService(options.database);
+  const professional = createProfessionalService(options.database);
   const publicStats = createPublicStatsService(options.database);
-  await registerRoutes(app, { account, auth, catalog, publicStats });
+  await registerRoutes(app, {
+    account,
+    auth,
+    catalog,
+    community,
+    emailSender,
+    member,
+    professional,
+    publicStats,
+  });
 
   app.setNotFoundHandler((request, reply) =>
     reply

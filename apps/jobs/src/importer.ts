@@ -5,13 +5,17 @@ import {
   artistSources,
   artists,
   catalogSources,
+  companies,
+  companySources,
   createDatabase,
   importBatches,
   mediaAssets,
   performanceSources,
   performanceMedia,
   performances,
+  productionCompanies,
   productionCredits,
+  productionDescriptions,
   productionMedia,
   productionSources,
   productions,
@@ -22,7 +26,7 @@ import {
   works,
   type TodamDatabase,
 } from "@todam/database";
-import { and, eq, inArray, notInArray, sql } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, ne, notInArray, sql } from "drizzle-orm";
 
 type ReportCounts = ImportReport["counts"];
 
@@ -31,8 +35,10 @@ function getCounts(catalog: CatalogImport): ReportCounts {
     documents: catalog.documents.length,
     works: catalog.works.length,
     venues: catalog.venues.length,
+    companies: catalog.companies.length,
     artists: catalog.artists.length,
     productions: catalog.productions.length,
+    descriptions: catalog.descriptions.length,
     performances: catalog.performances.length,
     media: catalog.media.length,
     withdrawnProductions: catalog.withdrawnProductionExternalKeys.length,
@@ -147,6 +153,7 @@ export async function applyCatalog(
     if (!batch) throw new Error("Impossible de créer le lot d'import.");
 
     const documentIds = new Map<string, string>();
+    const changedDocumentKeys = new Set<string>();
     for (const document of catalog.documents) {
       const currentRows = await transaction
         .select()
@@ -169,6 +176,16 @@ export async function applyCatalog(
       if (current) {
         documentIds.set(document.externalKey, current.id);
         if (hasChanges(current, next)) {
+          if (
+            hasChanges(current, {
+              title: next.title,
+              url: next.url,
+              rightsStatus: next.rightsStatus,
+              license: next.license,
+            })
+          ) {
+            changedDocumentKeys.add(document.externalKey);
+          }
           await transaction
             .update(sourceDocuments)
             .set({ ...next, updatedAt: new Date() })
@@ -193,6 +210,7 @@ export async function applyCatalog(
     }
 
     const workIds = new Map<string, string>();
+    const changedWorkKeys = new Set<string>();
     for (const item of catalog.works) {
       const currentRows = await transaction
         .select()
@@ -218,6 +236,7 @@ export async function applyCatalog(
       if (current) {
         id = current.id;
         if (hasChanges(current, next)) {
+          changedWorkKeys.add(item.externalKey);
           await transaction
             .update(works)
             .set({ ...next, updatedAt: new Date() })
@@ -248,6 +267,7 @@ export async function applyCatalog(
     }
 
     const venueIds = new Map<string, string>();
+    const changedVenueKeys = new Set<string>();
     for (const item of catalog.venues) {
       const currentRows = await transaction
         .select()
@@ -271,6 +291,7 @@ export async function applyCatalog(
         locality: item.locality,
         countryCode: item.countryCode,
         timezone: item.timezone,
+        officialUrl: item.officialUrl,
         coordinates:
           item.latitude === null || item.longitude === null
             ? null
@@ -281,6 +302,7 @@ export async function applyCatalog(
       if (current) {
         id = current.id;
         if (hasChanges(current, next)) {
+          changedVenueKeys.add(item.externalKey);
           await transaction
             .update(venues)
             .set({ ...next, updatedAt: new Date() })
@@ -310,7 +332,77 @@ export async function applyCatalog(
         });
     }
 
+    const companyIds = new Map<string, string>();
+    const changedCompanyIds = new Set<string>();
+    for (const item of catalog.companies) {
+      const currentRows = await transaction
+        .select()
+        .from(companies)
+        .where(
+          sql<boolean>`exists (
+            select 1 from ${companySources}
+            join ${sourceDocuments}
+              on ${sourceDocuments.id} = ${companySources.documentId}
+            where ${companySources.entityId} = ${companies.id}
+              and ${sourceDocuments.sourceId} = ${sourceId}
+              and ${companySources.externalKey} = ${item.externalKey}
+          )`,
+        )
+        .limit(1);
+      const next = {
+        name: item.name,
+        shortDescription: item.shortDescription,
+        description: item.description,
+        officialUrl: item.officialUrl,
+        locality: item.locality,
+        countryCode: item.countryCode,
+      };
+      const current = currentRows[0];
+      let id: string;
+      if (current) {
+        id = current.id;
+        if (hasChanges(current, next)) {
+          changedCompanyIds.add(id);
+          await transaction
+            .update(companies)
+            .set({ ...next, updatedAt: new Date() })
+            .where(eq(companies.id, id));
+          report.updated += 1;
+        } else {
+          report.unchanged += 1;
+        }
+      } else {
+        const [created] = await transaction
+          .insert(companies)
+          .values({ slug: item.slug, ...next })
+          .returning({ id: companies.id });
+        if (!created) {
+          throw new Error(`Impossible de créer la compagnie ${item.name}.`);
+        }
+        id = created.id;
+        report.inserted += 1;
+      }
+      companyIds.set(item.externalKey, id);
+      if (changedDocumentKeys.has(item.sourceDocumentKey)) {
+        changedCompanyIds.add(id);
+      }
+      const documentId = documentIds.get(item.sourceDocumentKey);
+      if (!documentId) throw new Error("Document de compagnie introuvable.");
+      await transaction
+        .insert(companySources)
+        .values({
+          entityId: id,
+          documentId,
+          externalKey: item.externalKey,
+        })
+        .onConflictDoUpdate({
+          target: [companySources.entityId, companySources.documentId],
+          set: { externalKey: item.externalKey, observedAt: new Date() },
+        });
+    }
+
     const artistIds = new Map<string, string>();
+    const changedArtistKeys = new Set<string>();
     for (const item of catalog.artists) {
       const currentRows = await transaction
         .select()
@@ -333,6 +425,7 @@ export async function applyCatalog(
       if (current) {
         id = current.id;
         if (hasChanges(current, next)) {
+          changedArtistKeys.add(item.externalKey);
           await transaction
             .update(artists)
             .set({ ...next, updatedAt: new Date() })
@@ -363,6 +456,8 @@ export async function applyCatalog(
     }
 
     const productionIds = new Map<string, string>();
+    const existingProductionIds = new Set<string>();
+    const changedProductionIds = new Set<string>();
     for (const item of catalog.productions) {
       const currentRows = await transaction
         .select()
@@ -388,6 +483,7 @@ export async function applyCatalog(
         title: item.title,
         discipline: item.discipline,
         audience: item.audience,
+        minimumAge: item.minimumAge,
         durationMinutes: item.durationMinutes,
         language: item.language,
         officialUrl: item.officialUrl,
@@ -397,7 +493,9 @@ export async function applyCatalog(
       let id: string;
       if (current) {
         id = current.id;
+        existingProductionIds.add(id);
         if (hasChanges(current, next)) {
+          changedProductionIds.add(id);
           await transaction
             .update(productions)
             .set({ ...next, updatedAt: new Date() })
@@ -416,6 +514,17 @@ export async function applyCatalog(
         report.inserted += 1;
       }
       productionIds.set(item.externalKey, id);
+      if (
+        current &&
+        (changedDocumentKeys.has(item.sourceDocumentKey) ||
+          (item.workExternalKey !== null &&
+            changedWorkKeys.has(item.workExternalKey)) ||
+          item.credits.some((credit) =>
+            changedArtistKeys.has(credit.artistExternalKey),
+          ))
+      ) {
+        changedProductionIds.add(id);
+      }
       const documentId = documentIds.get(item.sourceDocumentKey);
       if (!documentId) throw new Error("Document de production introuvable.");
       await transaction
@@ -426,27 +535,205 @@ export async function applyCatalog(
           set: { externalKey: item.externalKey, observedAt: new Date() },
         });
 
-      await transaction
-        .delete(productionCredits)
-        .where(eq(productionCredits.productionId, id));
-      if (item.credits.length > 0) {
-        await transaction.insert(productionCredits).values(
-          item.credits.map((credit) => {
-            const artistId = artistIds.get(credit.artistExternalKey);
-            if (!artistId) {
-              throw new Error(
-                `Artiste de crédit introuvable : ${credit.artistExternalKey}`,
-              );
-            }
-            return {
-              productionId: id,
-              artistId,
-              role: credit.role,
-              label: credit.label,
-              position: credit.position,
-            };
-          }),
+      const nextCompanyLinks = item.companies
+        .map((company) => {
+          const companyId = companyIds.get(company.companyExternalKey);
+          if (!companyId) {
+            throw new Error(
+              `Compagnie de production introuvable : ${company.companyExternalKey}`,
+            );
+          }
+          if (changedCompanyIds.has(companyId)) changedProductionIds.add(id);
+          return {
+            productionId: id,
+            companyId,
+            isPrimary: company.isPrimary,
+            position: company.position,
+          };
+        })
+        .sort(
+          (left, right) =>
+            Number(right.isPrimary) - Number(left.isPrimary) ||
+            left.position - right.position ||
+            left.companyId.localeCompare(right.companyId),
         );
+      const currentCompanyLinks = await transaction
+        .select({
+          productionId: productionCompanies.productionId,
+          companyId: productionCompanies.companyId,
+          isPrimary: productionCompanies.isPrimary,
+          position: productionCompanies.position,
+        })
+        .from(productionCompanies)
+        .where(eq(productionCompanies.productionId, id))
+        .orderBy(
+          desc(productionCompanies.isPrimary),
+          asc(productionCompanies.position),
+          asc(productionCompanies.companyId),
+        );
+      if (!valuesEqual(currentCompanyLinks, nextCompanyLinks)) {
+        if (current) changedProductionIds.add(id);
+        await transaction
+          .delete(productionCompanies)
+          .where(eq(productionCompanies.productionId, id));
+        if (nextCompanyLinks.length > 0) {
+          await transaction.insert(productionCompanies).values(nextCompanyLinks);
+        }
+      }
+
+      const nextCredits = item.credits.map((credit) => {
+        const artistId = artistIds.get(credit.artistExternalKey);
+        if (!artistId) {
+          throw new Error(
+            `Artiste de crédit introuvable : ${credit.artistExternalKey}`,
+          );
+        }
+        return {
+          productionId: id,
+          artistId,
+          role: credit.role,
+          label: credit.label,
+          position: credit.position,
+        };
+      });
+      const currentCredits = await transaction
+        .select({
+          productionId: productionCredits.productionId,
+          artistId: productionCredits.artistId,
+          role: productionCredits.role,
+          label: productionCredits.label,
+          position: productionCredits.position,
+        })
+        .from(productionCredits)
+        .where(eq(productionCredits.productionId, id))
+        .orderBy(
+          asc(productionCredits.position),
+          asc(productionCredits.artistId),
+          asc(productionCredits.role),
+        );
+      const orderedNextCredits = [...nextCredits].sort(
+        (left, right) =>
+          left.position - right.position ||
+          left.artistId.localeCompare(right.artistId) ||
+          left.role.localeCompare(right.role),
+      );
+      if (!valuesEqual(currentCredits, orderedNextCredits)) {
+        if (current) changedProductionIds.add(id);
+        await transaction
+          .delete(productionCredits)
+          .where(eq(productionCredits.productionId, id));
+        if (nextCredits.length > 0) {
+          await transaction.insert(productionCredits).values(nextCredits);
+        }
+      }
+    }
+
+    for (const item of catalog.descriptions) {
+      const productionId = productionIds.get(item.productionExternalKey);
+      const sourceDocumentId = documentIds.get(item.sourceDocumentKey);
+      if (!productionId) {
+        throw new Error(
+          `Production de description introuvable : ${item.productionExternalKey}`,
+        );
+      }
+      if (!sourceDocumentId) {
+        throw new Error(
+          `Document de description introuvable : ${item.sourceDocumentKey}`,
+        );
+      }
+      const currentRows = await transaction
+        .select()
+        .from(productionDescriptions)
+        .where(
+          and(
+            eq(productionDescriptions.productionId, productionId),
+            eq(productionDescriptions.locale, item.locale),
+            eq(productionDescriptions.kind, item.kind),
+          ),
+        )
+        .limit(1);
+      const next = {
+        body: item.body,
+        sourceDocumentId,
+        sourceUrl: item.sourceUrl,
+        rightsStatus: item.rightsStatus,
+        license: item.license,
+        lastVerifiedAt: new Date(item.lastVerifiedAt),
+      };
+      const current = currentRows[0];
+      if (current) {
+        if (hasChanges(current, next)) {
+          await transaction
+            .update(productionDescriptions)
+            .set({ ...next, updatedAt: new Date() })
+            .where(eq(productionDescriptions.id, current.id));
+          changedProductionIds.add(productionId);
+          report.updated += 1;
+        } else {
+          report.unchanged += 1;
+        }
+      } else {
+        await transaction.insert(productionDescriptions).values({
+          productionId,
+          locale: item.locale,
+          kind: item.kind,
+          ...next,
+        });
+        if (existingProductionIds.has(productionId)) {
+          changedProductionIds.add(productionId);
+        }
+        report.inserted += 1;
+      }
+      if (changedDocumentKeys.has(item.sourceDocumentKey)) {
+        changedProductionIds.add(productionId);
+      }
+    }
+    if (
+      catalog.coverage.expectedCompleteness === "complete" &&
+      productionIds.size > 0
+    ) {
+      const desiredDescriptions = new Set(
+        catalog.descriptions.map((item) => {
+          const productionId = productionIds.get(item.productionExternalKey)!;
+          return `${productionId}:${item.locale}:${item.kind}`;
+        }),
+      );
+      const existingDescriptions = await transaction
+        .select({
+          id: productionDescriptions.id,
+          productionId: productionDescriptions.productionId,
+          locale: productionDescriptions.locale,
+          kind: productionDescriptions.kind,
+        })
+        .from(productionDescriptions)
+        .innerJoin(
+          sourceDocuments,
+          eq(sourceDocuments.id, productionDescriptions.sourceDocumentId),
+        )
+        .where(
+          and(
+            eq(sourceDocuments.sourceId, sourceId),
+            inArray(
+              productionDescriptions.productionId,
+              Array.from(productionIds.values()),
+            ),
+          ),
+        );
+      const removedDescriptions = existingDescriptions.filter(
+        (item) =>
+          !desiredDescriptions.has(`${item.productionId}:${item.locale}:${item.kind}`),
+      );
+      if (removedDescriptions.length > 0) {
+        await transaction.delete(productionDescriptions).where(
+          inArray(
+            productionDescriptions.id,
+            removedDescriptions.map((item) => item.id),
+          ),
+        );
+        removedDescriptions.forEach((item) =>
+          changedProductionIds.add(item.productionId),
+        );
+        report.deactivated += removedDescriptions.length;
       }
     }
 
@@ -486,6 +773,7 @@ export async function applyCatalog(
       if (current) {
         id = current.id;
         if (hasChanges(current, next)) {
+          changedProductionIds.add(productionId);
           await transaction
             .update(performances)
             .set({ ...next, updatedAt: new Date() })
@@ -503,7 +791,15 @@ export async function applyCatalog(
           throw new Error(`Impossible de créer la séance ${item.externalKey}.`);
         }
         id = created.id;
+        changedProductionIds.add(productionId);
         report.inserted += 1;
+      }
+      if (
+        current &&
+        (changedVenueKeys.has(item.venueExternalKey) ||
+          changedDocumentKeys.has(item.sourceDocumentKey))
+      ) {
+        changedProductionIds.add(productionId);
       }
       const documentId = documentIds.get(item.sourceDocumentKey);
       if (!documentId) throw new Error("Document de représentation introuvable.");
@@ -568,6 +864,7 @@ export async function applyCatalog(
       if (current) {
         mediaId = current.id;
         if (hasChanges(current, next)) {
+          changedProductionIds.add(productionId);
           const invalidateMirror =
             current.remoteUrl !== item.url || item.storagePolicy !== "mirror";
           await transaction
@@ -597,9 +894,50 @@ export async function applyCatalog(
           throw new Error(`Impossible de créer l'affiche ${item.externalKey}.`);
         }
         mediaId = created.id;
+        changedProductionIds.add(productionId);
         report.inserted += 1;
       }
+      if (current && changedDocumentKeys.has(item.sourceDocumentKey)) {
+        changedProductionIds.add(productionId);
+      }
 
+      if (item.isPrimary) {
+        const demotedPrimaryLinks = await transaction
+          .update(productionMedia)
+          .set({ isPrimary: false })
+          .where(
+            and(
+              eq(productionMedia.productionId, productionId),
+              eq(productionMedia.isPrimary, true),
+              ne(productionMedia.mediaId, mediaId),
+            ),
+          )
+          .returning({ mediaId: productionMedia.mediaId });
+        if (demotedPrimaryLinks.length > 0) {
+          changedProductionIds.add(productionId);
+        }
+      }
+
+      const currentProductionMedia = await transaction
+        .select({
+          isPrimary: productionMedia.isPrimary,
+          position: productionMedia.position,
+        })
+        .from(productionMedia)
+        .where(
+          and(
+            eq(productionMedia.productionId, productionId),
+            eq(productionMedia.mediaId, mediaId),
+          ),
+        )
+        .limit(1);
+      if (
+        !currentProductionMedia[0] ||
+        currentProductionMedia[0].isPrimary !== item.isPrimary ||
+        currentProductionMedia[0].position !== item.position
+      ) {
+        changedProductionIds.add(productionId);
+      }
       await transaction
         .insert(productionMedia)
         .values({
@@ -659,6 +997,7 @@ export async function applyCatalog(
               )
               .returning({ id: mediaAssets.id });
       report.deactivated += deactivated.length;
+      if (deactivated.length > 0) changedProductionIds.add(productionId);
     }
 
     for (const externalKey of catalog.withdrawnProductionExternalKeys) {
@@ -741,6 +1080,51 @@ export async function applyCatalog(
               )
               .returning({ id: mediaAssets.id });
       report.deactivated += deactivated.length;
+    }
+
+    if (changedCompanyIds.size > 0) {
+      const impactedProductions = await transaction
+        .selectDistinct({ id: productionCompanies.productionId })
+        .from(productionCompanies)
+        .where(inArray(productionCompanies.companyId, Array.from(changedCompanyIds)));
+      for (const production of impactedProductions) {
+        changedProductionIds.add(production.id);
+      }
+      const quarantinedCompanies = await transaction
+        .update(companies)
+        .set({
+          publicationStatus: "draft",
+          reviewedAt: null,
+          reviewedBy: null,
+          updatedAt: new Date(),
+        })
+        .where(
+          and(
+            inArray(companies.id, Array.from(changedCompanyIds)),
+            eq(companies.publicationStatus, "published"),
+          ),
+        )
+        .returning({ id: companies.id });
+      report.quarantined += quarantinedCompanies.length;
+    }
+
+    if (changedProductionIds.size > 0) {
+      const quarantined = await transaction
+        .update(productions)
+        .set({
+          publicationStatus: "draft",
+          reviewedAt: null,
+          reviewedBy: null,
+          updatedAt: new Date(),
+        })
+        .where(
+          and(
+            inArray(productions.id, Array.from(changedProductionIds)),
+            eq(productions.publicationStatus, "published"),
+          ),
+        )
+        .returning({ id: productions.id });
+      report.quarantined += quarantined.length;
     }
 
     await transaction

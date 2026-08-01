@@ -1,5 +1,5 @@
-export function getHomeGreeting(pseudonym: string): string {
-  return `Bonjour, ${pseudonym}`;
+export function getHomeGreeting(username: string): string {
+  return `Bonjour, ${username}`;
 }
 
 export function getHomeProgressPercentage(current: number, target: number): number {
