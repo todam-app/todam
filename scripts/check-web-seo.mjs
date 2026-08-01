@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { access, readFile } from "node:fs/promises";
+import { request as httpRequest } from "node:http";
 import { join } from "node:path";
 
 const repositoryRoot = process.cwd();
@@ -201,6 +202,36 @@ async function fetchWithoutRedirect(path, options = {}) {
   return fetch(`${runtimeBaseUrl}${path}`, { ...options, redirect: "manual" });
 }
 
+function requestWithHostHeader(path, host) {
+  const target = new URL(path, runtimeBaseUrl);
+  assert.equal(
+    target.protocol,
+    "http:",
+    "Le contrôle local du Host Nginx exige une URL HTTP.",
+  );
+
+  return new Promise((resolve, reject) => {
+    const request = httpRequest(
+      target,
+      { headers: { host }, method: "GET" },
+      (response) => {
+        response.resume();
+        resolve({
+          status: response.statusCode ?? 0,
+          headers: {
+            get(name) {
+              const value = response.headers[name.toLowerCase()];
+              return Array.isArray(value) ? value.join(", ") : (value ?? null);
+            },
+          },
+        });
+      },
+    );
+    request.on("error", reject);
+    request.end();
+  });
+}
+
 async function checkRuntime() {
   const homeResponse = await fetchWithoutRedirect("/");
   assert.equal(homeResponse.status, 200, "La page d’accueil ne répond pas 200.");
@@ -230,9 +261,7 @@ async function checkRuntime() {
 
   const wwwResponse = liveMode
     ? await fetch("https://www.todam.fr/contact?source=seo", { redirect: "manual" })
-    : await fetchWithoutRedirect("/contact?source=seo", {
-        headers: { host: "www.todam.fr" },
-      });
+    : await requestWithHostHeader("/contact?source=seo", "www.todam.fr");
   assert.equal(
     wwwResponse.status,
     308,
