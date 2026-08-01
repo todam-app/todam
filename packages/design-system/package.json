@@ -15,13 +15,13 @@
     "typecheck": "tsc --noEmit"
   },
   "peerDependencies": {
-    "react": "19.2.3",
-    "react-native": "0.86.0"
+    "react": "19.2.8",
+    "react-native": "0.86.2"
   },
   "devDependencies": {
     "@types/react": "~19.2.2",
-    "react": "19.2.3",
-    "react-native": "0.86.0",
+    "react": "19.2.8",
+    "react-native": "0.86.2",
     "tsup": "8.5.1",
     "typescript": "6.0.3",
     "vitest": "4.1.10"
