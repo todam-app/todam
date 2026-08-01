@@ -75,8 +75,8 @@ Son nom est injecté hors Git avec `LEGAL_OPERATOR_NAME` avant l'ouverture.
 - Finalité : anticiper le passage de Todam en exploitation professionnelle.
 - Base : intérêt légitime à piloter et mettre en conformité le service.
 - Destinataires : l'éditeur, via Brevo et l'adresse `TODAM_OPERATIONS_EMAIL`.
-- Durée : conservation minimale nécessaire au suivi des seuils ; aucun e-mail,
-  nom d'utilisateur ou identifiant interne n'est inclus dans le rapport.
+- Durée : conservation minimale nécessaire au suivi des seuils ; aucun e-mail, nom
+  d'utilisateur ou identifiant interne n'est inclus dans le rapport.
 
 ## Sécurité et erreurs
 

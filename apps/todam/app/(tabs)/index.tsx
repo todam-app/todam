@@ -1,15 +1,7 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useQuery } from "@tanstack/react-query";
-import {
-  SearchResponseSchema,
-  type SearchResponse,
-} from "@todam/contracts";
-import {
-  Button,
-  SectionTitle,
-  TicketButton,
-  tokens,
-} from "@todam/design-system";
+import { SearchResponseSchema, type SearchResponse } from "@todam/contracts";
+import { Button, SectionTitle, TicketButton, tokens } from "@todam/design-system";
 import { Link, useLoaderData } from "expo-router";
 import Head from "expo-router/head";
 import { createStaticLoader } from "expo-router/server";
@@ -82,11 +74,7 @@ export const loader = createStaticLoader(() =>
   }),
 );
 
-function MarketingHome({
-  initialCatalog,
-}: {
-  initialCatalog: SearchResponse | null;
-}) {
+function MarketingHome({ initialCatalog }: { initialCatalog: SearchResponse | null }) {
   const { width } = useWindowDimensions();
   const catalog = useQuery({
     queryKey: ["public-home-catalog"],
@@ -200,9 +188,7 @@ function MarketingHome({
           </View>
 
           <View className="gap-5">
-            <LinkedSectionTitle href="/search">
-              À l’affiche
-            </LinkedSectionTitle>
+            <LinkedSectionTitle href="/search">À l’affiche</LinkedSectionTitle>
             <AsyncState
               empty={
                 !catalog.isPending && (catalog.data?.productions.length ?? 0) === 0
@@ -250,8 +236,7 @@ function MarketingHome({
                 {
                   number: "03",
                   title: "Partagez",
-                  body:
-                    "Publiez un journal sous votre nom d'utilisateur, un avis ou une liste.",
+                  body: "Publiez un journal sous votre nom d'utilisateur, un avis ou une liste.",
                   href: "/sign-up" as const,
                 },
               ].map((step, index) => (

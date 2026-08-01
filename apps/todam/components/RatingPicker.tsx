@@ -87,9 +87,7 @@ export function RatingPicker({ disabled = false, onChange, value }: RatingPicker
                   : disabled
                     ? tokens.color.disabled
                     : tokens.color.surface,
-                borderColor: selected
-                  ? tokens.color.selectedBorder
-                  : "transparent",
+                borderColor: selected ? tokens.color.selectedBorder : "transparent",
                 borderRadius: tokens.radius.medium,
                 borderWidth: 1,
                 gap: 2,

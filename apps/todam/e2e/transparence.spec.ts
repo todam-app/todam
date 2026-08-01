@@ -53,7 +53,9 @@ test("la page Les coulisses expose les chiffres, les coûts et le code source", 
   ).toBeVisible();
   await expect(page.getByRole("link", { name: "Contribuer au projet" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Aidez-nous" })).toBeVisible();
-  await expect(page.getByText("ajoutez des spectacles", { exact: false })).toBeVisible();
+  await expect(
+    page.getByText("ajoutez des spectacles", { exact: false }),
+  ).toBeVisible();
   await expect(
     page.getByRole("heading", {
       name: "Ce qui est disponible, et ce qui reste à prouver",
@@ -62,9 +64,7 @@ test("la page Les coulisses expose les chiffres, les coûts et le code source", 
   await expect(
     page.getByRole("heading", { name: "Corriger une information" }),
   ).toHaveCount(0);
-  await expect(page.getByRole("heading", { name: "Limites actuelles" })).toHaveCount(
-    0,
-  );
+  await expect(page.getByRole("heading", { name: "Limites actuelles" })).toHaveCount(0);
   await expect(
     page.getByText("Je vous le recommande : ça fait gagner un temps fou !"),
   ).toBeVisible();
