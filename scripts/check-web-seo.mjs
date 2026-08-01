@@ -79,11 +79,11 @@ function assertSeoHtml(html, expectedCanonical, label, { requireJsonLd = false }
 
 function decodeXml(value) {
   return value
-    .replaceAll("&amp;", "&")
     .replaceAll("&quot;", '"')
     .replaceAll("&apos;", "'")
     .replaceAll("&lt;", "<")
-    .replaceAll("&gt;", ">");
+    .replaceAll("&gt;", ">")
+    .replaceAll("&amp;", "&");
 }
 
 function htmlFileForPath(pathname) {
