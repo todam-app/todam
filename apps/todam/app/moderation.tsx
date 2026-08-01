@@ -208,7 +208,7 @@ function CatalogCandidateCard({
               key={`${candidate.id}-${source.url}`}
               onPress={() => void Linking.openURL(source.url)}
             >
-                    <Text className="text-base font-semibold text-brand-text">
+              <Text className="text-base font-semibold text-brand-text">
                 {source.title} ↗
               </Text>
               <Text className="text-xs text-muted">
@@ -349,7 +349,7 @@ function ClaimCard({
           className="min-h-11 justify-center"
           onPress={() => void Linking.openURL(claim.officialWebsiteUrl)}
         >
-                  <Text className="text-base font-semibold text-brand-text">
+          <Text className="text-base font-semibold text-brand-text">
             Ouvrir le site officiel ↗
           </Text>
         </Pressable>
@@ -485,7 +485,7 @@ function ReportCard({
               className="min-h-11 justify-center"
               onPress={() => void Linking.openURL(report.media!.sourceUrl)}
             >
-                    <Text className="text-sm font-semibold text-brand-text">
+              <Text className="text-sm font-semibold text-brand-text">
                 Ouvrir la source du visuel ↗
               </Text>
             </Pressable>
@@ -499,7 +499,7 @@ function ReportCard({
                   className="min-h-11 justify-center"
                   onPress={() => void Linking.openURL(report.contribution!.sourceUrl)}
                 >
-                    <Text className="text-sm font-semibold text-brand-text">
+                  <Text className="text-sm font-semibold text-brand-text">
                     Source officielle de la contribution ↗
                   </Text>
                 </Pressable>
@@ -699,7 +699,7 @@ function RevisionCard({
                 className="min-h-11 justify-center"
                 onPress={() => void Linking.openURL(change.provenanceUrl!)}
               >
-                        <Text className="text-base font-semibold text-brand-text">
+                <Text className="text-base font-semibold text-brand-text">
                   Vérifier la source
                 </Text>
               </Pressable>

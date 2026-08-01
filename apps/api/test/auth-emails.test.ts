@@ -129,7 +129,8 @@ describe("e-mails d'authentification Todam", () => {
     const email = createPasswordResetEmail({
       displayName: "Camille <Rideau>",
       publicWebUrl: "https://todam.fr",
-      resetUrl: "https://todam.fr/reinitialiser-mot-de-passe?token=secret&next=<profil>",
+      resetUrl:
+        "https://todam.fr/reinitialiser-mot-de-passe?token=secret&next=<profil>",
     });
 
     expect(email.subject).toBe("Réinitialise ton mot de passe — Todam");

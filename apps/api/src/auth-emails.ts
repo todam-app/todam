@@ -379,8 +379,7 @@ export function createAccountDeletionEmail(
 ): AuthEmailContent {
   const displayName = normalizeDisplayName(input.displayName);
   const safeDisplayName = escapeHtml(displayName);
-  const preheader =
-    "Confirme la suppression de ton compte Todam dans les 24 heures.";
+  const preheader = "Confirme la suppression de ton compte Todam dans les 24 heures.";
 
   const content = `
     <p style="color:${color.ink};font-family:${emailFont.sans};font-size:17px;line-height:27px;margin:0 0 14px;">Bonjour <strong>${safeDisplayName}</strong>,</p>

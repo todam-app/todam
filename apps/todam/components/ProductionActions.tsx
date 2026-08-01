@@ -92,8 +92,7 @@ function ActionButton({
             <Text
               style={[
                 styles.label,
-                (primaryWebButton || secondaryWebButton) &&
-                  styles.labelStandardWeb,
+                (primaryWebButton || secondaryWebButton) && styles.labelStandardWeb,
                 { color: foreground },
               ]}
             >

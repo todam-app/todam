@@ -31,7 +31,7 @@ export default function ForCompaniesPage() {
       <PageScrollView contentContainerClassName="flex-grow">
         <View className="todam-page-before-footer mx-auto w-full max-w-content flex-1 gap-14 px-5 py-10 md:px-8 md:py-16">
           <View className="max-w-4xl gap-6 border-b border-line pb-12">
-        <Text className="text-xs font-bold uppercase tracking-[2px] text-brand-text">
+            <Text className="text-xs font-bold uppercase tracking-[2px] text-brand-text">
               Pour les compagnies
             </Text>
             <Text
@@ -101,7 +101,7 @@ export default function ForCompaniesPage() {
               "Plusieurs représentants distincts peuvent être autorisés pour la même compagnie et chaque accès peut être révoqué.",
             ].map((item, index) => (
               <View className="flex-row gap-4" key={item}>
-              <Text className="text-base w-7 font-bold text-brand-text">
+                <Text className="text-base w-7 font-bold text-brand-text">
                   0{index + 1}
                 </Text>
                 <Text className="max-w-[70ch] flex-1 text-base leading-6 text-ink">
