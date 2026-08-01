@@ -247,6 +247,172 @@ body {
   padding-bottom: 12px;
 }
 
+@media (max-width: 767px) {
+  .todam-production-breadcrumb-current {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .todam-production-hero-layout {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .todam-production-hero-details {
+    display: contents;
+  }
+
+  .todam-production-hero-details > * {
+    order: 3;
+    width: 100%;
+  }
+
+  .todam-production-hero-heading {
+    order: 1 !important;
+  }
+
+  .todam-production-hero-visual {
+    order: 2;
+  }
+
+  .todam-search-result-toolbar > :first-child,
+  .todam-search-result-toolbar > :last-child {
+    flex-basis: 100%;
+  }
+
+  .todam-search-result-toolbar > :last-child {
+    justify-content: flex-start;
+  }
+
+  .todam-search-results .todam-production-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .todam-search-results .todam-production-ticket__body {
+    background: var(--todam-color-paper);
+    border: 1px solid var(--todam-color-line);
+    border-radius: 16px;
+    display: grid;
+    filter: none;
+    grid-template-columns: 104px minmax(0, 1fr);
+    min-height: 154px;
+    overflow: hidden;
+  }
+
+  .todam-search-results .todam-production-ticket__poster {
+    aspect-ratio: auto;
+    height: 100%;
+    min-height: 154px;
+  }
+
+  .todam-search-results .todam-production-ticket__poster-surface,
+  .todam-search-results .todam-production-ticket__info-surface {
+    clip-path: none !important;
+    -webkit-clip-path: none !important;
+  }
+
+  .todam-search-results .todam-production-ticket__info {
+    height: auto;
+    min-height: 154px;
+  }
+
+  .todam-search-results .todam-production-ticket__info-surface {
+    padding: 14px 48px 14px 14px;
+    position: relative;
+  }
+
+  .todam-search-results .todam-production-ticket__outline {
+    display: none;
+  }
+
+  .todam-search-results .todam-production-ticket__discipline {
+    font-size: 10px;
+    line-height: 14px;
+  }
+
+  .todam-search-results .todam-production-ticket__title {
+    font-size: 19px;
+    margin-top: 3px;
+  }
+
+  .todam-search-results .todam-production-ticket__credit {
+    font-size: 13px;
+    line-height: 18px;
+    margin-top: 5px;
+  }
+
+  .todam-search-results .todam-production-ticket__location {
+    font-size: 12px;
+    line-height: 16px;
+    margin-top: auto;
+    padding-top: 5px;
+  }
+
+  .todam-search-results .todam-production-ticket__date {
+    display: block;
+  }
+
+  .todam-search-results .todam-ticket-bookmark {
+    right: 4px;
+    top: 4px;
+    transform: scale(0.82);
+    transform-origin: top right;
+  }
+}
+
+@media (max-width: 1023px) {
+  .todam-company-editor-options {
+    display: flex;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    gap: 8px;
+    max-width: 100%;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+
+  .todam-company-editor-option {
+    background: var(--todam-color-paper);
+    border: 1px solid var(--todam-color-control-border) !important;
+    border-radius: 12px;
+    flex: 0 0 auto;
+    width: auto !important;
+    max-width: min(78vw, 280px);
+  }
+
+  .todam-company-editor-option-meta {
+    display: none;
+  }
+
+  .todam-company-editor-option[aria-selected="true"] {
+    background: var(--todam-color-selected-surface);
+    border-color: var(--todam-color-selected-border) !important;
+  }
+
+  .todam-choice-group--compact-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .todam-choice-option--compact-grid {
+    min-width: 0;
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  .todam-company-editor-options {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
 @media (min-width: 960px) {
   .todam-search-layout {
     grid-template-columns: 220px minmax(0, 1fr);
@@ -1055,8 +1221,19 @@ input:-webkit-autofill:focus {
 .todam-production-ticket__discipline,
 .todam-production-ticket__title,
 .todam-production-ticket__credit,
+.todam-production-ticket__date,
 .todam-production-ticket__location {
   margin: 0;
+}
+
+.todam-production-ticket__date {
+  color: var(--todam-color-muted);
+  display: none;
+  font-family: "Work Sans", system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+  margin-top: 4px;
 }
 
 .todam-production-ticket__discipline {

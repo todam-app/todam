@@ -1520,6 +1520,56 @@ test("les fiches compagnie et lieu gardent leur contexte utile et de vrais liens
   expect(disciplineBox!.x).toBeGreaterThan(periodBox!.x + periodBox!.width);
 });
 
+test("les parcours denses gardent des contrôles et cartes compacts", async ({
+  page,
+}) => {
+  await mockPresentationApi(page, "member");
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/journal/avis");
+  await expect(page.getByRole("heading", { level: 1, name: "Mes avis" })).toBeVisible();
+
+  for (const key of ["discipline", "visibility", "status", "sort"] as const) {
+    const bounds = await page.getByTestId(`review-filter-${key}`).boundingBox();
+    expect(bounds).not.toBeNull();
+    expect(bounds!.height).toBeLessThanOrEqual(48);
+  }
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/journal/avis");
+  const journalNavigation = await page.getByTestId("my-shows-navigation").boundingBox();
+  expect(journalNavigation).not.toBeNull();
+  expect(journalNavigation!.height).toBeLessThanOrEqual(64);
+
+  await mockPresentationApi(page, false);
+  await page.goto("/search?q=Grenoble");
+  const firstResult = page
+    .locator(".todam-search-results .todam-production-ticket")
+    .first();
+  const firstResultPoster = firstResult.locator(".todam-production-ticket__poster");
+  const [resultBounds, posterBounds] = await Promise.all([
+    firstResult.boundingBox(),
+    firstResultPoster.boundingBox(),
+  ]);
+  expect(resultBounds).not.toBeNull();
+  expect(posterBounds).not.toBeNull();
+  expect(resultBounds!.height).toBeLessThanOrEqual(180);
+  expect(posterBounds!.width).toBeLessThanOrEqual(110);
+
+  await page.goto("/production/jetais-partie-pardon-mind-the-gap");
+  const [titleBounds, visualBounds] = await Promise.all([
+    page
+      .getByRole("heading", {
+        level: 1,
+        name: "J’étais parti·e, pardon (dans un autre univers)",
+      })
+      .boundingBox(),
+    page.locator(".todam-production-hero-visual").boundingBox(),
+  ]);
+  expect(titleBounds).not.toBeNull();
+  expect(visualBounds).not.toBeNull();
+  expect(titleBounds!.y).toBeLessThan(visualBounds!.y);
+});
+
 for (const route of routes) {
   for (const viewport of viewports) {
     test(`${route.name} reste propre en ${viewport.name}`, async ({

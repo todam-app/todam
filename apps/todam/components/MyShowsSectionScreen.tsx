@@ -349,7 +349,10 @@ export function MyShowsSectionScreen({ section }: { section: MyShowsSection }) {
               Recherchez et filtrez uniquement les spectacles de cette section.
             </Text>
           </View>
-          <MyShowsNavigation counts={navigationCounts(dashboard.data)} />
+          <MyShowsNavigation
+            counts={navigationCounts(dashboard.data)}
+            variant="compact"
+          />
           <MyShowsFilters
             facets={firstPage?.facets ?? emptyFacets}
             key={query.q}

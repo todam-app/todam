@@ -103,6 +103,7 @@ export function MyListsScreen() {
               lists: dashboard.data?.counts.lists ?? 0,
               reviews: dashboard.data?.counts.reviews ?? 0,
             }}
+            variant="compact"
           />
           {creating ? (
             <View className="todam-form-panel gap-4 p-5">
@@ -192,6 +193,26 @@ export function MyListsScreen() {
               ))}
             </View>
           </AsyncState>
+          {lists.data?.length === 1 ? (
+            <View className="todam-calm-panel gap-3 p-4 md:flex-row md:items-center md:justify-between md:p-5">
+              <View className="min-w-0 flex-1 gap-1">
+                <Text className="text-base font-semibold text-ink">
+                  Complétez votre sélection
+                </Text>
+                <Text className="text-sm leading-5 text-muted">
+                  Explorez les spectacles à venir puis ajoutez-les à cette liste depuis
+                  leur fiche.
+                </Text>
+              </View>
+              <View className="md:min-w-[220px]">
+                <Button
+                  label="Découvrir des spectacles"
+                  onPress={() => router.push("/search")}
+                  variant="secondary"
+                />
+              </View>
+            </View>
+          ) : null}
         </View>
       </PageScrollView>
     </>

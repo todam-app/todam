@@ -304,6 +304,23 @@ export function DiscoverScreen() {
     setToDate("");
   }
 
+  function exploreUpcomingProductions() {
+    setInput("");
+    setType("productions");
+    setDiscipline(undefined);
+    setTemporal("upcoming");
+    setSort("date");
+    setLocality("");
+    setRadiusKm(undefined);
+    setFromDate("");
+    setToDate("");
+    if (Platform.OS === "web") {
+      router.replace({ pathname: "/search", params: { type: "productions" } });
+    } else {
+      setNativeQuery("");
+    }
+  }
+
   function renderAdvancedFilterFields(includeSort: boolean) {
     if (type === "members") return null;
     return (
@@ -606,6 +623,26 @@ export function DiscoverScreen() {
               />
             </View>
           ) : null}
+          {itemCount > 0 && itemCount <= 2 && !search.hasNextPage ? (
+            <View className="todam-calm-panel gap-3 p-4 md:flex-row md:items-center md:justify-between md:p-5">
+              <View className="min-w-0 flex-1 gap-1">
+                <Text className="text-base font-semibold text-ink">
+                  Continuez votre découverte
+                </Text>
+                <Text className="text-sm leading-5 text-muted">
+                  Peu de résultats correspondent à ces critères. Parcourez tous les
+                  spectacles à venir pour élargir la sélection.
+                </Text>
+              </View>
+              <View className="md:min-w-[230px]">
+                <Button
+                  label="Voir tous les spectacles"
+                  onPress={exploreUpcomingProductions}
+                  variant="secondary"
+                />
+              </View>
+            </View>
+          ) : null}
         </View>
       </AsyncState>
     );
@@ -839,7 +876,6 @@ export function DiscoverScreen() {
           </View>
         </SearchModal>
       ) : null}
-
     </PageScrollView>
   );
 }

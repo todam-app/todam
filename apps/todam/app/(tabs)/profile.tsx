@@ -168,17 +168,17 @@ function ProfileContent() {
           >
             {profile.data && dashboard.data ? (
               <>
-                <View className="gap-5 rounded-panel border border-line bg-paper p-5 shadow-soft md:flex-row md:items-center md:p-6">
-                  <View className="h-20 w-20 items-center justify-center self-center rounded-full border border-line bg-canvas md:self-auto">
+                <View className="flex-row flex-wrap items-center gap-4 rounded-panel border border-line bg-paper p-4 shadow-soft md:gap-5 md:p-6">
+                  <View className="h-16 w-16 items-center justify-center rounded-full border border-line bg-canvas md:h-20 md:w-20">
                     <Ionicons
                       accessibilityElementsHidden
                       color={tokens.color.muted}
                       importantForAccessibility="no"
                       name="person-outline"
-                      size={46}
+                      size={40}
                     />
                   </View>
-                  <View className="min-w-0 flex-1 items-center gap-1 md:items-start">
+                  <View className="min-w-0 flex-1 items-start gap-1">
                     <Text
                       aria-level={1}
                       accessibilityRole="header"
@@ -198,16 +198,16 @@ function ProfileContent() {
                     </Text>
                     {profile.data.bio ? (
                       <Text
-                        className="pt-1 text-center text-base leading-6 text-ink md:text-left"
+                        className="pt-1 text-left text-sm leading-5 text-ink md:text-base md:leading-6"
                         numberOfLines={2}
                       >
                         {profile.data.bio}
                       </Text>
                     ) : null}
                   </View>
-                  <View className="flex-row flex-wrap justify-center gap-3 md:justify-end">
+                  <View className="w-full flex-row flex-wrap justify-start gap-2 md:w-auto md:justify-end md:gap-3">
                     <Button
-                      label={editing ? "Fermer la modification" : "Modifier mon profil"}
+                      label={editing ? "Fermer" : "Modifier"}
                       onPress={() => {
                         setEditing((value) => !value);
                         setFeedback(null);
@@ -215,7 +215,7 @@ function ProfileContent() {
                       variant={editing ? "quiet" : "primary"}
                     />
                     <Button
-                      label="Se déconnecter"
+                      label="Déconnexion"
                       onPress={() => void signOut()}
                       variant="quiet"
                     />
@@ -276,6 +276,7 @@ function ProfileContent() {
                     reviews: dashboard.data.counts.reviews,
                     lists: dashboard.data.counts.lists,
                   }}
+                  variant="compact"
                 />
 
                 <AccessibleTabs

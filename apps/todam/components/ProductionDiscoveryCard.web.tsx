@@ -29,6 +29,10 @@ const disciplineLabels: Record<ProductionCard["discipline"], string> = {
   opera: "Opéra",
   ballet: "Ballet",
 };
+const compactDateFormatter = new Intl.DateTimeFormat("fr-FR", {
+  day: "numeric",
+  month: "short",
+});
 
 export interface ProductionDiscoveryCardProps {
   distanceKm?: number | null | undefined;
@@ -427,11 +431,13 @@ function WatchlistBookmark({ production }: { production: ProductionCard }) {
 }
 
 export function ProductionDiscoveryCard({
+  distanceKm,
   headingLevel = 3,
   locality,
   priority = false,
   production,
   showWatchlistAction = false,
+  startsAt = production.nextPerformance,
   venueName = production.nextVenue?.name ?? production.venueNames[0] ?? null,
   width,
 }: ProductionDiscoveryCardProps) {
@@ -513,6 +519,14 @@ export function ProductionDiscoveryCard({
                   ) : null}
                 </span>
               </div>
+            ) : null}
+            {startsAt ? (
+              <p className="todam-production-ticket__date">
+                {compactDateFormatter.format(new Date(startsAt))}
+                {distanceKm !== null && distanceKm !== undefined
+                  ? ` · ${distanceKm.toLocaleString("fr-FR")} km`
+                  : ""}
+              </p>
             ) : null}
           </div>
           <InfoOutline dimensions={dimensions.info} />

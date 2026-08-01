@@ -8,7 +8,13 @@ import { Pressable, Text, View } from "react-native";
 import { api } from "../lib/api";
 import { SelectionChip } from "./SelectionChip";
 
-export function HomeCitySelector({ city }: { city: CityOption | null }) {
+export function HomeCitySelector({
+  city,
+  embedded = false,
+}: {
+  city: CityOption | null;
+  embedded?: boolean;
+}) {
   const queryClient = useQueryClient();
   const [editing, setEditing] = useState(city === null);
   const [input, setInput] = useState(city?.locality ?? "");
@@ -30,11 +36,15 @@ export function HomeCitySelector({ city }: { city: CityOption | null }) {
   if (!editing && city) {
     return (
       <View
-        className="todam-calm-panel gap-3 p-5 md:flex-row md:items-center md:justify-between"
+        className={
+          embedded
+            ? "gap-3 border-t border-line pt-4 md:flex-row md:items-center md:justify-between"
+            : "todam-calm-panel gap-3 p-5 md:flex-row md:items-center md:justify-between"
+        }
         testID="home-city-selector"
       >
         <View className="min-w-0 flex-1 gap-1">
-        <Text className="text-xs font-bold uppercase tracking-[1.5px] text-brand-text">
+          <Text className="text-xs font-bold uppercase tracking-[1.5px] text-brand-text">
             Votre ville
           </Text>
           <Text className="text-xl font-semibold text-ink">{city.label}</Text>
@@ -61,7 +71,9 @@ export function HomeCitySelector({ city }: { city: CityOption | null }) {
 
   return (
     <View
-      className="todam-form-panel gap-4 p-5"
+      className={
+        embedded ? "gap-4 border-t border-line pt-4" : "todam-form-panel gap-4 p-5"
+      }
       testID="home-city-selector"
     >
       <View className="gap-1">
@@ -126,7 +138,9 @@ export function HomeCitySelector({ city }: { city: CityOption | null }) {
         </Text>
         <Link href="/confidentialite" asChild>
           <Pressable accessibilityRole="link" className="min-h-11 justify-center">
-          <Text className="text-base font-semibold text-brand-text">En savoir plus</Text>
+            <Text className="text-base font-semibold text-brand-text">
+              En savoir plus
+            </Text>
           </Pressable>
         </Link>
       </View>

@@ -15,12 +15,14 @@ type KeyboardEventLike = {
 };
 
 export function AccessibleChoiceGroup<Value extends string>({
+  compactGrid = false,
   label,
   onChange,
   options,
   testIdPrefix,
   value,
 }: {
+  compactGrid?: boolean;
   label: string;
   onChange: (value: Value) => void;
   options: readonly (readonly [Value, string])[];
@@ -61,6 +63,7 @@ export function AccessibleChoiceGroup<Value extends string>({
     <View className="gap-2">
       <Text className="text-sm font-semibold text-ink">{label}</Text>
       <View
+        {...(compactGrid ? { className: "todam-choice-group--compact-grid" } : {})}
         accessibilityLabel={label}
         accessibilityRole="radiogroup"
         style={styles.group}
@@ -70,6 +73,9 @@ export function AccessibleChoiceGroup<Value extends string>({
           return (
             <Pressable
               {...keyboardProps(index, selected)}
+              {...(compactGrid
+                ? { className: "todam-choice-option--compact-grid" }
+                : {})}
               accessibilityRole="radio"
               accessibilityState={{ checked: selected, selected }}
               key={option}

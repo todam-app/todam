@@ -125,7 +125,7 @@ export default function SignUpScreen() {
       <>
         <PrivatePageHead title="Confirmer l’adresse e-mail" />
         <PageScrollView contentContainerClassName="flex-grow" footer="minimal">
-          <View className="todam-page-before-footer w-full flex-1 justify-center py-8 md:py-12">
+          <View className="todam-page-before-footer w-full flex-1 justify-start py-6 md:justify-center md:py-12">
             <View className="todam-auth-panel mx-auto w-[calc(100%_-_2.5rem)] max-w-lg items-center gap-5 p-6 md:p-8">
               <Text
                 aria-level={1}
@@ -175,8 +175,8 @@ export default function SignUpScreen() {
         footer="minimal"
         keyboardShouldPersistTaps="handled"
       >
-        <View className="todam-page-before-footer w-full flex-1 justify-center py-8 md:py-12">
-          <View className="todam-auth-panel mx-auto w-[calc(100%_-_2.5rem)] max-w-lg gap-6 p-6 md:p-8">
+        <View className="todam-page-before-footer w-full flex-1 justify-start py-6 md:justify-center md:py-12">
+          <View className="todam-auth-panel mx-auto w-[calc(100%_-_2.5rem)] max-w-lg gap-5 p-5 md:gap-6 md:p-8">
             <View className="gap-2">
               <Text
                 aria-level={1}
@@ -235,15 +235,15 @@ export default function SignUpScreen() {
               value={password}
               webName="new-password"
             />
-            <View className="gap-1 rounded-todam border border-selected-border bg-selected p-4">
+            <View className="gap-1 rounded-todam border border-selected-border bg-selected p-3 md:p-4">
               <Text className="text-base font-semibold text-ink">À savoir</Text>
-              <Text className="text-base leading-6 text-muted">
+              <Text className="text-sm leading-5 text-muted md:text-base md:leading-6">
                 Ton profil et ton journal sont publics. Tes listes, ta liste « À voir »
                 et tes notes sans avis public sont privées par défaut. Ces notes
                 comptent quand même dans la moyenne.
               </Text>
             </View>
-            <Text className="text-base leading-6 text-muted">
+            <Text className="text-sm leading-5 text-muted md:text-base md:leading-6">
               En créant mon compte, je déclare avoir au moins 15 ans, j’accepte les{" "}
               <LegalLink href="/conditions-utilisation">
                 Conditions générales d’utilisation

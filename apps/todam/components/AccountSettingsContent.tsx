@@ -190,7 +190,7 @@ export function AccountSettingsContent({
   return (
     <View className="gap-6">
       <View className="gap-6 md:flex-row md:items-start">
-        <View className="todam-form-panel w-full gap-4 p-5 md:flex-1 md:p-6">
+        <View className="todam-form-panel w-full gap-4 p-4 md:flex-1 md:p-6">
           <SectionTitle>Visibilité du profil</SectionTitle>
           <Text className="text-base leading-6 text-muted">
             Un profil privé masque aussi les listes et avis réglés comme publics.
@@ -207,7 +207,7 @@ export function AccountSettingsContent({
           />
         </View>
 
-        <View className="todam-form-panel w-full gap-4 p-5 md:flex-1 md:p-6">
+        <View className="todam-form-panel w-full gap-4 p-4 md:flex-1 md:p-6">
           <SectionTitle>Ville de découverte</SectionTitle>
           <Text className="text-base leading-6 text-muted">
             Choisis ou modifie la ville utilisée pour classer les spectacles proches sur
@@ -227,12 +227,12 @@ export function AccountSettingsContent({
             loading={home.isPending}
             onRetry={() => void home.refetch()}
           >
-            {home.data ? <HomeCitySelector city={home.data.homeCity} /> : null}
+            {home.data ? <HomeCitySelector city={home.data.homeCity} embedded /> : null}
           </AsyncState>
         </View>
       </View>
 
-      <View className="todam-form-panel gap-4 p-5 md:p-6">
+      <View className="todam-form-panel gap-4 p-4 md:p-6">
         <SectionTitle>Visibilité des notes</SectionTitle>
         <Text className="text-base leading-6 text-muted">
           Une note liée à un avis public est toujours visible. Sans avis public, elle
@@ -251,7 +251,7 @@ export function AccountSettingsContent({
       </View>
 
       <View className="gap-6 md:flex-row md:items-start">
-        <View className="todam-form-panel w-full gap-4 p-5 md:flex-1 md:p-6">
+        <View className="todam-form-panel w-full gap-4 p-4 md:flex-1 md:p-6">
           <SectionTitle>Adresse e-mail</SectionTitle>
           <Text className="text-base leading-6 text-muted">
             Adresse actuelle : {sessionUser?.email}
@@ -305,7 +305,7 @@ export function AccountSettingsContent({
           </View>
         </View>
 
-        <View className="todam-form-panel w-full gap-4 p-5 md:flex-1 md:p-6">
+        <View className="todam-form-panel w-full gap-4 p-4 md:flex-1 md:p-6">
           <SectionTitle>Mot de passe</SectionTitle>
           <PasswordField
             autoComplete="current-password"
@@ -372,7 +372,7 @@ export function AccountSettingsContent({
         </View>
       </View>
 
-      <View className="todam-form-panel gap-4 p-5 md:p-6" testID="account-data-card">
+      <View className="todam-form-panel gap-4 p-4 md:p-6" testID="account-data-card">
         <SectionTitle>Mes données</SectionTitle>
         <Text className="text-base leading-6 text-muted">
           Télécharge une copie de tes données Todam au format JSON ou CSV.

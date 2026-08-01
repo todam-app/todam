@@ -2106,7 +2106,7 @@ export default function CompanyWorkspacePage() {
         <meta content="noindex,nofollow" name="robots" />
       </Head>
       <PageScrollView contentContainerClassName="flex-grow">
-        <View className="todam-page-before-footer mx-auto w-full max-w-content flex-1 gap-10 px-5 py-10 md:px-8 md:py-14">
+        <View className="todam-page-before-footer mx-auto w-full max-w-content flex-1 gap-7 px-5 py-7 md:gap-10 md:px-8 md:py-14">
           <View className="gap-4">
             <SectionTitle eyebrow="Espace professionnel" level={1}>
               Préparer une révision
@@ -2139,38 +2139,41 @@ export default function CompanyWorkspacePage() {
             error={memberships.isError}
             loading={memberships.isPending}
           >
-            <View className="gap-8 lg:flex-row lg:items-start">
-              <View className="w-full gap-6 lg:max-w-[300px]">
+            <View className="gap-6 lg:flex-row lg:items-start lg:gap-8">
+              <View className="todam-company-editor-sidebar w-full gap-4 lg:max-w-[300px] lg:gap-6">
                 <View className="gap-3">
                   <Text className="text-base font-semibold text-ink">
                     Compagnie gérée
                   </Text>
-                  {memberships.data?.map((membership) => (
-                    <Pressable
-                      accessibilityRole="button"
-                      accessibilityState={{
-                        selected: companyId === membership.companyId,
-                      }}
-                      className={`min-h-16 justify-center border-b border-line py-3 ${
-                        companyId === membership.companyId
-                          ? "border-l-2 border-l-accent pl-3"
-                          : ""
-                      }`}
-                      key={membership.companyId}
-                      onPress={() => {
-                        setCompanyId(membership.companyId);
-                        setProductionId(null);
-                        setTargetMode("company");
-                      }}
-                    >
-                      <Text className="text-base font-semibold text-ink">
-                        {membership.companyName}
-                      </Text>
-                      <Text className="text-sm text-muted">
-                        {membership.roleTitle} · {membershipRoleLabels[membership.role]}
-                      </Text>
-                    </Pressable>
-                  ))}
+                  <View className="todam-company-editor-options">
+                    {memberships.data?.map((membership) => (
+                      <Pressable
+                        accessibilityRole="button"
+                        accessibilityState={{
+                          selected: companyId === membership.companyId,
+                        }}
+                        className={`todam-company-editor-option min-h-11 justify-center border-b border-line px-3 py-2 lg:min-h-16 lg:px-0 lg:py-3 ${
+                          companyId === membership.companyId
+                            ? "border-l-2 border-l-accent pl-3"
+                            : ""
+                        }`}
+                        key={membership.companyId}
+                        onPress={() => {
+                          setCompanyId(membership.companyId);
+                          setProductionId(null);
+                          setTargetMode("company");
+                        }}
+                      >
+                        <Text className="text-base font-semibold text-ink">
+                          {membership.companyName}
+                        </Text>
+                        <Text className="todam-company-editor-option-meta text-sm text-muted">
+                          {membership.roleTitle} ·{" "}
+                          {membershipRoleLabels[membership.role]}
+                        </Text>
+                      </Pressable>
+                    ))}
+                  </View>
                 </View>
 
                 {company.data ? (
@@ -2178,73 +2181,77 @@ export default function CompanyWorkspacePage() {
                     <Text className="text-base font-semibold text-ink">
                       Contenu à modifier
                     </Text>
-                    {Platform.OS === "web" ? (
-                      <Pressable
-                        accessibilityRole="button"
-                        accessibilityState={{ selected: targetMode === "company" }}
-                        className={`min-h-11 justify-center border-l-2 px-3 py-2 ${
-                          targetMode === "company"
-                            ? "border-accent bg-selected"
-                            : "border-line"
-                        }`}
-                        onPress={() => {
-                          setTargetMode("company");
-                          setProductionId(null);
-                        }}
-                      >
-                        <Text className="text-base font-semibold text-ink">
-                          Fiche de la compagnie
-                        </Text>
-                      </Pressable>
-                    ) : (
+                    <View className="todam-company-editor-options">
+                      {Platform.OS === "web" ? (
+                        <Pressable
+                          accessibilityRole="button"
+                          accessibilityState={{ selected: targetMode === "company" }}
+                          className={`todam-company-editor-option min-h-11 justify-center border-l-2 px-3 py-2 ${
+                            targetMode === "company"
+                              ? "border-accent bg-selected"
+                              : "border-line"
+                          }`}
+                          onPress={() => {
+                            setTargetMode("company");
+                            setProductionId(null);
+                          }}
+                        >
+                          <Text className="text-base font-semibold text-ink">
+                            Fiche de la compagnie
+                          </Text>
+                        </Pressable>
+                      ) : (
+                        <Button
+                          label="Fiche de la compagnie"
+                          onPress={() => {
+                            setTargetMode("company");
+                            setProductionId(null);
+                          }}
+                          variant={targetMode === "company" ? "primary" : "secondary"}
+                        />
+                      )}
+                      {availableProductions.map((item) => (
+                        <Pressable
+                          accessibilityRole="button"
+                          accessibilityState={{
+                            selected:
+                              targetMode === "production" && productionId === item.id,
+                          }}
+                          className={`todam-company-editor-option min-h-11 justify-center border-l-2 px-3 py-2 lg:min-h-12 ${
+                            targetMode === "production" && productionId === item.id
+                              ? "border-accent bg-selected"
+                              : "border-line"
+                          }`}
+                          key={item.id}
+                          onPress={() => {
+                            setCreatingProduction(false);
+                            setTargetMode("production");
+                            setProductionId(item.id);
+                          }}
+                        >
+                          <Text className="text-base font-semibold text-ink">
+                            {item.title}
+                          </Text>
+                          <Text className="todam-company-editor-option-meta text-sm text-muted">
+                            {item.discipline === "theatre"
+                              ? "Théâtre"
+                              : item.discipline === "opera"
+                                ? "Opéra"
+                                : "Ballet"}
+                            {item.publicationStatus === "draft"
+                              ? " · Brouillon non public"
+                              : ""}
+                          </Text>
+                        </Pressable>
+                      ))}
+                    </View>
+                    <View className="self-start">
                       <Button
-                        label="Fiche de la compagnie"
-                        onPress={() => {
-                          setTargetMode("company");
-                          setProductionId(null);
-                        }}
-                        variant={targetMode === "company" ? "primary" : "secondary"}
+                        label="Créer un spectacle"
+                        onPress={() => setCreatingProduction(true)}
+                        variant="quiet"
                       />
-                    )}
-                    <Button
-                      label="Créer un spectacle"
-                      onPress={() => setCreatingProduction(true)}
-                      variant="quiet"
-                    />
-                    {availableProductions.map((item) => (
-                      <Pressable
-                        accessibilityRole="button"
-                        accessibilityState={{
-                          selected:
-                            targetMode === "production" && productionId === item.id,
-                        }}
-                        className={`min-h-12 justify-center border-l-2 px-3 py-2 ${
-                          targetMode === "production" && productionId === item.id
-                            ? "border-accent bg-selected"
-                            : "border-line"
-                        }`}
-                        key={item.id}
-                        onPress={() => {
-                          setCreatingProduction(false);
-                          setTargetMode("production");
-                          setProductionId(item.id);
-                        }}
-                      >
-                        <Text className="text-base font-semibold text-ink">
-                          {item.title}
-                        </Text>
-                        <Text className="text-sm text-muted">
-                          {item.discipline === "theatre"
-                            ? "Théâtre"
-                            : item.discipline === "opera"
-                              ? "Opéra"
-                              : "Ballet"}
-                          {item.publicationStatus === "draft"
-                            ? " · Brouillon non public"
-                            : ""}
-                        </Text>
-                      </Pressable>
-                    ))}
+                    </View>
                   </View>
                 ) : null}
               </View>

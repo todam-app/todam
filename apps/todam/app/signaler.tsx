@@ -95,7 +95,7 @@ export default function ContentReportPage() {
         <meta content="noindex,nofollow" name="robots" />
       </Head>
       <PageScrollView contentContainerClassName="flex-grow">
-        <View className="todam-page-before-footer mx-auto w-full max-w-2xl flex-1 gap-8 px-5 py-10 md:px-8 md:py-14">
+        <View className="todam-page-before-footer mx-auto w-full max-w-2xl flex-1 gap-6 px-5 py-7 md:gap-8 md:px-8 md:py-14">
           <View className="gap-4">
             <SectionTitle eyebrow="Qualité du catalogue" level={1}>
               Signaler ou corriger une information
@@ -146,6 +146,7 @@ export default function ContentReportPage() {
           ) : (
             <View className="todam-form-panel gap-5 p-5 md:p-6">
               <AccessibleChoiceGroup
+                compactGrid
                 label="Que concerne votre demande ?"
                 onChange={setCategory}
                 options={categoryOptions}

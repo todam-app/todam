@@ -67,8 +67,8 @@ export default function SignInScreen() {
         footer="minimal"
         keyboardShouldPersistTaps="handled"
       >
-        <View className="todam-page-before-footer w-full flex-1 justify-center py-8 md:py-12">
-          <View className="todam-auth-panel mx-auto w-[calc(100%_-_2.5rem)] max-w-lg gap-6 p-6 md:p-8">
+        <View className="todam-page-before-footer w-full flex-1 justify-start py-6 md:justify-center md:py-12">
+          <View className="todam-auth-panel mx-auto w-[calc(100%_-_2.5rem)] max-w-lg gap-5 p-5 md:gap-6 md:p-8">
             <View className="gap-2">
               <Text
                 aria-level={1}
@@ -113,24 +113,26 @@ export default function SignInScreen() {
               loading={pending}
               onPress={() => void submit()}
             />
-            <Link href="/mot-de-passe-oublie" asChild>
-              <Button label="Mot de passe oublié" variant="ghost" />
-            </Link>
-            <Link
-              href={{
-                pathname: "/sign-up",
-                params: {
-                  ...(params.returnTo
-                    ? { returnTo: safeInternalPath(parameter(params.returnTo)) }
-                    : {}),
-                  ...(params.action ? { action: parameter(params.action) } : {}),
-                  ...(params.rating ? { rating: parameter(params.rating) } : {}),
-                },
-              }}
-              asChild
-            >
-              <Button label="Créer un compte" variant="ghost" />
-            </Link>
+            <View className="gap-2">
+              <Link href="/mot-de-passe-oublie" asChild>
+                <Button label="Mot de passe oublié" variant="ghost" />
+              </Link>
+              <Link
+                href={{
+                  pathname: "/sign-up",
+                  params: {
+                    ...(params.returnTo
+                      ? { returnTo: safeInternalPath(parameter(params.returnTo)) }
+                      : {}),
+                    ...(params.action ? { action: parameter(params.action) } : {}),
+                    ...(params.rating ? { rating: parameter(params.rating) } : {}),
+                  },
+                }}
+                asChild
+              >
+                <Button label="Créer un compte" variant="ghost" />
+              </Link>
+            </View>
           </View>
         </View>
       </PageScrollView>

@@ -393,6 +393,7 @@ export function MyShowsFilters({
         horizontal
         keyboardShouldPersistTaps="handled"
         showsHorizontalScrollIndicator={false}
+        style={styles.chipScroller}
       >
         {keys.map((key) => {
           const options = optionsFor(key, section, facets);
@@ -511,7 +512,7 @@ export function MyShowsFilters({
               setAllFiltersOpen(false);
             }}
           >
-              <Text className="text-base font-bold text-brand-text">Tout effacer</Text>
+            <Text className="text-base font-bold text-brand-text">Tout effacer</Text>
           </Pressable>
         </View>
       </FilterOverlay>
@@ -520,7 +521,12 @@ export function MyShowsFilters({
 }
 
 const styles = StyleSheet.create({
+  chipScroller: {
+    flexGrow: 0,
+    maxHeight: 48,
+  },
   chips: {
+    alignItems: "center",
     columnGap: 8,
     paddingRight: 20,
   },

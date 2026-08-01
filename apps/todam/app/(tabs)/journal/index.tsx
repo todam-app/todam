@@ -47,7 +47,7 @@ function PreviewSection({
         accessibilityHint={`Ouvre tous les spectacles ${title.toLocaleLowerCase("fr-FR")}`}
         accessibilityLabel={`${title}, ${count} spectacle${count > 1 ? "s" : ""}`}
         accessibilityRole="link"
-        className="todam-interactive-card gap-4 rounded-panel border border-line bg-paper p-5 shadow-soft"
+        className="todam-interactive-card gap-3 rounded-panel border border-line bg-paper p-4 shadow-soft md:p-5"
       >
         <View className="flex-row items-center justify-between gap-3">
           <View className="min-w-0 flex-1 flex-row items-baseline gap-2">
@@ -62,7 +62,29 @@ function PreviewSection({
           </View>
           <Ionicons color={tokens.color.muted} name="chevron-forward" size={22} />
         </View>
-        {items.length > 0 ? (
+        {items.length === 1 && items[0] ? (
+          <View className="flex-row items-center gap-3">
+            <ProductionPoster
+              compact
+              discipline={items[0].discipline}
+              poster={items[0].poster}
+              title={items[0].title}
+            />
+            <View className="min-w-0 flex-1 gap-1">
+              <Text
+                className="font-serif text-lg font-semibold text-ink"
+                numberOfLines={2}
+              >
+                {items[0].title}
+              </Text>
+              {items[0].company ? (
+                <Text className="text-sm text-muted" numberOfLines={1}>
+                  {items[0].company.name}
+                </Text>
+              ) : null}
+            </View>
+          </View>
+        ) : items.length > 1 ? (
           <View className="flex-row gap-3">
             {items.slice(0, 3).map((production) => (
               <View className="min-w-0 flex-1 gap-2" key={production.id}>

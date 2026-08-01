@@ -44,8 +44,8 @@ export default function ResetPasswordScreen() {
     <>
       <PrivatePageHead title="Nouveau mot de passe" />
       <PageScrollView contentContainerClassName="flex-grow" footer="minimal">
-        <View className="todam-page-before-footer w-full flex-1 justify-center py-8 md:py-12">
-          <View className="todam-auth-panel mx-auto w-[calc(100%_-_2.5rem)] max-w-lg gap-5 p-6 md:p-8">
+        <View className="todam-page-before-footer w-full flex-1 justify-start py-6 md:justify-center md:py-12">
+          <View className="todam-auth-panel mx-auto w-[calc(100%_-_2.5rem)] max-w-lg gap-5 p-5 md:p-8">
             <Text
               aria-level={1}
               accessibilityRole="header"

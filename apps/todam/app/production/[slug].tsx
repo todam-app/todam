@@ -690,16 +690,16 @@ export default function ProductionScreen() {
                       </Text>
                     </Pressable>
                   </Link>
-                  <Text className="text-sm text-muted">
+                  <Text className="todam-production-breadcrumb-current text-sm text-muted">
                     / {disciplineLabels[production.data.discipline]} /{" "}
                     {production.data.title}
                   </Text>
                 </View>
 
                 <View
-                  className={`todam-production-hero todam-production-hero--${production.data.discipline} gap-7 p-5 md:flex-row md:items-start md:p-8`}
+                  className={`todam-production-hero todam-production-hero-layout todam-production-hero--${production.data.discipline} gap-7 p-5 md:flex-row md:items-start md:p-8`}
                 >
-                  <View className="w-[190px] max-w-[280px] md:w-[260px]">
+                  <View className="todam-production-hero-visual w-[132px] max-w-[280px] self-start md:w-[260px]">
                     <ProductionPoster
                       discipline={production.data.discipline}
                       poster={production.data.posters[0] ?? null}
@@ -732,8 +732,8 @@ export default function ProductionScreen() {
                     )}
                   </View>
 
-                  <View className="min-w-0 flex-1 gap-5">
-                    <View className="gap-3">
+                  <View className="todam-production-hero-details min-w-0 flex-1 gap-5">
+                    <View className="todam-production-hero-heading gap-3">
                       <View className="flex-row flex-wrap gap-2">
                         <Text className="rounded-full bg-ink px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-paper">
                           {disciplineLabels[production.data.discipline]}
@@ -810,6 +810,8 @@ export default function ProductionScreen() {
                           </Link>
                         </View>
                       </View>
+                    </View>
+                    <View className="todam-production-hero-summary gap-3">
                       {shortDescription ? (
                         <View className="gap-1">
                           <Text className="max-w-[72ch] text-lg leading-7 text-ink">

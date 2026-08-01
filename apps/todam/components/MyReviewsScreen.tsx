@@ -456,11 +456,12 @@ export function MyReviewsScreen() {
               Retrouvez les avis écrits sur vos spectacles notés.
             </Text>
           </View>
-          <MyShowsNavigation counts={counts} />
+          <MyShowsNavigation counts={counts} variant="compact" />
           <ScrollView
             contentContainerStyle={styles.chips}
             horizontal
             showsHorizontalScrollIndicator={false}
+            style={styles.chipScroller}
           >
             {filterKeys.map((key) => {
               const options = countOptions(allReviews, query, key);
@@ -596,7 +597,12 @@ export function MyReviewsScreen() {
 }
 
 const styles = StyleSheet.create({
+  chipScroller: {
+    flexGrow: 0,
+    maxHeight: 48,
+  },
   chips: {
+    alignItems: "center",
     columnGap: 8,
     paddingRight: 20,
   },
