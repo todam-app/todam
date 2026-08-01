@@ -35,13 +35,14 @@
     "legal:generate": "node scripts/generate-legal-assets.mjs",
     "legal:pdf": "python scripts/generate-legal-pdfs.py",
     "legal:check": "node scripts/generate-legal-assets.mjs --check && node scripts/check-legal-release.mjs",
+    "seo:check": "node scripts/check-web-seo.mjs",
     "test": "pnpm --recursive --if-present test",
     "test:e2e": "pnpm --filter @todam/todam test:e2e",
     "test:integration": "pnpm --filter @todam/jobs test:integration && pnpm --filter @todam/api test:integration",
     "typecheck": "pnpm --recursive --if-present typecheck",
     "validate:openapi": "pnpm --filter @todam/api openapi:check && node scripts/check-openapi.mjs",
     "check:licenses": "node scripts/check-licenses.mjs",
-    "check": "pnpm legal:check && pnpm lint && pnpm format:check && pnpm typecheck && pnpm test && pnpm validate:openapi && pnpm build && pnpm check:licenses"
+    "check": "pnpm legal:check && pnpm lint && pnpm format:check && pnpm typecheck && pnpm test && pnpm validate:openapi && pnpm build && pnpm seo:check && pnpm check:licenses"
   },
   "engines": {
     "node": ">=24 <25"

@@ -1482,6 +1482,7 @@ test("les fiches compagnie et lieu gardent leur contexte utile et de vrais liens
   page,
 }) => {
   await mockPresentationApi(page, false);
+  await page.setViewportSize({ width: 1440, height: 900 });
 
   await page.goto("/compagnie/collectif-mind-the-gap");
   await expect(
@@ -1505,6 +1506,18 @@ test("les fiches compagnie et lieu gardent leur contexte utile et de vrais liens
   });
   await expect(venueOfficialLink).toHaveAttribute("href", venue.officialUrl);
   await expect(venueOfficialLink).toHaveAttribute("target", "_blank");
+
+  const periodOptions = page.getByRole("radiogroup", { name: "Période" });
+  const disciplineOptions = page.getByRole("radiogroup", { name: "Discipline" });
+  await expect(page.getByRole("radio", { name: "Toutes" })).toBeVisible();
+  const [periodBox, disciplineBox] = await Promise.all([
+    periodOptions.boundingBox(),
+    disciplineOptions.boundingBox(),
+  ]);
+  expect(periodBox).not.toBeNull();
+  expect(disciplineBox).not.toBeNull();
+  expect(Math.abs(periodBox!.y - disciplineBox!.y)).toBeLessThanOrEqual(1);
+  expect(disciplineBox!.x).toBeGreaterThan(periodBox!.x + periodBox!.width);
 });
 
 for (const route of routes) {

@@ -15,8 +15,45 @@ const staticPaths = [
   "/contact",
 ] as const;
 
+function assertPublicWebUrl(value: string): URL {
+  const url = new URL(value);
+
+  if (
+    !["http:", "https:"].includes(url.protocol) ||
+    url.username ||
+    url.password ||
+    url.search ||
+    url.hash ||
+    (url.pathname !== "/" && url.pathname !== "")
+  ) {
+    throw new Error(
+      "EXPO_PUBLIC_WEB_URL doit être une origine HTTP(S) sans identifiants, chemin, requête ni fragment.",
+    );
+  }
+
+  if (
+    process.env.TODAM_REQUIRE_STATIC_CATALOG === "1" &&
+    url.origin !== "https://todam.fr"
+  ) {
+    throw new Error(
+      "Le build de production doit utiliser EXPO_PUBLIC_WEB_URL=https://todam.fr.",
+    );
+  }
+
+  return url;
+}
+
+function escapeXml(value: string): string {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&apos;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;");
+}
+
 async function main() {
-  const generatedOn = new Date().toISOString().slice(0, 10);
+  const publicWebUrl = assertPublicWebUrl(PUBLIC_WEB_URL);
   const [productionSlugs, venueSlugs, companySlugs] = await Promise.all([
     getPublishedCatalogSlugs("productions"),
     getPublishedCatalogSlugs("venues"),
@@ -34,7 +71,7 @@ async function main() {
     .sort((left, right) => left.localeCompare(right, "fr"))
     .map(
       (path) =>
-        `  <url><loc>${PUBLIC_WEB_URL}${path}</loc><lastmod>${generatedOn}</lastmod></url>`,
+        `  <url><loc>${escapeXml(new URL(path, publicWebUrl).href)}</loc></url>`,
     )
     .join("\n");
 

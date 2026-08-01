@@ -327,32 +327,38 @@ export default function VenuePage() {
                   </View>
                 </View>
 
-                <View className="gap-5">
-                  <SectionTitle eyebrow="Programmation">
-                    {period === "upcoming" ? "À venir" : "Archives"}
-                  </SectionTitle>
-                  <AccessibleChoiceGroup
-                    label="Période"
-                    onChange={setPeriod}
-                    options={[
-                      ["upcoming", "À venir"],
-                      ["archives", "Archives"],
-                    ]}
-                    testIdPrefix="venue-period"
-                    value={period}
-                  />
-                  <AccessibleChoiceGroup
-                    label="Discipline"
-                    onChange={(value) => setDiscipline(value === "all" ? null : value)}
-                    options={[
-                      ["all", "Toutes les disciplines"],
-                      ...venue.data.disciplines.map(
-                        (value) => [value, disciplineLabels[value]] as const,
-                      ),
-                    ]}
-                    testIdPrefix="venue-discipline"
-                    value={discipline ?? "all"}
-                  />
+                <View className="gap-6">
+                  <View className="gap-4 md:flex-row md:items-end md:justify-between md:gap-8">
+                    <SectionTitle eyebrow="Programmation">
+                      {period === "upcoming" ? "À venir" : "Archives"}
+                    </SectionTitle>
+                    <View className="flex-row flex-wrap items-end gap-x-6 gap-y-3">
+                      <AccessibleChoiceGroup
+                        label="Période"
+                        onChange={setPeriod}
+                        options={[
+                          ["upcoming", "À venir"],
+                          ["archives", "Archives"],
+                        ]}
+                        testIdPrefix="venue-period"
+                        value={period}
+                      />
+                      <AccessibleChoiceGroup
+                        label="Discipline"
+                        onChange={(value) =>
+                          setDiscipline(value === "all" ? null : value)
+                        }
+                        options={[
+                          ["all", "Toutes"],
+                          ...venue.data.disciplines.map(
+                            (value) => [value, disciplineLabels[value]] as const,
+                          ),
+                        ]}
+                        testIdPrefix="venue-discipline"
+                        value={discipline ?? "all"}
+                      />
+                    </View>
+                  </View>
 
                   {groups.length === 0 ? (
                     <View className="todam-editorial-empty justify-center p-5">

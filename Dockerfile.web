@@ -39,6 +39,7 @@ RUN test -f apps/todam/public/legal/cgu-todam-v1.0.2.pdf \
     && test -f apps/todam/public/legal/suppression-compte-todam-v1.0.2.pdf
 RUN pnpm legal:generate
 RUN pnpm --filter @todam/todam build
+RUN pnpm seo:check
 
 FROM nginx:1.29-alpine AS runtime
 
