@@ -350,10 +350,10 @@ describe("import PostgreSQL réel", () => {
     expect(first.deactivatedProductions).toBe(2);
     expect(second.deactivatedProductions).toBe(0);
     expect(rows).toEqual([
-      { isActive: false, sourceKey: "fixture.theatre-des-muses" },
-      { isActive: false, sourceKey: "fixture.theatre-des-muses" },
       { isActive: true, sourceKey: "fixture.replacement" },
       { isActive: true, sourceKey: "fixture.replacement" },
+      { isActive: false, sourceKey: "fixture.theatre-des-muses" },
+      { isActive: false, sourceKey: "fixture.theatre-des-muses" },
     ]);
   });
 
