@@ -24,7 +24,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "3.1090.0",
+    "@aws-sdk/client-s3": "3.1105.0",
     "@todam/contracts": "workspace:*",
     "@todam/database": "workspace:*",
     "@todam/domain": "workspace:*",
@@ -34,9 +34,9 @@
     "zod": "4.4.3"
   },
   "devDependencies": {
-    "@types/node": "26.1.1",
+    "@types/node": "26.1.2",
     "tsup": "8.5.1",
-    "tsx": "4.23.1",
+    "tsx": "4.23.10",
     "typescript": "6.0.3",
     "vitest": "4.1.10"
   }
