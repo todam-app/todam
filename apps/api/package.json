@@ -29,7 +29,7 @@
     "@todam/database": "workspace:*",
     "@todam/domain": "workspace:*",
     "better-auth": "1.6.25",
-    "dotenv": "17.4.2",
+    "dotenv": "18.0.6",
     "drizzle-orm": "0.45.2",
     "fastify": "5.10.0",
     "fastify-plugin": "6.0.0",

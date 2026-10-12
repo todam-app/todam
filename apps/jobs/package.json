@@ -28,7 +28,7 @@
     "@todam/contracts": "workspace:*",
     "@todam/database": "workspace:*",
     "@todam/domain": "workspace:*",
-    "dotenv": "17.4.2",
+    "dotenv": "18.0.6",
     "drizzle-orm": "0.45.2",
     "pg": "8.22.0",
     "zod": "4.4.3"
